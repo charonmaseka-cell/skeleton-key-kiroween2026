@@ -118,6 +118,8 @@ export type BenchmarkResult = {
     repairedRequests: number;
     /** requests in flight at once: requested, the most that were actually in flight, repairs allowed per request, and the service error after which sending stopped */
     concurrency: { requested: number; peakInFlight: number; maxRepairAttempts: number; stoppedAfter: string | null };
+    /** set when the run stopped sending before every chunk was dispatched: why, and at which chunk */
+    stop: StopRecord | null;
     /** wall-clock ms from the start of the run to its end (with concurrency this is less than the sum of request latencies) */
     elapsedMs: number;
     latencyMs: { total: number; mean: number | null; max: number | null };
@@ -141,6 +143,11 @@ export type BenchmarkResult = {
 export const STOPPING_CODES = new Set(['daily_limit', 'rate_limited', 'quota_exhausted', 'model_unavailable', 'limiter_unavailable', 'origin_denied', 'not_configured']);
 /** Hard ceiling on requests in flight. The benchmark accepts 1 to 3. */
 export const MAX_CONCURRENCY = 3;
+/** Codes of a failed request that mean the Worker could not get a schema-valid answer, or failed in an unexpected way. */
+export const SCHEMA_STOP_CODES = new Set(['schema_invalid', 'internal_error']);
+
+/** Why a run stopped sending, and where. Responses and charges up to that point are kept. */
+export type StopRecord = { reason: string; docId: string; chunk: number; detail?: string };
 
 export type RunOptions = {
   mode: 'mock' | 'live' | 'replay';
@@ -158,6 +165,17 @@ export type RunOptions = {
   maxRepairAttempts?: number;
   /** After a stopping service error (see STOPPING_CODES) send nothing new. Default off. */
   stopOnServiceErrors?: boolean;
+  /** After a request fails with an UNRECOVERED schema error (the Worker's repair, if any, also failed) send nothing new. Default off. */
+  stopOnSchemaError?: boolean;
+  /**
+   * Validate and audit each response BEFORE the next chunk is dispatched. A value accepted as validated whose own evidence does
+   * not support it (audit 'suspect') stops the run at once. Labels play no part. Default off.
+   */
+  stopOnUnsupportedValue?: boolean;
+  /** Stop for good at the first neuron-budget refusal (no later, smaller chunk may slip through). Default off. */
+  stopOnBudget?: boolean;
+  /** The audit used for stopOnUnsupportedValue (default: auditFact). A seam for tests. */
+  audit?: (f: Fact) => FactRecord['audit'];
   /**
    * Atomic neuron claim, made synchronously just before a request is dispatched: returns why it cannot be covered, or
    * null and a release function. Replaces `gate` when given.
@@ -216,6 +234,8 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
   const runStart = Date.now();
   let peakInFlight = 0;
   let runStopped: string | null = null;
+  let stopRecord: StopRecord | null = null;
+  const audit = opts.audit ?? auditFact;
 
   for (const sampleId of opts.sampleIds) {
     const sample: Sample = loadSample(sampleId);
@@ -249,6 +269,10 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       const notSent = (i: number, chunk: Block[], code: string): Outcome => ({ record: { id: `${doc.id}#${i + 1}`, blockIds: chunk.map((b) => b.id), status: 'failed' }, request: { docId: doc.id, chunk: i + 1, blocks: chunk.length, chars: 0, ok: false, code, ms: 0, attemptsCharged: 0, repaired: false, claims: 0, dropped: 0 }, claims: [] });
       const perRequestAttempts = 1 + (opts.maxRepairAttempts ?? 1);
       const conc = Math.max(1, Math.min(opts.concurrency ?? 1, MAX_CONCURRENCY));
+      const stop = (reason: string, i: number, detail: string) => {
+        runStopped ??= reason;
+        stopRecord ??= { reason, docId: doc.id, chunk: i + 1, detail };
+      };
       const send = async (i: number, chunk: Block[], claim: { release: () => void } | undefined) => {
         const started = Date.now() - runStart;
         try {
@@ -261,7 +285,14 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
             outcomes[i] = { record: { id: `${doc.id}#${i + 1}`, blockIds, status: 'ok' }, request: { docId: doc.id, chunk: i + 1, blocks: chunk.length, chars, ok: true, ms: res.ms, attemptsCharged: res.attemptsCharged, repaired: res.meta.repaired, claims: res.claims.length, dropped: res.meta.dropped, ...t }, claims: res.claims, usage: res.meta.usage, droppedReasons: res.meta.droppedReasons };
           } else {
             outcomes[i] = { record: { id: `${doc.id}#${i + 1}`, blockIds, status: 'failed' }, request: { docId: doc.id, chunk: i + 1, blocks: chunk.length, chars, ok: false, status: res.status, code: res.code, ms: res.ms, attemptsCharged: res.attemptsCharged, repaired: false, claims: 0, dropped: 0, ...t }, claims: [], usage: null };
-            if (opts.stopOnServiceErrors && STOPPING_CODES.has(res.code)) runStopped ??= res.code;
+            if (opts.stopOnServiceErrors && STOPPING_CODES.has(res.code)) stop(res.code, i, `request failed: ${res.code}`);
+            if (opts.stopOnSchemaError && SCHEMA_STOP_CODES.has(res.code)) stop(res.code, i, `unrecovered ${res.code} after ${res.attemptsCharged} attempt(s)`);
+          }
+          // Validate and audit THIS response before anything else is dispatched. The response is already stored above and its
+          // charges already counted, so a stop here loses neither.
+          if (res.ok && opts.stopOnUnsupportedValue) {
+            const bad = validateClaims(res.claims, { docId: doc.id, blocks, hintsByField: HINTS }).filter((f) => f.status === 'validated' && audit(f) === 'suspect');
+            if (bad.length) stop('unsupported_value_validated', i, `${bad.length} validated value(s) not supported by their own evidence: ${bad.slice(0, 3).map((f) => `${f.field}=${JSON.stringify(f.value)}`).join('; ')}`);
           }
         } finally {
           claim?.release();
@@ -295,6 +326,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
             const claim = opts.claim ? opts.claim(schemaId, chunk) : (() => { const why = opts.gate?.(schemaId, chunk) ?? null; return { refusal: why, release: () => undefined }; })();
             if (claim.refusal) {
               if (inflight > 0) break;
+              if (opts.stopOnBudget) stop('neuron_budget_exhausted', i, claim.refusal);
               outcomes[i] = notSent(i, chunk, 'neuron_budget_exhausted');
               next++;
               continue;
@@ -437,6 +469,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       schemaValidRate: rate(okReqs.length, sent.length),
       repairedRequests: requests.filter((r) => r.repaired).length,
       concurrency: { requested: Math.max(1, Math.min(opts.concurrency ?? 1, MAX_CONCURRENCY)), peakInFlight, maxRepairAttempts: opts.maxRepairAttempts ?? 1, stoppedAfter: runStopped },
+      stop: stopRecord,
       elapsedMs: Date.now() - runStart,
       latencyMs: { total: sent.reduce((n, r) => n + r.ms, 0), mean: sent.length ? Math.round(sent.reduce((n, r) => n + r.ms, 0) / sent.length) : null, max: sent.length ? Math.max(...sent.map((r) => r.ms)) : null },
       claimsReceived: claims,

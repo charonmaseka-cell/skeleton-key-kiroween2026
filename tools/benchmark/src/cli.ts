@@ -8,6 +8,10 @@
 //   --resume-from FILE  with --frozen-plan: reuse the chunks that succeeded in an earlier live result; send only the rest
 //   --concurrency N     requests in flight at once for a document, 1 to 3 (default 1). Reservations are claimed atomically.
 //   --max-repairs N     repairs the Worker may make per request, 0 or 1 (default 1); in-flight requests are budgeted for them
+//   --batch-id ID       live: one allowance shared by every invocation of the batch (a first run, a resume, a retry). Create it with
+//                       --batch-attempts N --batch-neurons N; the caps are then FIXED and cannot be raised or reset on resume. The
+//                       attempts and estimated neurons already used are subtracted; chunks that succeeded in earlier invocations are reused
+//                       and never resent. Do not combine with --max-attempts or --run-neuron-cap.
 //   --write-plan FILE   build the output-aware plan for --sample, write it to FILE, and stop (no model, no credentials)
 //   --run-neuron-cap N  neurons this run may add, charged by conservative reservation (default 6000)
 //   --daily-neuron-cap N  cumulative neurons for the day, baseline included (default 8000)
@@ -23,6 +27,8 @@ import { NeuronBudget, budgetedAi, loadDailyBaseline, requestClaim } from './bud
 import { formatPlan, planRun } from './preflight';
 import { DEFAULT_MAX_VALUES, buildFrozenPlan, frozenChunker, outputChunker, sizeChunker, type Chunker, type FrozenPlan } from './chunking';
 import { oracleAi, restAi, type Ai } from './ai';
+import { Batch, batchAi } from './batch';
+import { recordingAi } from './recording';
 import { AUDIT_VERSION, formatSummary, runBenchmark } from './run';
 import { LEGACY_PARSER_VERSION, PARSER_VERSION } from '@skeleton-key/ingest';
 import { scopeRule } from '../../../apps/scopecheck/src/adapter/rules';
@@ -74,12 +80,28 @@ if (args.get('write-plan')) {
   process.exit(0);
 }
 let resume: Record<string, { okChunks: number[]; claims: unknown[] }> | undefined;
-if (args.get('resume-from')) {
-  if (!args.get('frozen-plan')) { console.error('error: --resume-from needs --frozen-plan (the chunk numbers must mean the same chunks)'); process.exit(1); }
+// A batch (live) keeps one allowance across invocations. It is opened here, before anything is planned, so that the chunks its
+// earlier invocations completed are reused and the attempts and neurons they used are already subtracted.
+const REPO_ROOT = new URL('../../../', import.meta.url).pathname;
+let batch: Batch | undefined;
+if (args.get('batch-id')) {
+  if (mode !== 'live') { console.error('error: --batch-id applies to live runs only'); process.exit(1); }
+  if (args.has('max-attempts') || args.has('run-neuron-cap')) { console.error('error: with --batch-id the allowance comes from the batch; do not pass --max-attempts or --run-neuron-cap'); process.exit(1); }
+  const caps = args.has('batch-attempts') || args.has('batch-neurons') ? { attempts: Number(args.get('batch-attempts')), neurons: Number(args.get('batch-neurons')) } : undefined;
+  try {
+    batch = Batch.open(join(REPO_ROOT, '.benchmark-state', 'batches', `${args.get('batch-id')}.json`), args.get('batch-id')!, caps);
+  } catch (e) {
+    console.error(`error: ${(e as Error).message}`);
+    process.exit(1);
+  }
+}
+const resumeFiles = [...(batch?.state.resultFiles ?? []), ...(args.get('resume-from')?.split(',') ?? [])];
+if (resumeFiles.length) {
+  if (!args.get('frozen-plan')) { console.error('error: resuming needs --frozen-plan (the chunk numbers must mean the same chunks)'); process.exit(1); }
   resume = {};
-  // Several files may be given (comma separated); a later file replaces an earlier one for the same document.
-  for (const file of args.get('resume-from')!.split(',')) {
-    const prior = JSON.parse(readFileSync(file, 'utf8')) as { requests: { docId: string; chunk: number; ok: boolean }[]; samples: { docs: { docId: string; claimsReturned?: unknown[] }[] }[] };
+  // Several files may be given; a later file replaces an earlier one for the same document (a resumed result already carries the earlier chunks).
+  for (const file of resumeFiles) {
+    const prior = JSON.parse(readFileSync(file.startsWith('/') ? file : join(REPO_ROOT, file), 'utf8')) as { requests: { docId: string; chunk: number; ok: boolean }[]; samples: { docs: { docId: string; claimsReturned?: unknown[] }[] }[] };
     for (const d of prior.samples.flatMap((x) => x.docs)) resume[d.docId] = { okChunks: prior.requests.filter((r) => r.docId === d.docId && r.ok).map((r) => r.chunk), claims: d.claimsReturned ?? [] };
   }
 }
@@ -109,10 +131,11 @@ let counter: SqliteAdmission;
 let attemptBudget: number;
 let ceiling: number;
 let neuronBudget: NeuronBudget | undefined;
+let rawLogFile: string | undefined;
 
 if (mode === 'live') {
-  const allowance = Number(args.get('max-attempts'));
-  if (!Number.isInteger(allowance) || allowance < 1 || allowance > 50) fail('live mode requires --max-attempts N (1-50): the inference attempts this run may use, repairs included');
+  const allowance = batch ? batch.remainingAttempts : Number(args.get('max-attempts'));
+  if (!Number.isInteger(allowance) || allowance < 1 || allowance > 50) fail(batch ? `batch ${batch.state.id} has no attempts left (${batch.state.attemptsUsed} of ${batch.state.attemptCap} used)` : 'live mode requires --max-attempts N (1-50): the inference attempts this run may use, repairs included');
   if (!docFilter) fail('live mode requires --doc <id[,id]> so the run is limited to named documents');
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
   const token = process.env.CLOUDFLARE_API_TOKEN;
@@ -124,13 +147,21 @@ if (mode === 'live') {
   ceiling = counter.usedToday(Date.now()) + allowance;
   const day = new Date().toISOString().slice(0, 10);
   const statePath = join(STATE_DIR, 'live-usage.json');
-  const runCap = intArg('run-neuron-cap', 6_000, 1, 10_000);
+  const runCap = batch ? batch.remainingNeurons : intArg('run-neuron-cap', 6_000, 1, 10_000);
+  if (!(runCap > 0)) fail(`batch has no estimated neurons left (${batch?.state.neuronsCharged} of ${batch?.state.neuronCap} used)`);
   const dailyCap = intArg('daily-neuron-cap', 8_000, 1, 10_000);
   const baseline = loadDailyBaseline(statePath, day);
   if (baseline >= dailyCap) fail(`the day's cumulative charge (${Math.round(baseline)} neurons) already reaches the daily cap (${dailyCap}). Stop here.`);
   neuronBudget = new NeuronBudget({ model, runCap, dailyCap, dailyBaseline: baseline, statePath, day });
+  // Raw model responses are appended to a file as they arrive (see recording.ts).
+  mkdirSync(join(SAMPLES_DIR, 'benchmark-results'), { recursive: true });
+  rawLogFile = join(SAMPLES_DIR, 'benchmark-results', `raw-${label}-${new Date(processStart).toISOString().replace(/[:.]/g, '-')}.jsonl`);
+  const raw = recordingAi(model === profileModel ? restAi(accountId, token) : withModel(restAi(accountId, token), model), rawLogFile);
   // Every attempt, repairs included, reserves its worst case BEFORE the call and is refused if it would pass a cap.
-  ai = budgetedAi(model === profileModel ? restAi(accountId, token) : withModel(restAi(accountId, token), model), neuronBudget);
+  if (batch) {
+    batch.begin(label);
+    ai = batchAi(raw, batch, (inner) => budgetedAi(inner, neuronBudget!), () => neuronBudget!);
+  } else ai = budgetedAi(raw, neuronBudget);
 } else if (mode === 'replay') {
   counter = new SqliteAdmission(':memory:');
   attemptBudget = 1000; // not binding: replay charges nothing
@@ -211,7 +242,12 @@ const result = await runBenchmark({
   resume,
   concurrency,
   maxRepairAttempts: maxRepairs,
+  // live stop conditions: a stopping service error, an unrecovered schema error, an unsupported value accepted as validated, or
+  // a budget refusal each end the sending. Labels play no part in any of them.
   stopOnServiceErrors: mode === 'live',
+  stopOnSchemaError: mode === 'live',
+  stopOnUnsupportedValue: mode === 'live',
+  stopOnBudget: mode === 'live',
   // an atomic claim, made in the same synchronous step as the check, just before each request is dispatched
   claim: mode === 'live' ? requestClaim(neuronBudget!, model) : undefined,
   attemptBudget,
@@ -226,6 +262,7 @@ const result = await runBenchmark({
 if (neuronBudget) {
   const idle = await neuronBudget.whenIdle(35_000);
   if (!idle) console.log(`WARNING: ${neuronBudget.outstanding.size} model call(s) still outstanding; their reservations stand and may be settled later`);
+  batch?.syncNeurons(neuronBudget.runTotal);
 }
 const finishedAt = new Date().toISOString();
 console.log(formatSummary(result));
@@ -245,26 +282,34 @@ const replayInfo = mode === 'replay' ? {
   responsesProducedWith: { parser: LEGACY_PARSER_VERSION, note: 'text lines only; no cell metadata (a result file without a parser field was made by ingest/1)' },
   rescoredWith: { parser: PARSER_VERSION, scopeRuleVersion: scopeRule.version, auditVersion: AUDIT_VERSION, chunkPlan: args.get('frozen-plan') ?? 'size-only default' },
 } : undefined;
-writeFileSync(out, JSON.stringify({ ...result, replay: replayInfo, finishedAt, wallClockMs: Date.now() - processStart, auditVersion: AUDIT_VERSION, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, resumedFrom: args.get('resume-from'), chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
+writeFileSync(out, JSON.stringify({ ...result, replay: replayInfo, finishedAt, wallClockMs: Date.now() - processStart, auditVersion: AUDIT_VERSION, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, resumedFrom: args.get('resume-from'), chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, rawResponses: rawLogFile ? rawLogFile.replace(REPO, '') : undefined, batch: batch?.state, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
+if (batch) {
+  batch.end(out.replace(REPO, ''), result.summary.stop?.reason ?? null);
+  // the batch state lives in the (git-ignored) state directory; keep a copy with the results
+  writeFileSync(join(outDir, `batch-${batch.state.id}.json`), JSON.stringify(batch.state, null, 2) + '\n');
+  console.log(`batch ${batch.state.id}: ${batch.state.attemptsUsed} of ${batch.state.attemptCap} attempts, ${Math.round(batch.state.neuronsCharged * 10) / 10} of ${batch.state.neuronCap} estimated neurons used`);
+}
 
-// Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.
+// Stop conditions for live batches. What STOPS sending is decided inside the runner, request by request, never from labels: a
+// stopping service error, an unrecovered schema error, an unsupported value accepted as validated, a budget refusal. Everything
+// that compares with labels (a value different from its label, a conservative hold, a miss) is an observation only.
 if (mode === 'live') {
   const stops: string[] = [];
-  for (const r of result.requests) if (!r.ok) stops.push(`request failed: ${r.code ?? r.status} (doc ${r.docId})`);
-  const observations: string[] = [];
-  for (const sm of result.samples) for (const d of sm.docs) {
-    // Stop: a validated value that is not supported by its own evidence, or an ambiguous value that was validated.
-    if (d.extraction.outcomes.wrongly_validated > 0) stops.push(`${d.docId}: ambiguous value was validated`);
-    const suspect = d.facts.filter((f) => f.audit === 'suspect');
-    if (suspect.length) stops.push(`${d.docId}: ${suspect.length} validated value(s) not visible in their evidence (audit)`);
-    // Observation only: validated, supported by evidence, but different from the label (for example an incomplete item name).
-    if (d.extraction.outcomes.wrong_value > 0) observations.push(`${d.docId}: ${d.extraction.outcomes.wrong_value} validated value(s) differ from the label but are visible in their evidence`);
-  }
+  const stop = result.summary.stop;
+  if (stop) stops.push(`${stop.reason} at ${stop.docId}#${stop.chunk}${stop.detail ? `: ${stop.detail}` : ''}; no later chunk was sent`);
   if (neuronBudget?.capReached) stops.push(`neuron cap reached (${JSON.stringify({ runCharged: neuronBudget.summary.runCharged, dailyAfter: neuronBudget.summary.dailyAfter, overruns: neuronBudget.summary.overruns })}); no further calls are allowed`);
-  for (const o of observations) console.log(`OBSERVATION: ${o}`);
+  for (const r of result.requests) if (!r.ok && !r.code?.startsWith('stopped_after_') && !r.reused) console.log(`FAILED REQUEST: ${r.docId}#${r.chunk} ${r.code ?? r.status}`);
+  for (const sm of result.samples) for (const d of sm.docs) {
+    const o = d.extraction.outcomes;
+    const parts = [`${o.correct} correct`, `${o.wrong_value} differ from label but visible in evidence`, `${o.correct_conservative + o.held_for_review} held`, `${o.missed} missed`, `${o.wrongly_validated} validated against a label that wanted review`];
+    console.log(`OBSERVATION: ${d.docId}: ${parts.join(', ')}`);
+  }
   if (stops.length) {
     console.log(`STOP CONDITIONS:\n - ${stops.join('\n - ')}`);
     process.exitCode = 3;
-  } else console.log('stop conditions: none');
+  } else {
+    console.log('stop conditions: none');
+    if (result.requests.some((r) => !r.ok && !r.reused)) process.exitCode = 3;
+  }
 }

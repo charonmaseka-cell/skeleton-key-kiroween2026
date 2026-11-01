@@ -48,7 +48,7 @@ Stop the batch and inspect on: an unrecovered schema error (after the one repair
 
 ## Supported scope (to be decided with the model)
 
-The supported scope is limited to what was measured: text PDFs, one chunk per document, small documents (the largest sample is about 0.4k characters and 9 blocks), the four profiles above. Anything beyond that is unvalidated. These samples do not establish a public request ceiling; production admission stays at 0.
+The supported scope is limited to what was measured: text PDFs, one chunk per document, documents of up to about 400 characters (largest measured request: 357 characters, 8 blocks), the measured benchmark envelope, the four profiles above. Anything beyond that is unvalidated. These samples do not establish a public request ceiling; production admission stays at 0.
 
 ---
 # Results and decision
@@ -86,7 +86,7 @@ Columns: attempts / repair used; latency (ms, measured); claims returned (and ho
 | Schema-valid requests | 8 of 8 | 8 of 8 |
 | Latency, sum of requests (measured) | 74,104 ms | 14,795 ms |
 | Tokens in / out (measured) | 3,663 / 2,433 | 3,663 / 3,006 |
-| **Estimated** neurons | 596 (rates confirmed in aggregate by the dashboard) | 321 (**rates unverified**) |
+| **Estimated** neurons | 596 (from published per-token rates) | 321 (from **unverified** rates) |
 | Claims returned / dropped by the Worker as `invalid_value` | 60 / 0 | 39 / 14 |
 | Correct labelled facts | 52 | 36 |
 | **Missed labelled facts** | **1** | **21** |
@@ -134,7 +134,7 @@ Known limitation of the selected model, kept visible: with the 70B the `quote-c`
 
 Supported means measured, no more:
 
-- Text PDFs (scanned PDFs are rejected), **one chunk per document**, small documents (the largest sample is about 0.4k characters and 9 blocks).
+- Text PDFs (scanned PDFs are rejected), **one chunk per document**, documents of up to about 400 characters (largest measured request: 357 characters, 8 blocks), the measured benchmark envelope.
 - ScopeCheck: one RFQ and up to two quotations, laid out either as pipe-separated columns or as free text lines; item codes of the form `AB-123` (hyphen-less codes are treated as description-only).
 - PackCheck: the four-document grant pack, South African rand, with the requirements, application form, budget and registration roles.
 - Profiles: `scopecheck.rfq.v1`, `scopecheck.quote.v1`, `packcheck.grant.v2` for the application form, `packcheck.grant.v1` for the other PackCheck documents (v2 is unmeasured on those three).
@@ -144,7 +144,7 @@ Not validated and not supported yet: multi-chunk or long documents, noisy or sca
 
 ## Production admission
 
-`DAILY_ADMISSION_CEILING` stays **0**. These samples (eight tiny fictional documents, one run each) do not establish a suitable public request ceiling or token caps: per-request neuron use depends on input size, and no document above about 0.4k characters has been measured. The ceiling is set only after a deployment-time test with realistic document sizes against the deployed Worker and Durable Object.
+`DAILY_ADMISSION_CEILING` stays **0**. These samples (eight tiny fictional documents, one run each) do not establish a suitable public request ceiling or token caps: per-request neuron use depends on input size, and no document above about 400 characters (single chunk) has been measured. The ceiling is set only after a deployment-time test with realistic document sizes against the deployed Worker and Durable Object.
 
 ## Unlabelled claims (reported separately, neither correct nor incorrect)
 
@@ -154,6 +154,7 @@ Not validated and not supported yet: multi-chunk or long documents, noisy or sca
 ## Limitations of this comparison
 
 - One run per document per model (the 8B and 70B repeats we have were identical), eight small fictional documents, labels written by the same author.
-- 8B neuron figures are estimates from unverified per-token rates. The dashboard shows neurons per model, so a reading for `llama-3.1-8b-instruct` will verify them; the 70B aggregate was confirmed at checkpoint 1.
+- **Published pricing is not consumption.** Every neuron figure here is an estimate computed from measured tokens and per-token prices. The 70B prices are published; the 8B prices are unverified (secondary sources). Dashboard-confirmed consumption exists only for the checkpoint-1 aggregate (462.81 neurons, 5 attempts, 70B). A per-model dashboard reading for 2026-11-01 will confirm the rest.
+- **Timeout:** these runs used the harness's 45 s timeout (not stored in the result files, recorded here). The Worker is configured for 25 s; integration runs from now on use 25 s (`--timeout-ms`, default 25000, stored in new results). The slowest 70B request was 18.1 s, so none of these requests would have hit 25 s, but the margin is thin.
 - The 8B used the profiles tuned and fixed for the 70B (same prompts, by design); the `invalid_value` drops suggest a profile or value-shape change might help it, but that would be a new profile version and a new comparison, which this stage does not run.
 - Attempts: 9 for the 8B (8 documents plus one repeat of `quote-a`) of the 16 authorised; no repair was needed or observed. Live repair stays unobserved (controlled offline tests only).

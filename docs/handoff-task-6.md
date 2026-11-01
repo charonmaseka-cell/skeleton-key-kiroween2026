@@ -12,13 +12,13 @@ Everything here is measured or committed; nothing is a promise. Benchmark record
 | PackCheck profiles | `packcheck.grant.v2` for the **application form** (fixes "R1.6 million" read as 1.6). `packcheck.grant.v1` was measured for requirements, budget and registration; v2 is **unmeasured** on those three. Pick the profile by document role until a v2 check says otherwise. |
 | Profile policy | Published versions are frozen (hash test in `services/extraction-api/test/profiles.test.ts`); a behaviour change is a new ID. Record the profile version with every result. |
 | Repairs | At most one counted repair per chunk (`MAX_REPAIR_ATTEMPTS=1`). Only verified offline; unobserved live. |
-| Timeout | Worker config `INFERENCE_TIMEOUT_MS=25000`. The benchmark ran with 45000. The slowest 70B request was 18,129 ms (`quote-a`), so there is little margin: re-measure on the deployed Worker, and show the `timeout` error recoverably. |
+| Timeout | Worker config `INFERENCE_TIMEOUT_MS=25000`. Benchmark runs up to the model comparison used a 45 s harness timeout (preserved in the records); integration runs from now on use the Worker's 25 s (CLI default, stored in new results). The slowest 70B request was 18,129 ms (`quote-a`), so there is little margin: re-measure on the deployed Worker, and show the `timeout` error recoverably. |
 | Production admission | `DAILY_ADMISSION_CEILING = "0"`. Not derived: eight tiny documents do not support a ceiling, `MAX_CHARS`, `MAX_BLOCKS` or token caps. |
 | Coverage | Always `unverified` after extraction; absences stay Needs review until a person confirms coverage. |
 
 ## 2. Supported scope for the first app shells
 
-Text PDFs, one chunk per document, small documents (largest sample about 0.4k characters, 9 blocks), item codes shaped `AB-123`, South African rand. ScopeCheck: one RFQ and up to two quotations, pipe-column or free-text lines. PackCheck: requirements, application form, budget, registration. Unsupported and unvalidated: long or multi-chunk documents, scans (rejected), DOCX, other currencies or languages, hyphen-less item codes (treated as description-only), more than two quotations, any real document.
+Text PDFs, one chunk per document, documents of up to about 400 characters (largest measured request: 357 characters, 8 blocks), the measured benchmark envelope, item codes shaped `AB-123`, South African rand. ScopeCheck: one RFQ and up to two quotations, pipe-column or free-text lines. PackCheck: requirements, application form, budget, registration. Unsupported and unvalidated: long or multi-chunk documents, scans (rejected), DOCX, other currencies or languages, hyphen-less item codes (treated as description-only), more than two quotations, any real document.
 
 ## 3. Fixtures to build on
 

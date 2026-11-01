@@ -21,6 +21,11 @@ for (let i = 0; i < argv.length; i++) {
   if (a.startsWith('--')) args.set(a.slice(2), argv[i + 1] && !argv[i + 1]!.startsWith('--') ? argv[++i]! : 'true');
 }
 
+// Integration runs use the Worker's configured timeout (services/extraction-api/wrangler.toml, 25 s).
+// Results up to and including the model comparison ran with 45 s; that setting is preserved in their records
+// (docs/build-log.md) and was not stored in the result files. New results store the value used.
+const WORKER_TIMEOUT_MS = 25_000;
+const timeoutMs = Number(args.get('timeout-ms') ?? WORKER_TIMEOUT_MS);
 const mode = args.get('mode') === 'live' ? 'live' : args.get('mode') === 'replay' ? 'replay' : 'mock';
 const sampleIds = (args.get('sample') ?? 'scopecheck,packcheck').split(',');
 const docFilter = args.get('doc')?.split(',');
@@ -105,7 +110,7 @@ if (mode === 'replay') {
   transport = new LocalTransport({
     ai,
     counter,
-    env: { DAILY_ADMISSION_CEILING: String(ceiling), MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: mode === 'live' ? '45000' : '5000' },
+    env: { DAILY_ADMISSION_CEILING: String(ceiling), MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: mode === 'live' ? String(timeoutMs) : '5000' },
   });
 }
 
@@ -142,7 +147,7 @@ counter.close();
 const outDir = join(SAMPLES_DIR, 'benchmark-results');
 mkdirSync(outDir, { recursive: true });
 const out = args.get('out') ?? join(outDir, `${mode}-${label}-${result.startedAt.replace(/[:.]/g, '-')}.json`);
-writeFileSync(out, JSON.stringify(result, null, 2) + '\n');
+writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms' } : undefined }, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
 
 // Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.

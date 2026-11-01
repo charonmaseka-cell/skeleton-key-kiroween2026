@@ -25,13 +25,13 @@ export const MODELS: Record<string, ModelConfig> = {
     id: BASELINE_MODEL,
     role: 'baseline',
     neuronsPerMillion: { input: 26_636, output: 204_818 },
-    ratesBasis: 'Approximate: published USD per million tokens ($0.293 input, $2.253 output) divided by $0.011 per 1,000 neurons. Aggregate confirmed against the Cloudflare dashboard at checkpoint 1 (462.81 vs 462.76 estimated).',
+    ratesBasis: 'PUBLISHED RATES, approximate: USD per million tokens ($0.293 input, $2.253 output) divided by $0.011 per 1,000 neurons. These are prices, not consumption. Dashboard-confirmed consumption exists only as one aggregate at checkpoint 1 (462.81 neurons against 462.76 estimated); no per-request figure has been confirmed.',
   },
   [SECOND_CANDIDATE]: {
     id: SECOND_CANDIDATE,
     role: 'candidate',
     neuronsPerMillion: { input: 25_608, output: 75_147 },
-    ratesBasis: 'UNVERIFIED: approximately $0.28 input and $0.83 output per million tokens converted at $0.011 per 1,000 neurons. Cloudflare\'s pricing page could not be fetched from the sandbox (HTTP 403), so these rates come from secondary sources and must be checked against the dashboard.',
+    ratesBasis: 'UNVERIFIED RATES: approximately $0.28 input and $0.83 output per million tokens converted at $0.011 per 1,000 neurons. Cloudflare\'s pricing page could not be fetched from the sandbox (HTTP 403), so these come from secondary sources. No dashboard-confirmed consumption exists for this model yet.',
   },
 };
 

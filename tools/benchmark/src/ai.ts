@@ -43,6 +43,10 @@ export type MockDefects = {
   outOfProfile?: boolean;
   /** first response is not valid JSON (forces a repair attempt) */
   badJsonFirst?: boolean;
+  /** every response is invalid JSON (repair is attempted and also fails) */
+  badJsonAlways?: boolean;
+  /** strip item codes such as "CP-100" from item values while keeping the cited excerpt (what the live model did on the RFQ and quote-b) */
+  dropItemCodes?: boolean;
   /** make every call fail with this message */
   fail?: string;
 };
@@ -56,6 +60,7 @@ export function oracleAi(samples: Sample[], defects: MockDefects = {}): Ai & { c
     async run(_model: string, input: unknown) {
       calls++;
       if (defects.fail) throw new Error(defects.fail);
+      if (defects.badJsonAlways) return { response: 'not json', usage: { prompt_tokens: 100, completion_tokens: 3 } };
       if (defects.badJsonFirst && calls === 1) return { response: 'not json', usage: { prompt_tokens: 100, completion_tokens: 3 } };
       const user = (input as { messages: { role: string; content: string }[] }).messages.find((m) => m.role === 'user')!.content;
       const sent = (JSON.parse(user.slice(user.indexOf('\n') + 1)) as { blocks: { id: string; text: string }[] }).blocks;
@@ -66,7 +71,8 @@ export function oracleAi(samples: Sample[], defects: MockDefects = {}): Ai & { c
             if (defects.omit?.(doc.id, f)) continue;
             const block = sent.find((b) => b.text === doc.lines[f.line]);
             if (!block) continue;
-            const value = f.value === null && f.kind === 'date' ? '2026-03-01' : f.value; // a plausible reading of an ambiguous date
+            let value = f.value === null && f.kind === 'date' ? '2026-03-01' : f.value; // a plausible reading of an ambiguous date
+            if (defects.dropItemCodes && f.field === 'item' && typeof value === 'string') value = value.replace(/\b[A-Za-z]{1,4}-\d+\s*/g, '').trim();
             claims.push({ field: f.field, blockId: block.id, excerpt: f.excerpt, value });
           }
         }

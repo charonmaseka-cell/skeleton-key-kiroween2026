@@ -1,0 +1,23 @@
+{
+  "note": "Aggregate usage checkpoints. Per-request neurons in the result files remain ESTIMATES derived from measured tokens; the dashboard figure is an aggregate only.",
+  "checkpoints": [
+    {
+      "recordedAt": "2026-11-01",
+      "afterInferenceAttempts": 5,
+      "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "dashboardNeuronsAggregate": 462.81,
+      "dashboardSource": "Cloudflare dashboard screenshot supplied by the user (Workers AI usage, this model, 2026-11-01)",
+      "dashboardRequestCountShown": false,
+      "estimatedNeuronsAggregate": 462.76,
+      "estimateBasis": "sum of per-request estimates from measured tokens (see NEURON_RATES in tools/benchmark/src/usage.ts)",
+      "difference": 0.05,
+      "differencePercent": 0.01,
+      "status": "dashboard-confirmed aggregate at this checkpoint",
+      "limits": [
+        "Aggregate only: no per-request neuron figures and no request count were visible.",
+        "Individual request usage stays labelled estimated_from_tokens.",
+        "Covers the five attempts made before the identity work; later attempts need their own checkpoint."
+      ]
+    }
+  ]
+}

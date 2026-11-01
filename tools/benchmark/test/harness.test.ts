@@ -11,7 +11,7 @@ import { summarizeUsage } from '../src/usage';
 
 const SAMPLES = ['scopecheck', 'packcheck'];
 
-async function run(opts: { defects?: MockDefects; budget?: number; simulate?: boolean; docs?: string[]; ceiling?: number; samples?: string[] } = {}): Promise<BenchmarkResult> {
+async function run(opts: { defects?: MockDefects; budget?: number; simulate?: boolean; docs?: string[]; ceiling?: number; samples?: string[]; identityRecovery?: boolean } = {}): Promise<BenchmarkResult> {
   const ai = oracleAi(SAMPLES.map(loadSample), opts.defects);
   const counter = new SqliteAdmission(':memory:');
   const transport = new LocalTransport({ ai, counter, env: { DAILY_ADMISSION_CEILING: String(opts.ceiling ?? 1000), MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '2000' } });
@@ -25,6 +25,7 @@ async function run(opts: { defects?: MockDefects; budget?: number; simulate?: bo
     limits: { maxChars: 24_000, maxBlocks: 400 },
     attemptBudget: opts.budget ?? 1000,
     simulateCoverageConfirmation: opts.simulate,
+    identityRecovery: opts.identityRecovery,
   });
   counter.close();
   return result;
@@ -140,6 +141,84 @@ describe('attempts, repairs and failures', () => {
     expect(r.summary.schemaValidRate).toBe(0);
     expect(docOf(r, 'quote-a').processingComplete).toBe(false);
     expect(r.attemptsCharged).toBe(1); // not refunded
+  });
+});
+
+describe('repair behaviour, offline with controlled responses and counted attempts', () => {
+  it('invalid JSON then valid JSON: exactly one repair, two attempts charged, claims accepted', async () => {
+    const r = await run({ defects: { badJsonFirst: true }, docs: ['quote-a'], samples: ['scopecheck'] });
+    expect(r.requests[0]).toMatchObject({ ok: true, repaired: true, attemptsCharged: 2 });
+    expect(r.summary.requests).toBe(1);
+    expect(r.attemptsCharged).toBe(2);
+    expect(docOf(r, 'quote-a').rates.claims).toBeGreaterThan(0);
+  });
+
+  it('invalid JSON twice: the single repair is spent, both attempts are charged, nothing is accepted', async () => {
+    const ai = oracleAi(SAMPLES.map(loadSample), { badJsonAlways: true });
+    const counter = new SqliteAdmission(':memory:');
+    const transport = new LocalTransport({ ai, counter, env: { DAILY_ADMISSION_CEILING: '1000', MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '2000' } });
+    const r = await runBenchmark({ mode: 'mock', model: 'm', label: 't', transport, sampleIds: ['scopecheck'], docFilter: ['quote-a'], limits: { maxChars: 24_000, maxBlocks: 400 }, attemptBudget: 2 });
+    counter.close();
+    expect(ai.calls).toBe(2); // one attempt plus exactly one repair, never a third
+    expect(r.attemptsCharged).toBe(2);
+    expect(r.requests[0]).toMatchObject({ ok: false, attemptsCharged: 2 });
+    expect(docOf(r, 'quote-a').rates.claims).toBe(0);
+    expect(docOf(r, 'quote-a').processingComplete).toBe(false);
+  });
+
+  it('a one-attempt allowance blocks the repair: one attempt charged, the model is called once', async () => {
+    const ai = oracleAi(SAMPLES.map(loadSample), { badJsonFirst: true });
+    const counter = new SqliteAdmission(':memory:');
+    const transport = new LocalTransport({ ai, counter, env: { DAILY_ADMISSION_CEILING: '1', MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '2000' } });
+    const r = await runBenchmark({ mode: 'mock', model: 'm', label: 't', transport, sampleIds: ['scopecheck'], docFilter: ['quote-a'], limits: { maxChars: 24_000, maxBlocks: 400 }, attemptBudget: 1 });
+    counter.close();
+    expect(ai.calls).toBe(1);
+    expect(r.attemptsCharged).toBe(1);
+    expect(r.requests[0]!.ok).toBe(false);
+  });
+});
+
+describe('ScopeCheck item identity in the harness', () => {
+  const dropped = { dropItemCodes: true } as const;
+
+  it('a model that drops item codes breaks matching; the identity step restores the strict findings', async () => {
+    const r = await run({ defects: dropped, samples: ['scopecheck'] });
+    const sc = r.samples[0]!;
+    // before: the original matching misses expected findings (and may emit false critical ones)
+    expect(sc.findingsBefore!.score.missed.length + sc.findingsBefore!.score.falseCritical.length).toBeGreaterThan(0);
+    // after: strict identities match exactly, nothing confirmed beyond the labels
+    expect(sc.findings.score).toMatchObject({ expected: 4, matchedExactState: 4, missed: [], falseCritical: [], overConfident: [] });
+    expect(sc.findings.score.unexpectedOther).toEqual([]);
+    expect(sc.identity!.counts.recovered).toBeGreaterThan(0);
+    expect(sc.identity!.uncertain).toEqual([]);
+  });
+
+  it('extraction scores and raw claims are identical with and without the identity step', async () => {
+    const on = await run({ defects: dropped, samples: ['scopecheck'], identityRecovery: true });
+    const off = await run({ defects: dropped, samples: ['scopecheck'], identityRecovery: false });
+    expect(on.samples[0]!.docs.map((d) => d.extraction)).toEqual(off.samples[0]!.docs.map((d) => d.extraction));
+    expect(on.samples[0]!.docs.map((d) => d.claimsReturned)).toEqual(off.samples[0]!.docs.map((d) => d.claimsReturned));
+    expect(on.samples[0]!.docs.flatMap((d) => d.facts.map((f) => f.value))).toEqual(off.samples[0]!.docs.flatMap((d) => d.facts.map((f) => f.value)));
+    expect(on.summary.recall).toBe(off.summary.recall);
+    expect(off.samples[0]!.findingsBefore).toBeUndefined();
+    expect(off.samples[0]!.identity).toBeUndefined();
+    expect(on.samples[0]!.docs.some((d) => d.extraction.outcomes.wrong_value > 0)).toBe(true); // the dropped codes are still scored as differing from the labels
+  });
+
+  it('coverage stays unverified and the omission stays Needs review after recovery', async () => {
+    const r = await run({ defects: dropped, samples: ['scopecheck'] });
+    for (const d of r.samples[0]!.docs) expect(d.coverage.state).toBe('unverified');
+    const absent = r.samples[0]!.findings.produced.find((f) => f.code === 'item.absent')!;
+    expect(absent).toMatchObject({ subject: 'PG-6', response: 'quote-b', state: 'needs_review', reason: 'coverage_unverified' });
+  });
+
+  it('recovered identifiers are recorded separately, each with its own validated span', async () => {
+    const r = await run({ defects: dropped, samples: ['scopecheck'] });
+    for (const rec of r.samples[0]!.identity!.recovered) {
+      expect(rec.codeSpan.text).toBe(rec.code);
+      expect(rec.codeSpan.end - rec.codeSpan.start).toBe(rec.code.length);
+      expect(rec.codeSpan.blockId).toBe(rec.itemEvidence.blockId);
+    }
   });
 });
 

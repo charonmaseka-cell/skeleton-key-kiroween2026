@@ -13,10 +13,11 @@ import {
   type DocumentExtraction,
   type ExtractionIssue,
   type Fact,
-  type RuleContext,
+  type Finding,
 } from '@skeleton-key/engine';
 import { packMatches, runChecks, scopeMatches, type PackData, type ScopeData } from './checks';
 import { scoreExtraction, scoreFindings, type ExtractionScore, type FindingsScore } from './score';
+import { resolveItemIdentities, type IdentityReport, type RecoveredIdentifier, type UncertainReason } from './scope-identity';
 import { HINTS, loadBlocks, loadSample, type Sample } from './samples';
 import type { Transport } from './transport';
 import { summarizeUsage, type UsageSummary } from './usage';
@@ -65,10 +66,18 @@ export type DocResult = {
   rates: { claims: number; evidenceLocated: number; valueSupported: number };
 };
 
+export type ProducedFinding = { code: string; subject: string; response?: string; severity: string; state: string; reason?: string };
+export type FindingsBlock = { produced: ProducedFinding[]; score: FindingsScore };
+
 export type SampleResult = {
   sampleId: string;
   docs: DocResult[];
-  findings: { produced: { code: string; subject: string; response?: string; severity: string; state: string; reason?: string }[]; score: FindingsScore };
+  /** findings after the ScopeCheck identity step when identityRecovery is on, otherwise the original findings */
+  findings: FindingsBlock;
+  /** ScopeCheck only, when identityRecovery is on: findings with the original matching, for comparison */
+  findingsBefore?: FindingsBlock;
+  /** ScopeCheck only: identifiers recovered from the source and items left uncertain. Recorded separately; facts and extraction scores are not changed. */
+  identity?: { recovered: RecoveredIdentifier[]; uncertain: { factId: string; docId: string; reason: UncertainReason; candidates: string[]; description: string }[]; counts: IdentityReport['counts'] };
 };
 
 export type BenchmarkResult = {
@@ -79,6 +88,7 @@ export type BenchmarkResult = {
   attemptBudget: number;
   attemptsCharged: number;
   simulatedCoverageConfirmation: boolean;
+  identityRecovery: boolean;
   requests: RequestRecord[];
   samples: SampleResult[];
   summary: {
@@ -113,6 +123,8 @@ export type RunOptions = {
   limits: { maxChars: number; maxBlocks: number };
   attemptBudget: number;
   simulateCoverageConfirmation?: boolean;
+  /** ScopeCheck item-identity step (default on). Off reproduces the original matching. */
+  identityRecovery?: boolean;
   measuredNeurons?: number;
 };
 
@@ -219,27 +231,41 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
     // Checks and findings (rules are deterministic; the model only supplied facts).
     const effective = buildEffectiveFacts(allFacts, []);
     const base = { facts: effective, documents: extractions };
-    let ctx: RuleContext<ScopeData> | RuleContext<PackData>;
+    const complete = sampleId === 'scopecheck' ? extractions.has('rfq') && docs.length === sample.docs.length : docs.length === sample.docs.length;
+    const scoreOf = (produced: Finding[]): FindingsBlock => ({
+      produced: produced.map((f) => ({ code: f.code, subject: f.subjectId, response: f.responseDocId, severity: f.severity, state: f.state, reason: f.reason })),
+      // Findings are only scored when every document of the sample was processed.
+      score: complete
+        ? scoreFindings(produced, sample.expectedFindings, { coverageConfirmed: !!opts.simulateCoverageConfirmation, mustNotFlag: sample.mustNotFlag })
+        : { expected: 0, produced: 0, matchedExactState: 0, conservative: [], missed: [], falseCritical: [], overConfident: [], unexpectedOther: [], mustNotFlagViolations: [] },
+    });
+    const scopeRun = (identities?: IdentityReport['identities']): Finding[] => {
+      const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a', 'quote-b'].filter((q) => extractions.has(q)), identities };
+      return extractions.has('rfq') ? runChecks(sampleId, { ...base, matches: scopeMatches(effective, data), data }) : [];
+    };
+
+    let sampleResult: SampleResult;
     if (sampleId === 'scopecheck') {
-      const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a', 'quote-b'].filter((q) => extractions.has(q)) };
-      ctx = extractions.has('rfq') ? { ...base, matches: scopeMatches(effective, data), data } : { ...base, matches: [], data };
+      const before = complete ? scopeRun() : [];
+      if (opts.identityRecovery === false) {
+        sampleResult = { sampleId, docs: docResults, findings: scoreOf(before) };
+      } else {
+        const report = resolveItemIdentities(allFacts, [...blocksByDoc.values()].flat());
+        const after = complete ? scopeRun(report.identities) : [];
+        sampleResult = {
+          sampleId,
+          docs: docResults,
+          findings: scoreOf(after),
+          findingsBefore: scoreOf(before),
+          identity: { recovered: report.recovered, uncertain: report.uncertain, counts: report.counts },
+        };
+      }
     } else {
       const data: PackData = { requirementsDocId: 'requirements', formDocId: 'application-form', otherDocIds: ['budget', 'registration'].filter((d) => extractions.has(d)) };
-      ctx = { ...base, matches: packMatches(effective, data), data };
+      const produced = complete ? runChecks(sampleId, { ...base, matches: packMatches(effective, data), data }) : [];
+      sampleResult = { sampleId, docs: docResults, findings: scoreOf(produced) };
     }
-    const complete = sampleId === 'scopecheck' ? extractions.has('rfq') && docs.length === sample.docs.length : docs.length === sample.docs.length;
-    const produced = complete ? runChecks(sampleId, ctx) : [];
-    samples.push({
-      sampleId,
-      docs: docResults,
-      findings: {
-        produced: produced.map((f) => ({ code: f.code, subject: f.subjectId, response: f.responseDocId, severity: f.severity, state: f.state, reason: f.reason })),
-        // Findings are only scored when every document of the sample was processed.
-        score: complete
-          ? scoreFindings(produced, sample.expectedFindings, { coverageConfirmed: !!opts.simulateCoverageConfirmation, mustNotFlag: sample.mustNotFlag })
-          : { expected: 0, produced: 0, matchedExactState: 0, conservative: [], missed: [], falseCritical: [], overConfident: [], unexpectedOther: [], mustNotFlagViolations: [] },
-      },
-    });
+    samples.push(sampleResult);
   }
 
   const docRes = samples.flatMap((s) => s.docs);
@@ -257,6 +283,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
     attemptBudget: opts.attemptBudget,
     attemptsCharged: charged,
     simulatedCoverageConfirmation: !!opts.simulateCoverageConfirmation,
+    identityRecovery: opts.identityRecovery !== false,
     requests,
     samples,
     summary: {
@@ -298,6 +325,18 @@ export function formatSummary(r: BenchmarkResult): string {
   ];
   for (const sm of r.samples) for (const d of sm.docs) {
     lines.push(`  ${sm.sampleId}/${d.docId}: coverage=${d.coverage.state} processing-complete=${d.processingComplete} issues=${d.issues.length} outcomes=${JSON.stringify(d.extraction.outcomes)}`);
+  }
+  for (const sm of r.samples) {
+    if (sm.identity) {
+      const c = sm.identity.counts;
+      lines.push(`  ${sm.sampleId} identity: code-from-model=${c.codeFromModel} recovered=${c.recovered} description-only=${c.descriptionOnly} uncertain=${c.uncertain}`);
+      for (const rec of sm.identity.recovered) lines.push(`    recovered ${rec.code} for "${rec.description}" (${rec.docId}) span ${rec.codeSpan.start}-${rec.codeSpan.end}`);
+    }
+    if (sm.findingsBefore) {
+      const f = (b: FindingsBlock) => `exact=${b.score.matchedExactState}/${b.score.expected} missed=${b.score.missed.length} false-critical=${b.score.falseCritical.length} over-confident=${b.score.overConfident.length} other(needs-review)=${b.score.unexpectedOther.length}`;
+      lines.push(`  ${sm.sampleId} findings BEFORE identity step: ${f(sm.findingsBefore)}`);
+      lines.push(`  ${sm.sampleId} findings AFTER  identity step: ${f(sm.findings)}`);
+    }
   }
   return lines.join('\n');
 }

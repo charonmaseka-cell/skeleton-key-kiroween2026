@@ -103,6 +103,7 @@ const result = await runBenchmark({
   limits: { maxChars: 24_000, maxBlocks: 400 },
   attemptBudget,
   simulateCoverageConfirmation: simulate,
+  identityRecovery: args.get('no-identity-recovery') !== 'true',
   measuredNeurons: args.has('measured-neurons') ? Number(args.get('measured-neurons')) : undefined,
 });
 console.log(formatSummary(result));

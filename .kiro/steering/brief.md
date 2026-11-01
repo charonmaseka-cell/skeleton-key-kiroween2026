@@ -4,7 +4,7 @@ inclusion: manual
 
 # ScopeCheck Build Brief (reference) and approved amendments
 
-The original brief is imported verbatim at **`docs/reference/ScopeCheck_Build_Brief.md`** (dated 1 November 2026; the two diagrams are transcribed as text). It is **historical**. Where it conflicts with the approved amendments below, the amendments win. Do not restore superseded proposals from it.
+The original brief is imported verbatim at **`docs/reference/scopecheck-build-brief.md`** (dated 1 November 2026; the two diagrams are transcribed as text). It is **historical**. Where it conflicts with the approved amendments below, the amendments win. Do not restore superseded proposals from it.
 
 ## Submission
 

@@ -1,10 +1,11 @@
-import type { Block, ChunkLimits } from '@skeleton-key/engine';
+import { toRequestBlock, type Block, type ChunkLimits } from '@skeleton-key/engine';
 import { chunkForSchema } from './schema-fields';
 
 // Browser client for the extraction Worker (design section on the client bounds; R5.4, R8.8, R8.10).
 //
 //  - Text leaves the device ONLY when `extractDocument` is called, which the UI does only after the user
-//    presses Analyse. The request body is exactly {schemaId, blocks:[{id,text}]}: no filename, no model name.
+//    presses Analyse. The request body is exactly {schemaId, blocks:[{id,text,cells?}]}: no filename, no model name.
+//    `cells` is present only for a line the parser validated as positioned table cells (see engine toRequestBlock).
 //  - Bounded: at most MAX_CHUNKS_PER_DOC chunks per document and MAX_CALLS_PER_SESSION requests per session.
 //    The Worker owns the single counted repair; the client never retries on its own.
 //  - A chunk that fails (any error) is recorded as FAILED with its block ids. A failed or unsent chunk is never
@@ -77,7 +78,7 @@ async function send(cfg: ClientConfig, schemaId: string, blocks: Block[], signal
     res = await doFetch(`${cfg.baseUrl.replace(/\/$/, '')}/extract`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ schemaId, blocks: blocks.map((b) => ({ id: b.id, text: b.text })) }),
+      body: JSON.stringify({ schemaId, blocks: blocks.map(toRequestBlock) }),
       signal,
       credentials: 'omit',
       referrerPolicy: 'no-referrer',

@@ -1,4 +1,4 @@
-import type { Block } from '@skeleton-key/engine';
+import { toRequestBlock, type Block } from '@skeleton-key/engine';
 import type { AdmitResult } from '../../../services/extraction-api/src/admission';
 import type { EnvVars } from '../../../services/extraction-api/src/config';
 import { handle } from '../../../services/extraction-api/src/handler';
@@ -17,7 +17,7 @@ export type ExtractResult =
   | { ok: false; status: number; code: string; ms: number; attemptsCharged: number };
 
 export interface Transport {
-  extract(schemaId: string, blocks: Pick<Block, 'id' | 'text'>[]): Promise<ExtractResult>;
+  extract(schemaId: string, blocks: Pick<Block, 'id' | 'text' | 'layout' | 'cells'>[]): Promise<ExtractResult>;
 }
 
 export type Counter = { admit(ceiling: number, nowMs: number): Promise<AdmitResult>; usedToday?(nowMs: number): number };
@@ -33,7 +33,7 @@ export class LocalTransport implements Transport {
     private readonly opts: { ai: Ai; counter: Counter; env: EnvVars; now?: () => number },
   ) {}
 
-  async extract(schemaId: string, blocks: Pick<Block, 'id' | 'text'>[]): Promise<ExtractResult> {
+  async extract(schemaId: string, blocks: Pick<Block, 'id' | 'text' | 'layout' | 'cells'>[]): Promise<ExtractResult> {
     const now = this.opts.now ?? Date.now;
     // Attempts are counted per request (every admission this request was granted), not as a difference of the shared daily
     // counter, so requests running at the same time cannot be charged for each other's attempts.
@@ -44,7 +44,7 @@ export class LocalTransport implements Transport {
       new Request('https://worker.local/extract', {
         method: 'POST',
         headers: { origin: ORIGIN, 'content-type': 'application/json' },
-        body: JSON.stringify({ schemaId, blocks: blocks.map((b) => ({ id: b.id, text: b.text })) }),
+        body: JSON.stringify({ schemaId, blocks: blocks.map((b) => toRequestBlock(b as Block)) }),
       }),
       { ALLOWED_ORIGINS: ORIGIN, ...this.opts.env },
       { now, counter, ai: this.opts.ai, log: () => undefined },
@@ -61,12 +61,12 @@ export class LocalTransport implements Transport {
 export class HttpTransport implements Transport {
   constructor(private readonly url: string, private readonly origin: string, private readonly worstCaseAttempts = 2) {}
 
-  async extract(schemaId: string, blocks: Pick<Block, 'id' | 'text'>[]): Promise<ExtractResult> {
+  async extract(schemaId: string, blocks: Pick<Block, 'id' | 'text' | 'layout' | 'cells'>[]): Promise<ExtractResult> {
     const started = performance.now();
     const res = await fetch(`${this.url.replace(/\/$/, '')}/extract`, {
       method: 'POST',
       headers: { origin: this.origin, 'content-type': 'application/json' },
-      body: JSON.stringify({ schemaId, blocks: blocks.map((b) => ({ id: b.id, text: b.text })) }),
+      body: JSON.stringify({ schemaId, blocks: blocks.map((b) => toRequestBlock(b as Block)) }),
     });
     const ms = Math.round(performance.now() - started);
     const json = (await res.json()) as { claims?: unknown[]; meta?: ExtractMeta; error?: { code: string } };

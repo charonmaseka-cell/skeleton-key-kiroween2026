@@ -2,13 +2,17 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { CHAIN, REPO, RUNNER_FILES, computeHashes, frozenFileList } from '../src/freeze';
+import { CHAIN, EVALUATION_SET, REPO, RUNNER_FILES, computeHashes, hashesAtCommit } from '../src/freeze';
 
 // The fresh-document validation (SC-T12) has an ORIGINAL freeze (freeze.json) and a chain of SUPERSEDING freezes (freeze-2.json,
 // freeze-3.json), each recording a runner-only change on top of the one before. None is ever rewritten: each new one records the
 // SHA-256 of the manifest it supersedes. If a test here fails, a frozen file changed after its freeze: revert it, or write a new
 // superseding manifest on purpose (npx tsx tools/benchmark/src/freeze.ts --supersede --from OLD --to NEW --reason "...") and record why
 // in docs/build-log.md BEFORE any live batch.
+//
+// After the SC-T12 results were accepted, development continues on later commits. So the ACCEPTED implementation is verified from git
+// history at the commit the last manifest was frozen at (CI checks out full history for this), while the evaluation set (documents,
+// labels, chunk plan and their generator) must still be byte-identical in the working tree.
 
 type Manifest = {
   version?: number;
@@ -72,20 +76,25 @@ describe('each superseding freeze records a runner-only change', () => {
     expect(chain[2]!.addedFiles!.map((c) => c.file)).toEqual(['tools/benchmark/src/recover.ts']);
   });
 
-  it('documents, labels, profiles, chunk plan, parser, engine, identity and comparison rules are byte-identical in EVERY freeze and now', () => {
+  it('documents, labels, profiles, chunk plan, parser, engine, identity and comparison rules are byte-identical in EVERY freeze', () => {
     const protectedFiles = Object.keys(original.files).filter(PROTECTED);
     expect(protectedFiles.length).toBeGreaterThan(30);
     for (const f of ['samples/scopecheck-fresh/sample.json', 'samples/scopecheck-fresh/chunk-plan.json', 'samples/scopecheck-fresh/rfq.pdf', 'apps/scopecheck/src/adapter/rules.ts', 'apps/scopecheck/src/adapter/identity.ts', 'services/extraction-api/src/profiles.ts', 'packages/ingest/src/cells.ts', 'packages/engine/src/chunk-output.ts']) expect(protectedFiles).toContain(f);
-    for (const f of protectedFiles) {
-      for (const m of chain) expect(m.files[f], `${f} in a freeze`).toBe(original.files[f]);
-      expect(now[f], f).toBe(original.files[f]);
-    }
-    for (const m of chain.slice(1)) for (const c of [...m.changedFiles!, ...m.addedFiles!.map((a) => ({ file: a.file }))]) expect(PROTECTED(c.file), c.file).toBe(false);
+    for (const f of protectedFiles) for (const m of chain) expect(m.files[f], `${f} in a freeze`).toBe(original.files[f]);
+    for (const m of chain.slice(1)) for (const c of [...m.changedFiles!, ...m.addedFiles!.map((x) => ({ file: x.file }))]) expect(PROTECTED(c.file), c.file).toBe(false);
   });
 
-  it('the latest manifest covers exactly the files that exist now, and each hash matches', () => {
-    expect(Object.keys(last.files).sort()).toEqual(frozenFileList());
-    expect(last.files).toEqual(now);
+  it('the evaluation set (documents, labels, chunk plan, generator) is still byte-identical now', () => {
+    const files = Object.keys(original.files).filter(EVALUATION_SET);
+    expect(files.length).toBeGreaterThanOrEqual(6);
+    for (const f of files) expect(now[f], f).toBe(original.files[f]);
+  });
+
+  it('the ACCEPTED implementation is reproducible: every file of the last manifest has that hash at its frozen commit in git', () => {
+    const atCommit = hashesAtCommit(last.frozenAtCommit, Object.keys(last.files));
+    const missing = Object.entries(atCommit).filter(([, h]) => h === null).map(([f]) => f);
+    expect(missing, 'git history is needed for this check (CI: actions/checkout with fetch-depth 0)').toEqual([]);
+    for (const [f, h] of Object.entries(last.files)) expect(atCommit[f], f).toBe(h);
   });
 
   it('the frozen configuration is the same in every freeze: model, profiles, 1,500-token cap, 25 s timeout, concurrency 1, admission 0', () => {
@@ -97,6 +106,6 @@ describe('each superseding freeze records a runner-only change', () => {
 
 describe('what the freeze covers', () => {
   it('rules, identity, parser cells, chunker, profiles, scorer, labels, plan and the runner are all in it', () => {
-    for (const f of ['apps/scopecheck/src/adapter/rules.ts', 'apps/scopecheck/src/adapter/identity.ts', 'packages/ingest/src/cells.ts', 'packages/engine/src/chunk-output.ts', 'services/extraction-api/src/profiles.ts', 'tools/benchmark/src/score.ts', 'tools/benchmark/src/run.ts', 'tools/benchmark/src/batch.ts', 'tools/benchmark/src/recording.ts', 'tools/benchmark/src/recover.ts', 'samples/scopecheck-fresh/sample.json', 'samples/scopecheck-fresh/chunk-plan.json']) expect(frozenFileList()).toContain(f);
+    for (const f of ['apps/scopecheck/src/adapter/rules.ts', 'apps/scopecheck/src/adapter/identity.ts', 'packages/ingest/src/cells.ts', 'packages/engine/src/chunk-output.ts', 'services/extraction-api/src/profiles.ts', 'tools/benchmark/src/score.ts', 'tools/benchmark/src/run.ts', 'tools/benchmark/src/batch.ts', 'tools/benchmark/src/recording.ts', 'tools/benchmark/src/recover.ts', 'samples/scopecheck-fresh/sample.json', 'samples/scopecheck-fresh/chunk-plan.json']) expect(Object.keys(last.files)).toContain(f);
   });
 });

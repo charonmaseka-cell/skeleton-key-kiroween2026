@@ -1,3 +1,4 @@
+import { toRequestBlock } from '@skeleton-key/engine';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -195,7 +196,7 @@ describe('a multi-chunk run stops cleanly when the budget cannot cover another a
       // the same gate the CLI uses: the exact messages the Worker would send for this chunk
       gate: (schemaId, chunk) => {
         const profile = PROFILES[schemaId]!;
-        return budget.refusal(worstCaseNeurons({ messages: buildMessages(profile, chunk, false), max_tokens: profile.maxOutputTokens }, M).neurons);
+        return budget.refusal(worstCaseNeurons({ messages: buildMessages(profile, chunk.map(toRequestBlock), false), max_tokens: profile.maxOutputTokens }, M).neurons);
       },
     });
     counter.close();
@@ -338,7 +339,7 @@ describe('an overrun in a multi-chunk run stops the remaining chunks', () => {
     const transport = new LocalTransport({ ai: budgetedAi(heavy, budget), counter, env: { DAILY_ADMISSION_CEILING: '1000', MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '5000' } });
     const r = await runBenchmark({
       mode: 'mock', model: 'mock-oracle', label: 't', transport, sampleIds: [SAMPLE], docFilter: ['rfq'], limits: params, chunker: outputChunker(params), attemptBudget: 1000,
-      gate: (schemaId, chunk) => { const p = PROFILES[schemaId]!; return budget.refusal(worstCaseNeurons({ messages: buildMessages(p, chunk, false), max_tokens: p.maxOutputTokens }, M).neurons); },
+      gate: (schemaId, chunk) => { const p = PROFILES[schemaId]!; return budget.refusal(worstCaseNeurons({ messages: buildMessages(p, chunk.map(toRequestBlock), false), max_tokens: p.maxOutputTokens }, M).neurons); },
     });
     counter.close();
     expect(budget.attempts).toHaveLength(1); // exactly one call was made

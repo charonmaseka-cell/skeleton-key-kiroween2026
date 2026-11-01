@@ -1,3 +1,4 @@
+import { toRequestBlock } from '@skeleton-key/engine';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -33,7 +34,7 @@ async function requestFor(docId: string, i: number) {
   const blocks = await loadBlocks(SAMPLE, doc);
   const chunk = frozenChunker(plan)(docId, blocks, doc.schemaId).chunks[i - 1]!;
   const p = getProfile(doc.schemaId)!;
-  return { messages: buildMessages(p, chunk.map((b) => ({ id: b.id, text: b.text })), false), response_format: responseFormat(p), max_tokens: p.maxOutputTokens };
+  return { messages: buildMessages(p, chunk.map(toRequestBlock), false), response_format: responseFormat(p), max_tokens: p.maxOutputTokens };
 }
 
 /** a raw log of an interrupted run: call 1 (RFQ chunk 1) answered, call 2 (RFQ chunk 2) started and never returned */

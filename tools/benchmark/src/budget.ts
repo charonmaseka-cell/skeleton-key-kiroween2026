@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { estimateNeurons } from './usage';
 import type { Ai } from './ai';
+import { toRequestBlock, type Block } from '@skeleton-key/engine';
 import { PROFILES, buildMessages } from '../../../services/extraction-api/src/profiles';
 
 // Conservative neuron budget for live runs.
@@ -215,9 +216,9 @@ export function budgetedAi(ai: Ai, budget: NeuronBudget): Ai {
  * Worker will send (id and text of each block, nothing else), so the claim and the reservation agree.
  */
 export function requestClaim(budget: NeuronBudget, model: string) {
-  return (schemaId: string, chunk: { id: string; text: string }[]) => {
+  return (schemaId: string, chunk: Block[]) => {
     const profile = PROFILES[schemaId]!;
-    const sent = chunk.map((b) => ({ id: b.id, text: b.text }));
+    const sent = chunk.map(toRequestBlock); // exactly what the Worker is sent
     return budget.claim(worstCaseNeurons({ messages: buildMessages(profile, sent, false), max_tokens: profile.maxOutputTokens }, model).neurons);
   };
 }

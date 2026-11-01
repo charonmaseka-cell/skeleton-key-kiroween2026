@@ -9,7 +9,7 @@ import { FIXTURES } from './fixtures';
 // review and export as the sample pack. No inference is made.
 
 const pack = FIXTURES[0]!;
-const keyOf = (f: { code: string; subject: string; responseDocId?: string; state: string }) => `${f.code}|${f.subject}|${f.responseDocId ?? ''}`;
+const keyOf = (f: { code: string; fingerprint: string; state: string }) => `${f.code}|${f.fingerprint}|${f.state}`;
 const run = (f: Fixture, s = emptySession()) => evaluateSession(packCheckAdapter, f, s, 1);
 
 function fakeWorker(fail: (n: number) => { status: number; code: string } | null = () => null) {
@@ -43,7 +43,7 @@ describe('PackCheck live path with a fake Worker', () => {
     const { fixture, results } = await analyse(w);
     const sample = run(pack);
     const live = run(fixture);
-    expect(live.items.map((i) => keyOf(i.finding) + i.finding.state).sort()).toEqual(sample.items.map((i) => keyOf(i.finding) + i.finding.state).sort());
+    expect(live.items.map((i) => keyOf(i.finding)).sort()).toEqual(sample.items.map((i) => keyOf(i.finding)).sort());
     expect(Object.values(results).every((r) => r.chunks.every((c) => c.status === 'ok'))).toBe(true);
     expect(fixture.sample).toBe(false);
     expect(live.exportModel.sample).toBe(false);

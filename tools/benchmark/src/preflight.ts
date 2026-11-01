@@ -57,7 +57,7 @@ export async function planRun(opts: { samples: string[]; docFilter?: string[]; s
         const expectedOutputTokens = estimatedValues * TOKENS_PER_CLAIM;
         const expectedSeconds = FIXED_SECONDS + expectedOutputTokens / TYPICAL_TOKENS_PER_SECOND;
         const slowestSeconds = FIXED_SECONDS + expectedOutputTokens / SLOWEST_TOKENS_PER_SECOND;
-        const messages = buildMessages(profile, chunk, false);
+        const messages = buildMessages(profile, chunk.map((b) => ({ id: b.id, text: b.text })), false); // exactly what the Worker is sent
         const w = worstCaseNeurons({ messages, max_tokens: profile.maxOutputTokens }, opts.model);
         const bytes = messages.reduce((n, m) => n + Buffer.byteLength(m.content, 'utf8'), 0);
         const expectedNeurons = charge(Math.ceil(bytes / BYTES_PER_PROMPT_TOKEN_TYPICAL) + PROMPT_OVERHEAD_TOKENS, expectedOutputTokens, opts.model);

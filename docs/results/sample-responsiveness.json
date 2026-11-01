@@ -1,0 +1,52 @@
+{
+  "measuredAt": "2026-11-01T18:20:45.788Z",
+  "runtime": "v22.23.4",
+  "warmRuns": 100,
+  "note": "Node, one process, no rendering; computation only",
+  "rows": [
+    {
+      "name": "ScopeCheck sample: scopecheck-standard",
+      "docs": 3,
+      "blocks": 12,
+      "claims": 30,
+      "findings": 4,
+      "firstRunMs": 20.7,
+      "warmMedianMs": 1.1,
+      "warmP95Ms": 2.4,
+      "warmMaxMs": 5.4
+    },
+    {
+      "name": "ScopeCheck sample: scopecheck-layout",
+      "docs": 2,
+      "blocks": 9,
+      "claims": 22,
+      "findings": 4,
+      "firstRunMs": 2,
+      "warmMedianMs": 0.7,
+      "warmP95Ms": 1.4,
+      "warmMaxMs": 2.2
+    },
+    {
+      "name": "PackCheck sample: packcheck-pack",
+      "docs": 4,
+      "blocks": 20,
+      "claims": 17,
+      "findings": 3,
+      "firstRunMs": 3.3,
+      "warmMedianMs": 0.5,
+      "warmP95Ms": 0.9,
+      "warmMaxMs": 1.3
+    },
+    {
+      "name": "ScopeCheck full-length (saved responses, same code path)",
+      "docs": 3,
+      "blocks": 232,
+      "claims": 239,
+      "findings": 20,
+      "firstRunMs": 12.6,
+      "warmMedianMs": 7,
+      "warmP95Ms": 10.4,
+      "warmMaxMs": 11.9
+    }
+  ]
+}

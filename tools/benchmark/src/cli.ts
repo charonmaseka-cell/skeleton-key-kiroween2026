@@ -6,6 +6,8 @@
 //   --values-per-request N  output-aware value budget per request (default 14; an estimate, see chunking.ts)
 //   --frozen-plan FILE  use exactly the chunks recorded in FILE (refused if the document text changed)
 //   --resume-from FILE  with --frozen-plan: reuse the chunks that succeeded in an earlier live result; send only the rest
+//   --concurrency N     requests in flight at once for a document, 1 to 3 (default 1). Reservations are claimed atomically.
+//   --max-repairs N     repairs the Worker may make per request, 0 or 1 (default 1); in-flight requests are budgeted for them
 //   --write-plan FILE   build the output-aware plan for --sample, write it to FILE, and stop (no model, no credentials)
 //   --run-neuron-cap N  neurons this run may add, charged by conservative reservation (default 6000)
 //   --daily-neuron-cap N  cumulative neurons for the day, baseline included (default 8000)
@@ -17,10 +19,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SqliteAdmission } from './admission';
-import { NeuronBudget, budgetedAi, loadDailyBaseline, worstCaseNeurons } from './budget';
+import { NeuronBudget, budgetedAi, loadDailyBaseline, requestClaim } from './budget';
 import { formatPlan, planRun } from './preflight';
 import { DEFAULT_MAX_VALUES, buildFrozenPlan, frozenChunker, outputChunker, sizeChunker, type Chunker, type FrozenPlan } from './chunking';
-import { buildMessages } from '../../../services/extraction-api/src/profiles';
 import { oracleAi, restAi, type Ai } from './ai';
 import { AUDIT_VERSION, formatSummary, runBenchmark } from './run';
 import { LEGACY_PARSER_VERSION, PARSER_VERSION } from '@skeleton-key/ingest';
@@ -62,6 +63,8 @@ const intArg = (name: string, def: number, min: number, max: number) => {
 // The chunk limits are configuration, never a constant: a benchmark of multi-chunk behaviour must be able to set them.
 const limits = { maxChars: intArg('max-chars', 24_000, 200, 100_000), maxBlocks: intArg('max-blocks', 400, 1, 2_000), overlap: intArg('overlap', 0, 0, 20) };
 const minChunks = intArg('min-chunks', 1, 1, 100);
+const concurrency = intArg('concurrency', 1, 1, 3);
+const maxRepairs = intArg('max-repairs', 1, 0, 1);
 const outputParams = { ...limits, maxValues: intArg('values-per-request', DEFAULT_MAX_VALUES, 1, 60), headingContext: true };
 if (args.get('write-plan')) {
   const sampleId = sampleIds[0]!;
@@ -191,7 +194,7 @@ if (mode === 'replay') {
   transport = new LocalTransport({
     ai,
     counter,
-    env: { DAILY_ADMISSION_CEILING: String(ceiling), MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: mode === 'live' ? String(timeoutMs) : '5000' },
+    env: { DAILY_ADMISSION_CEILING: String(ceiling), MAX_REPAIR_ATTEMPTS: String(maxRepairs), INFERENCE_TIMEOUT_MS: mode === 'live' ? String(timeoutMs) : '5000' },
   });
 }
 
@@ -206,10 +209,11 @@ const result = await runBenchmark({
   limits,
   chunker,
   resume,
-  gate: mode === 'live' ? (schemaId, chunk) => {
-    const profile = PROFILES[schemaId]!;
-    return neuronBudget!.refusal(worstCaseNeurons({ messages: buildMessages(profile, chunk, false), max_tokens: profile.maxOutputTokens }, model).neurons);
-  } : undefined,
+  concurrency,
+  maxRepairAttempts: maxRepairs,
+  stopOnServiceErrors: mode === 'live',
+  // an atomic claim, made in the same synchronous step as the check, just before each request is dispatched
+  claim: mode === 'live' ? requestClaim(neuronBudget!, model) : undefined,
   attemptBudget,
   simulateCoverageConfirmation: simulate,
   identityRecovery: args.get('no-identity-recovery') !== 'true',
@@ -217,6 +221,12 @@ const result = await runBenchmark({
   recordedProfiles: replayProfiles,
   measuredNeurons: args.has('measured-neurons') ? Number(args.get('measured-neurons')) : undefined,
 });
+// A call can outlive the Worker's timeout: wait (bounded) for it to settle so its reported usage is charged before the
+// ledger and the result are written. A call still outstanding keeps its reservation.
+if (neuronBudget) {
+  const idle = await neuronBudget.whenIdle(35_000);
+  if (!idle) console.log(`WARNING: ${neuronBudget.outstanding.size} model call(s) still outstanding; their reservations stand and may be settled later`);
+}
 const finishedAt = new Date().toISOString();
 console.log(formatSummary(result));
 

@@ -1,7 +1,7 @@
 import { useId, useRef, useState } from 'react';
 import type { Block } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
-import { ERROR_TEXT, analyseAll, newClientSession, type ClientConfig, type DocumentResult, type ErrorKind } from './extraction-client';
+import { ERROR_TEXT, MAX_CALLS_PER_SESSION, MAX_CHUNKS_PER_DOC, analyseAll, newClientSession, type ClientConfig, type DocumentResult, type ErrorKind } from './extraction-client';
 import { buildLiveFixture, type Fixture } from './session-core';
 
 // Upload and Analyse (foundation tasks 8 and 9; spec SC-1, SC-2, SC-5).
@@ -119,6 +119,9 @@ export function UploadPanel({
       </h2>
       <p className="text-sm">
         <strong>What leaves your device.</strong> Files are read on your device when you choose them. When you press Analyse, the <em>text extracted from them</em> is sent to an AI service for analysis. Not all processing is local. Do not analyse documents you are not allowed to share. The original files are never uploaded.
+      </p>
+      <p className="text-sm" data-testid="live-limits">
+        <strong>Live analysis is limited.</strong> Text-layer PDFs only, up to {Math.round(MAX_FILE_BYTES / (1024 * 1024))} MB each. Each document is sent in short requests, one after another: a document needing more than {MAX_CHUNKS_PER_DOC} requests is refused as too long, a session sends at most {MAX_CALLS_PER_SESSION} requests, and nothing is retried automatically. It takes minutes, not seconds: one measured run of three 3-page documents took about 5 minutes (a single run, not a promise). Results cover only what was read; a part that failed is marked not processed. The sample sets below are the instant default and run the same checks on saved extractions.
       </p>
       {!configured && (
         <p role="note" className="rounded border border-amber-800 bg-amber-50 p-2 text-sm font-medium">

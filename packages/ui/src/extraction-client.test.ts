@@ -128,3 +128,77 @@ describe('bounds', () => {
     expect(w.calls.length).toBeGreaterThan(0);
   });
 });
+
+describe('bounded concurrency (off by default)', () => {
+  const slow = (ms: number | ((n: number) => number), reply: (n: number, b: { blocks: { id: string }[] }) => Reply = (_, b) => ok(b)) => {
+    let active = 0;
+    let peak = 0;
+    let n = 0;
+    const calls: number[] = [];
+    const fetchImpl = (async (_u: string, init: RequestInit) => {
+      const body = JSON.parse(String(init.body));
+      const my = ++n;
+      calls.push(my);
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise((r) => setTimeout(r, typeof ms === 'function' ? ms(my) : ms));
+      active--;
+      const r = reply(my, body);
+      if (r === 'throw') throw new TypeError('down');
+      return new Response(JSON.stringify(r.body), { status: r.status });
+    }) as unknown as typeof fetch;
+    return { fetchImpl, get peak() { return peak; }, get n() { return n; } };
+  };
+
+  it('is sequential unless asked: one request in flight', async () => {
+    const w = slow(5);
+    await extractDocument(cfg(w), newClientSession(), doc(8));
+    expect(w.peak).toBe(1);
+  });
+
+  it('with concurrency 3 never has more than three requests in flight, and the result is the same as in order', async () => {
+    const seq = await extractDocument(cfg(slow(2)), newClientSession(), doc(10));
+    const w = slow(8);
+    const par = await extractDocument({ ...cfg(w), concurrency: 3 }, newClientSession(), doc(10));
+    expect(w.peak).toBe(3);
+    expect(par.chunks).toEqual(seq.chunks);
+    expect(par.claims).toEqual(seq.claims);
+  });
+
+  it('a larger request is capped at three', async () => {
+    const w = slow(8);
+    await extractDocument({ ...cfg(w), concurrency: 50 }, newClientSession(), doc(10));
+    expect(w.peak).toBe(3);
+  });
+
+  it('the session call limit is taken atomically: concurrent chunks cannot pass it', async () => {
+    const w = slow(5);
+    const session = newClientSession();
+    session.calls = MAX_CALLS_PER_SESSION - 2; // two calls left
+    const r = await extractDocument({ ...cfg(w), concurrency: 3 }, session, doc(10));
+    expect(w.n).toBe(2);
+    expect(session.calls).toBe(MAX_CALLS_PER_SESSION);
+    expect(r.stoppedBy).toBe('rate_limited');
+    expect(r.chunks.filter((c) => c.status === 'ok')).toHaveLength(2);
+    expect(r.chunks.filter((c) => c.status === 'not_sent')).toHaveLength(3);
+  });
+
+  it('after a stopping error nothing new is sent; requests already in flight finish and are kept', async () => {
+    // the 2nd request is refused for the daily allowance (quickly) while the 1st and 3rd are still in flight
+    const w = slow((n) => (n === 2 ? 5 : 40), (n, b) => (n === 2 ? err(429, 'daily_limit') : ok(b)));
+    const r = await extractDocument({ ...cfg(w), concurrency: 3 }, newClientSession(), doc(12));
+    expect(r.stoppedBy).toBe('daily_limit');
+    expect(w.n).toBe(3); // exactly the three that were already dispatched
+    expect(r.chunks.filter((c) => c.status === 'ok')).toHaveLength(2); // the in-flight ones finished and were kept
+    expect(r.chunks.filter((c) => c.status === 'not_sent').length).toBeGreaterThan(0);
+    expect(r.chunks[1]).toMatchObject({ status: 'failed', error: 'daily_limit' });
+    expect(r.claims.length).toBeGreaterThan(0);
+  });
+
+  it('a failed chunk is still never covered, whatever the order requests finish in', async () => {
+    const w = slow(4, (n, b) => (n === 2 ? err(502, 'schema_invalid') : ok(b)));
+    const r = await extractDocument({ ...cfg(w), concurrency: 3 }, newClientSession(), doc(6));
+    expect(r.chunks.map((c) => c.status)).toEqual(['ok', 'failed', 'ok']);
+    expect(r.stoppedBy).toBeUndefined();
+  });
+});

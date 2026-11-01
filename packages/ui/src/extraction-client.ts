@@ -14,6 +14,8 @@ import { chunkForSchema } from './schema-fields';
 
 export const MAX_CHUNKS_PER_DOC = 8;
 export const MAX_CALLS_PER_SESSION = 30;
+/** Requests in flight at once for one document. The default is 1; the ceiling is 3. */
+export const MAX_CONCURRENCY = 3;
 
 /**
  * Uploaded documents are split by EXPECTED OUTPUT (schema-fields.ts): about 14 values per request, an estimate from
@@ -57,6 +59,8 @@ export type ClientConfig = {
   baseUrl: string;
   fetchImpl?: typeof fetch;
   limits?: ChunkLimits;
+  /** requests in flight at once, 1 to 3 (default 1: in order) */
+  concurrency?: number;
 };
 
 export type ClientSession = { calls: number };
@@ -132,24 +136,37 @@ export async function extractDocument(
   const todo = chunks.map((_, i) => i).filter((i) => result.chunks[i]!.status !== 'ok');
   let done = chunks.length - todo.length;
   opts.onProgress?.(done, chunks.length);
-  for (const i of todo) {
-    if (result.stoppedBy) break; // a stopping error: do not send the rest
-    if (session.calls >= MAX_CALLS_PER_SESSION) {
-      result.stoppedBy = 'rate_limited';
-      break;
-    }
-    session.calls++;
+  // Bounded concurrency (default 1 = in order). The decision to send is made synchronously, so the call counter and the
+  // stop flag are checked and updated in one step: two chunks can never both take the last allowed call. After a stopping
+  // error nothing new is sent; requests already in flight finish and are recorded (they cannot be cancelled in the Worker).
+  const width = Math.max(1, Math.min(Math.floor(cfg.concurrency ?? 1), MAX_CONCURRENCY));
+  const queue = [...todo];
+  const one = async (i: number) => {
     const r = await send(cfg, doc.schemaId, chunks[i]!, opts.signal);
     if (r.ok) {
       result.chunks[i] = { index: i, blockIds: chunks[i]!.map((b) => b.id), status: 'ok', claims: r.claims.length };
       perChunkClaims[i] = r.claims;
     } else {
       result.chunks[i] = { index: i, blockIds: chunks[i]!.map((b) => b.id), status: 'failed', error: r.error, claims: 0 };
-      if (ERROR_TEXT[r.error].stopsRun) result.stoppedBy = r.error;
+      if (ERROR_TEXT[r.error].stopsRun) result.stoppedBy ??= r.error;
     }
     done++;
     opts.onProgress?.(done, chunks.length);
-  }
+  };
+  const worker = async () => {
+    for (;;) {
+      if (result.stoppedBy || opts.signal?.aborted) return; // a stopping error: do not send the rest
+      const i = queue.shift();
+      if (i === undefined) return;
+      if (session.calls >= MAX_CALLS_PER_SESSION) {
+        result.stoppedBy ??= 'rate_limited';
+        return;
+      }
+      session.calls++;
+      await one(i);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(width, queue.length) }, worker));
   result.claims = perChunkClaims.flat();
   return result;
 }

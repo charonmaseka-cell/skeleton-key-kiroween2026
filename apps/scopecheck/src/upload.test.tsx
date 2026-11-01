@@ -42,6 +42,21 @@ async function choose(user: ReturnType<typeof userEvent.setup>, rfq = 'rfq.pdf',
 }
 const analyseBtn = () => screen.getByRole('button', { name: /^Analyse \(sends extracted text\)/ }) as HTMLButtonElement;
 
+describe('live uploads are visibly limited, and the sample sets are the default', () => {
+  it('states the limits in numbers before anything is chosen, and starts in sample mode', () => {
+    setup();
+    const t = screen.getByTestId('live-limits').textContent!;
+    expect(t).toMatch(/Live analysis is limited/);
+    expect(t).toMatch(/up to 5 MB each/);
+    expect(t).toMatch(/more than 8 requests is refused/);
+    expect(t).toMatch(/at most 30 requests/);
+    expect(t).toMatch(/nothing is retried automatically/);
+    expect(t).toMatch(/about 5 minutes \(a single run, not a promise\)/);
+    expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
+    expect(screen.queryByRole('region', { name: 'Live mode' })).toBeNull();
+  });
+});
+
 describe('before Analyse: nothing leaves the device', () => {
   it('states plainly that extracted text is sent, and that not all processing is local', () => {
     setup();

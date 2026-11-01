@@ -52,6 +52,12 @@ describe('PackCheck slots', () => {
 });
 
 describe('PackCheck upload', () => {
+  it('states the live limits before anything is chosen and starts in sample mode', () => {
+    setup();
+    expect(screen.getByTestId('live-limits').textContent).toMatch(/Live analysis is limited.*at most 30 requests/);
+    expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
+  });
+
   it('shows the plain statement, reads files on the device, and sends nothing before Analyse', async () => {
     const user = userEvent.setup();
     const s = setup();

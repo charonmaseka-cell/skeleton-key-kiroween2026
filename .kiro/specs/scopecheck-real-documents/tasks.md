@@ -14,3 +14,6 @@ Introduced 2026-11-01 (see `requirements.md`). Only the final dates are given (S
 - [ ] SC-T9 DOCX input (SC-7). After SC-T8.
 - [ ] SC-T10 Supplier-specific clarification email drafts (SC-7). After SC-T8.
 - [x] SC-T11 Requirement-line identity, multi-item blocks and evidence-empty items (SC-8). Done 2026-11-01.
+- [x] SC-T4a Correctness fixes from the saved baseline responses, done 2026-11-02, offline: leading connectors, identity from validated source cells, coordinate-aware cells (`ingest/2-cells`; synthetic PDFs only, no real positioned-column PDF tested), 96 planned comparisons, separate exclusions. Versioned replay: 18 of 18 expected, 1 false critical (SN-403 specification, an extraction fault). `docs/results/sc-t4-offline-replay-v2.md`. The replay shows the defects are fixed on these documents; it is not evidence the rules generalise.
+- [x] SC-T6 Bounded concurrency PREPARED (benchmark and browser client), offline only, off by default: `docs/concurrency.md`. A live measurement needs a new authorisation.
+- [ ] SC-T7 Fresh-document validation: run the fixed rules on documents they were not written against (a live batch or new pre-registered documents). Not started.

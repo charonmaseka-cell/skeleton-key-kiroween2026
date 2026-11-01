@@ -10,3 +10,6 @@
 
 ## Key dates (SAST)
 - Credit requests close 1 Dec 22:00; submission deadline 5 Dec 2026 00:00; keep apps available through 29 Jan 2027.
+
+## Current spec
+`.kiro/specs/skeleton-key-foundation/` (requirements, design, tasks). Pause for review before application coding.

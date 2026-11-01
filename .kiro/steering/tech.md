@@ -26,3 +26,10 @@
 - Do not log original filenames or document content.
 - Cached extraction is allowed only for bundled original fictional samples, labelled as such; rules and matching always rerun.
 - Never introduce a paid service or dependency requiring billing without flagging it first.
+
+## Worker limits and quota
+- Server-enforced (not client-only): origin allowlist, max body size, max text length, per-client request limit, global daily ceiling, bounded retries (one JSON-repair retry per chunk; no automatic retry loops). Each has a handler test.
+- Quota exhaustion returns a distinct error; keep session data, show a recoverable banner, never fall back silently to cache.
+- Reuse each document's validated extraction in-session (multiple chunk requests allowed); corrections rerun rules locally without calling the model.
+- Run the live-extraction benchmark before building the full interface.
+- Keep docs concise: update existing files rather than adding per-topic reports.

@@ -280,6 +280,25 @@ describe('ScopeCheck layout variant: a free-text quotation without pipe delimite
   });
 });
 
+describe('ScopeCheck comparisons: an aspect that could not be compared is Not evaluated, not silently skipped', () => {
+  it('a specification the model never extracted: the finding is missed (strictly scored) and the comparison is recorded Not evaluated', async () => {
+    const r = await run({ samples: ['scopecheck-layout'], oracle: ['scopecheck-layout'], defects: { omit: (doc, f) => doc === 'quote-c' && f.line === 1 && f.field === 'specification' } });
+    const sc = r.samples[0]!;
+    expect(sc.findings.score.missed).toEqual(['spec.differs|CP-100:specification|quote-c']);
+    expect(sc.findings.score.falseCritical).toEqual([]);
+    expect(sc.comparisons!.find((c) => c.id === 'specification:CP-100~quote-c')).toMatchObject({ status: 'not_evaluated', reason: 'no specification fact in quote-c' });
+    expect(sc.comparisons!.find((c) => c.id === 'quantity:CP-100~quote-c')).toMatchObject({ status: 'agree' });
+    expect(sc.comparisons!.find((c) => c.id === 'quantity:MS-20~quote-c')).toMatchObject({ status: 'flagged' });
+  });
+
+  it('an uncertain item is Not evaluated for every aspect, so nothing about it is presented as agreeing', async () => {
+    const r = await run({ samples: ['scopecheck-layout'], oracle: ['scopecheck-layout'] });
+    const c = r.samples[0]!.comparisons!.filter((x) => x.id.endsWith('PG-6~quote-c'));
+    expect(c.map((x) => x.status)).toEqual(['not_evaluated', 'not_evaluated']);
+    expect(c[0]!.reason).toMatch(/item not matched in quote-c \(match_unresolved\)/);
+  });
+});
+
 describe('usage labelling', () => {
   const rep = (p: number | null, c: number | null) => ({ promptTokens: p, completionTokens: c });
   it('measured tokens give an ESTIMATED neuron figure, labelled as such', () => {

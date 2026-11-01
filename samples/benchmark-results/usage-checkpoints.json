@@ -18,6 +18,18 @@
         "Individual request usage stays labelled estimated_from_tokens.",
         "Covers the five attempts made before the identity work; later attempts need their own checkpoint."
       ]
+    },
+    {
+      "recordedAt": "2026-11-01",
+      "afterInferenceAttempts": 11,
+      "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "dashboardNeuronsAggregate": null,
+      "estimatedNeuronsAggregate": 868.62,
+      "estimateBasis": "sum of per-request estimates from measured tokens",
+      "status": "PENDING dashboard reading",
+      "limits": [
+        "No dashboard figure has been supplied for this checkpoint; the number above is an estimate."
+      ]
     }
   ]
 }

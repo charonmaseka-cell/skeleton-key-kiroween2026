@@ -15,7 +15,7 @@ import {
   type Fact,
   type Finding,
 } from '@skeleton-key/engine';
-import { evaluatePack, packMatches, runChecks, scopeMatches, type Comparison, type PackData, type ScopeData } from './checks';
+import { evaluatePack, evaluateScope, packMatches, runChecks, scopeMatches, type Comparison, type PackData, type ScopeData } from './checks';
 import { scoreExtraction, scoreFindings, type ExtractionScore, type FindingsScore } from './score';
 import { resolveItemIdentities, type IdentityReport, type RecoveredIdentifier, type UncertainReason } from '../../../apps/scopecheck/src/adapter/identity';
 import { HINTS, loadBlocks, loadSample, type Sample } from './samples';
@@ -258,10 +258,11 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
         ? scoreFindings(produced, sample.expectedFindings, { coverageConfirmed: !!opts.simulateCoverageConfirmation, mustNotFlag: sample.mustNotFlag })
         : { expected: 0, produced: 0, matchedExactState: 0, conservative: [], missed: [], falseCritical: [], overConfident: [], unexpectedOther: [], mustNotFlagViolations: [] },
     });
-    const scopeRun = (identities?: IdentityReport['identities']): Finding[] => {
+    const scopeCtx = (identities?: IdentityReport['identities']) => {
       const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a', 'quote-b', 'quote-c'].filter((q) => extractions.has(q)), identities };
-      return extractions.has('rfq') ? runChecks(family, { ...base, matches: scopeMatches(effective, data), data }) : [];
+      return { ...base, matches: scopeMatches(effective, data), data };
     };
+    const scopeRun = (identities?: IdentityReport['identities']): Finding[] => (extractions.has('rfq') ? runChecks(family, scopeCtx(identities)) : []);
 
     let sampleResult: SampleResult;
     if (family === 'scopecheck') {
@@ -276,6 +277,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
           docs: docResults,
           findings: scoreOf(after),
           findingsBefore: scoreOf(before),
+          comparisons: complete ? evaluateScope(scopeCtx(report.identities)).comparisons : undefined,
           identity: { recovered: report.recovered, uncertain: report.uncertain, counts: report.counts },
         };
       }

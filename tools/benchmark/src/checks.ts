@@ -127,11 +127,9 @@ const reasonOf = (e: EffectiveFact, ids?: Map<string, ItemIdentity>) => {
   return id?.kind === 'uncertain' ? id.reason : undefined;
 };
 
-export const scopeRule: Rule<ScopeData> = {
-  id: 'bench.scope',
-  version: '1',
-  run(ctx: RuleContext<ScopeData>) {
+export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDraft[]; comparisons: Comparison[] } {
     const out: FindingDraft[] = [];
+    const comparisons: Comparison[] = [];
     const rfq = linesOf(ctx.facts, ctx.data.rfqDocId).filter((l) => usable(l.f.item));
     for (const l of rfq) {
       if (itemIdentityKey(l.f.item!, ctx.data.identities) !== null) continue;
@@ -148,6 +146,9 @@ export const scopeRule: Rule<ScopeData> = {
         const verdict = concludeAbsence(m, doc);
         const base = { contextId: 'rfq-vs-quote', responseDocId: q, matchStatus: m.status };
         if (verdict.kind === 'absent') {
+          for (const field of ['quantity', 'specification']) {
+            comparisons.push({ id: `${field}:${key}~${q}`, check: 'quote_aspect', field, docs: [ctx.data.rfqDocId, q], status: 'not_evaluated', reason: `item not matched in ${q} (${verdict.reason})` });
+          }
           const d = describeInputs([r.f.item!]);
           out.push(draft({ ...base, code: 'item.absent', severity: 'critical', state: verdict.state, basis: 'absence', subjectId: key, message: `${key} not found in ${q}`, reason: verdict.reason, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(doc)] }));
           continue;
@@ -156,13 +157,20 @@ export const scopeRule: Rule<ScopeData> = {
         const aspect = (field: string, code: string, equal: (a: EffectiveFact, b: EffectiveFact) => 'equal' | 'different' | 'incomparable', why?: string) => {
           const a = r.f[field];
           const b = offer.f[field];
-          if (!a || !b) return;
+          const cmp = { id: `${field}:${key}~${q}`, check: 'quote_aspect' as const, field, docs: [ctx.data.rfqDocId, q] };
+          if (!a || !b) {
+            // not silently skipped: the comparison could not run because a side was never extracted
+            comparisons.push({ ...cmp, status: 'not_evaluated', reason: `no ${field} fact in ${!a ? ctx.data.rfqDocId : q}` });
+            return;
+          }
           if (!usable(a) || !usable(b)) {
+            comparisons.push({ ...cmp, status: 'not_evaluated', reason: `${field} in ${!usable(a) ? ctx.data.rfqDocId : q} not validated (${(!usable(a) ? a : b).fact.reason ?? 'needs_review'})` });
             const d = describeInputs([a, b]);
             out.push(draft({ ...base, code: `${field}.unverified`, severity: 'warning', state: 'needs_review', subjectId: `${key}:${field}`, message: `${field} for ${key} needs review`, reason: 'unvalidated_input', inputs: d.inputs, evidence: d.evidence }));
             return;
           }
           const verdict2 = equal(a, b);
+          comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined });
           if (verdict2 === 'equal') return;
           const d = describeInputs([a, b]);
           out.push(draft({ ...base, code, severity: 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${key}:${field}`, message: why ?? `${field} ${verdict2}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
@@ -194,7 +202,14 @@ export const scopeRule: Rule<ScopeData> = {
         }
       }
     }
-    return uniq(out);
+    return { drafts: uniq(out), comparisons };
+}
+
+export const scopeRule: Rule<ScopeData> = {
+  id: 'bench.scope',
+  version: '2',
+  run(ctx: RuleContext<ScopeData>) {
+    return evaluateScope(ctx).drafts;
   },
 };
 
@@ -228,7 +243,7 @@ const CRITICAL_FIELDS = new Set(['organisation_name', 'funding_requested', 'tota
  */
 export type Comparison = {
   id: string;
-  check: 'field_equivalence' | 'funding_within_budget' | 'attachment_listed';
+  check: 'field_equivalence' | 'funding_within_budget' | 'attachment_listed' | 'quote_aspect';
   field: string;
   docs: string[];
   /** agree = evaluated, nothing to report; flagged = evaluated and produced a finding (confirmed or Needs review); not_evaluated = an input was not validated */

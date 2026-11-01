@@ -19,7 +19,7 @@
       },
       "meaning": "The model dropped the 'million' scale (1.6 instead of 1600000). The engine held it as Needs review. Had it been accepted, R1.6 against the R2,000,000 budget would have produced a false critical funding difference.",
       "consequence": "The funding-vs-budget comparison was not exercised on live data. A controlled replay with only this value corrected exercised it and produced no funding finding.",
-      "openIssue": "A held critical-field claim is visible as an extraction issue but not as a finding (value.needs_review fires only for ambiguity reasons)."
+      "openIssue": "Resolved as a requirement (R4.9, R7.6) and in the benchmark: a held critical field is a Needs-review finding (value.needs_review) and its dependent comparisons are recorded Not evaluated. The review interface and exports are Task 6.5."
     },
     {
       "id": "obs-2",
@@ -29,6 +29,30 @@
       ],
       "type": "incomplete_value_validated",
       "detail": "Item values returned without their codes (CP-100, MS-20, PG-6). Supported by the cited evidence, so validated; differs from the label. Identical claims on a repeat of the RFQ, so this is stable. Recovered deterministically by the ScopeCheck identity step; the original claims, facts and scores are unchanged."
+    },
+    {
+      "id": "obs-3",
+      "doc": "packcheck/application-form",
+      "type": "profile_fix_verified",
+      "detail": "With packcheck.grant.v2 the live model returned funding_requested as amount 1600000 ZAR for the unchanged excerpt 'Funding requested: R1.6 million'. It validated. The other six claims were identical to the v1 run. Prompt tokens rose 490 -> 618 (longer field descriptions). The v1 failed extraction and the synthetic replay are retained."
+    },
+    {
+      "id": "obs-4",
+      "doc": "scopecheck-layout/quote-c",
+      "type": "extraction_miss",
+      "detail": "The model did not extract the specification 'cast iron casing' on the CP-100 line. The pre-registered spec.differs finding for CP-100 is therefore missed. Recorded as Not evaluated in the comparison ledger ('no specification fact in quote-c'); strict scoring keeps it as a missed finding. Not an identity failure."
+    },
+    {
+      "id": "obs-5",
+      "doc": "scopecheck-layout/quote-c",
+      "type": "partial_value_validated",
+      "detail": "Exclusion returned as 'Installation and commissioning' (the cited evidence is the full sentence 'Installation and commissioning are excluded from this offer'). Supported by its evidence, so validated; differs from the label, which is unchanged."
+    },
+    {
+      "id": "obs-6",
+      "doc": "scopecheck-layout/quote-c",
+      "type": "unlabelled_claim",
+      "detail": "One validated claim has no label: specification 'certified to SANS-1200' (cited evidence 'certified to SANS-1200'). Reported separately; neither counted correct nor incorrect."
     }
   ]
 }

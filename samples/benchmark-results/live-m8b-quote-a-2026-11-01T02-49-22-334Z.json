@@ -1,0 +1,406 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.1-8b-instruct",
+  "startedAt": "2026-11-01T02:49:22.334Z",
+  "label": "m8b-quote-a",
+  "attemptBudget": 2,
+  "attemptsCharged": 1,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "quote-a",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 352,
+      "ok": true,
+      "ms": 2959,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 7,
+      "dropped": 3
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "scopecheck",
+      "docs": [
+        {
+          "docId": "quote-a",
+          "profile": {
+            "id": "scopecheck.quote.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each",
+              "value": "CP-100 Centrifugal pump"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each",
+              "value": {
+                "value": "8",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each",
+              "value": "MS-20 Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each",
+              "value": "PG-6 Pressure gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l4",
+              "excerpt": "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "exclusion",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "Excluded: delivery and installation are not included in this price.",
+              "value": "delivery and installation"
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-a:14bce64a9f05b2",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "CP-100 Centrifugal pump",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 87,
+                  "text": "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:09c2f08014c429",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "8",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 87,
+                  "text": "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0eaeac4a4257cd",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "MS-20 Motor starter",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 70,
+                  "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1efaf3ca509e94",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 70,
+                  "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1f907d342cb379",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "PG-6 Pressure gauge",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 69,
+                  "text": "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:197973140378d0",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 69,
+                  "text": "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:195659794a2395",
+              "field": "exclusion",
+              "kind": "text",
+              "status": "validated",
+              "value": "delivery and installation",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 67,
+                  "text": "Excluded: delivery and installation are not included in this price."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-a",
+            "expected": 13,
+            "validatable": 13,
+            "outcomes": {
+              "correct": 6,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 1,
+              "wrongly_validated": 0,
+              "missed": 6
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 1,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 1,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 2,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 2,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 3,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 3,
+                "outcome": "missed"
+              },
+              {
+                "field": "exclusion",
+                "line": 4,
+                "outcome": "wrong_value"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 0.46153846153846156,
+            "validatedPrecision": 0.8571428571428571
+          },
+          "issues": [
+            {
+              "docId": "quote-a",
+              "kind": "server_dropped",
+              "reason": "invalid_value",
+              "count": 3
+            }
+          ],
+          "rates": {
+            "claims": 7,
+            "evidenceLocated": 7,
+            "valueSupported": 7
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "findingsBefore": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "identity": {
+        "recovered": [],
+        "uncertain": [],
+        "counts": {
+          "codeFromModel": 3,
+          "recovered": 0,
+          "descriptionOnly": 0,
+          "uncertain": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 1,
+    "requestsOk": 1,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 2959,
+      "mean": 2959,
+      "max": 2959
+    },
+    "claimsReceived": 7,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 3,
+    "recall": 0.46153846153846156,
+    "validatedPrecision": 0.8571428571428571,
+    "missedFacts": 6,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 1,
+    "requestsReportingTokens": 1,
+    "promptTokens": 478,
+    "completionTokens": 663,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 62,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. UNVERIFIED: approximately $0.28 input and $0.83 output per million tokens converted at $0.011 per 1,000 neurons. Cloudflare's pricing page could not be fetched from the sandbox (HTTP 403), so these rates come from secondary sources and must be checked against the dashboard."
+    }
+  }
+}

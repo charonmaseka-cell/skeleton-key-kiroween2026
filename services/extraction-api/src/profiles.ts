@@ -15,7 +15,7 @@ export type Profile = {
   fields: ProfileField[];
 };
 
-const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'; // candidate; benchmark decides
+const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'; // selected by the benchmark (docs/model-comparison.md); change only after a new comparison
 
 // Money magnitude wording shared by the v2 money fields. The excerpt must still be copied unchanged.
 const MAGNITUDE_RULE =

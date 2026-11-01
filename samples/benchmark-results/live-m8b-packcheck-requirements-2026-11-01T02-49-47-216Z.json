@@ -1,0 +1,240 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.1-8b-instruct",
+  "startedAt": "2026-11-01T02:49:47.216Z",
+  "label": "m8b-packcheck-requirements",
+  "attemptBudget": 2,
+  "attemptsCharged": 1,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "requirements",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 225,
+      "ok": true,
+      "ms": 1017,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 4,
+      "dropped": 0
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "packcheck",
+      "docs": [
+        {
+          "docId": "requirements",
+          "profile": {
+            "id": "packcheck.grant.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Required attachment: Application form",
+              "value": "Application form"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Required attachment: Project budget",
+              "value": "Project budget"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "Required attachment: Registration certificate",
+              "value": "Registration certificate"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "Required attachment: Tax clearance certificate",
+              "value": "Tax clearance certificate"
+            }
+          ],
+          "facts": [
+            {
+              "id": "requirements:0ff4808cb67e32",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Application form",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 37,
+                  "text": "Required attachment: Application form"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "requirements:16422b1c052fd5",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Project budget",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 35,
+                  "text": "Required attachment: Project budget"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "requirements:09f608fbca34ef",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Registration certificate",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 45,
+                  "text": "Required attachment: Registration certificate"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "requirements:04403bab28adda",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Tax clearance certificate",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 46,
+                  "text": "Required attachment: Tax clearance certificate"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "requirements",
+            "expected": 4,
+            "validatable": 4,
+            "outcomes": {
+              "correct": 4,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "attachment_title",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 4,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [],
+          "rates": {
+            "claims": 4,
+            "evidenceLocated": 4,
+            "valueSupported": 4
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 1,
+    "requestsOk": 1,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 1017,
+      "mean": 1017,
+      "max": 1017
+    },
+    "claimsReceived": 4,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 0,
+    "recall": 1,
+    "validatedPrecision": 1,
+    "missedFacts": 0,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 1,
+    "requestsReportingTokens": 1,
+    "promptTokens": 429,
+    "completionTokens": 180,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 25,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. UNVERIFIED: approximately $0.28 input and $0.83 output per million tokens converted at $0.011 per 1,000 neurons. Cloudflare's pricing page could not be fetched from the sandbox (HTTP 403), so these rates come from secondary sources and must be checked against the dashboard."
+    }
+  }
+}

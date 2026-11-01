@@ -1,0 +1,303 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.1-8b-instruct",
+  "startedAt": "2026-11-01T02:49:32.263Z",
+  "label": "m8b-quote-b",
+  "attemptBudget": 2,
+  "attemptsCharged": 1,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "quote-b",
+      "chunk": 1,
+      "blocks": 3,
+      "chars": 212,
+      "ok": true,
+      "ms": 2117,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 4,
+      "dropped": 2
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "scopecheck",
+      "docs": [
+        {
+          "docId": "quote-b",
+          "profile": {
+            "id": "scopecheck.quote.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each",
+              "value": "CP-100 Centrifugal pump"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each",
+              "value": "MS-20 Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-b:1c45f422c47ac9",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "CP-100 Centrifugal pump",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 78,
+                  "text": "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:19aff8d2f14aab",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 78,
+                  "text": "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:07f8dc75b6ea85",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "MS-20 Motor starter",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 70,
+                  "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:056165a4875cd5",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 70,
+                  "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 3,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-b",
+            "expected": 8,
+            "validatable": 8,
+            "outcomes": {
+              "correct": 4,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 4
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 1,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 1,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 2,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 2,
+                "outcome": "missed"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 0.5,
+            "validatedPrecision": 1
+          },
+          "issues": [
+            {
+              "docId": "quote-b",
+              "kind": "server_dropped",
+              "reason": "invalid_value",
+              "count": 2
+            }
+          ],
+          "rates": {
+            "claims": 4,
+            "evidenceLocated": 4,
+            "valueSupported": 4
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "findingsBefore": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "identity": {
+        "recovered": [],
+        "uncertain": [],
+        "counts": {
+          "codeFromModel": 2,
+          "recovered": 0,
+          "descriptionOnly": 0,
+          "uncertain": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 1,
+    "requestsOk": 1,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 2117,
+      "mean": 2117,
+      "max": 2117
+    },
+    "claimsReceived": 4,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 2,
+    "recall": 0.5,
+    "validatedPrecision": 1,
+    "missedFacts": 4,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 1,
+    "requestsReportingTokens": 1,
+    "promptTokens": 419,
+    "completionTokens": 410,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 42,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. UNVERIFIED: approximately $0.28 input and $0.83 output per million tokens converted at $0.011 per 1,000 neurons. Cloudflare's pricing page could not be fetched from the sandbox (HTTP 403), so these rates come from secondary sources and must be checked against the dashboard."
+    }
+  }
+}

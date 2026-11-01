@@ -1,0 +1,1229 @@
+{
+  "mode": "replay",
+  "model": "replay",
+  "startedAt": "2026-11-01T02:07:00.706Z",
+  "label": "scopecheck-findings",
+  "attemptBudget": 1000,
+  "attemptsCharged": 0,
+  "simulatedCoverageConfirmation": false,
+  "requests": [
+    {
+      "docId": "rfq",
+      "chunk": 1,
+      "blocks": 4,
+      "chars": 232,
+      "ok": true,
+      "ms": 0,
+      "attemptsCharged": 0,
+      "repaired": false,
+      "claims": 9,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 352,
+      "ok": true,
+      "ms": 0,
+      "attemptsCharged": 0,
+      "repaired": false,
+      "claims": 13,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-b",
+      "chunk": 1,
+      "blocks": 3,
+      "chars": 212,
+      "ok": true,
+      "ms": 0,
+      "attemptsCharged": 0,
+      "repaired": false,
+      "claims": 8,
+      "dropped": 0
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "scopecheck",
+      "docs": [
+        {
+          "docId": "rfq",
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump",
+              "value": "Centrifugal pump"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "qty 10 units",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "316 stainless steel casing",
+              "value": "316 stainless steel casing"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter",
+              "value": "Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "qty 5 units",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "IP55 enclosure",
+              "value": "IP55 enclosure"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "Item PG-6 Pressure gauge",
+              "value": "Pressure gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l4",
+              "excerpt": "qty 20 units",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "0-10 bar range",
+              "value": "0-10 bar range"
+            }
+          ],
+          "facts": [
+            {
+              "id": "rfq:0b501b386e1f6c",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Centrifugal pump",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 28,
+                  "text": "Item CP-100 Centrifugal pump"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:012292cc8dcd29",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 31,
+                  "end": 43,
+                  "text": "qty 10 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:0001426e03ce89",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "316 stainless steel casing",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 46,
+                  "end": 72,
+                  "text": "316 stainless steel casing"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:197c40e28fa23a",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Motor starter",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 24,
+                  "text": "Item MS-20 Motor starter"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:010c00cd0c0f1d",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 27,
+                  "end": 38,
+                  "text": "qty 5 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:0951c7fc7fedda",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "IP55 enclosure",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 41,
+                  "end": 55,
+                  "text": "IP55 enclosure"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:0b8542d1b12007",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Pressure gauge",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 24,
+                  "text": "Item PG-6 Pressure gauge"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:0b87097b4e7a92",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 27,
+                  "end": 39,
+                  "text": "qty 20 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1db78a43a9eeb6",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0-10 bar range",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 42,
+                  "end": 56,
+                  "text": "0-10 bar range"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 4,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "rfq",
+            "expected": 9,
+            "validatable": 9,
+            "outcomes": {
+              "correct": 6,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 3,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 1,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 2,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 3,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 3,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 0.6666666666666666,
+            "validatedPrecision": 0.6666666666666666
+          },
+          "issues": [],
+          "rates": {
+            "claims": 9,
+            "evidenceLocated": 9,
+            "valueSupported": 9
+          }
+        },
+        {
+          "docId": "quote-a",
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump",
+              "value": "CP-100 Centrifugal pump"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "qty 8 units",
+              "value": {
+                "value": "8",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l2",
+              "excerpt": "R 12 500 each",
+              "value": {
+                "amount": "12500",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "316 stainless steel casing",
+              "value": "316 stainless steel casing"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter",
+              "value": "MS-20 Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "qty 5 units",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "R 3 200 each",
+              "value": {
+                "amount": "3200",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "IP55 enclosure",
+              "value": "IP55 enclosure"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "Item PG-6 Pressure gauge",
+              "value": "PG-6 Pressure gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l4",
+              "excerpt": "qty 20 units",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l4",
+              "excerpt": "R 450 each",
+              "value": {
+                "amount": "450",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "0-10 bar range",
+              "value": "0-10 bar range"
+            },
+            {
+              "field": "exclusion",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "delivery and installation are not included in this price",
+              "value": "delivery and installation are not included in this price"
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-a:000968d1d20062",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "CP-100 Centrifugal pump",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 28,
+                  "text": "Item CP-100 Centrifugal pump"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1a24404d615131",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "8",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 31,
+                  "end": 42,
+                  "text": "qty 8 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1984093a595527",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "12500",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 74,
+                  "end": 87,
+                  "text": "R 12 500 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0fb8fb38184c57",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "316 stainless steel casing",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 45,
+                  "end": 71,
+                  "text": "316 stainless steel casing"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:04434551361b7d",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "MS-20 Motor starter",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 24,
+                  "text": "Item MS-20 Motor starter"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1634bdfd590a80",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 27,
+                  "end": 38,
+                  "text": "qty 5 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1444a9c6e03b98",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "3200",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 58,
+                  "end": 70,
+                  "text": "R 3 200 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1702f81b38eae9",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "IP55 enclosure",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 41,
+                  "end": 55,
+                  "text": "IP55 enclosure"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:09be3091e24ad7",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "PG-6 Pressure gauge",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 24,
+                  "text": "Item PG-6 Pressure gauge"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:065a859af4c1ff",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 27,
+                  "end": 39,
+                  "text": "qty 20 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:08c2c8f88f56b7",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "450",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 59,
+                  "end": 69,
+                  "text": "R 450 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1aff63f2fa7053",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0-10 bar range",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 42,
+                  "end": 56,
+                  "text": "0-10 bar range"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1c0a806d4278aa",
+              "field": "exclusion",
+              "kind": "text",
+              "status": "validated",
+              "value": "delivery and installation are not included in this price",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 10,
+                  "end": 66,
+                  "text": "delivery and installation are not included in this price"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-a",
+            "expected": 13,
+            "validatable": 13,
+            "outcomes": {
+              "correct": 13,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "exclusion",
+                "line": 4,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [],
+          "rates": {
+            "claims": 13,
+            "evidenceLocated": 13,
+            "valueSupported": 13
+          }
+        },
+        {
+          "docId": "quote-b",
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump",
+              "value": "Centrifugal pump"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "qty 10 units",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l2",
+              "excerpt": "R 11 900 each",
+              "value": {
+                "amount": "11900",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "cast iron casing",
+              "value": "cast iron casing"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter",
+              "value": "Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "qty 5 units",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "R 3 100 each",
+              "value": {
+                "amount": "3100",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "IP55 enclosure",
+              "value": "IP55 enclosure"
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-b:0cc8ae274b992f",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Centrifugal pump",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 28,
+                  "text": "Item CP-100 Centrifugal pump"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:143896cda87c91",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 31,
+                  "end": 43,
+                  "text": "qty 10 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:1aff2bc0b10d4d",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "11900",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 65,
+                  "end": 78,
+                  "text": "R 11 900 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:16f0112b39dd12",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "cast iron casing",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 46,
+                  "end": 62,
+                  "text": "cast iron casing"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:1e60b17568b1a7",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Motor starter",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 24,
+                  "text": "Item MS-20 Motor starter"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:1f22a6db21197d",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 27,
+                  "end": 38,
+                  "text": "qty 5 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:047a9f8362d4e9",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "3100",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 58,
+                  "end": 70,
+                  "text": "R 3 100 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:08348388ab2c01",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "IP55 enclosure",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 41,
+                  "end": 55,
+                  "text": "IP55 enclosure"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 3,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-b",
+            "expected": 8,
+            "validatable": 8,
+            "outcomes": {
+              "correct": 6,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 2,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 1,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 2,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 2,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 0.75,
+            "validatedPrecision": 0.75
+          },
+          "issues": [],
+          "rates": {
+            "claims": 8,
+            "evidenceLocated": 8,
+            "valueSupported": 8
+          }
+        }
+      ],
+      "findings": {
+        "produced": [
+          {
+            "code": "item.absent",
+            "subject": "CENTRIFUGAL PUMP",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "MOTOR STARTER",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "PRESSURE GAUGE",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "exclusion.stated",
+            "subject": "quote-a:exclusion",
+            "response": "quote-a",
+            "severity": "info",
+            "state": "confirmed"
+          },
+          {
+            "code": "spec.differs",
+            "subject": "CENTRIFUGAL PUMP:specification",
+            "response": "quote-b",
+            "severity": "critical",
+            "state": "confirmed"
+          },
+          {
+            "code": "item.absent",
+            "subject": "PRESSURE GAUGE",
+            "response": "quote-b",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          }
+        ],
+        "score": {
+          "expected": 4,
+          "produced": 6,
+          "matchedExactState": 1,
+          "conservative": [],
+          "missed": [
+            "quantity.differs|CP-100:quantity|quote-a",
+            "spec.differs|CP-100:specification|quote-b",
+            "item.absent|PG-6|quote-b"
+          ],
+          "falseCritical": [
+            "spec.differs|CENTRIFUGAL PUMP:specification|quote-b"
+          ],
+          "overConfident": [],
+          "unexpectedOther": [
+            "item.absent|CENTRIFUGAL PUMP|quote-a(needs_review)",
+            "item.absent|MOTOR STARTER|quote-a(needs_review)",
+            "item.absent|PRESSURE GAUGE|quote-a(needs_review)",
+            "item.absent|PRESSURE GAUGE|quote-b(needs_review)"
+          ],
+          "mustNotFlagViolations": []
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 3,
+    "requestsOk": 3,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "claimsReceived": 30,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 0,
+    "recall": 0.8333333333333334,
+    "validatedPrecision": 0.8333333333333334,
+    "missedFacts": 0,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 1,
+    "overConfidentFindings": 0,
+    "missedFindings": 3,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 3,
+    "requestsReportingTokens": 0,
+    "promptTokens": null,
+    "completionTokens": null,
+    "tokenSource": "unavailable",
+    "neurons": {
+      "value": null,
+      "basis": "unavailable",
+      "note": "No token usage was reported."
+    }
+  }
+}

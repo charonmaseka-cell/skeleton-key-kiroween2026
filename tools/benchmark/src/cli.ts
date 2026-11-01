@@ -9,7 +9,7 @@ import { SqliteAdmission } from './admission';
 import { oracleAi, restAi, type Ai } from './ai';
 import { formatSummary, runBenchmark } from './run';
 import { loadSample, SAMPLES_DIR } from './samples';
-import { LocalTransport } from './transport';
+import { LocalTransport, ReplayTransport, type Transport } from './transport';
 import { estimateNeurons } from './usage';
 import { PROFILES } from '../../../services/extraction-api/src/profiles';
 
@@ -20,7 +20,7 @@ for (let i = 0; i < argv.length; i++) {
   if (a.startsWith('--')) args.set(a.slice(2), argv[i + 1] && !argv[i + 1]!.startsWith('--') ? argv[++i]! : 'true');
 }
 
-const mode = args.get('mode') === 'live' ? 'live' : 'mock';
+const mode = args.get('mode') === 'live' ? 'live' : args.get('mode') === 'replay' ? 'replay' : 'mock';
 const sampleIds = (args.get('sample') ?? 'scopecheck,packcheck').split(',');
 const docFilter = args.get('doc')?.split(',');
 const label = args.get('label') ?? (docFilter ? docFilter.join('+') : 'all');
@@ -59,6 +59,11 @@ if (mode === 'live') {
   const budget = Number(args.get('neuron-budget') ?? 8000);
   if (state.day === day && state.neuronsEstimated >= budget) fail(`estimated neurons used today (${Math.round(state.neuronsEstimated)}) already reach the budget (${budget}). Stop here.`);
   ai = restAi(accountId, token);
+} else if (mode === 'replay') {
+  counter = new SqliteAdmission(':memory:');
+  attemptBudget = 1000; // not binding: replay charges nothing
+  ceiling = 0;
+  ai = { run: async () => { throw new Error('replay mode never calls a model'); } } as unknown as Ai;
 } else {
   counter = new SqliteAdmission(':memory:');
   attemptBudget = 1000;
@@ -66,16 +71,31 @@ if (mode === 'live') {
   ai = oracleAi(sampleIds.map(loadSample));
 }
 
-const transport = new LocalTransport({
-  ai,
-  counter,
-  env: { DAILY_ADMISSION_CEILING: String(ceiling), MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: mode === 'live' ? '45000' : '5000' },
-});
+let transport: Transport;
+if (mode === 'replay') {
+  const from = args.get('from');
+  if (!from) fail('replay mode requires --from <result.json[,result.json]>');
+  const saved: unknown[][] = [];
+  for (const f of from.split(',')) {
+    const r = JSON.parse(readFileSync(f, 'utf8')) as { samples: { docs: { claimsReturned?: unknown[] }[] }[] };
+    for (const sm of r.samples) for (const d of sm.docs) {
+      if (!d.claimsReturned) fail(`${f} has no saved claims (older result format)`);
+      saved.push(d.claimsReturned);
+    }
+  }
+  transport = new ReplayTransport(saved);
+} else {
+  transport = new LocalTransport({
+    ai,
+    counter,
+    env: { DAILY_ADMISSION_CEILING: String(ceiling), MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: mode === 'live' ? '45000' : '5000' },
+  });
+}
 
-console.log(mode === 'live' ? `LIVE: model=${model} doc(s)=${docFilter!.join(',')} attempt budget=${attemptBudget} (admission ceiling today=${ceiling})` : 'MOCK: no model will be called');
+console.log(mode === 'replay' ? 'REPLAY: no model will be called' : mode === 'live' ? `LIVE: model=${model} doc(s)=${docFilter!.join(',')} attempt budget=${attemptBudget} (admission ceiling today=${ceiling})` : 'MOCK: no model will be called');
 const result = await runBenchmark({
   mode,
-  model: mode === 'live' ? model : 'mock-oracle',
+  model: mode === 'live' ? model : mode === 'replay' ? 'replay' : 'mock-oracle',
   label,
   transport,
   sampleIds,
@@ -93,6 +113,10 @@ if (mode === 'live' && statePath) {
   const add = result.usage.promptTokens !== null ? estimateNeurons(result.usage.promptTokens, result.usage.completionTokens ?? 0) : 0;
   writeFileSync(statePath, JSON.stringify({ day, neuronsEstimated: (prev.day === day ? prev.neuronsEstimated : 0) + add }));
 }
+if (mode === 'replay' && result.requests.some((r) => !r.ok)) {
+  console.error('error: a requested document had no saved claims; do not trust this comparison');
+  process.exitCode = 4;
+}
 counter.close();
 
 const outDir = join(SAMPLES_DIR, 'benchmark-results');
@@ -100,3 +124,23 @@ mkdirSync(outDir, { recursive: true });
 const out = args.get('out') ?? join(outDir, `${mode}-${label}-${result.startedAt.replace(/[:.]/g, '-')}.json`);
 writeFileSync(out, JSON.stringify(result, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
+
+// Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.
+if (mode === 'live') {
+  const stops: string[] = [];
+  for (const r of result.requests) if (!r.ok) stops.push(`request failed: ${r.code ?? r.status} (doc ${r.docId})`);
+  const observations: string[] = [];
+  for (const sm of result.samples) for (const d of sm.docs) {
+    // Stop: a validated value that is not supported by its own evidence, or an ambiguous value that was validated.
+    if (d.extraction.outcomes.wrongly_validated > 0) stops.push(`${d.docId}: ambiguous value was validated`);
+    const suspect = d.facts.filter((f) => f.audit === 'suspect');
+    if (suspect.length) stops.push(`${d.docId}: ${suspect.length} validated value(s) not visible in their evidence (audit)`);
+    // Observation only: validated, supported by evidence, but different from the label (for example an incomplete item name).
+    if (d.extraction.outcomes.wrong_value > 0) observations.push(`${d.docId}: ${d.extraction.outcomes.wrong_value} validated value(s) differ from the label but are visible in their evidence`);
+  }
+  for (const o of observations) console.log(`OBSERVATION: ${o}`);
+  if (stops.length) {
+    console.log(`STOP CONDITIONS:\n - ${stops.join('\n - ')}`);
+    process.exitCode = 3;
+  } else console.log('stop conditions: none');
+}

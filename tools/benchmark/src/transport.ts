@@ -73,3 +73,31 @@ export class HttpTransport implements Transport {
     return { ok: false, status: res.status, code: json.error?.code ?? 'unknown', ms, attemptsCharged: this.worstCaseAttempts };
   }
 }
+
+/**
+ * Offline replay of claims saved by an earlier run. No model is called and nothing is charged;
+ * claims are re-validated against the re-parsed document, so findings can be recomputed across
+ * documents that were processed in separate runs. Block IDs are only unique within a document, so
+ * each saved claim set is matched to a chunk only if every claim's block ID exists in it and its
+ * excerpt occurs in that block's text, and each saved set is used once.
+ */
+export class ReplayTransport implements Transport {
+  private readonly unused: unknown[][];
+  constructor(saved: unknown[][]) {
+    this.unused = [...saved];
+  }
+
+  async extract(_schemaId: string, blocks: Pick<Block, 'id' | 'text'>[]): Promise<ExtractResult> {
+    const byId = new Map(blocks.map((b) => [b.id, b.text]));
+    const fits = (set: unknown[]) =>
+      set.length > 0 && set.every((c) => {
+        const { blockId, excerpt } = c as { blockId?: string; excerpt?: string };
+        const text = blockId ? byId.get(blockId) : undefined;
+        return text !== undefined && typeof excerpt === 'string' && text.includes(excerpt);
+      });
+    const idx = this.unused.findIndex(fits);
+    if (idx < 0) return { ok: false, status: 0, code: 'replay_no_saved_claims_for_chunk', ms: 0, attemptsCharged: 0 };
+    const [claims] = this.unused.splice(idx, 1);
+    return { ok: true, claims: claims!, ms: 0, attemptsCharged: 0, meta: { attempts: 0, repaired: false, dropped: 0, droppedReasons: {}, usage: { promptTokens: null, completionTokens: null } } };
+  }
+}

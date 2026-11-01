@@ -15,6 +15,8 @@ export type ExtractionScore = {
   details: { field: string; line: number; outcome: FactOutcome; reason?: string }[];
   /** validated facts that match no label (not necessarily wrong: the labels are not exhaustive) */
   unlabelledValidated: number;
+  /** ids of every returned fact (any status) that matched no label: reported, never auto-scored */
+  unlabelledFactIds: string[];
   /** facts the client rejected as unsupported (quote/value/block/shape) by reason */
   rejectedByReason: Record<string, number>;
   /** facts held as ambiguous / needing review by reason */
@@ -111,6 +113,7 @@ export function scoreExtraction(doc: SampleDoc, blocks: Block[], facts: Fact[]):
     outcomes,
     details,
     unlabelledValidated: validated.filter((f) => !used.has(f.id)).length,
+    unlabelledFactIds: docFacts.filter((f) => !used.has(f.id)).map((f) => f.id),
     rejectedByReason,
     ambiguousByReason,
     recall: validatableExpected === 0 ? null : outcomes.correct / validatableExpected,

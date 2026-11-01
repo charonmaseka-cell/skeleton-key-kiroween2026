@@ -36,6 +36,20 @@ export type RequestRecord = {
   dropped: number;
 };
 
+export type FactRecord = {
+  id: string;
+  field: string;
+  kind: string;
+  status: string;
+  reason?: string;
+  value: unknown;
+  evidence: { blockId: string; start: number; end: number; text: string }[];
+  /** 'labelled' = matched a hand-written label; 'unlabelled' = no label (neither correct nor incorrect) */
+  label: 'labelled' | 'unlabelled';
+  /** independent check of a VALIDATED value against its own evidence text; null when not validated */
+  audit: 'consistent' | 'suspect' | 'manual' | null;
+};
+
 export type DocResult = {
   docId: string;
   blocks: number;
@@ -44,6 +58,10 @@ export type DocResult = {
   coverage: DocumentExtraction['coverage'];
   extraction: ExtractionScore;
   issues: ExtractionIssue[];
+  /** raw claims exactly as returned by the Worker (fictional documents only) */
+  claimsReturned: unknown[];
+  /** every claim after client-side validation, with its outcome */
+  facts: FactRecord[];
   rates: { claims: number; evidenceLocated: number; valueSupported: number };
 };
 
@@ -54,7 +72,7 @@ export type SampleResult = {
 };
 
 export type BenchmarkResult = {
-  mode: 'mock' | 'live';
+  mode: 'mock' | 'live' | 'replay';
   model: string;
   startedAt: string;
   label: string;
@@ -86,7 +104,7 @@ export type BenchmarkResult = {
 };
 
 export type RunOptions = {
-  mode: 'mock' | 'live';
+  mode: 'mock' | 'live' | 'replay';
   model: string;
   label: string;
   transport: Transport;
@@ -97,6 +115,21 @@ export type RunOptions = {
   simulateCoverageConfirmation?: boolean;
   measuredNeurons?: number;
 };
+
+const digits = (t: string) => t.replace(/[\s,]/g, '');
+/** Independent, deliberately crude check that a validated value is visible in its own evidence. */
+function auditFact(f: Fact): FactRecord['audit'] {
+  if (f.status !== 'validated') return null;
+  const ev = f.evidence.map((e) => e.text).join(' ');
+  const v = f.value as Record<string, unknown> | string | null;
+  if (f.kind === 'money' && v && typeof v === 'object') return digits(ev).includes(String(v.amount ?? '').replace(/\.0+$/, '')) || /million|m\b/i.test(ev) ? 'consistent' : 'suspect';
+  if (f.kind === 'quantity' && v && typeof v === 'object') return digits(ev).includes(String(v.value ?? '')) ? 'consistent' : 'suspect';
+  if ((f.kind === 'text' || f.kind === 'name') && typeof v === 'string') {
+    const hay = ev.toLowerCase();
+    return v.toLowerCase().split(/\s+/).filter(Boolean).every((t) => hay.includes(t.replace(/[^\w-]/g, ''))) ? 'consistent' : 'suspect';
+  }
+  return 'manual';
+}
 
 const rate = (n: number, d: number) => (d === 0 ? null : n / d);
 
@@ -162,13 +195,22 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
         ...oversized.map((b) => ({ docId: doc.id, kind: 'block_oversized' as const, reason: b.id, count: 1 })),
       ];
       const located = facts.filter((f) => f.evidence.length > 0).length;
+      const extractionScore = scoreExtraction(doc, blocks, facts);
+      const unlabelled = new Set(extractionScore.unlabelledFactIds);
       docResults.push({
         docId: doc.id,
+        claimsReturned: claims,
+        facts: facts.map((f) => ({
+          id: f.id, field: f.field, kind: f.kind, status: f.status, reason: f.reason, value: f.value,
+          evidence: f.evidence.map((e) => ({ blockId: e.blockId, start: e.start, end: e.end, text: e.text })),
+          label: unlabelled.has(f.id) ? 'unlabelled' : 'labelled',
+          audit: auditFact(f),
+        })),
         blocks: blocks.length,
         chunks: chunks.length,
         processingComplete: processingComplete(extraction),
         coverage: extraction.coverage,
-        extraction: scoreExtraction(doc, blocks, facts),
+        extraction: extractionScore,
         issues,
         rates: { claims: facts.length, evidenceLocated: located, valueSupported: facts.filter((f) => f.status === 'validated').length },
       });
@@ -244,7 +286,7 @@ const pct = (x: number | null) => (x === null ? 'n/a' : `${(x * 100).toFixed(0)}
 
 export function formatSummary(r: BenchmarkResult): string {
   const s = r.summary;
-  const banner = r.mode === 'mock' ? '*** MOCK RUN: no real model was called; usage is synthetic ***' : `*** LIVE RUN: ${r.model} ***`;
+  const banner = r.mode === 'mock' ? '*** MOCK RUN: no real model was called; usage is synthetic ***' : r.mode === 'replay' ? '*** REPLAY: saved claims re-validated offline; no model call, no usage ***' : `*** LIVE RUN: ${r.model} ***`;
   const lines = [
     banner,
     `label=${r.label} attempts charged=${r.attemptsCharged}/${r.attemptBudget} simulated coverage confirmation=${r.simulatedCoverageConfirmation}`,

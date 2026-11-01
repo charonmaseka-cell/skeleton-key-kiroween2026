@@ -1,0 +1,46 @@
+{
+  "id": "sc-t12-fresh",
+  "createdAt": "2026-11-01T22:55:52.075Z",
+  "attemptCap": 16,
+  "neuronCap": 3000,
+  "attemptsUsed": 14,
+  "neuronsCharged": 2109.219,
+  "resultFiles": [
+    "samples/benchmark-results/recovered-sc-t12-fresh-invocation1.json",
+    "samples/benchmark-results/live-sc-t12-fresh-resume2-2026-11-01T23-11-42-955Z.json"
+  ],
+  "invocations": [
+    {
+      "label": "sc-t12-fresh",
+      "startedAt": "2026-11-01T22:55:52.077Z",
+      "attemptsAtStart": 0,
+      "neuronsAtStart": 0,
+      "interrupted": true
+    },
+    {
+      "label": "sc-t12-fresh-resume1",
+      "startedAt": "2026-11-01T23:04:26.241Z",
+      "attemptsAtStart": 2,
+      "neuronsAtStart": 464.298,
+      "interrupted": true
+    },
+    {
+      "label": "sc-t12-fresh-resume2",
+      "startedAt": "2026-11-01T23:09:09.617Z",
+      "attemptsAtStart": 3,
+      "neuronsAtStart": 827.856,
+      "attemptsEnd": 14,
+      "neuronsEnd": 2109.219,
+      "resultFile": "samples/benchmark-results/live-sc-t12-fresh-resume2-2026-11-01T23-11-42-955Z.json",
+      "stop": null
+    }
+  ],
+  "reconciliations": [
+    {
+      "at": "2026-11-01T23:04:13.194Z",
+      "reason": "interrupted invocation: the reservation of a call that never returned stands (daily ledger now minus daily ledger at batch start)",
+      "before": 100.74,
+      "after": 464.298
+    }
+  ]
+}

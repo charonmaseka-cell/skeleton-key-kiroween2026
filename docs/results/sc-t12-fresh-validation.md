@@ -35,7 +35,16 @@ Wrapped descriptions: evidence cannot span two lines, so their labelled item val
 - Per-attempt worst-case reservation 364 to 383 neurons (a repair is similar). Expected actual charge about **1,450** estimated neurons (12 requests, 44 to 153 each); peak reservation 1,726 (charged so far + one worst case). The sum of all worst cases (4,420) is not the spend.
 - Forecast per request 5 to 19 s at the typical rate (33 tokens/s), under the 25 s timeout; the baseline's slowest request was 25.0 s (a timeout) and typical 13 to 16 s, so a timeout is possible and is budgeted for.
 
-## Proposed bounded live batch (NOT executed; needs your authorisation)
+## Freeze chain
+- `freeze.json` (commit `18e0f36`): the implementation, documents, labels and chunk plan. Kept as written.
+- `freeze-2.json` (commit `03a8733`, before the batch): **runner-only** (`run.ts`, `cli.ts`, new `batch.ts`, `recording.ts`). An unrecovered schema error stops further requests; each response is validated and audited before the next chunk is dispatched, and an unsupported value accepted as validated stops the batch at once; a budget refusal stops sending; one batch allowance across invocations with fixed caps; a raw-response log. Differing-from-label values, holds and misses are observations. Tests: `stop-conditions.test.ts` (16), `batch.test.ts` (10); disabling each stop fails 5, 4 and 2 of them.
+- `freeze-3.json` (commit `005072f`, during the batch, after the first invocation was interrupted and before any claims were inspected): **runner-only** (`batch.ts`, new `recover.ts`). The reservation is recorded at dispatch; an answered chunk is rebuilt from the raw log by the SHA-256 of its exact request so it is never resent; charges are reconciled upward only. Tests: `recover.test.ts` (8).
+Each manifest records the SHA-256 of the one before; `freeze.test.ts` checks that documents, labels, profiles, chunk plan, parser, engine, identity and comparison rules are byte-identical in all three and now.
+
+## Live batch
+Run on 1 Nov 2026 (UTC) under the authorised allowance; results, failures first: **`docs/results/sc-t12-fresh-results.md`**. The plan below is what was authorised.
+
+### Plan as authorised (originally proposed here)
 - **Attempts: 16 in total, repairs and retries included** (12 first attempts + 4 for repairs or failed-chunk retries). Concurrency 1, 1 repair per request. Stop at the first rate-limit, quota or daily error, an unrecovered schema error, an unsupported validated value, or a cap.
 - **Neurons: run cap 3,000 estimated** (expected about 1,450; room for 4 extra attempts of about 370 each) **and the cumulative UTC daily ceiling stays 8,000.** The ledger on this sandbox shows 4,290.7 for 1 Nov (UTC); if the batch ran on 1 Nov the daily headroom would be 3,709.3, which covers the run cap. From 2 Nov 00:00 UTC the sandbox ledger starts at 0. These are charges against a budget, not dashboard-confirmed consumption.
 - Command shape (frozen plan; the CLI preflight runs first and refuses a plan that cannot work):

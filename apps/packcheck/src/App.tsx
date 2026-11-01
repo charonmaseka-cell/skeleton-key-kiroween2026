@@ -34,7 +34,7 @@ export function App() {
           Reset corrections, decisions and coverage
         </button>
       </section>
-      <ReviewWorkspace session={session} baseName={fixture.id}>
+      <ReviewWorkspace key={fixture.id} session={session} baseName={fixture.id}>
         <Checks view={view} />
       </ReviewWorkspace>
     </AppShell>

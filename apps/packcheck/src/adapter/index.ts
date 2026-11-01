@@ -21,7 +21,7 @@ export const packCheckAdapter: DomainAdapter = {
     const requirementsDocId = byRole('requirements');
     const formDocId = byRole('application-form');
     if (!requirementsDocId || !formDocId) return { findings: [], comparisons: [] };
-    const data: PackData = { requirementsDocId, formDocId, otherDocIds: Object.keys(roles).filter((d) => roles[d] === 'budget' || roles[d] === 'registration') };
+    const data: PackData = { requirementsDocId, formDocId, otherDocIds: Object.keys(roles).filter((d) => roles[d] === 'budget' || roles[d] === 'registration'), roles };
     const ctx = { facts, documents, matches: packMatches(facts, data), data };
     return { findings: runRules([packRule], ctx), comparisons: evaluatePack(ctx).comparisons, context: { data } };
   },

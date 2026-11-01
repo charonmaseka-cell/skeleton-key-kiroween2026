@@ -4,6 +4,7 @@ import {
   compareQuantities,
   dedupeDrafts,
   describeInputs,
+  formatValue,
   makeDraft,
   nameTokens,
   resolveMatches,
@@ -21,7 +22,8 @@ import { descriptionOverlap, type ItemIdentity } from './identity';
 // benchmark (tools/benchmark), so what is measured is what ships. Procurement logic stays here,
 // never in the engine.
 
-type Line = { blockId: string; docId: string; f: Record<string, EffectiveFact> };
+/** `f` is the first fact per field; `all` keeps every fact so duplicates are never silently ignored. */
+type Line = { blockId: string; docId: string; f: Record<string, EffectiveFact>; all: Record<string, EffectiveFact[]> };
 
 export function linesOf(facts: Map<string, EffectiveFact>, docId: string): Line[] {
   const byBlock = new Map<string, Line>();
@@ -29,25 +31,24 @@ export function linesOf(facts: Map<string, EffectiveFact>, docId: string): Line[
     if (e.fact.docId !== docId) continue;
     const blockId = e.fact.evidence[0]?.blockId;
     if (!blockId) continue;
-    const line = byBlock.get(blockId) ?? { blockId, docId, f: {} };
+    const line = byBlock.get(blockId) ?? { blockId, docId, f: {}, all: {} };
     line.f[e.fact.field] ??= e;
+    (line.all[e.fact.field] ??= []).push(e);
     byBlock.set(blockId, line);
   }
   return [...byBlock.values()];
 }
 
-/** Human-readable value for ledger details. */
-export function showValue(v: unknown): string {
-  if (v === null || v === undefined) return 'unknown';
-  if (typeof v === 'string') return v;
-  const o = v as Record<string, unknown>;
-  if ('amount' in o) return `${o.currency ?? '?'} ${o.amount}`;
-  if ('value' in o) return `${o.value}${o.unit ? ` ${o.unit}` : ''}`;
-  return JSON.stringify(v);
-}
+/** Human-readable value for ledger details (shared formatter from the engine). */
+export const showValue = formatValue;
 
 export const norm = (v: unknown) => nameTokens(String(v ?? '')).join(' ');
 const itemKey = (v: unknown) => (String(v ?? '').match(/[A-Za-z]{1,4}-\d+/)?.[0] ?? norm(v)).toUpperCase();
+/** A value typed by the user: if it names more than one code the identity is uncertain, never the first token. */
+function typedItemKey(v: unknown): string | null {
+  const codes = [...new Set((String(v ?? '').match(/\b[A-Za-z]{1,4}-\d+\b/g) ?? []).map((c) => c.toUpperCase()))];
+  return codes.length > 1 ? null : (codes[0] ?? norm(v).toUpperCase());
+}
 const usable = (e?: EffectiveFact): e is EffectiveFact => !!e && e.usable;
 const sameTokens = (a: unknown, b: unknown) => {
   const x = new Set(nameTokens(String(a ?? '')));
@@ -71,7 +72,7 @@ export type ScopeData = {
 /** The key an item is matched on, or null when its identity is uncertain. */
 export function itemIdentityKey(e: EffectiveFact, identities?: Map<string, ItemIdentity>): string | null {
   const id = identities && e.provenance === 'document' ? identities.get(e.fact.id) : undefined;
-  if (!id) return itemKey(e.value);
+  if (!id) return e.provenance === 'document' ? itemKey(e.value) : typedItemKey(e.value);
   if (id.kind === 'code') return id.code;
   if (id.kind === 'description') return id.key.toUpperCase();
   return null;
@@ -83,8 +84,9 @@ const OVERLAP_SUGGEST = 0.7; // same as the matcher's default threshold
 function lexicalCandidate(subjectId: string, q: string, blockId: string, rfqItem: EffectiveFact, offerItem: EffectiveFact, data: ScopeData): MatchCandidate | null {
   const ids = data.identities;
   if (!ids) return null;
-  const a = ids.get(rfqItem.fact.id);
-  const b = ids.get(offerItem.fact.id);
+  // An identity belongs to the document value. A value the user typed has none (it must not inherit the old code).
+  const a = rfqItem.provenance === 'document' ? ids.get(rfqItem.fact.id) : undefined;
+  const b = offerItem.provenance === 'document' ? ids.get(offerItem.fact.id) : undefined;
   // Two different firm codes are two different items: never suggest across them.
   if (a?.kind === 'code' && b?.kind === 'code') return null;
   const score = descriptionOverlap(String(rfqItem.value), String(offerItem.value));
@@ -125,6 +127,18 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
     const out: FindingDraft[] = [];
     const comparisons: PlannedComparison[] = [];
     const rfq = linesOf(ctx.facts, ctx.data.rfqDocId).filter((l) => usable(l.f.item));
+    // An RFQ item whose extraction was held must not vanish: it is a Needs-review item and every comparison it blocks is Not evaluated.
+    for (const l of linesOf(ctx.facts, ctx.data.rfqDocId)) {
+      const item = l.f.item;
+      if (!item || item.usable) continue;
+      const d = describeInputs([item]);
+      out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: ctx.data.rfqDocId, code: 'item.unverified', severity: 'warning', state: 'needs_review', subjectId: `${ctx.data.rfqDocId}:${l.blockId}:item`, message: 'Requested item could not be validated', reason: item.fact.reason ?? 'unvalidated_input', inputs: d.inputs, evidence: d.evidence }));
+      for (const q of ctx.data.quoteDocIds) {
+        for (const field of ['quantity', 'specification']) {
+          comparisons.push({ id: `${field}:held-${item.fact.id}~${q}`, check: 'quote_aspect', field, docs: [ctx.data.rfqDocId, q], status: 'not_evaluated', reason: `requested item in ${ctx.data.rfqDocId} not validated (${item.fact.reason ?? 'needs_review'})`, blocked: { docId: ctx.data.rfqDocId, field: 'item', reason: item.fact.reason ?? 'needs_review', factId: item.fact.id } });
+        }
+      }
+    }
     for (const l of rfq) {
       if (itemIdentityKey(l.f.item!, ctx.data.identities) !== null) continue;
       const d = describeInputs([l.f.item!]);
@@ -144,7 +158,11 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
             comparisons.push({ id: `${field}:${key}~${q}`, check: 'quote_aspect', field, docs: [ctx.data.rfqDocId, q], status: 'not_evaluated', reason: `item not matched in ${q} (${verdict.reason})`, blocked: { docId: q, field: 'item', reason: verdict.reason } });
           }
           const d = describeInputs([r.f.item!]);
-          out.push(makeDraft({ ...base, code: 'item.absent', severity: 'critical', state: verdict.state, basis: 'absence', subjectId: key, message: `${key} not found in ${q}`, reason: verdict.reason, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(doc)] }));
+          // A line in this quotation that is held, or whose identity is uncertain, could be this item: keep the omission Needs review.
+          const candidate = qLines.some((l) => !!l.f.item && (!l.f.item.usable || itemIdentityKey(l.f.item, ctx.data.identities) === null));
+          const state = verdict.state === 'confirmed' && candidate ? 'needs_review' : verdict.state;
+          const reason = verdict.state === 'confirmed' && candidate ? 'held_candidate_in_response' : verdict.reason;
+          out.push(makeDraft({ ...base, code: 'item.absent', severity: 'critical', state, basis: 'absence', subjectId: key, message: `${key} not found in ${q}`, reason, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(doc)] }));
           continue;
         }
         const offer = qLines.find((l) => l.blockId === m.verifiedTargetId)!;
@@ -152,6 +170,13 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
           const a = r.f[field];
           const b = offer.f[field];
           const cmp = { id: `${field}:${key}~${q}`, check: 'quote_aspect' as const, field, docs: [ctx.data.rfqDocId, q] };
+          // More than one fact for this field in the same line: never compare "the first one" and report agreement.
+          const many = (r.all[field]?.length ?? 0) > 1 ? r : (offer.all[field]?.length ?? 0) > 1 ? offer : undefined;
+          if (many) {
+            const doc2 = many === r ? ctx.data.rfqDocId : q;
+            comparisons.push({ ...cmp, status: 'not_evaluated', reason: `more than one ${field} in the same line of ${doc2}; it is not clear which to compare`, blocked: { docId: doc2, field, reason: 'multiple_candidates' } });
+            return;
+          }
           if (!a || !b) {
             // not silently skipped: the comparison could not run because a side was never extracted
             comparisons.push({ ...cmp, status: 'not_evaluated', reason: `no ${field} fact in ${!a ? ctx.data.rfqDocId : q}`, blocked: { docId: !a ? ctx.data.rfqDocId : q, field, reason: 'no_fact' } });
@@ -165,10 +190,10 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
             return;
           }
           const verdict2 = equal(a, b);
-          comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, detail: `${showValue(a.value)} <-> ${showValue(b.value)}` });
+          comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} <-> ${showValue(b.value)}` });
           if (verdict2 === 'equal') return;
           const d = describeInputs([a, b]);
-          out.push(makeDraft({ ...base, code, severity: 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${key}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${key} in ${q}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
+          out.push(makeDraft({ ...base, code, severity: 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${key}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${key} in ${q}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
         };
         aspect('quantity', 'quantity.differs', (a, b) => compareQuantities(a.value as never, b.value as never).result);
         aspect('specification', 'spec.differs', (a, b) => (sameTokens(a.value, b.value) ? 'equal' : 'different'));

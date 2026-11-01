@@ -8,7 +8,7 @@ import { itemIdentityKey, linesOf, type ScopeContext } from './adapter';
 
 type Aspect = { field: 'quantity' | 'specification'; label: string; comparison?: PlannedComparison; finding?: ReviewItem };
 type Cell = { quote: string; aspects: Aspect[]; absent?: ReviewItem; matched: boolean };
-type Row = { key: string | null; description: string; requested: string; cells: Cell[]; uncertain?: ReviewItem };
+type Row = { key: string | null; description: string; requested: string; cells: Cell[]; uncertain?: ReviewItem; held?: ReviewItem; heldFactId?: string };
 
 const LABEL = { quantity: 'Quantity', specification: 'Specification' } as const;
 const CODE = { quantity: 'quantity.differs', specification: 'spec.differs' } as const;
@@ -22,7 +22,23 @@ export function buildMatrix(view: SessionView): { rows: Row[]; uncertainQuoteLin
   const rows: Row[] = [];
   for (const line of linesOf(view.effective, data.rfqDocId)) {
     const item = line.f.item as EffectiveFact | undefined;
-    if (!item?.usable) continue;
+    if (!item) continue;
+    if (!item.usable) {
+      // A requested item whose extraction was held keeps its row; nothing about it is compared.
+      rows.push({
+        key: null,
+        description: 'Requested item could not be validated',
+        requested: '',
+        held: byCode('item.unverified', (i) => i.finding.responseDocId === data.rfqDocId && i.finding.inputs.some((x) => x.factId === item.fact.id)),
+        heldFactId: item.fact.id,
+        cells: data.quoteDocIds.map((quote) => ({
+          quote,
+          matched: false,
+          aspects: (['quantity', 'specification'] as const).map((field): Aspect => ({ field, label: LABEL[field], comparison: view.evaluation.comparisons.find((c) => c.id === `${field}:held-${item.fact.id}~${quote}`) })),
+        })),
+      });
+      continue;
+    }
     const key = itemIdentityKey(item, identities);
     const q = line.f.quantity;
     const s = line.f.specification;
@@ -85,13 +101,21 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.key ?? r.description} className="align-top">
+              <tr key={r.key ?? r.heldFactId ?? r.description} className="align-top">
                 <th scope="row" className="border border-slate-400 p-2 font-normal">
-                  <strong>{r.key ?? 'Identity uncertain'}</strong>
+                  <strong>{r.held ? 'Held item' : (r.key ?? 'Identity uncertain')}</strong>
                   <br />
                   {r.description}
                   <br />
                   <span className="text-sm">Requested: {r.requested || 'not extracted'}</span>
+                  {r.held && (
+                    <>
+                      <br />
+                      <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${r.held.finding.message}`} href={`#finding-${r.held.finding.id}`}>
+                        Open the item
+                      </a>
+                    </>
+                  )}
                   {r.uncertain && (
                     <>
                       <br />
@@ -108,7 +132,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                         <StatusBadge kind={c.absent.finding.state === 'confirmed' ? 'confirmed' : 'needs_review'} label={c.absent.finding.state === 'confirmed' ? 'Not in this quotation' : 'Not found: Needs review'} />
                         <br />
                         <span className="text-sm">{explainReason(c.absent.finding.reason)}</span>{' '}
-                        <a className="text-sm text-blue-900 underline" href={`#finding-${c.absent.finding.id}`}>
+                        <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${c.absent.finding.message}`} href={`#finding-${c.absent.finding.id}`}>
                           Open the item
                         </a>
                       </p>
@@ -121,11 +145,16 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                             <span className="font-medium">{a.label}: </span>
                             <StatusBadge kind={b.kind} label={b.text} />
                             {a.comparison?.detail && <span className="ml-1 text-sm">{a.comparison.detail}</span>}
+                            {!!a.comparison?.userSupplied?.length && (
+                              <span className="ml-1">
+                                <StatusBadge kind="user_supplied" label="uses a value you supplied" />
+                              </span>
+                            )}
                             {a.comparison?.status === 'not_evaluated' && <span className="block text-sm">{a.comparison.reason}</span>}
                             {a.finding && (
                               <>
                                 {' '}
-                                <a className="text-sm text-blue-900 underline" href={`#finding-${a.finding.finding.id}`}>
+                                <a className="text-sm text-blue-900 underline" aria-label={`Open the finding: ${a.finding.finding.message}`} href={`#finding-${a.finding.finding.id}`}>
                                   Open the finding
                                 </a>
                               </>

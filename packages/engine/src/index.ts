@@ -18,6 +18,7 @@ export * from './findings';
 export * from './review';
 export * from './export';
 export * from './comparisons';
+export * from './format';
 export * from './export-render';
 export * from './adapter';
 export * from './chunk';

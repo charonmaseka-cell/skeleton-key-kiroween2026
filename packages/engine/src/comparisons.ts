@@ -30,6 +30,8 @@ export type PlannedComparison = {
   /** what was compared, for display, e.g. "10 units <-> 8 units" */
   detail?: string;
   blocked?: BlockedInput;
+  /** fact IDs whose value in this comparison was typed by the user, not read from a document */
+  userSupplied?: string[];
 };
 
 export type ComparisonSummary = { planned: number; agree: number; flagged: number; notEvaluated: number };

@@ -6,7 +6,9 @@ import type { ExportEntry, ExportModel } from './export';
 
 const SAMPLE_MARK = 'SAMPLE (fictional): invented documents, not a real review';
 
-const fmt = (v: unknown): string => (v === null || v === undefined ? 'unknown' : typeof v === 'string' ? v : JSON.stringify(v));
+import { formatValue } from './format';
+
+const fmt = formatValue;
 
 function entryLines(e: ExportEntry): string[] {
   const out = [`- [${e.state === 'confirmed' ? 'CONFIRMED' : 'NEEDS REVIEW'}] ${e.message} (${e.code}, ${e.severity})`];
@@ -31,8 +33,13 @@ export function renderText(m: ExportModel): string {
       : ['(none)']),
     '',
   );
+  L.push(
+    `COVERAGE OF EACH DOCUMENT (${m.coverage.length}): an absence is only stated as fact against a document whose extraction is confirmed`,
+    ...(m.coverage.length ? m.coverage.map((c) => `- ${c.docId}: ${c.state}${c.confirmedByUser ? ' (asserted by the reviewer, not checked by the tool)' : ''}`) : ['(not recorded)']),
+    '',
+  );
   L.push(`USER DECISIONS (${m.decisions.length})`, ...(m.decisions.length ? m.decisions.map((d) => `- ${d.findingId}: ${d.status} at ${new Date(d.at).toISOString()}${d.note ? `; ${d.note}` : ''}`) : ['(none)']), '');
-  L.push(`CORRECTIONS (${m.corrections.length}): original values are preserved`, ...(m.corrections.length ? m.corrections.map((x) => `- ${x.field} (${x.factId}): ${fmt(x.originalValue)} -> ${fmt(x.correctedValue)}${x.note ? `; ${x.note}` : ''}`) : ['(none)']), '');
+  L.push(`CORRECTIONS (${m.corrections.length}): original values are preserved`, ...(m.corrections.length ? m.corrections.map((x) => `- ${x.field} (${x.factId}): ${fmt(x.originalValue)} -> ${fmt(x.correctedValue)}${x.reverted ? ' (REVERTED)' : ''}${x.note ? `; ${x.note}` : ''}`) : ['(none)']), '');
   L.push(`NOTES (${m.notes.length})`, ...(m.notes.length ? m.notes.map((n) => `- ${n.findingId}: ${n.note}`) : ['(none)']));
   return L.join('\n') + '\n';
 }
@@ -53,8 +60,9 @@ export function renderCsv(m: ExportModel): string {
   m.findings.forEach((e) => entry('confirmed_finding', e));
   m.unresolved.forEach((e) => entry('needs_review', e));
   m.notEvaluated.forEach((n) => rows.push(['not_evaluated', sample, 'not_evaluated', n.id, n.check, '', '', '', n.field, n.reason, n.docs.join(' vs '), n.blocked ? `${n.blocked.field} in ${n.blocked.docId} (${n.blocked.reason})` : '', '', '']));
+  m.coverage.forEach((c) => rows.push(['coverage', sample, c.state, c.docId, c.confirmedByUser ? 'asserted_by_reviewer' : 'not_user_confirmed', '', '', '', '', '', c.docId, '', '', '']));
   m.decisions.forEach((d) => rows.push(['decision', sample, '', d.findingId, d.status, '', '', '', '', '', '', '', '', d.note]));
-  m.corrections.forEach((x) => rows.push(['correction', sample, 'user_supplied', x.factId, x.field, '', '', '', `${fmt(x.originalValue)} -> ${fmt(x.correctedValue)}`, '', '', '', '', x.note]));
+  m.corrections.forEach((x) => rows.push(['correction', sample, 'user_supplied', x.factId, x.field, '', '', '', `${fmt(x.originalValue)} -> ${fmt(x.correctedValue)}${x.reverted ? ' (REVERTED)' : ''}`, '', '', '', '', x.note]));
   m.notes.forEach((n) => rows.push(['note', sample, '', n.findingId, '', '', '', '', '', '', '', '', '', n.note]));
   return [head, ...rows].map((r) => r.map(cell).join(',')).join('\n') + '\n';
 }

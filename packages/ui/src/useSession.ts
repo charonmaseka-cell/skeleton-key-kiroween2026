@@ -8,6 +8,7 @@ import {
   evaluateSession,
   revertCorrection,
   withReconciledStore,
+  withdrawDocumentCoverage,
   type DomainAdapter,
   type Fixture,
   type SessionState,
@@ -19,6 +20,7 @@ export function useSession(adapter: DomainAdapter, fixtures: Fixture[]) {
   const [states, setStates] = useState<Record<string, SessionState>>({});
   const [stamp, setStamp] = useState(0);
   const [announcement, setAnnouncement] = useState('');
+  const [announceCount, setAnnounceCount] = useState(0);
 
   const fixture = fixtures.find((f) => f.id === fixtureId) ?? fixtures[0]!;
   const state = states[fixture.id] ?? emptySession();
@@ -32,9 +34,11 @@ export function useSession(adapter: DomainAdapter, fixtures: Fixture[]) {
         return { ...prev, [fixture.id]: withReconciledStore(next, evaluateSession(adapter, fixture, next, at)) };
       });
       setStamp(at);
-      setAnnouncement(message);
+      // A trailing no-break space on alternate messages makes an identical consecutive message announce again.
+      setAnnounceCount((n) => n + 1);
+      setAnnouncement(message + (announceCount % 2 ? '\u00a0' : ''));
     },
-    [adapter, fixture],
+    [adapter, fixture, announceCount],
   );
 
   return {
@@ -51,6 +55,7 @@ export function useSession(adapter: DomainAdapter, fixtures: Fixture[]) {
     revert: (factId: string) => update((s) => revertCorrection(s, factId), 'Correction removed. The document value is back in use. Checks have re-run.'),
     decide: (finding: Finding, status: ReviewStatus, note?: string) => update((s, at) => decideFinding(s, finding, status, note, at), `Decision saved: ${status}.`),
     confirmCoverage: (docId: string) => update((s, at) => confirmDocumentCoverage(s, docId, at), 'Coverage confirmed for this document. Checks have re-run.'),
+    withdrawCoverage: (docId: string) => update((s) => withdrawDocumentCoverage(s, docId), 'Coverage confirmation withdrawn. Absences are back to Needs review.'),
     reset: () => {
       setStates((prev) => ({ ...prev, [fixture.id]: emptySession() }));
       setStamp(0);

@@ -54,13 +54,20 @@ function Table({ title, id, rows, view, cols }: { title: string; id: string; row
                     <br />
                     <span className="text-sm">{c.docs.map((d) => view.titles[d] ?? d).join(' vs ')}</span>
                   </th>
-                  <td className="border border-slate-400 p-2">{c.detail ?? <span className="text-sm">{c.reason}</span>}</td>
+                  <td className="border border-slate-400 p-2">
+                    {c.detail ?? <span className="text-sm">{c.reason}</span>}
+                    {!!c.userSupplied?.length && (
+                      <span className="ml-1">
+                        <StatusBadge kind="user_supplied" label="uses a value you supplied" />
+                      </span>
+                    )}
+                  </td>
                   <td className="border border-slate-400 p-2">
                     <StatusBadge kind={b.kind} label={b.text} />
                     {c.status === 'not_evaluated' && <span className="block text-sm">{c.reason}</span>}
                     {c.status === 'flagged' && c.reason && <span className="block text-sm">{explainReason(c.reason)}</span>}
                     {f && (
-                      <a className="text-sm text-blue-900 underline" href={`#finding-${f.finding.id}`}>
+                      <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${f.finding.message}`} href={`#finding-${f.finding.id}`}>
                         Open the item
                       </a>
                     )}

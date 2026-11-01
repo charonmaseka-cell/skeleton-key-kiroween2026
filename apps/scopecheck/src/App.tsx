@@ -41,7 +41,7 @@ export function App() {
         </button>
         <p>{fixture.description}</p>
       </section>
-      <ReviewWorkspace session={session} baseName={fixture.id}>
+      <ReviewWorkspace key={fixture.id} session={session} baseName={fixture.id}>
         <ComparisonMatrix view={view} />
       </ReviewWorkspace>
     </AppShell>

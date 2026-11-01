@@ -4,6 +4,7 @@ import {
   confirmCoverage,
   decide,
   newExtraction,
+  processingComplete,
   reconcileReview,
   renderCsv,
   renderText,
@@ -36,6 +37,12 @@ export type FixtureDoc = {
   recordedIn: string;
   blocks: Block[];
   claims: unknown[];
+  /**
+   * How the document was sent for extraction. Default: one chunk covering every block, processed ok.
+   * A fixture can declare a failed chunk; its blocks are then NOT processed and no absence against
+   * the document can be confirmed, whatever the reviewer says.
+   */
+  chunks?: { blockIds: string[]; status: 'ok' | 'failed' }[];
 };
 
 export type Fixture = {
@@ -77,9 +84,11 @@ export type SessionState = {
   store: ReviewStore;
   /** documents whose extraction coverage the user has confirmed, with the time */
   confirmed: Record<string, number>;
+  /** corrections the user withdrew; kept for the export history */
+  reverted: Correction[];
 };
 
-export const emptySession = (): SessionState => ({ corrections: [], store: {}, confirmed: {} });
+export const emptySession = (): SessionState => ({ corrections: [], store: {}, confirmed: {}, reverted: [] });
 
 export type SessionView = {
   fixture: Fixture;
@@ -103,8 +112,10 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
   for (const d of fixture.docs) {
     const ids = d.blocks.map((b) => b.id);
     // A successful extraction never proves complete coverage: documents stay 'unverified' until a person confirms.
-    let ext = newExtraction(d.id, ids, [{ id: `${d.id}#1`, blockIds: ids, status: 'ok' }]);
-    if (state.confirmed[d.id] !== undefined) ext = confirmCoverage(ext, 'user', 'Confirmed by the reviewer in this session');
+    const chunks = (d.chunks ?? [{ blockIds: ids, status: 'ok' as const }]).map((c, i) => ({ id: `${d.id}#${i + 1}`, blockIds: c.blockIds, status: c.status }));
+    let ext = newExtraction(d.id, ids, chunks);
+    // Confirmation is only possible for a document that was fully processed. A failed chunk cannot be confirmed away.
+    if (state.confirmed[d.id] !== undefined && processingComplete(ext)) ext = confirmCoverage(ext, 'user', 'Confirmed by the reviewer in this session');
     documents.set(d.id, ext);
   }
   const evaluation = adapter.evaluate({
@@ -115,7 +126,11 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
     roles: Object.fromEntries(fixture.docs.map((d) => [d.id, d.role])),
   });
   const { items, store } = reconcileReview(evaluation.findings, state.store, at);
-  const exportModel = buildExport({ items, corrections: state.corrections, facts: effective, sample: true, comparisons: evaluation.comparisons });
+  const coverage = fixture.docs.map((d) => {
+    const ext = documents.get(d.id)!;
+    return { docId: d.id, state: processingComplete(ext) ? ext.coverage.state : 'processing_incomplete', confirmedByUser: ext.coverage.state === 'user_confirmed', at: state.confirmed[d.id] };
+  });
+  const exportModel = buildExport({ items, corrections: state.corrections, facts: effective, sample: true, comparisons: evaluation.comparisons, coverage, reverted: state.reverted });
   const uncovered = Object.fromEntries(fixture.docs.map((d) => [d.id, uncoveredBlocks(documents.get(d.id)!, facts.filter((f) => f.docId === d.id))]));
   return {
     fixture,
@@ -138,7 +153,11 @@ export function applyCorrection(state: SessionState, factId: string, correctedVa
   return { ...state, corrections: [...state.corrections, { factId, correctedValue, note: note || undefined, at }] };
 }
 
-export const revertCorrection = (state: SessionState, factId: string): SessionState => ({ ...state, corrections: state.corrections.filter((c) => c.factId !== factId) });
+export const revertCorrection = (state: SessionState, factId: string): SessionState => ({
+  ...state,
+  corrections: state.corrections.filter((c) => c.factId !== factId),
+  reverted: [...state.reverted, ...state.corrections.filter((c) => c.factId === factId)],
+});
 
 export const decideFinding = (state: SessionState, finding: Finding, status: ReviewStatus, note: string | undefined, at: number): SessionState => ({
   ...state,
@@ -146,6 +165,12 @@ export const decideFinding = (state: SessionState, finding: Finding, status: Rev
 });
 
 export const confirmDocumentCoverage = (state: SessionState, docId: string, at: number): SessionState => ({ ...state, confirmed: { ...state.confirmed, [docId]: at } });
+
+export const withdrawDocumentCoverage = (state: SessionState, docId: string): SessionState => {
+  const { [docId]: _removed, ...rest } = state.confirmed;
+  void _removed;
+  return { ...state, confirmed: rest };
+};
 
 export const withReconciledStore = (state: SessionState, view: SessionView): SessionState => ({ ...state, store: view.store });
 
@@ -160,9 +185,12 @@ const DECIMAL = /^-?\d+(\.\d+)?$/;
 export function parseCorrection(kind: ValueKind, input: CorrectionInput): Parsed {
   switch (kind) {
     case 'money': {
-      const amount = (input.amount ?? '').replace(/[\s,]/g, '');
+      // Never guess the author's separators: a comma could be a thousands separator or a decimal comma.
+      const raw = (input.amount ?? '').trim();
+      const plain = /^\d+(\.\d+)?$/.test(raw) || /^\d{1,3}( \d{3})+(\.\d+)?$/.test(raw);
+      if (!plain) return { ok: false, error: 'Enter the amount as a plain number such as 1600000 or 1 600 000. Use a dot for decimals; commas are not accepted because they can mean different things.' };
+      const amount = raw.replace(/ /g, '');
       const currency = (input.currency ?? '').trim().toUpperCase();
-      if (!DECIMAL.test(amount)) return { ok: false, error: 'Enter the amount as a number, for example 1600000.' };
       if (!/^[A-Z]{3}$/.test(currency)) return { ok: false, error: 'Enter the three-letter currency code, for example ZAR.' };
       return { ok: true, value: { amount, currency } };
     }
@@ -190,6 +218,8 @@ export function parseCorrection(kind: ValueKind, input: CorrectionInput): Parsed
 
 export const exportCsv = (view: SessionView): string => renderCsv(view.exportModel);
 export const exportText = (view: SessionView): string => renderText(view.exportModel);
+export const renderCsvOf = exportCsv;
+export const renderTextOf = exportText;
 
 /** Plain-language explanation of engine and adapter reason codes. */
 const REASONS: Record<string, string> = {
@@ -205,6 +235,9 @@ const REASONS: Record<string, string> = {
   date_format_ambiguous: 'The date could be read more than one way (for example day/month or month/day).',
   number_format_ambiguous: 'The number could be read more than one way.',
   currency_ambiguous: 'The currency could not be determined from the text.',
+  held_candidate_in_response: 'A line in this document was held or could not be identified and could be this item, so the omission is not stated as fact.',
+  multiple_candidates: 'More than one value was extracted for this field in the same place, so it is not clear which to compare.',
+  processing_incomplete: 'Part of the document was not processed, so nothing can be concluded about what it does not contain.',
   value_not_in_excerpt: 'The extracted value is not supported by the cited text.',
   multiple_candidates_no_context: 'The cited text holds several possible values and no label identifies the right one.',
   legal_form_differs: 'The names differ only in their legal form (for example Trust or Foundation).',

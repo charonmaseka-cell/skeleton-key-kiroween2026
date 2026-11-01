@@ -1,5 +1,5 @@
-import { useId, useState, type FormEvent, type ReactNode } from 'react';
-import type { EffectiveFact, Evidence, Finding, PlannedComparison, ReviewItem, ValueKind } from '@skeleton-key/engine';
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { formatValue, processingComplete, type EffectiveFact, type Evidence, type Finding, type PlannedComparison, type ReviewItem, type ValueKind } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
 import { exportCsv, exportText, explainReason, parseCorrection, type CorrectionInput, type SessionView } from './session-core';
 import type { Session } from './useSession';
@@ -7,14 +7,8 @@ import type { Session } from './useSession';
 // Shared review workspace pieces used by both apps. Keyboard operable: native buttons, links, inputs
 // with labels, visible focus (set in each app's CSS), no pointer-only interaction.
 
-export const showValue = (v: unknown): string => {
-  if (v === null || v === undefined) return 'unknown';
-  if (typeof v === 'string') return v;
-  const o = v as Record<string, unknown>;
-  if ('amount' in o) return `${o.currency ?? '?'} ${String(Number(o.amount)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
-  if ('value' in o) return `${o.value}${o.unit ? ` ${o.unit}` : ''}`;
-  return JSON.stringify(v);
-};
+/** One formatter for every display of a value (shared with the adapters, from the engine). */
+export const showValue = formatValue;
 
 // ---------- evidence ----------
 
@@ -48,7 +42,9 @@ export function EvidenceView({ evidence, role, view }: { evidence: Evidence; rol
 export function ValueEditor({ fact, onSave, onCancel }: { fact: EffectiveFact; onSave: (value: unknown, note?: string) => void; onCancel: () => void }) {
   const id = useId();
   const kind = fact.fact.kind as ValueKind;
-  const [input, setInput] = useState<CorrectionInput>({ currency: 'ZAR' });
+  // The currency is taken from the original value; it is never assumed.
+  const original = fact.fact.value as { currency?: string | null } | null;
+  const [input, setInput] = useState<CorrectionInput>({ currency: kind === 'money' ? (original?.currency ?? '') : '' });
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const set = (k: keyof CorrectionInput) => (e: { target: { value: string } }) => setInput((p) => ({ ...p, [k]: e.target.value }));
@@ -114,21 +110,32 @@ export function ValueEditor({ fact, onSave, onCancel }: { fact: EffectiveFact; o
 
 const SEVERITY: Record<string, string> = { critical: 'Critical', warning: 'Warning', info: 'Info' };
 
-export function FactLine({ fact, session, view }: { fact: EffectiveFact; session: Session; view: SessionView }) {
+/** `context` names the place the value is shown in (a finding, a Not-evaluated item), so repeated controls for one value stay distinguishable. */
+export function FactLine({ fact, session, view, context }: { fact: EffectiveFact; session: Session; view: SessionView; context?: string }) {
   const [editing, setEditing] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
   const user = fact.provenance === 'user_supplied';
+  const where = view.titles[fact.fact.docId] ?? fact.fact.docId;
+  // The control that had focus is replaced by the result of the action; put focus back on a stable button.
+  // If the whole item disappears (the correction resolved it), focus goes to the main region, never to the document body.
+  const refocus = () =>
+    setTimeout(() => {
+      if (toggle.current && document.contains(toggle.current)) toggle.current.focus();
+      else document.getElementById('main')?.focus();
+    }, 0);
+  const tail = context ? ` (${context})` : '';
   return (
     <li className="py-1">
       <span className="font-medium">{fact.fact.field}</span>: <span>{showValue(fact.value)}</span>{' '}
       {user ? <StatusBadge kind="user_supplied" /> : fact.status === 'validated' ? <StatusBadge kind="validated" /> : <StatusBadge kind="needs_review" label={`Held: ${explainReason(fact.fact.reason)}`} />}
       {user && <span className="ml-1 text-sm">(document said {showValue(fact.fact.value)})</span>}{' '}
-      <button type="button" onClick={() => setEditing((e) => !e)} aria-expanded={editing} className="text-sm underline">
+      <button ref={toggle} type="button" onClick={() => setEditing((e) => !e)} aria-expanded={editing} aria-label={`${editing ? 'Close' : user ? 'Change correction' : 'Correct this value'}: ${fact.fact.field} (${formatValue(fact.value)}) in ${where}${tail}`} className="text-sm underline">
         {editing ? 'Close' : user ? 'Change correction' : 'Correct this value'}
       </button>
       {user && (
         <>
           {' '}
-          <button type="button" onClick={() => session.revert(fact.fact.id)} className="text-sm underline">
+          <button type="button" aria-label={`Revert to document value: ${fact.fact.field} (${formatValue(fact.value)}) in ${where}${tail}`} onClick={() => { session.revert(fact.fact.id); refocus(); }} className="text-sm underline">
             Revert to document value
           </button>
         </>
@@ -136,14 +143,14 @@ export function FactLine({ fact, session, view }: { fact: EffectiveFact; session
       {editing && (
         <ValueEditor
           fact={fact}
-          onCancel={() => setEditing(false)}
+          onCancel={() => { setEditing(false); refocus(); }}
           onSave={(v, n) => {
             session.correct(fact.fact.id, v, n);
             setEditing(false);
+            refocus();
           }}
         />
       )}
-      {view.titles[fact.fact.docId] && <span className="sr-only"> in {view.titles[fact.fact.docId]}</span>}
     </li>
   );
 }
@@ -152,9 +159,11 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
   const { finding, review } = item;
   const [note, setNote] = useState(review.note ?? '');
   const noteId = useId();
+  // A reopen clears the stored note; the input must follow it.
+  useEffect(() => setNote(review.note ?? ''), [review.note, review.history.length]);
   const inputs = finding.inputs.map((i) => view.effective.get(i.factId)).filter((x): x is EffectiveFact => !!x);
   return (
-    <article id={`finding-${finding.id}`} aria-labelledby={`h-${finding.id}`} className="space-y-2 rounded border border-slate-400 bg-white p-4">
+    <article id={`finding-${finding.id}`} tabIndex={-1} aria-labelledby={`h-${finding.id}`} className="space-y-2 rounded border border-slate-400 bg-white p-4">
       <h4 id={`h-${finding.id}`} className="text-lg font-semibold">
         {finding.message}
       </h4>
@@ -170,7 +179,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
           <h5 className="font-medium">Values used</h5>
           <ul className="divide-y divide-slate-200">
             {inputs.map((f) => (
-              <FactLine key={f.fact.id} fact={f} session={session} view={view} />
+              <FactLine key={f.fact.id} fact={f} session={session} view={view} context={finding.message} />
             ))}
           </ul>
         </section>
@@ -185,17 +194,17 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
       )}
       <section aria-label="Review decision" className="space-y-1 border-t border-slate-300 pt-2">
         <label htmlFor={noteId} className="block text-sm font-medium">
-          Note for this item (optional)
+          Note for this item (optional)<span className="sr-only">: {finding.message}</span>
         </label>
         <input id={noteId} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded border border-slate-600 px-2 py-1" />
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => session.decide(finding, 'accepted', note)} className="rounded bg-green-800 px-3 py-1 text-white">
+          <button type="button" aria-label={`Accept: ${finding.message}`} onClick={() => session.decide(finding, 'accepted', note)} className="rounded bg-green-800 px-3 py-1 text-white">
             Accept
           </button>
-          <button type="button" onClick={() => session.decide(finding, 'dismissed', note)} className="rounded bg-slate-800 px-3 py-1 text-white">
+          <button type="button" aria-label={`Dismiss: ${finding.message}`} onClick={() => session.decide(finding, 'dismissed', note)} className="rounded bg-slate-800 px-3 py-1 text-white">
             Dismiss
           </button>
-          <button type="button" onClick={() => session.decide(finding, 'open', note)} className="rounded border border-slate-700 px-3 py-1">
+          <button type="button" aria-label={`Reopen: ${finding.message}`} onClick={() => session.decide(finding, 'open', note)} className="rounded border border-slate-700 px-3 py-1">
             Reopen
           </button>
         </div>
@@ -265,7 +274,7 @@ export function NotEvaluatedList({ comparisons, session, view }: { comparisons: 
                     Blocked input: <strong>{c.blocked.field.replace(/_/g, ' ')}</strong> in {view.titles[c.blocked.docId] ?? c.blocked.docId}. {explainReason(c.blocked.reason)}
                   </p>
                 )}
-                {fact && <ul className="mt-1"><FactLine fact={fact} session={session} view={view} /></ul>}
+                {fact && <ul className="mt-1"><FactLine fact={fact} session={session} view={view} context={`blocking: ${c.field.replace(/_/g, ' ')}`} /></ul>}
               </li>
             );
           })}
@@ -288,10 +297,13 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
         const facts = [...view.effective.values()].filter((f) => f.fact.docId === d.id);
         const unciting = view.uncovered[d.id] ?? [];
         const confirmed = ext.coverage.state !== 'unverified';
+        const complete = processingComplete(ext);
+        const failedBlocks = (d.chunks ?? []).filter((c) => c.status === 'failed').flatMap((c) => c.blockIds);
+        const focusSummary = () => setTimeout(() => document.getElementById(`doc-sum-${d.id}`)?.focus(), 0);
         return (
           <details key={d.id} className="rounded border border-slate-400 p-3">
-            <summary className="cursor-pointer text-lg font-medium">
-              {d.title} <StatusBadge kind={confirmed ? 'verified' : 'unverified'} />
+            <summary id={`doc-sum-${d.id}`} className="cursor-pointer text-lg font-medium">
+              {d.title} <StatusBadge kind={confirmed ? 'verified' : 'unverified'} label={!complete ? 'Part of the document was not processed' : undefined} />
             </summary>
             <p className="mt-2 text-sm">
               Profile {d.profile}. {d.claims.length} recorded claims, {facts.filter((f) => f.usable).length} usable values.
@@ -316,9 +328,19 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
                 A successful extraction does not prove every item was found. {confirmed ? 'You confirmed this document.' : 'Until you confirm coverage, anything not found stays Needs review.'}
                 {unciting.length > 0 && ` Text no extracted value cites: ${unciting.join(', ')}.`}
               </p>
-              {!confirmed && (
-                <button type="button" onClick={() => session.confirmCoverage(d.id)} className="mt-1 rounded border border-slate-800 px-3 py-1">
+              {!complete && (
+                <p role="note" className="mt-1 text-sm font-medium">
+                  Extraction of this document is incomplete{failedBlocks.length ? ` (blocks not processed: ${failedBlocks.join(', ')})` : ''}. Coverage cannot be confirmed, so nothing absent from it can be stated as fact.
+                </p>
+              )}
+              {complete && !confirmed && (
+                <button type="button" aria-label={`I checked this document: confirm coverage of ${d.title}`} onClick={() => { session.confirmCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-slate-800 px-3 py-1">
                   I checked this document: confirm coverage
+                </button>
+              )}
+              {confirmed && (
+                <button type="button" aria-label={`Withdraw coverage confirmation for ${d.title}`} onClick={() => { session.withdrawCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-slate-800 px-3 py-1">
+                  Withdraw my coverage confirmation
                 </button>
               )}
             </div>

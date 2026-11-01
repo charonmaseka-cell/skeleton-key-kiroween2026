@@ -19,6 +19,15 @@ export type ExportEntry = {
   evidence: { role: string; docId: string; blockId: string; start: number; end: number; text: string }[];
 };
 
+export type CoverageEntry = {
+  docId: string;
+  /** unverified until a check or the user confirms the extraction is complete */
+  state: string;
+  /** true when a person asserted it; absences against this document rest on that assertion */
+  confirmedByUser: boolean;
+  at?: number;
+};
+
 export type NotEvaluatedEntry = {
   id: string;
   check: string;
@@ -34,11 +43,13 @@ export type ExportModel = {
   unresolved: ExportEntry[];
   /** comparisons that could not run, with the reason and the blocked input. Never "agrees". */
   notEvaluated: NotEvaluatedEntry[];
+  /** per-document coverage state, so confirmed absences can be traced to what supports them */
+  coverage: CoverageEntry[];
   /** how many comparisons were planned and what became of them */
   comparisons: ComparisonSummary;
   decisions: { findingId: string; status: string; at: number; note?: string }[];
   notes: { findingId: string; note: string }[];
-  corrections: { factId: string; field: string; originalValue: unknown; correctedValue: unknown; note?: string; at: number }[];
+  corrections: { factId: string; field: string; originalValue: unknown; correctedValue: unknown; note?: string; at: number; reverted?: boolean }[];
 };
 
 export function buildExport(args: {
@@ -47,6 +58,9 @@ export function buildExport(args: {
   facts: Map<string, EffectiveFact>;
   sample: boolean;
   comparisons?: PlannedComparison[];
+  coverage?: CoverageEntry[];
+  /** corrections the user later withdrew; kept so the history is complete */
+  reverted?: Correction[];
 }): ExportModel {
   const entries: ExportEntry[] = args.items.map(({ finding, review }) => ({
     findingId: finding.id,
@@ -83,13 +97,17 @@ export function buildExport(args: {
       blocked: c.blocked ? { docId: c.blocked.docId, field: c.blocked.field, reason: c.blocked.reason } : undefined,
     })),
     comparisons: summarizeComparisons(args.comparisons ?? []),
+    coverage: args.coverage ?? [],
     decisions: args.items.flatMap(({ finding, review }) =>
       review.history.map((h) => ({ findingId: finding.id, status: `${h.event}:${h.status}`, at: h.at, note: h.note })),
     ),
     notes: entries.filter((e) => e.note).map((e) => ({ findingId: e.findingId, note: e.note! })),
-    corrections: args.corrections.map((c) => {
+    corrections: [
+      ...args.corrections.map((c) => ({ c, reverted: false })),
+      ...(args.reverted ?? []).map((c) => ({ c, reverted: true })),
+    ].map(({ c, reverted }) => {
       const eff = args.facts.get(c.factId);
-      return { factId: c.factId, field: eff?.fact.field ?? 'unknown', originalValue: eff?.fact.value ?? null, correctedValue: c.correctedValue, note: c.note, at: c.at };
+      return { factId: c.factId, field: eff?.fact.field ?? 'unknown', originalValue: eff?.fact.value ?? null, correctedValue: c.correctedValue, note: c.note, at: c.at, ...(reverted ? { reverted: true } : {}) };
     }),
   };
 }

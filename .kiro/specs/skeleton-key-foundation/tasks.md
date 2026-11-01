@@ -26,13 +26,13 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
   - [x] 3.4 Workers AI call with JSON mode, profile token cap, timeout, at most one counted repair; map quota errors to `quota_exhausted`. Live JSON-mode behaviour is untested until the benchmark. (R8.8, R8.10)
   - [x] 3.5 Content-free logging; no persistence or AI caching. (R8.4, R8.5)
   - [x] 3.6 Handler tests for every limit and error code. (R8.11)
-- [ ] 4. Fictional samples and expected outputs
-  - [ ] 4.1 Original RFQ + 2 quotes (text PDFs) with one quantity mismatch, one spec difference, one exclusion, one absence; expected outputs. (R10.3–10.4)
-  - [ ] 4.2 Original grant pack (application form, budget, organisation documents) with a missing attachment, org-name inconsistency, an ambiguous date or currency, and a funding < budget pair that must NOT be flagged; requirements list; expected outputs. (R3.1, R10.3)
-- [ ] 5. Live-extraction benchmark (before full UI)
-  - [ ] 5.1 Minimal PDF.js Node/browser parser to Blocks with pages and bbox; scanned PDF rejection. (R4.5, R10.9)
-  - [ ] 5.2 Chunker and ExtractionClient with client bounds (chunks per doc, calls per session, one repair retry). (R5.4, R5.5, R8.8)
-  - [ ] 5.3 `tools/benchmark` (also derive `DAILY_ADMISSION_CEILING`, `MAX_CHARS`, `MAX_BLOCKS` and token caps from measured neurons per call) run on both sample sets and two candidate models; report requests, time, consumption, schema/evidence/value-supported rates, recall. (R10.1)
+- [x] 4. Fictional samples and expected outputs (done)
+  - [x] 4.1 Original RFQ + 2 quotes (text PDFs) with one quantity mismatch, one spec difference, one exclusion, one absence; expected outputs. (R10.3–10.4)
+  - [x] 4.2 Original grant pack (application form, budget, organisation documents) with a missing attachment, org-name inconsistency, an ambiguous date or currency, and a funding < budget pair that must NOT be flagged; requirements list; expected outputs. (R3.1, R10.3)
+- [ ] 5. Live-extraction benchmark (before full UI): harness done and tested with a mock model; live results pending
+  - [x] 5.1 Minimal PDF.js Node/browser parser to Blocks with pages and bbox; scanned PDF rejection. (R4.5, R10.9)
+  - [x] 5.2 (chunker in engine; client bounds via attempt budget and admission ceiling) Chunker and ExtractionClient with client bounds (chunks per doc, calls per session, one repair retry). (R5.4, R5.5, R8.8)
+  - [ ] 5.3 (harness built; live runs pending) `tools/benchmark` (also derive `DAILY_ADMISSION_CEILING`, `MAX_CHARS`, `MAX_BLOCKS` and token caps from measured neurons per call) run on both sample sets and two candidate models; report requests, time, consumption, schema/evidence/value-supported rates, recall. (R10.1)
   - [ ] 5.4 Record results and model/scope decision in `docs/build-log.md`; tune limits and chunk budget. (R10.2)
 - [ ] 6. Minimal app shells on labelled fixtures
   - [ ] 6.1 `packages/ui` primitives: status badge (text + icon), evidence viewer, banner, review panel; keyboard focus, AA contrast, reduced motion. (R13)
@@ -66,4 +66,4 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
 - [ ] 19. Regression run, accessibility pass, decorative polish if time, README (accurate privacy statement), setup guide, demo video showing the real document-processing path in both apps. (R3.1, R8.3, R13.4)
 - [ ] 20. Confirm free-tier usage and keep apps available through 29 January 2027. (R11.2)
 
-**Status: Tasks 1 to 3 complete. Pause before deployment and the live benchmark.**
+**Status: Tasks 1 to 4 complete; Task 5 harness built and mock-tested. Live benchmark in progress (needs Cloudflare credentials in sandbox secrets).**

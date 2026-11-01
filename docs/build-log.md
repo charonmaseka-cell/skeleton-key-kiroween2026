@@ -19,3 +19,9 @@ Factual record of Kiro tasks, tests and decisions. Only completed work is record
 - Decision: `DAILY_ADMISSION_CEILING` is `0` (closed) until the benchmark measures neurons per call. The Rate Limiting binding stays optional/unverified.
 - Dependency audit: `miniflare` (test tooling) pinned `undici@7.28.0` and `sharp@0.35.2` (3 high). Root `overrides` now use patched same-major releases `undici@7.30.1` and `sharp@0.35.5`; 0 high remain; DO tests still pass (`npm ci` verified). `npm audit fix` offered only downgrades, so it was not used.
 - Remaining (11 moderate, development tooling only, not deployed): `minimatch <11.0.1` GHSA-g3hv-75wg-m249 (glob DoS) reached through `eslint@10.14.0` (latest) and `typescript-eslint@8.72.1`, which require `minimatch ^10`; the fix is a major version they do not support. All other moderate entries (`@eslint/*`, `@typescript-eslint/*`, `eslint`, `typescript-eslint`) are the same chain. Revisit when ESLint releases a patched dependency.
+
+## Task 4: Samples and benchmark harness (1 Nov 2026)
+- Dependency audit before merging PR #3: overrides patched `undici`/`sharp` (0 high); 11 moderate remain in the ESLint chain (see Task 3 entry).
+- Added fictional labelled samples (ScopeCheck: RFQ + 2 quotes; PackCheck: 4-document grant pack), `packages/ingest` (PDF.js text blocks with page and coordinates; scans rejected), engine `chunkBlocks` and extraction issues, Worker `droppedReasons`, and `tools/benchmark` (harness, scoring, benchmark-local checks, CLI).
+- **MOCK results only so far** (oracle model built from the labels; says nothing about model quality): 7 documents, recall 100%, 0 false critical findings, absences stay Needs review with coverage unverified. 119 repository tests pass; two mutation checks (auto-coverage, silent server drops) each made tests fail.
+- Not yet done: live results. Pending Cloudflare credentials in sandbox secrets. `DAILY_ADMISSION_CEILING` stays `0` in `wrangler.toml`.

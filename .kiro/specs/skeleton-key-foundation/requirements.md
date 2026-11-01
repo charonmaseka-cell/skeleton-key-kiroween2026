@@ -120,7 +120,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 5. Weak live extraction SHALL NOT be hidden behind the cache.
 
 ### R10. Quality measurement and live-extraction benchmark
-1. BEFORE the full interface is built, a benchmark harness SHALL run the real extraction path (PDF parsing, Worker, model, Zod and evidence validation) on the fictional RFQ and two quotes, and on the fictional grant pack, and SHALL report: request count, elapsed time, neurons or token consumption where available, schema-valid rate, evidence-valid rate and value-supported rate.
+1. BEFORE the full interface is built, a benchmark harness SHALL run the real extraction path (PDF parsing, Worker, model, Zod and evidence validation) on the fictional RFQ and two quotes, and on the fictional grant pack, and SHALL report: request count, elapsed time, repair attempts, token consumption (measured only when the model reports it) and neuron usage (clearly labelled as measured or estimated), schema-valid rate, evidence-valid rate and value-supported rate.
 2. THE benchmark outcome SHALL decide the model choice and whether to simplify document scope; the result SHALL be recorded in `docs/build-log.md`.
 3. ScopeCheck fixtures SHALL include one quantity mismatch, one specification difference, one exclusion and one absence. PackCheck fixtures SHALL include a missing attachment, an organisation-name inconsistency, a currency or date ambiguity, and a funding-versus-budget pair that is correctly NOT flagged.
 4. Fixtures SHALL be original and fictional, with expected outputs.
@@ -129,6 +129,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 7. Deterministic fixture tests (Vitest) SHALL be separate from optional live-model checks.
 8. Property tests SHALL cover: reordering quote lines leaves the substantive comparison unchanged; unknown unit never yields an exact unit-price comparison; a missing source block prevents an evidence-backed confirmed Finding; a failed extraction never becomes a confirmed omission; a Correction that changes a Finding reopens it; the Engine accepts both Adapters with no domain imports.
 9. Unsupported inputs (e.g. scanned PDFs) SHALL be rejected with an explicit message.
+10. Rejected model claims, claims citing unknown source blocks, failed chunks and unprocessed blocks SHALL surface as extraction issues. A successful request SHALL NOT establish complete coverage.
 
 ### R11. Cost, accounts and hosting
 1. THE end-user experience SHALL require no accounts or login. Developer accounts for GitHub and Cloudflare are expected.

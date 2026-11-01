@@ -132,7 +132,8 @@ const RawOutput = z.object({ claims: z.array(z.unknown()).max(200) });
 
 export type Claim = { field: string; kind: FieldKind; blockId: string; excerpt: string; value: unknown };
 
-export type ParsedOutput = { ok: true; claims: Claim[]; dropped: number } | { ok: false };
+export type DroppedReasons = { unknown_block: number; unknown_field: number; invalid_value: number };
+export type ParsedOutput = { ok: true; claims: Claim[]; dropped: number; droppedReasons: DroppedReasons } | { ok: false };
 
 export function parseModelOutput(profile: Profile, blockIds: Set<string>, raw: unknown): ParsedOutput {
   let data: unknown = raw;
@@ -147,21 +148,26 @@ export function parseModelOutput(profile: Profile, blockIds: Set<string>, raw: u
   if (!out.success) return { ok: false };
   const kinds = new Map(profile.fields.map((x) => [x.name, x.kind]));
   const claims: Claim[] = [];
-  let dropped = 0;
+  const droppedReasons: DroppedReasons = { unknown_block: 0, unknown_field: 0, invalid_value: 0 };
   for (const item of out.data.claims) {
     const c = RawClaim.safeParse(item);
     if (!c.success) return { ok: false }; // structurally broken output -> repair attempt
     const kind = kinds.get(c.data.field);
-    if (!kind || !blockIds.has(c.data.blockId)) {
-      dropped++; // field outside the profile or a block that was not sent
+    if (!kind) {
+      droppedReasons.unknown_field++; // field outside the profile
+      continue;
+    }
+    if (!blockIds.has(c.data.blockId)) {
+      droppedReasons.unknown_block++; // a block that was not sent
       continue;
     }
     const v = VALUE_BY_KIND[kind].safeParse(c.data.value);
     if (!v.success) {
-      dropped++;
+      droppedReasons.invalid_value++;
       continue;
     }
     claims.push({ field: c.data.field, kind, blockId: c.data.blockId, excerpt: c.data.excerpt, value: v.data });
   }
-  return { ok: true, claims, dropped };
+  const dropped = droppedReasons.unknown_block + droppedReasons.unknown_field + droppedReasons.invalid_value;
+  return { ok: true, claims, dropped, droppedReasons };
 }

@@ -167,6 +167,7 @@ describe('successful extraction', () => {
     const out = (await res.json()) as { claims: { field: string }[]; meta: { dropped: number } };
     expect(out.claims.map((c) => c.field)).toEqual(['organisation_name']);
     expect(out.meta.dropped).toBe(3);
+    expect((out.meta as unknown as { droppedReasons: object }).droppedReasons).toEqual({ unknown_block: 1, unknown_field: 1, invalid_value: 1 }); // surfaced, not silent
     const messages = (state.inputs[0] as { messages: { role: string; content: string }[] }).messages;
     expect(messages[0]!.role).toBe('system');
     expect(messages[0]!.content).not.toContain('IGNORE ALL PREVIOUS');

@@ -5,3 +5,7 @@ dist/
 .DS_Store
 .env
 .env.*
+
+# benchmark local state and mocked output (live results are committed deliberately)
+.benchmark-state/
+samples/benchmark-results/mock-*

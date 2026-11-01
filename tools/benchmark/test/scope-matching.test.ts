@@ -26,9 +26,12 @@ describe('matching with identities: two different codes sharing one description'
     expect(matches.find((m) => m.subjectId === 'CP-200')).toMatchObject({ status: 'none', candidateTargetIds: [] });
   });
 
-  it('without the identity step the shared description collides (the original behaviour)', () => {
+  it('without the identity step, two requirement lines sharing a description are still two distinct subjects (no shared identity)', () => {
     const matches = scopeMatches(buildEffectiveFacts(all, []), { rfqDocId: 'rfq', quoteDocIds: ['quote-a'] });
-    expect(matches.every((m) => m.subjectId === 'CENTRIFUGAL PUMP')).toBe(true);
+    const rfqSubjects = matches.map((m) => m.subjectId);
+    expect(rfqSubjects).toHaveLength(2);
+    expect(new Set(rfqSubjects).size).toBe(2);
+    expect(rfqSubjects.every((id) => id.startsWith('CENTRIFUGAL PUMP@'))).toBe(true);
   });
 });
 

@@ -235,6 +235,8 @@ const REASONS: Record<string, string> = {
   date_format_ambiguous: 'The date could be read more than one way (for example day/month or month/day).',
   number_format_ambiguous: 'The number could be read more than one way.',
   currency_ambiguous: 'The currency could not be determined from the text.',
+  ambiguous_allocation: 'More than one requirement line names this item, or the quotation has several matching lines, so it is not clear which answers which.',
+  multiple_items_in_block: 'Several items were extracted from one line, so no quantity or specification can be tied to one of them.',
   held_candidate_in_response: 'A line in this document was held or could not be identified and could be this item, so the omission is not stated as fact.',
   multiple_candidates: 'More than one value was extracted for this field in the same place, so it is not clear which to compare.',
   processing_incomplete: 'Part of the document was not processed, so nothing can be concluded about what it does not contain.',

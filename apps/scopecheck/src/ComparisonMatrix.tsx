@@ -1,14 +1,15 @@
-import type { EffectiveFact, PlannedComparison, ReviewItem } from '@skeleton-key/engine';
+import type { PlannedComparison, ReviewItem } from '@skeleton-key/engine';
 import { StatusBadge, explainReason, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
-import { itemIdentityKey, linesOf, type ScopeContext } from './adapter';
+import { requirementsOf, type ScopeContext } from './adapter';
+import type { Line } from './adapter/rules';
 
 // ScopeCheck comparison view: each RFQ item against each quotation. Built from the rules' own outputs
 // (match resolutions, the comparison ledger, findings). It is computed on every render from the
 // session, so a correction or a coverage confirmation changes it immediately.
 
 type Aspect = { field: 'quantity' | 'specification'; label: string; comparison?: PlannedComparison; finding?: ReviewItem };
-type Cell = { quote: string; aspects: Aspect[]; absent?: ReviewItem; matched: boolean };
-type Row = { key: string | null; description: string; requested: string; cells: Cell[]; uncertain?: ReviewItem; held?: ReviewItem; heldFactId?: string };
+type Cell = { quote: string; aspects: Aspect[]; absent?: ReviewItem; ambiguous?: ReviewItem; matched: boolean };
+type Row = { /** unique per requirement line, even when two lines name the same item */ rowId: string; key: string | null; description: string; requested: string; cells: Cell[]; uncertain?: ReviewItem; held?: ReviewItem; heldFactId?: string };
 
 const LABEL = { quantity: 'Quantity', specification: 'Specification' } as const;
 const CODE = { quantity: 'quantity.differs', specification: 'spec.differs' } as const;
@@ -17,51 +18,57 @@ export function buildMatrix(view: SessionView): { rows: Row[]; uncertainQuoteLin
   const ctx = view.evaluation.context as ScopeContext | undefined;
   if (!ctx) return { rows: [], uncertainQuoteLines: [], exclusions: [], quotes: [] };
   const { data } = ctx;
-  const identities = data.identities;
   const byCode = (code: string, pred: (i: ReviewItem) => boolean) => view.items.find((i) => i.finding.code === code && pred(i));
+  const ledger = (id: string) => view.evaluation.comparisons.find((c) => c.id === id);
+  const { reqs, multi, held } = requirementsOf(view.effective, data);
   const rows: Row[] = [];
-  for (const line of linesOf(view.effective, data.rfqDocId)) {
-    const item = line.f.item as EffectiveFact | undefined;
-    if (!item) continue;
-    if (!item.usable) {
-      // A requested item whose extraction was held keeps its row; nothing about it is compared.
-      rows.push({
-        key: null,
-        description: 'Requested item could not be validated',
-        requested: '',
-        held: byCode('item.unverified', (i) => i.finding.responseDocId === data.rfqDocId && i.finding.inputs.some((x) => x.factId === item.fact.id)),
-        heldFactId: item.fact.id,
-        cells: data.quoteDocIds.map((quote) => ({
-          quote,
-          matched: false,
-          aspects: (['quantity', 'specification'] as const).map((field): Aspect => ({ field, label: LABEL[field], comparison: view.evaluation.comparisons.find((c) => c.id === `${field}:held-${item.fact.id}~${quote}`) })),
-        })),
-      });
-      continue;
-    }
-    const key = itemIdentityKey(item, identities);
-    const q = line.f.quantity;
-    const s = line.f.specification;
-    const requested = [q?.usable ? showValue(q.value) : '', s?.usable ? showValue(s.value) : ''].filter(Boolean).join(', ');
+
+  // Requested lines that could not be used keep their row; nothing about them is compared.
+  const blocked = (line: Line, tag: string, description: string, code: string): Row => {
+    const first = (line.all.item ?? [line.f.item!])[0]!;
+    return {
+      rowId: `${tag}`,
+      key: null,
+      description,
+      requested: '',
+      held: byCode(code, (i) => i.finding.responseDocId === data.rfqDocId && i.finding.inputs.some((x) => x.factId === first.fact.id)),
+      heldFactId: first.fact.id,
+      cells: data.quoteDocIds.map((quote) => ({
+        quote,
+        matched: false,
+        aspects: (['quantity', 'specification'] as const).map((field): Aspect => ({ field, label: LABEL[field], comparison: ledger(`${field}:${tag}~${quote}`) })),
+      })),
+    };
+  };
+  for (const l of held) rows.push(blocked(l, `held-${l.f.item!.fact.id}`, 'Requested item could not be validated', 'item.unverified'));
+  for (const l of multi) rows.push(blocked(l, `multi-${l.blockId}`, 'Several items were extracted from one requested line', 'item.multiple_items'));
+
+  for (const r of reqs) {
+    const item = r.line.f.item!;
+    const q = r.line.f.quantity;
+    const sp = r.line.f.specification;
+    const requested = [q?.usable ? showValue(q.value) : '', sp?.usable ? showValue(sp.value) : ''].filter(Boolean).join(', ');
     const cells: Cell[] = data.quoteDocIds.map((quote) => {
       const aspects = (['quantity', 'specification'] as const).map((field): Aspect => ({
         field,
         label: LABEL[field],
-        comparison: key ? view.evaluation.comparisons.find((c) => c.id === `${field}:${key}~${quote}`) : undefined,
-        finding: key ? byCode(CODE[field], (i) => i.finding.subjectId === `${key}:${field}` && i.finding.responseDocId === quote) : undefined,
+        comparison: r.key ? ledger(`${field}:${r.reqId}~${quote}`) : undefined,
+        finding: r.key ? byCode(CODE[field], (i) => i.finding.subjectId === `${r.reqId}:${field}` && i.finding.responseDocId === quote) : undefined,
       }));
-      const absent = key ? byCode('item.absent', (i) => i.finding.subjectId === key && i.finding.responseDocId === quote) : undefined;
-      return { quote, aspects, absent, matched: !!key && !absent };
+      const absent = r.key ? byCode('item.absent', (i) => i.finding.subjectId === r.reqId && i.finding.responseDocId === quote) : undefined;
+      const ambiguous = r.key ? byCode('item.allocation_ambiguous', (i) => i.finding.subjectId === r.reqId && i.finding.responseDocId === quote) : undefined;
+      return { quote, aspects, absent, ambiguous, matched: !!r.key && !absent && !ambiguous };
     });
     rows.push({
-      key,
+      rowId: r.reqId,
+      key: r.key,
       description: String(item.value ?? ''),
       requested,
       cells,
-      uncertain: key === null ? byCode('item.identity_uncertain', (i) => i.finding.responseDocId === data.rfqDocId && i.finding.inputs.some((x) => x.factId === item.fact.id)) : undefined,
+      uncertain: r.key === null ? byCode('item.identity_uncertain', (i) => i.finding.subjectId === r.reqId) : undefined,
     });
   }
-  const uncertainQuoteLines = view.items.filter((i) => i.finding.code === 'item.identity_uncertain' && data.quoteDocIds.includes(i.finding.responseDocId ?? ''));
+  const uncertainQuoteLines = view.items.filter((i) => ['item.identity_uncertain', 'item.multiple_items'].includes(i.finding.code) && data.quoteDocIds.includes(i.finding.responseDocId ?? ''));
   const exclusions = view.items
     .filter((i) => i.finding.code === 'exclusion.stated')
     .map((i) => ({ quote: i.finding.responseDocId ?? '', item: i, text: showValue(i.finding.inputs[0]?.value) }));
@@ -101,9 +108,10 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.key ?? r.heldFactId ?? r.description} className="align-top">
+              <tr key={r.rowId} className="align-top">
                 <th scope="row" className="border border-slate-400 p-2 font-normal">
                   <strong>{r.held ? 'Held item' : (r.key ?? 'Identity uncertain')}</strong>
+                  {r.key && r.rowId !== r.key && <span className="text-sm"> (requirement line {r.rowId.split('@')[1]})</span>}
                   <br />
                   {r.description}
                   <br />
@@ -127,6 +135,16 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                 </th>
                 {r.cells.map((c) => (
                   <td key={c.quote} className="border border-slate-400 p-2">
+                    {c.ambiguous && (
+                      <p>
+                        <StatusBadge kind="needs_review" label="Allocation unclear: Needs review" />
+                        <br />
+                        <span className="text-sm">{explainReason('ambiguous_allocation')}</span>{' '}
+                        <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${c.ambiguous.finding.message}`} href={`#finding-${c.ambiguous.finding.id}`}>
+                          Open the item
+                        </a>
+                      </p>
+                    )}
                     {c.absent ? (
                       <p>
                         <StatusBadge kind={c.absent.finding.state === 'confirmed' ? 'confirmed' : 'needs_review'} label={c.absent.finding.state === 'confirmed' ? 'Not in this quotation' : 'Not found: Needs review'} />
@@ -172,7 +190,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
       </div>
       {uncertainQuoteLines.length > 0 && (
         <div>
-          <h4 className="font-medium">Quotation lines whose item identity is uncertain</h4>
+          <h4 className="font-medium">Quotation lines whose item identity is uncertain or that carry several items</h4>
           <ul className="list-disc pl-5">
             {uncertainQuoteLines.map((i) => (
               <li key={i.finding.id}>

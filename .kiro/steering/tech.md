@@ -33,3 +33,4 @@
 - Reuse each document's validated extraction in-session (multiple chunk requests allowed); corrections rerun rules locally without calling the model.
 - Run the live-extraction benchmark before building the full interface.
 - Keep docs concise: update existing files rather than adding per-topic reports.
+- Origin allowlist is an extra control, not authentication. Quota counters (atomic, SQLite Durable Object, no content) and limits are set from benchmark data; a request-count ceiling alone does not guard the neuron allowance.

@@ -43,7 +43,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 6. WHEN a quote states an exclusion, THE app SHALL report it; an exclusion with no stated price SHALL remain "unpriced".
 7. WHEN extraction of a quote is incomplete or a match is uncertain, THE app SHALL mark the item **Needs review** and SHALL NOT emit a confirmed omission or mismatch.
 8. THE app SHALL NOT produce award recommendations or supplier rankings.
-9. LATER MILESTONES (not first slice) SHALL add delivery, payment-terms, warranty and arithmetic checks from the brief, each following R6 and R4.
+9. LATER MILESTONES (M5) SHALL add: delivery lead-time and Incoterm differences; changed payment terms; missing or shorter warranty coverage; and arithmetic inconsistencies where quantities, prices, discounts, tax and rounding give a clear calculation basis. Each SHALL follow R4 and R6, and unclear terms SHALL remain **Needs review**.
 
 ### R3. PackCheck: grant-application completeness and consistency
 **User story:** As a grant reviewer, I want required attachments mapped to files and key facts compared across documents.
@@ -51,8 +51,8 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 1. THE acceptance sample SHALL be one original fictional grant-application pack with its requirements list. The application's supported inputs SHALL NOT be limited to that sample: PackCheck SHALL accept user-uploaded documents (text-based PDF first, DOCX later) for the same checks. The final submission SHALL demonstrate this real document-processing path; early milestones MAY run on clearly labelled structured fixtures.
 2. THE app SHALL map each required attachment to an actual file, or report it missing, citing the requirement and listing the files examined.
 3. THE app SHALL extract and check: organisation name, funding requested, currency, total project budget and project start and end dates.
-4. THE app SHALL compare equivalent fields across documents (e.g. organisation name in the form versus the budget; funding requested in the form versus the budget summary) and report inconsistencies with Evidence from each file.
-5. Non-equivalent fields SHALL NOT be flagged as inconsistent: funding requested (e.g. R1.6 million) differing from total project budget (e.g. R2 million) is not by itself a Finding. A rule MAY only check that funding requested does not exceed the total budget, and only when both values are validated and share a currency.
+4. THE app SHALL compare equivalent fields across documents (e.g. organisation name in the form versus the budget; funding requested in the form versus the budget summary; currency; project dates) and report inconsistencies with Evidence from each file. These cross-file checks are the core PackCheck behaviour and SHALL NOT be replaced by the funding-versus-budget check in item 5.
+5. Non-equivalent fields SHALL NOT be flagged as inconsistent: funding requested (e.g. R1.6 million) differing from total project budget (e.g. R2 million) is not by itself a Finding. As an additional rule, PackCheck MAY check that funding requested does not exceed the total budget, only when both values are validated and share a currency.
 6. WHEN a value is missing, ambiguous, in differing currencies or unsupported by its source, THE app SHALL mark it **Needs review** and SHALL NOT emit a confirmed Finding.
 7. WHEN a file cannot be fully extracted or a mapping is uncertain, THE app SHALL mark it **Needs review**.
 8. PackCheck SHALL use the shared Engine without a copy of ScopeCheck's procurement logic.
@@ -105,9 +105,9 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 4. Original filenames and document content SHALL NOT appear in application or Worker logs.
 5. THE system SHALL NOT use persistent AI caching, content logging, a database or uploaded-file storage for user documents; session state SHALL be in memory only.
 6. THE Worker SHALL enforce, server-side, a documented maximum request body size and maximum text length per request, rejecting larger inputs with a defined error before calling the model.
-7. THE Worker SHALL enforce a documented per-client request limit and a global daily request ceiling, returning a defined rate-limit error that the UI shows as recoverable. Client-side limits alone SHALL NOT satisfy this requirement.
+7. THE Worker SHALL enforce a documented per-client request limit and a global daily request ceiling, returning a defined rate-limit error that the UI shows as recoverable. Client-side limits alone SHALL NOT satisfy this requirement. Usage counters SHALL be atomic and SHALL store no document content or filenames; a SQLite-backed Durable Object (available on Workers Free) SHALL be evaluated for this. A request-count ceiling does not by itself keep model usage within the neuron allowance, so ceilings and size limits SHALL be set from benchmark measurements.
 8. THE system SHALL bound retries: at most one JSON-repair retry per chunk, a fixed maximum number of chunks per document, and a maximum total model calls per session; no unbounded or automatic retry loops.
-9. THE Worker SHALL accept requests only from the deployed app origins (CORS allowlist) and SHALL return generic error bodies without echoing input.
+9. THE Worker SHALL accept requests only from the deployed app origins (CORS allowlist) and SHALL return generic error bodies without echoing input. The origin allowlist is an additional control, not authentication.
 10. WHEN free inference quota is exhausted or the model is unavailable, THE system SHALL return a distinct error, tell the user that analysis is temporarily unavailable, keep the session data and any already-extracted documents intact, and SHALL NOT fall back silently to cached or partial findings.
 11. Each limit SHALL have an automated test that exercises the Worker handler.
 

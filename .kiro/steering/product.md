@@ -3,7 +3,7 @@
 Skeleton Key is a reusable, domain-neutral document-checking engine. Two distinct apps are built on it:
 
 - **ScopeCheck** (`apps/scopecheck`): matches commercial quotations to an industrial RFQ. Finds quantity mismatches, specification differences, exclusions and omissions.
-- **PackCheck** (`apps/packcheck`): grant applications first. Maps required attachments to files and compares organisation name, funding requested, currency, total project budget and project dates across documents. Funding requested and total budget are different fields: R1.6m vs R2m is not an inconsistency by itself. Must accept uploaded documents, not just its bundled sample.
+- **PackCheck** (`apps/packcheck`): grant applications first. Maps required attachments to files and compares organisation name, funding requested, currency, total project budget and project dates across documents. Funding requested and total budget are different fields: R1.6m vs R2m is not an inconsistency by itself. Cross-file equivalent-field checks are primary; a funding-exceeds-budget check is additional only. Must accept uploaded documents, not just its bundled sample.
 
 Both apps are protected scope. If the schedule slips, cut animation, optional formats, extra rules and extra samples before reducing either app below a working demo.
 

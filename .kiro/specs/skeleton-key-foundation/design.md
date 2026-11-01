@@ -73,8 +73,8 @@ type ReviewDecision = { findingId: string; fingerprint: string; status: 'open'|'
 
 - **Matcher** (generic): candidate pairs from model suggestions plus a deterministic lexical score. Each pair has `score`, `source`, `decision: auto|needs_review|user_confirmed|user_rejected`. Initial heuristic threshold 0.7 is a config value, shown only as "suggested match", never a probability (R5.6); calibrated from benchmark fixtures.
 - **Rule interface**: `Rule<Ctx> = { id; run(ctx): Finding[] }` where `ctx` exposes effective Facts, matches and document completeness. Adapters supply the rule set. All arithmetic uses decimal.js (R6.1). Currency mismatch → no numeric comparison (R6.5).
-- **ScopeCheck rules (M1/M3):** quantity mismatch, spec difference, exclusion (unpriced preserved), omission (cites RFQ requirement + names quote examined). Later (M5): delivery, payment, warranty, arithmetic with stated discount/rounding/tax/pack basis; no stated basis → no finding (R6.2–6.3).
-- **PackCheck grant rules:**
+- **ScopeCheck rules (M1/M3):** quantity mismatch, spec difference, exclusion (unpriced preserved), omission (cites RFQ requirement + names quote examined). Later (M5): delivery lead time and Incoterm differences; changed payment terms; missing or shorter warranty coverage; arithmetic inconsistencies where quantities, prices, discounts, tax and rounding give a clear basis. Unclear terms or no stated basis → `needs_review` / no finding (R6.2–6.3).
+- **PackCheck grant rules** (cross-file equivalent-field checks are primary; the funding-exceeds-budget rule is additional and does not replace them):
   - `attachment-missing`: required attachment with no mapped file, cites the requirement, lists files examined (R3.2).
   - `org-name-consistent`: equivalent field across documents; normalised compare; differing → finding, missing/ambiguous → needs_review.
   - `currency-consistent`, `dates-consistent` (start ≤ end; same dates across docs where repeated).
@@ -94,11 +94,11 @@ type ReviewDecision = { findingId: string; fingerprint: string; status: 'open'|'
 `POST /extract` JSON `{schemaId, blocks:[{id,text}], docKind}`; no filenames are accepted or logged.
 
 Enforced server-side, in order (each returns a distinct JSON error code with no input echo):
-1. **Origin allowlist**: `Origin` must match configured Pages origins, else 403 (R8.9).
+1. **Origin allowlist**: `Origin` must match configured Pages origins, else 403 (R8.9). Extra control only; it is not authentication (non-browser clients can spoof it), so the limits below carry the protection.
 2. **Body size**: reject if `Content-Length` or read length > `MAX_BODY_BYTES` (initial 64 KB), 413 (R8.6).
 3. **Text length**: sum of block text > `MAX_CHARS` (initial 24,000, tuned by benchmark) or blocks > `MAX_BLOCKS`, 413.
 4. **Per-client limit**: Workers Rate Limiting binding keyed by client IP (periods only 10 or 60 s; initial 6 per 60 s). Counters are per-location and eventually consistent, so it is abuse mitigation, not exact; free-plan availability is **to verify in task 3.1** (R8.7).
-5. **Global daily ceiling**: a Durable Object (SQLite-backed, free-plan eligible; verify) counts requests per UTC day, ceiling set below the Workers AI neuron budget (initial 200 calls/day; tuned by benchmark) → 429 `daily_limit` (R8.7).
+5. **Global daily ceiling**: a Durable Object (SQLite-backed, available on Workers Free per Cloudflare documentation) holds atomic counters of request count per UTC day and, if the model reports it, estimated neurons used; no content or filenames are stored. The request ceiling is a placeholder (initial 200/day) and is NOT proof of staying within 10,000 neurons: set it, the size limits and the chunk budget from benchmark measurements, and stop on a neuron estimate where available → 429 `daily_limit` (R8.7).
 6. **Model call**: Workers AI with JSON mode, `max_tokens` capped, a fixed timeout, **no retry in the Worker**. Quota/capacity errors are mapped to 503 `quota_exhausted` (R8.10).
 Logs: only status code, error code, and counts (no content, no filenames) (R8.4). No AI Gateway caching, no KV/R2 for content (R8.5).
 
@@ -130,6 +130,6 @@ Errors: `schema_invalid`, `rate_limited`, `daily_limit`, `quota_exhausted`, `too
 Two Cloudflare Pages projects (build commands per app, output `apps/*/dist`) and one Worker. Config values (origins, limits) in `wrangler.toml` vars. No secrets in the client. Cost watch: Pages 500 builds/month, Workers 100k requests/day, Workers AI 10k neurons/day; ceiling in §6.5 protects the AI quota.
 
 ## 11. Open design assumptions
-- Rate Limiting binding and SQLite Durable Objects must be confirmed usable on the free plan in task 3.1; fallback is the stricter Durable Object-only limiter, and if neither is available the endpoint stays closed to the public (local/dev only) until a limiter exists.
+- SQLite-backed Durable Objects are documented as available on Workers Free; the Rate Limiting binding's free-plan availability still needs confirming in task 3.1. Fallback is the stricter Durable Object-only limiter, and if neither is available the endpoint stays closed to the public (local/dev only) until a limiter exists.
 - Initial numeric limits are placeholders to be tuned by the benchmark.
 - Build Brief text is still missing; M5 checks (delivery, payment, warranty) will need its definitions.

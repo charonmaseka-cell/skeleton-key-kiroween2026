@@ -1,6 +1,6 @@
 # Fresh-document validation (SC-T12): pre-registration, freeze, plan and proposed live batch
 
-**Status: prepared offline. No inference has been run on these documents.** No live call was made in this step; the 3 remaining attempts of the earlier authorisation are untouched; production admission is 0. The live batch below is a **proposal**, not started.
+**Status: prepared offline; see the batch record at the end for what was run.** No live call was made in this step; the 3 remaining attempts of the earlier authorisation are untouched; production admission is 0. The live batch below is a **proposal**, not started.
 
 ## What is being tested
 Whether the ScopeCheck rules, identity step, parser and chunker (fixed on the earlier `scopecheck-realistic` set) still work on documents they were not written against: a new fictional tender and two quotations with different wording and layout. Files: `samples/scopecheck-fresh/`, generator `tools/benchmark/src/fresh-scopecheck.ts`.

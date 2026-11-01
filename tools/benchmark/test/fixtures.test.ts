@@ -27,7 +27,11 @@ describe('app fixtures', () => {
       const sample = loadSample(set.sample);
       for (const d of fixture.docs) {
         const doc = sample.docs.find((x) => x.id === d.id)!;
-        expect(d.blocks, `${d.id} blocks`).toEqual(JSON.parse(JSON.stringify(await loadBlocks(set.sample, doc))));
+        // Fixtures hold blocks as parsed by 'ingest/1' (lines of text). The current parser ('ingest/2-cells') yields the same
+        // ids, text, page and bbox plus layout metadata; only that metadata is ignored here, so a change to ids, text or
+        // offsets still fails this test.
+        const legacy = (await loadBlocks(set.sample, doc)).map((b) => { const rest: Record<string, unknown> = { ...b }; delete rest.parser; delete rest.layout; delete rest.cells; return rest; });
+        expect(d.blocks, `${d.id} blocks`).toEqual(JSON.parse(JSON.stringify(legacy)));
         const rec = JSON.parse(readFileSync(`${SAMPLES_DIR}../${d.recordedIn}`, 'utf8')) as BenchmarkResult;
         const saved = rec.samples.flatMap((s) => s.docs).find((x) => x.docId === d.id)!;
         expect(d.claims, `${d.id} claims`).toEqual(saved.claimsReturned);

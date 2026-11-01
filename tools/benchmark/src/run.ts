@@ -88,6 +88,11 @@ export type SampleResult = {
   findingsBefore?: FindingsBlock;
   /** PackCheck only: every planned comparison and whether it ran (agree / flagged / not_evaluated with the reason) */
   comparisons?: Comparison[];
+  /**
+   * ScopeCheck only, OFFLINE DIAGNOSTIC from the labels (no rule reads it): the labelled requirement rows times the
+   * quotations times two aspects, against what the ledger planned. A shortfall means a comparison was hidden.
+   */
+  comparisonCompleteness?: { labelledRequirementRows: number; quotations: number; aspects: number; expected: number; planned: number; complete: boolean };
   /** ScopeCheck only: identifiers recovered from the source and items left uncertain. Recorded separately; facts and extraction scores are not changed. */
   identity?: { recovered: RecoveredIdentifier[]; uncertain: { factId: string; docId: string; reason: UncertainReason; candidates: string[]; description: string }[]; counts: IdentityReport['counts'] };
 };
@@ -290,11 +295,17 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
     const effective = buildEffectiveFacts(allFacts, []);
     const base = { facts: effective, documents: extractions };
     const complete = family === 'scopecheck' ? extractions.has('rfq') && docs.length === sample.docs.length : docs.length === sample.docs.length;
+    // Blocks carrying a labelled exclusion (scoring only; no extraction or rule reads this).
+    const exclusionBlocks: Record<string, Set<string>> = {};
+    for (const doc of docs) {
+      const lines = new Set(doc.facts.filter((f) => f.field === 'exclusion').map((f) => doc.lines[f.line]));
+      exclusionBlocks[doc.id] = new Set((blocksByDoc.get(doc.id) ?? []).filter((b) => lines.has(b.text)).map((b) => b.id));
+    }
     const scoreOf = (produced: Finding[]): FindingsBlock => ({
       produced: produced.map((f) => ({ code: f.code, subject: f.subjectId, response: f.responseDocId, severity: f.severity, state: f.state, reason: f.reason })),
       // Findings are only scored when every document of the sample was processed.
       score: complete
-        ? scoreFindings(produced, sample.expectedFindings, { coverageConfirmed: !!opts.simulateCoverageConfirmation, mustNotFlag: sample.mustNotFlag })
+        ? scoreFindings(produced, sample.expectedFindings, { coverageConfirmed: !!opts.simulateCoverageConfirmation, mustNotFlag: sample.mustNotFlag, exclusionBlocks })
         : { expected: 0, produced: 0, matchedExactState: 0, conservative: [], missed: [], falseCritical: [], overConfident: [], unexpectedOther: [], mustNotFlagViolations: [] },
     });
     const scopeCtx = (identities?: IdentityReport['identities']) => {
@@ -311,12 +322,17 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       } else {
         const report = resolveItemIdentities(allFacts, [...blocksByDoc.values()].flat());
         const after = complete ? scopeRun(report.identities) : [];
+        const planned = complete ? evaluateScope(scopeCtx(report.identities)).comparisons : undefined;
+        const rfqLabelled = docs.find((d) => d.id === 'rfq');
+        const quotations = docs.filter((d) => d.id !== 'rfq').length;
+        const rows = rfqLabelled ? rfqLabelled.facts.filter((f) => f.field === 'item').length : 0;
         sampleResult = {
+          comparisonCompleteness: planned && rfqLabelled ? { labelledRequirementRows: rows, quotations, aspects: 2, expected: rows * quotations * 2, planned: planned.length, complete: planned.length === rows * quotations * 2 } : undefined,
           sampleId,
           docs: docResults,
           findings: scoreOf(after),
           findingsBefore: scoreOf(before),
-          comparisons: complete ? evaluateScope(scopeCtx(report.identities)).comparisons : undefined,
+          comparisons: planned,
           identity: { recovered: report.recovered, uncertain: report.uncertain, counts: report.counts },
         };
       }
@@ -390,6 +406,7 @@ export function formatSummary(r: BenchmarkResult): string {
   for (const sm of r.samples) {
     if (sm.comparisons) {
       const c = sm.comparisons;
+      if (sm.comparisonCompleteness) lines.push(`  ${sm.sampleId} comparison completeness (label diagnostic): ${sm.comparisonCompleteness.labelledRequirementRows} rows x ${sm.comparisonCompleteness.quotations} quotations x ${sm.comparisonCompleteness.aspects} aspects = ${sm.comparisonCompleteness.expected} expected, ${sm.comparisonCompleteness.planned} planned: ${sm.comparisonCompleteness.complete ? 'complete' : 'INCOMPLETE (a comparison is missing from the ledger)'}`);
       lines.push(`  ${sm.sampleId} comparisons: ${c.length} planned, agree=${c.filter((x) => x.status === 'agree').length} flagged=${c.filter((x) => x.status === 'flagged').length} NOT EVALUATED=${c.filter((x) => x.status === 'not_evaluated').length}`);
       for (const x of c.filter((y) => y.status === 'not_evaluated')) lines.push(`    not evaluated: ${x.id} (${x.reason})`);
     }

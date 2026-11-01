@@ -8,6 +8,16 @@ export const BlockSchema = z.object({
   page: z.number().int().positive().optional(), // PDF only
   bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(), // PDF only
   ref: z.string().optional(), // DOCX paragraph / table-cell reference only
+  /**
+   * PDF only, parser 'ingest/2-cells' and later. Source cells found from the POSITIONS of text items, as offsets into
+   * `text` (text.slice(start, end) is the cell). Present only when `layout` is 'positioned'. It never changes `text`,
+   * so existing evidence offsets stay valid.
+   */
+  cells: z.array(z.object({ start: z.number().int().nonnegative(), end: z.number().int().positive(), x0: z.number(), x1: z.number(), wrapOf: z.object({ blockId: z.string(), cell: z.number().int().nonnegative() }).optional() })).optional(),
+  /** how the line is laid out: several aligned cells, one text item (cells, if any, are written in the text), or unclear */
+  layout: z.enum(['positioned', 'single_item', 'uncertain']).optional(),
+  /** version of the parser that produced this block; absent means 'ingest/1' (text only) */
+  parser: z.string().optional(),
 });
 export type Block = z.infer<typeof BlockSchema>;
 

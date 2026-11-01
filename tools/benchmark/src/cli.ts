@@ -23,6 +23,8 @@ import { DEFAULT_MAX_VALUES, buildFrozenPlan, frozenChunker, outputChunker, size
 import { buildMessages } from '../../../services/extraction-api/src/profiles';
 import { oracleAi, restAi, type Ai } from './ai';
 import { AUDIT_VERSION, formatSummary, runBenchmark } from './run';
+import { LEGACY_PARSER_VERSION, PARSER_VERSION } from '@skeleton-key/ingest';
+import { scopeRule } from '../../../apps/scopecheck/src/adapter/rules';
 import { loadSample, SAMPLES_DIR } from './samples';
 import { LocalTransport, ReplayTransport, type Transport } from './transport';
 import { modelConfig, withModel } from './candidates';
@@ -169,11 +171,17 @@ if (mode === 'replay') {
   if (!from) fail('replay mode requires --from <result.json[,result.json]>');
   const saved: unknown[][] = [];
   const recordedProfiles: Record<string, string> = {};
+  const plan = args.get('frozen-plan') ? (JSON.parse(readFileSync(args.get('frozen-plan')!, 'utf8')) as FrozenPlan) : undefined;
   for (const f of from.split(',')) {
     const r = JSON.parse(readFileSync(f, 'utf8')) as { samples: { docs: { docId: string; claimsReturned?: unknown[]; profile?: { id: string } }[] }[] };
     for (const sm of r.samples) for (const d of sm.docs) {
+      if (docFilter && !docFilter.includes(d.docId)) continue;
       if (!d.claimsReturned) fail(`${f} has no saved claims (older result format)`);
-      saved.push(d.claimsReturned);
+      // With a frozen plan the saved claims of a document are split back into the requests they came from (by the
+      // chunk's own block ids), so the replay has the same chunks, and so the same coverage record, as the live run.
+      const pd = plan?.docs.find((x) => x.docId === d.docId);
+      if (pd) for (const c of pd.chunks) saved.push(d.claimsReturned.filter((cl) => c.blockIds.includes((cl as { blockId?: string }).blockId ?? '')));
+      else saved.push(d.claimsReturned);
       if (d.profile) recordedProfiles[d.docId] = d.profile.id;
     }
   }
@@ -221,7 +229,13 @@ counter.close();
 const outDir = join(SAMPLES_DIR, 'benchmark-results');
 mkdirSync(outDir, { recursive: true });
 const out = args.get('out') ?? join(outDir, `${mode}-${label}-${result.startedAt.replace(/[:.]/g, '-')}.json`);
-writeFileSync(out, JSON.stringify({ ...result, finishedAt, wallClockMs: Date.now() - processStart, auditVersion: AUDIT_VERSION, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, resumedFrom: args.get('resume-from'), chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
+const replayInfo = mode === 'replay' ? {
+  note: 'OFFLINE REPLAY of saved model responses. No model was called. The responses are NOT results of the parser, rules or audit named under rescoredWith: they were produced earlier, from the text of the parser named under responsesProducedWith.',
+  source: args.get('from')!.split(','),
+  responsesProducedWith: { parser: LEGACY_PARSER_VERSION, note: 'text lines only; no cell metadata (a result file without a parser field was made by ingest/1)' },
+  rescoredWith: { parser: PARSER_VERSION, scopeRuleVersion: scopeRule.version, auditVersion: AUDIT_VERSION, chunkPlan: args.get('frozen-plan') ?? 'size-only default' },
+} : undefined;
+writeFileSync(out, JSON.stringify({ ...result, replay: replayInfo, finishedAt, wallClockMs: Date.now() - processStart, auditVersion: AUDIT_VERSION, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, resumedFrom: args.get('resume-from'), chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
 
 // Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.

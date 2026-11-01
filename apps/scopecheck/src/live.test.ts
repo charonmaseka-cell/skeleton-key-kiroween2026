@@ -69,7 +69,7 @@ describe('uploaded PDFs, in chunks, through a fake Worker, to findings', () => {
     const s = states(v);
     expect(s.get('quantity.differs|CP-100:quantity|quote-1')).toBe('confirmed');
     expect(s.get('spec.differs|CP-100:specification|quote-2')).toBe('confirmed');
-    expect(s.get('exclusion.stated|quote-1:exclusion|quote-1')).toBe('confirmed');
+    expect([...s.keys()].filter((k) => k.startsWith('exclusion.stated|quote-1:') && k.endsWith(':exclusion|quote-1'))).toHaveLength(1);
     expect(s.get('item.absent|PG-6|quote-2')).toBe('needs_review');
     expect([...s.values()].filter((x) => x === 'confirmed')).toHaveLength(3);
     for (const d of v.documents.values()) expect(d.coverage.state).toBe('unverified');

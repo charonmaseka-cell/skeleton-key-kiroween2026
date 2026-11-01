@@ -6,3 +6,5 @@ import { parsePdfWith } from './core';
 export { groupLines, parsePdfWith, UnsupportedPdfError } from './core';
 
 export const parsePdf = (data: Uint8Array, docId: string): Promise<Block[]> => parsePdfWith(getDocument, data, docId);
+export { PARSER_VERSION, LEGACY_PARSER_VERSION, groupRows } from './core';
+export { detectCells, MIN_ROWS } from './cells';

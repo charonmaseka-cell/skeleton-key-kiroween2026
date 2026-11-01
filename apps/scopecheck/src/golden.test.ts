@@ -7,12 +7,26 @@ import { FIXTURES } from './fixtures';
 // Golden tests: the ScopeCheck adapter run on the fixture inputs (source blocks + recorded claims).
 // Expected outcomes come from the labelled sample manifests, not from the apps.
 
-const manifest = (id: string) => JSON.parse(readFileSync(new URL(`../../../samples/${id}/sample.json`, import.meta.url), 'utf8')) as { expectedFindings: { code: string; subject: string; response: string; state: string }[] };
+type Manifest = { expectedFindings: { code: string; subject: string; response: string; state: string }[]; docs: { id: string; lines: string[]; facts: { field: string; line: number }[] }[] };
+const manifest = (id: string) => JSON.parse(readFileSync(new URL(`../../../samples/${id}/sample.json`, import.meta.url), 'utf8')) as Manifest;
 const key = (c: string, s: string, r?: string) => `${c}|${s}|${r ?? ''}`;
 const standard = FIXTURES.find((f) => f.id === 'scopecheck-standard')!;
 const layout = FIXTURES.find((f) => f.id === 'scopecheck-layout')!;
 const run = (f: Fixture, s: SessionState = emptySession(), at = 1) => evaluateSession(scopeCheckAdapter, f, s, at);
-const states = (v: ReturnType<typeof run>) => new Map(v.items.map((i) => [key(i.finding.code, i.finding.subjectId, i.finding.responseDocId), i.finding.state]));
+/**
+ * A stated exclusion is identified by its own source line (`quote-a:p1-l5:exclusion`); the labels name one exclusion per
+ * document (`quote-a:exclusion`). A finding is read as the labelled one only when its evidence is in the labelled line.
+ */
+function labelSubject(f: ReturnType<typeof run>['items'][number]['finding'], fx: Fixture, sampleId: string): string {
+  if (f.code !== 'exclusion.stated') return f.subjectId;
+  const m = manifest(sampleId);
+  const doc = m.docs.find((d) => d.id === f.responseDocId);
+  const lines = new Set((doc?.facts ?? []).filter((x) => x.field === 'exclusion').map((x) => doc!.lines[x.line]));
+  const blocks = fx.docs.find((d) => d.id === f.responseDocId)?.blocks ?? [];
+  const labelled = f.evidence.some((e) => lines.has(blocks.find((b) => b.id === e.evidence.blockId)?.text ?? '\u0000'));
+  return labelled ? `${f.responseDocId}:exclusion` : f.subjectId;
+}
+const states = (v: ReturnType<typeof run>, fx: Fixture = standard, sampleId = 'scopecheck') => new Map(v.items.map((i) => [key(i.finding.code, labelSubject(i.finding, fx, sampleId), i.finding.responseDocId), i.finding.state]));
 const settle = (f: Fixture, s: SessionState, at = 1): SessionState => withReconciledStore(s, run(f, s, at));
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
 
@@ -21,7 +35,7 @@ describe('standard sample: RFQ and two quotations', () => {
 
   it('produces exactly the expected findings, in the expected states, from the fixture inputs', () => {
     const want = new Map(manifest('scopecheck').expectedFindings.map((e) => [key(e.code, e.subject, e.response), e.state]));
-    expect(states(v)).toEqual(want);
+    expect(states(v, standard, 'scopecheck')).toEqual(want);
   });
 
   it('quantity and specification differences are confirmed; the PG-6 omission stays Needs review because coverage is unverified', () => {
@@ -111,7 +125,7 @@ describe('layout sample: free-text quotation (known limitation kept visible)', (
 
   it('4 of the 5 expected findings; the CP-100 specification difference is a known MISS (the extraction never found that specification)', () => {
     const want = new Map(manifest('scopecheck-layout').expectedFindings.map((e) => [key(e.code, e.subject, e.response), e.state]));
-    const got = states(v);
+    const got = states(v, layout, 'scopecheck-layout');
     const missing = [...want.keys()].filter((k) => !got.has(k));
     expect(missing).toEqual([key('spec.differs', 'CP-100:specification', 'quote-c')]);
     for (const [k, st] of got) expect(want.get(k), k).toBe(st); // nothing extra, every state as expected

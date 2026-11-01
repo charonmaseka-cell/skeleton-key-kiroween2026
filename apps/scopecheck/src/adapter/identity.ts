@@ -1,4 +1,4 @@
-import { isEvidenceIntact, nameTokens, type Block, type Evidence, type Fact } from '@skeleton-key/engine';
+import { cellAround, isEvidenceIntact, nameTokens, type Block, type Evidence, type Fact } from '@skeleton-key/engine';
 
 // ScopeCheck adapter: item identity. All procurement-specific parsing (what an item code looks
 // like, how a quotation line is laid out) lives here, in the ScopeCheck app, not in the shared
@@ -11,8 +11,9 @@ import { isEvidenceIntact, nameTokens, type Block, type Evidence, type Fact } fr
 // text ties it unambiguously to that item. Anything else stays description-only or uncertain, and
 // uncertain identity can never produce a confirmed omission.
 //
-// Layout assumptions (documented limits): one item per block; an item's "segment" is the part of
-// its block between column separators (`|`, `;` or a tab), or the whole block when there are none;
+// Layout assumptions (documented limits): one item per block; an item's "segment" (cell) is, in this order, the
+// source cell the PDF parser found from item positions (Block.cells, validated against the text) or the part of its block
+// between column separators (`|`, `;` or a tab) written in the text, or the whole block when there are none;
 // a code looks like 1-4 letters, a hyphen and digits (CP-100). Codes without a hyphen are not
 // recognised and leave the item description-only. A second code-like token in the same segment
 // (a standard such as SANS-1200, an alternative part number) makes identity uncertain: the
@@ -45,7 +46,13 @@ export type RecoveredIdentifier = {
   codeSpan: Evidence;
   /** the span the model cited for the item (unchanged) */
   itemEvidence: Evidence;
-  method: 'single_code_in_item_segment';
+  method: 'single_code_in_item_segment' | 'single_code_in_item_cell';
+  /**
+   * 'single_code_in_item_cell' only: the model returned several cells of the row joined by "|" in one item value. Each part
+   * was located exactly once in a DIFFERENT source cell of the cited span; these are those spans (all intact). The raw
+   * claim is not edited.
+   */
+  parts?: Evidence[];
 };
 
 export type IdentityReport = {
@@ -71,8 +78,11 @@ function locateWithin(block: Block, ev: Evidence, description: string): { start:
   return hits.length === 1 ? hits[0]! : null;
 }
 
-/** The part of the block between column separators that contains [start, end). */
-function segmentAround(text: string, start: number, end: number): { start: number; end: number } {
+/** The source cell that contains [start, end): the parser's validated cell, else the part between written separators. */
+function segmentAround(block: Block, start: number, end: number): { start: number; end: number } {
+  const positioned = cellAround(block, start, end);
+  if (positioned) return positioned;
+  const text = block.text;
   let segStart = 0;
   let segEnd = text.length;
   for (const sep of SEGMENT_SEPARATORS) {
@@ -82,6 +92,26 @@ function segmentAround(text: string, start: number, end: number): { start: numbe
     if (r !== -1) segEnd = Math.min(segEnd, r);
   }
   return { start: segStart, end: segEnd };
+}
+
+/**
+ * A value that joins several source cells with "|". Every part must be located exactly once inside the cited span, and
+ * the parts must lie in different source cells; otherwise null (the identity stays uncertain and goes to review).
+ */
+function locateCells(block: Block, ev: Evidence, value: string, docBlocks: Map<string, Block>): { first: { start: number; end: number }; parts: Evidence[] } | null {
+  const texts = value.split('|').map((p) => p.trim()).filter(Boolean);
+  if (texts.length < 2) return null;
+  const spans: { start: number; end: number }[] = [];
+  for (const t of texts) {
+    const hit = locateWithin(block, ev, t);
+    if (!hit) return null;
+    spans.push(hit);
+  }
+  const cells = spans.map((h) => segmentAround(block, h.start, h.end));
+  if (new Set(cells.map((c) => `${c.start}:${c.end}`)).size !== cells.length) return null; // two parts in one cell: not cell boundaries
+  const parts = spans.map((h): Evidence => ({ docId: block.docId, blockId: block.id, start: h.start, end: h.end, text: block.text.slice(h.start, h.end) }));
+  if (!parts.every((p) => isEvidenceIntact(p, docBlocks))) return null;
+  return { first: spans[0]!, parts };
 }
 
 export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityReport {
@@ -116,7 +146,10 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
     const block = docBlocks.get(ev.blockId)!;
 
     // 1. The model kept a code in its value. Accept it only if the source segment holds no competing code.
-    const inValue = [...new Set(codesIn(fact.value).map((c) => c.code))];
+    // When the value joins several cells with "|", only its FIRST part describes the item: a code in a later part (a
+    // standard in the specification cell, say) is not the item's code.
+    const descriptionPart = fact.value.includes('|') ? fact.value.split('|')[0]! : fact.value;
+    const inValue = [...new Set(codesIn(descriptionPart).map((c) => c.code))];
     if (inValue.length > 1) {
       uncertain(fact, 'multiple_codes', inValue);
       continue;
@@ -128,7 +161,7 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
         uncertain(fact, 'code_not_in_source', [code]);
         continue;
       }
-      const seg = segmentAround(block.text, ev.start + at.start, ev.start + at.end);
+      const seg = segmentAround(block, ev.start + at.start, ev.start + at.end);
       const inSegment = [...new Set(codesIn(block.text.slice(seg.start, seg.end)).map((c) => c.code))];
       if (inSegment.length > 1) {
         uncertain(fact, 'multiple_codes', inSegment);
@@ -139,17 +172,26 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
       continue;
     }
 
-    // 2. The code was omitted: look for it in the same column segment as the description.
-    const at = locateWithin(block, ev, fact.value);
+    // 2. The code was omitted: look for it in the same source cell as the description.
+    let at = locateWithin(block, ev, fact.value);
+    let parts: Evidence[] | undefined;
     if (!at) {
-      uncertain(fact, 'description_not_located');
-      continue;
+      // The model may have joined several cells of the row with "|" in one value ("Pipe DN50 | HDPE, 6 m"). That is only
+      // accepted when every part is found exactly once inside the cited span, each in a DIFFERENT source cell. The first
+      // part is the item description; the others are the model's cells and play no part in the identity.
+      const located = locateCells(block, ev, fact.value, docBlocks);
+      if (!located) {
+        uncertain(fact, 'description_not_located');
+        continue;
+      }
+      at = located.first;
+      parts = located.parts;
     }
-    const { start: segStart, end: segEnd } = segmentAround(block.text, at.start, at.end);
+    const { start: segStart, end: segEnd } = segmentAround(block, at.start, at.end);
     const found = codesIn(block.text.slice(segStart, segEnd));
 
     if (found.length === 0) {
-      report.identities.set(fact.id, { kind: 'description', key: nameTokens(fact.value).join(' ') });
+      report.identities.set(fact.id, { kind: 'description', key: nameTokens(parts ? fact.value.split('|')[0]!.trim() : fact.value).join(' ') });
       report.counts.descriptionOnly++;
     } else if (found.length > 1) {
       uncertain(fact, 'multiple_codes', [...new Set(found.map((c) => c.code))]);
@@ -161,7 +203,7 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
         continue;
       }
       report.identities.set(fact.id, { kind: 'code', code: c.code, origin: 'recovered' });
-      report.recovered.push({ factId: fact.id, docId: fact.docId, description: fact.value, code: c.code, codeSpan, itemEvidence: ev, method: 'single_code_in_item_segment' });
+      report.recovered.push({ factId: fact.id, docId: fact.docId, description: fact.value, code: c.code, codeSpan, itemEvidence: ev, method: parts ? 'single_code_in_item_cell' : 'single_code_in_item_segment', ...(parts ? { parts } : {}) });
       report.counts.recovered++;
     }
   }

@@ -50,10 +50,32 @@ function typedItemKey(v: unknown): string | null {
   return codes.length > 1 ? null : (codes[0] ?? norm(v).toUpperCase());
 }
 const usable = (e?: EffectiveFact): e is EffectiveFact => !!e && e.usable;
-const sameTokens = (a: unknown, b: unknown) => {
-  const x = new Set(nameTokens(String(a ?? '')));
-  const y = new Set(nameTokens(String(b ?? '')));
-  return x.size === y.size && [...x].every((t) => y.has(t));
+/**
+ * Leading procurement connectors that introduce a specification without being part of it: "with", "c/w",
+ * "complete with" and "incl." (also "incl"). Only a PREFIX is removed, only whole words, and the longest first, so
+ * "without", "withstand", "with no ..." (negation kept), numbers, units, standards and qualifiers are never touched.
+ */
+const LEADING_CONNECTORS = [/^complete\s+with(?=\s|$)/i, /^c\/w(?=\s|$)/i, /^incl\.?(?=\s|$)/i, /^with(?=\s|$)/i];
+export function stripLeadingConnectors(text: string): { text: string; removed: string[] } {
+  let rest = text.trim();
+  const removed: string[] = [];
+  for (let guard = 0; guard < 3; guard++) {
+    const re = LEADING_CONNECTORS.find((r) => r.test(rest));
+    if (!re) break;
+    const m = rest.match(re)![0];
+    const next = rest.slice(m.length).trim();
+    if (next.length === 0) break; // a connector with nothing after it is left alone
+    removed.push(m.toLowerCase());
+    rest = next;
+  }
+  return { text: rest, removed };
+}
+export const sameSpec = (a: unknown, b: unknown): { same: boolean; removed: string[] } => {
+  const sa = stripLeadingConnectors(String(a ?? ''));
+  const sb = stripLeadingConnectors(String(b ?? ''));
+  const x = new Set(nameTokens(sa.text));
+  const y = new Set(nameTokens(sb.text));
+  return { same: x.size === y.size && [...x].every((t) => y.has(t)), removed: [...sa.removed, ...sb.removed] };
 };
 
 
@@ -100,10 +122,12 @@ export const isMulti = (l: Line) => (l.all.item?.length ?? 0) > 1;
 export type Req = { reqId: string; key: string | null; line: Line; sharedBy: number };
 
 /** The RFQ split into requirement lines, lines with several item facts, and lines whose item failed validation. */
-export function requirementsOf(facts: Map<string, EffectiveFact>, data: ScopeData): { reqs: Req[]; multi: Line[]; held: Line[] } {
+export function requirementsOf(facts: Map<string, EffectiveFact>, data: ScopeData): { reqs: Req[]; multi: Line[]; held: Line[]; noItem: Line[] } {
   const lines = linesOf(facts, data.rfqDocId);
   const multi = lines.filter(isMulti);
   const held = lines.filter((l) => !isMulti(l) && l.f.item && !l.f.item.usable);
+  // A requirement line that has a quantity or a specification but no item value: its item was never extracted.
+  const noItem = lines.filter((l) => !l.unplaced && !l.f.item && (l.f.quantity || l.f.specification));
   const keyed = lines.filter((l) => !isMulti(l) && usable(l.f.item)).map((line) => ({ line, key: itemIdentityKey(line.f.item!, data.identities) }));
   const count = new Map<string, number>();
   for (const { key } of keyed) if (key !== null) count.set(key, (count.get(key) ?? 0) + 1);
@@ -111,7 +135,7 @@ export function requirementsOf(facts: Map<string, EffectiveFact>, data: ScopeDat
     const sharedBy = key === null ? 1 : count.get(key)!;
     return { key, line, sharedBy, reqId: key === null ? `${data.rfqDocId}:${line.blockId}:item` : sharedBy > 1 ? `${key}@${line.blockId}` : key };
   });
-  return { reqs, multi, held };
+  return { reqs, multi, held, noItem };
 }
 
 /** A quotation split into lines that can be matched and lines that cannot be (and so may hide the item). */
@@ -119,7 +143,8 @@ export function offersOf(facts: Map<string, EffectiveFact>, docId: string, ident
   const lines = linesOf(facts, docId);
   const multi = lines.filter(isMulti);
   const matchable = lines.filter((l) => !isMulti(l) && usable(l.f.item) && itemIdentityKey(l.f.item!, identities) !== null);
-  const unresolved = lines.filter((l) => isMulti(l) || (!!l.f.item && (!l.f.item.usable || itemIdentityKey(l.f.item, identities) === null)));
+  // A line with a quantity, specification or price but no item value could be the item: it counts as unresolved.
+  const unresolved = lines.filter((l) => isMulti(l) || (!!l.f.item && (!l.f.item.usable || itemIdentityKey(l.f.item, identities) === null)) || (!l.unplaced && !l.f.item && !!(l.f.quantity || l.f.specification || l.f.unit_price)));
   return { lines, multi, matchable, unresolved };
 }
 
@@ -163,7 +188,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
   const comparisons: PlannedComparison[] = [];
   const { data } = ctx;
   const ASPECTS = ['quantity', 'specification'] as const;
-  const { reqs, multi: rfqMulti, held: rfqHeld } = requirementsOf(ctx.facts, data);
+  const { reqs, multi: rfqMulti, held: rfqHeld, noItem: rfqNoItem } = requirementsOf(ctx.facts, data);
 
   // An RFQ line whose item failed validation, or that carries several item facts, never vanishes: it is a
   // Needs-review finding (with only the evidence that really exists) and every comparison it blocks is Not evaluated.
@@ -177,12 +202,32 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
       }
     }
   };
+  // A requirement line with a quantity or specification but no item value: visible as Needs review, and its comparisons are
+  // Not evaluated with the missing item as the blocked input.
+  for (const l of rfqNoItem) {
+    const present = Object.values(l.f);
+    const d = describeInputs(present);
+    out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: data.rfqDocId, code: 'item.missing', severity: 'warning', state: 'needs_review', subjectId: `${data.rfqDocId}:${l.blockId}:item`, message: 'A requirement line has no item value', reason: 'no_item_fact', inputs: d.inputs, evidence: d.evidence }));
+    for (const q of data.quoteDocIds) {
+      for (const field of ASPECTS) {
+        comparisons.push({ id: `${field}:${data.rfqDocId}:${l.blockId}:item~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `no item value was extracted for this requirement line in ${data.rfqDocId}; it cannot be matched to ${q}`, blocked: { docId: data.rfqDocId, field: 'item', reason: 'no_fact' } });
+      }
+    }
+  }
   for (const l of rfqHeld) blockRfq(l, 'item.unverified', 'Requested item could not be validated', l.f.item!.fact.reason ?? 'unvalidated_input', `held-${l.f.item!.fact.id}`);
   for (const l of rfqMulti) blockRfq(l, 'item.multiple_items', 'Several items were extracted from one requested line', 'multiple_items_in_block', `multi-${l.blockId}`);
   for (const r of reqs) {
     if (r.key !== null) continue;
     const d = describeInputs([r.line.f.item!]);
+    const why = reasonOf(r.line.f.item!, data.identities) ?? 'identity_uncertain';
     out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: data.rfqDocId, code: 'item.identity_uncertain', severity: 'warning', state: 'needs_review', subjectId: r.reqId, message: 'Item identity is uncertain', reason: reasonOf(r.line.f.item!, data.identities), inputs: d.inputs, evidence: d.evidence }));
+    // Nothing is hidden: every quantity and specification comparison this requirement line would have had is listed as
+    // Not evaluated against every quotation, with the input that blocks it (the requirement's own identity).
+    for (const q of data.quoteDocIds) {
+      for (const field of ASPECTS) {
+        comparisons.push({ id: `${field}:${r.reqId}~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `requested item in ${data.rfqDocId} has an uncertain identity (${why}); it cannot be matched to ${q}`, blocked: { docId: data.rfqDocId, field: 'item', reason: why, factId: r.line.f.item!.fact.id } });
+      }
+    }
   }
 
   for (const q of data.quoteDocIds) {
@@ -219,7 +264,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         continue;
       }
       const offer = qLines.find((l) => l.blockId === m.verifiedTargetId)!;
-      const aspect = (field: string, code: string, equal: (a: EffectiveFact, b: EffectiveFact) => 'equal' | 'different' | 'incomparable', why?: string) => {
+      const aspect = (field: string, code: string, equal: (a: EffectiveFact, b: EffectiveFact) => 'equal' | 'different' | 'incomparable', why?: string, note?: (a: EffectiveFact, b: EffectiveFact) => string) => {
         const a = r.line.f[field];
         const b = offer.f[field];
         const cmp = { id: `${field}:${r.reqId}~${q}`, check: 'quote_aspect' as const, field, docs: [data.rfqDocId, q] };
@@ -243,20 +288,24 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
           return;
         }
         const verdict2 = equal(a, b);
-        comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} <-> ${showValue(b.value)}` });
+        comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} <-> ${showValue(b.value)}${note?.(a, b) ?? ''}` });
         if (verdict2 === 'equal') return;
         const d = describeInputs([a, b]);
         out.push(makeDraft({ ...base, matchStatus: m.status, code, severity: 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${r.reqId}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${r.key} in ${q}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
       };
       aspect('quantity', 'quantity.differs', (a, b) => compareQuantities(a.value as never, b.value as never).result);
-      aspect('specification', 'spec.differs', (a, b) => (sameTokens(a.value, b.value) ? 'equal' : 'different'));
+      aspect('specification', 'spec.differs', (a, b) => (sameSpec(a.value, b.value).same ? 'equal' : 'different'), undefined, (a, b) => {
+        const r = sameSpec(a.value, b.value);
+        return r.removed.length ? ` (leading ${r.removed.map((x) => `"${x}"`).join(', ')} not counted as a difference)` : '';
+      });
     }
+    // Every stated exclusion is its own finding, identified by its source line (and its position within the line), so
+    // one exclusion (for example VAT) can never hide another (for example freight).
     for (const l of qLines) {
-      const ex = l.f.exclusion;
-      if (usable(ex)) {
+      (l.all.exclusion ?? []).filter(usable).forEach((ex, i) => {
         const d = describeInputs([ex]);
-        out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'exclusion.stated', severity: 'info', state: 'confirmed', subjectId: `${q}:exclusion`, message: `Exclusion stated in ${q} (unpriced)`, inputs: d.inputs, evidence: d.evidence }));
-      }
+        out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'exclusion.stated', severity: 'info', state: 'confirmed', subjectId: `${q}:${l.blockId}:exclusion${i > 0 ? `#${i + 1}` : ''}`, message: `Exclusion stated in ${q} (unpriced): ${showValue(ex.value)}`, inputs: d.inputs, evidence: d.evidence }));
+      });
     }
     // Several item facts in one quotation block: which one a quantity or specification belongs to is not known.
     for (const l of offers.multi) {
@@ -285,7 +334,9 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
 
 export const scopeRule: Rule<ScopeData> = {
   id: 'bench.scope',
-  version: '2',
+  // 3 (2026-11-02): leading connectors are not a specification difference; unresolved requirement lines list their
+  // comparisons as Not evaluated; each stated exclusion is its own finding (identified by its source line).
+  version: '3',
   run(ctx: RuleContext<ScopeData>) {
     return evaluateScope(ctx).drafts;
   },

@@ -95,3 +95,6 @@ Quotation B was sent from the frozen plan (7 requests, 0 repairs, no timeout); t
 
 ## PC-T3: PackCheck upload (1 Nov 2026)
 PackCheck now has the same upload panel as ScopeCheck (`PACKCHECK_SLOTS`: requirements and application form required, budget and registration optional; one profile `packcheck.grant.v2`). Tested with a fake parser and a fake Worker (UI flow and the client path against the sample pack's recorded claims; findings equal the sample pack's). No live inference was made for this work and no real Worker is connected.
+
+## Correctness fixes from saved responses (2 Nov 2026)
+Five fixes, offline only (no model call, 3 attempts untouched, admission 0): leading connectors in specifications, identity from validated source cells, coordinate-aware cell detection (parser `ingest/2-cells`, synthetic tests only), all 96 comparisons planned with Not-evaluated rows for unresolved identities and missing facts, separate exclusion findings with a scorer that cannot count VAT as freight. Versioned replay of the saved baseline: 18 of 18 expected, 1 false critical (SN-403 specification, an extraction fault), 96 comparisons (22 Not evaluated). Original baseline files unchanged. Report: `docs/results/sc-t4-offline-replay-v2.md`.

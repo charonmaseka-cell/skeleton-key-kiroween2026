@@ -11,6 +11,7 @@ import { formatSummary, runBenchmark } from './run';
 import { loadSample, SAMPLES_DIR } from './samples';
 import { LocalTransport, ReplayTransport, type Transport } from './transport';
 import { estimateNeurons } from './usage';
+import { modelConfig, withModel } from './candidates';
 import { PROFILES } from '../../../services/extraction-api/src/profiles';
 
 const args = new Map<string, string>();
@@ -39,7 +40,13 @@ function fail(msg: string): never {
   process.exit(1);
 }
 
-const model = PROFILES['scopecheck.quote.v1']!.model;
+// Model selection is benchmark configuration only (candidates.ts). Default: the model the profiles name.
+const profileModel = PROFILES['scopecheck.quote.v1']!.model;
+const model = args.get('model') ?? profileModel;
+if (args.has('model')) {
+  if (mode !== 'live') fail('--model applies to live runs only');
+  modelConfig(model); // throws for a model that is not registered as a candidate
+}
 let ai: Ai;
 let counter: SqliteAdmission;
 let attemptBudget: number;
@@ -64,7 +71,7 @@ if (mode === 'live') {
   const state = existsSync(statePath) ? (JSON.parse(readFileSync(statePath, 'utf8')) as { day: string; neuronsEstimated: number }) : { day, neuronsEstimated: 0 };
   const budget = Number(args.get('neuron-budget') ?? 8000);
   if (state.day === day && state.neuronsEstimated >= budget) fail(`estimated neurons used today (${Math.round(state.neuronsEstimated)}) already reach the budget (${budget}). Stop here.`);
-  ai = restAi(accountId, token);
+  ai = model === profileModel ? restAi(accountId, token) : withModel(restAi(accountId, token), model);
 } else if (mode === 'replay') {
   counter = new SqliteAdmission(':memory:');
   attemptBudget = 1000; // not binding: replay charges nothing
@@ -123,7 +130,7 @@ console.log(formatSummary(result));
 if (mode === 'live' && statePath) {
   const day = new Date().toISOString().slice(0, 10);
   const prev = existsSync(statePath) ? (JSON.parse(readFileSync(statePath, 'utf8')) as { day: string; neuronsEstimated: number }) : { day, neuronsEstimated: 0 };
-  const add = result.usage.promptTokens !== null ? estimateNeurons(result.usage.promptTokens, result.usage.completionTokens ?? 0) : 0;
+  const add = result.usage.promptTokens !== null ? estimateNeurons(result.usage.promptTokens, result.usage.completionTokens ?? 0, model) : 0;
   writeFileSync(statePath, JSON.stringify({ day, neuronsEstimated: (prev.day === day ? prev.neuronsEstimated : 0) + add }));
 }
 if (mode === 'replay' && result.requests.some((r) => !r.ok)) {

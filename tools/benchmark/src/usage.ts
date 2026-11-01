@@ -3,12 +3,14 @@
 //  - Neurons are an ESTIMATE derived from tokens, unless the user supplies a figure read from the
 //    Cloudflare dashboard (then labelled as such). Per-request neuron counts are not returned by the API.
 
+import { BASELINE_MODEL, modelConfig } from './candidates';
+
+/** Kept for compatibility: the baseline model's rates. See candidates.ts for every model. */
 export const NEURON_RATES = {
-  model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
-  inputPerMillionTokens: 26_636,
-  outputPerMillionTokens: 204_818,
-  basis:
-    'Approximate: published USD per million tokens ($0.293 input, $2.253 output) divided by $0.011 per 1,000 neurons. Check the Cloudflare pricing page for exact figures.',
+  model: BASELINE_MODEL,
+  inputPerMillionTokens: modelConfig(BASELINE_MODEL).neuronsPerMillion.input,
+  outputPerMillionTokens: modelConfig(BASELINE_MODEL).neuronsPerMillion.output,
+  basis: modelConfig(BASELINE_MODEL).ratesBasis,
 } as const;
 
 export type NeuronBasis = 'estimated_from_tokens' | 'measured_by_user_from_dashboard' | 'mock_estimate' | 'unavailable';
@@ -23,12 +25,14 @@ export type UsageSummary = {
   neurons: { value: number | null; basis: NeuronBasis; note: string };
 };
 
-export const estimateNeurons = (prompt: number, completion: number): number =>
-  (prompt * NEURON_RATES.inputPerMillionTokens + completion * NEURON_RATES.outputPerMillionTokens) / 1_000_000;
+export const estimateNeurons = (prompt: number, completion: number, model: string = BASELINE_MODEL): number => {
+  const r = modelConfig(model).neuronsPerMillion;
+  return (prompt * r.input + completion * r.output) / 1_000_000;
+};
 
 export function summarizeUsage(
   reports: ({ promptTokens: number | null; completionTokens: number | null } | null)[],
-  opts: { mock: boolean; measuredNeurons?: number },
+  opts: { mock: boolean; measuredNeurons?: number; model?: string },
 ): UsageSummary {
   const withTokens = reports.filter((r): r is { promptTokens: number; completionTokens: number } => !!r && r.promptTokens !== null && r.completionTokens !== null);
   const prompt = withTokens.reduce((n, r) => n + r.promptTokens, 0);
@@ -41,9 +45,9 @@ export function summarizeUsage(
     neurons = { value: null, basis: 'unavailable', note: 'No token usage was reported.' };
   } else {
     neurons = {
-      value: Math.round(estimateNeurons(prompt, completion)),
+      value: Math.round(estimateNeurons(prompt, completion, opts.model)),
       basis: opts.mock ? 'mock_estimate' : 'estimated_from_tokens',
-      note: opts.mock ? 'Synthetic tokens from the mock model; not a real measurement.' : `ESTIMATE from measured tokens. ${NEURON_RATES.basis}`,
+      note: opts.mock ? 'Synthetic tokens from the mock model; not a real measurement.' : `ESTIMATE from measured tokens. ${modelConfig(opts.model ?? BASELINE_MODEL).ratesBasis}`,
     };
   }
   return {

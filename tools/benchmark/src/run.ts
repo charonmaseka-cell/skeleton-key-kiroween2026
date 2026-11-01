@@ -327,7 +327,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       missedFindings: findings.reduce((n, s) => n + s.missed.length, 0),
       mustNotFlagViolations: findings.reduce((n, s) => n + s.mustNotFlagViolations.length, 0),
     },
-    usage: summarizeUsage(usageReports, { mock: opts.mode === 'mock', measuredNeurons: opts.measuredNeurons }),
+    usage: summarizeUsage(usageReports, { mock: opts.mode === 'mock', measuredNeurons: opts.measuredNeurons, model: opts.mode === 'live' ? opts.model : undefined }),
   };
 }
 

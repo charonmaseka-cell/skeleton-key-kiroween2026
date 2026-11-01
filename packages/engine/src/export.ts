@@ -1,5 +1,6 @@
 import type { Correction, EffectiveFact } from './types';
 import type { ReviewItem } from './review';
+import { notEvaluatedOf, summarizeComparisons, type PlannedComparison, type ComparisonSummary } from './comparisons';
 
 // Format-agnostic export model (renderers come later). Unresolved items are included,
 // clearly marked, next to confirmed findings, decisions, corrections and notes.
@@ -18,10 +19,23 @@ export type ExportEntry = {
   evidence: { role: string; docId: string; blockId: string; start: number; end: number; text: string }[];
 };
 
+export type NotEvaluatedEntry = {
+  id: string;
+  check: string;
+  field: string;
+  docs: string[];
+  reason: string;
+  blocked?: { docId: string; field: string; reason: string };
+};
+
 export type ExportModel = {
   sample: boolean;
   findings: ExportEntry[];
   unresolved: ExportEntry[];
+  /** comparisons that could not run, with the reason and the blocked input. Never "agrees". */
+  notEvaluated: NotEvaluatedEntry[];
+  /** how many comparisons were planned and what became of them */
+  comparisons: ComparisonSummary;
   decisions: { findingId: string; status: string; at: number; note?: string }[];
   notes: { findingId: string; note: string }[];
   corrections: { factId: string; field: string; originalValue: unknown; correctedValue: unknown; note?: string; at: number }[];
@@ -32,6 +46,7 @@ export function buildExport(args: {
   corrections: Correction[];
   facts: Map<string, EffectiveFact>;
   sample: boolean;
+  comparisons?: PlannedComparison[];
 }): ExportModel {
   const entries: ExportEntry[] = args.items.map(({ finding, review }) => ({
     findingId: finding.id,
@@ -59,6 +74,15 @@ export function buildExport(args: {
     sample: args.sample,
     findings: entries.filter((e) => e.state === 'confirmed'),
     unresolved: entries.filter((e) => e.state === 'needs_review'),
+    notEvaluated: notEvaluatedOf(args.comparisons ?? []).map((c) => ({
+      id: c.id,
+      check: c.check,
+      field: c.field,
+      docs: c.docs,
+      reason: c.reason ?? 'not evaluated',
+      blocked: c.blocked ? { docId: c.blocked.docId, field: c.blocked.field, reason: c.blocked.reason } : undefined,
+    })),
+    comparisons: summarizeComparisons(args.comparisons ?? []),
     decisions: args.items.flatMap(({ finding, review }) =>
       review.history.map((h) => ({ findingId: finding.id, status: `${h.event}:${h.status}`, at: h.at, note: h.note })),
     ),

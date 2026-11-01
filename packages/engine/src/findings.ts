@@ -68,6 +68,24 @@ export function coverageSnapshot(doc: DocumentExtraction): CoverageSnapshot {
   return { docId: doc.docId, processingComplete: processingComplete(doc), coverage: doc.coverage.state };
 }
 
+/** Fill the structural defaults of a finding draft (presence basis, no inputs yet). */
+export const makeDraft = (d: Omit<FindingDraft, 'basis' | 'inputs' | 'evidence' | 'coverage'> & Partial<FindingDraft>): FindingDraft => ({
+  basis: 'presence',
+  inputs: [],
+  evidence: [],
+  coverage: [],
+  ...d,
+});
+
+/** Keep one draft per identity (context, subject, response); models can emit duplicate claims. */
+export function dedupeDrafts(drafts: FindingDraft[]): FindingDraft[] {
+  const seen = new Set<string>();
+  return drafts.filter((d) => {
+    const k = `${d.code}|${d.contextId}|${d.subjectId}|${d.responseDocId ?? ''}`;
+    return seen.has(k) ? false : (seen.add(k), true);
+  });
+}
+
 /** Build finding inputs/evidence from effective facts, keeping provenance explicit. */
 export function describeInputs(facts: EffectiveFact[]): { inputs: FindingInput[]; evidence: FindingEvidence[] } {
   const inputs: FindingInput[] = [];

@@ -17,6 +17,8 @@ export * from './hash';
 export * from './findings';
 export * from './review';
 export * from './export';
+export * from './comparisons';
+export * from './export-render';
 export * from './adapter';
 export * from './chunk';
 export * from './issues';

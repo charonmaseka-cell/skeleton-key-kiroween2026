@@ -20,4 +20,17 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Independent builds: each app depends on the shared engine and UI, never on the other app.
+    files: ['apps/scopecheck/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [{ group: ['**/apps/packcheck/**', '@skeleton-key/packcheck*'], message: 'ScopeCheck must not import PackCheck.' }] }],
+    },
+  },
+  {
+    files: ['apps/packcheck/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [{ group: ['**/apps/scopecheck/**', '@skeleton-key/scopecheck*'], message: 'PackCheck must not import ScopeCheck.' }] }],
+    },
+  },
 );

@@ -1,0 +1,445 @@
+{
+  "id": "packcheck-pack",
+  "title": "Grant application pack",
+  "description": "A four-document grant pack with a missing attachment, an organisation-name inconsistency, an ambiguous date, and a funding request (R1.6 million) that is correctly below the budget (R2 million). All names and amounts are invented.",
+  "sample": true,
+  "label": "Sample (fictional)",
+  "extraction": {
+    "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "note": "The claims are recorded model output for these fictional documents (selected benchmark configuration). Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+  },
+  "docs": [
+    {
+      "id": "requirements",
+      "role": "requirements",
+      "title": "Grant call GC-2026 application requirements",
+      "profile": "packcheck.grant.v2",
+      "recordedIn": "samples/benchmark-results/live-packcheck-requirements-v2-2026-11-01T03-00-30-176Z.json",
+      "blocks": [
+        {
+          "id": "p1-l1",
+          "docId": "requirements",
+          "kind": "pdf-run",
+          "text": "Grant call GC-2026 application requirements (fictional sample)",
+          "page": 1,
+          "bbox": [
+            50,
+            780,
+            276.2000000000001,
+            10
+          ]
+        },
+        {
+          "id": "p1-l2",
+          "docId": "requirements",
+          "kind": "pdf-run",
+          "text": "Required attachment: Application form",
+          "page": 1,
+          "bbox": [
+            50,
+            758,
+            170.07000000000005,
+            10
+          ]
+        },
+        {
+          "id": "p1-l3",
+          "docId": "requirements",
+          "kind": "pdf-run",
+          "text": "Required attachment: Project budget",
+          "page": 1,
+          "bbox": [
+            50,
+            736,
+            162.86000000000004,
+            10
+          ]
+        },
+        {
+          "id": "p1-l4",
+          "docId": "requirements",
+          "kind": "pdf-run",
+          "text": "Required attachment: Registration certificate",
+          "page": 1,
+          "bbox": [
+            50,
+            714,
+            197.30000000000007,
+            10
+          ]
+        },
+        {
+          "id": "p1-l5",
+          "docId": "requirements",
+          "kind": "pdf-run",
+          "text": "Required attachment: Tax clearance certificate",
+          "page": 1,
+          "bbox": [
+            50,
+            692,
+            206.75000000000006,
+            10
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "blockId": "p1-l2",
+          "excerpt": "Required attachment: Application form",
+          "value": "Application form"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "blockId": "p1-l3",
+          "excerpt": "Required attachment: Project budget",
+          "value": "Project budget"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "Required attachment: Registration certificate",
+          "value": "Registration certificate"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "blockId": "p1-l5",
+          "excerpt": "Required attachment: Tax clearance certificate",
+          "value": "Tax clearance certificate"
+        }
+      ]
+    },
+    {
+      "id": "application-form",
+      "role": "application-form",
+      "title": "Application form for grant GC-2026",
+      "profile": "packcheck.grant.v2",
+      "recordedIn": "samples/benchmark-results/live-packcheck-application-form-v2-2026-11-01T02-36-58-539Z.json",
+      "blocks": [
+        {
+          "id": "p1-l1",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Application form for grant GC-2026 (fictional sample)",
+          "page": 1,
+          "bbox": [
+            50,
+            780,
+            233.41000000000008,
+            10
+          ]
+        },
+        {
+          "id": "p1-l2",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Organisation name: Green Valley Community Trust",
+          "page": 1,
+          "bbox": [
+            50,
+            758,
+            226.74000000000012,
+            10
+          ]
+        },
+        {
+          "id": "p1-l3",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Funding requested: R1.6 million",
+          "page": 1,
+          "bbox": [
+            50,
+            736,
+            141.17000000000004,
+            10
+          ]
+        },
+        {
+          "id": "p1-l4",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Project start date: 1 March 2026",
+          "page": 1,
+          "bbox": [
+            50,
+            714,
+            142.29000000000002,
+            10
+          ]
+        },
+        {
+          "id": "p1-l5",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Project end date: 28 February 2027",
+          "page": 1,
+          "bbox": [
+            50,
+            692,
+            157.31000000000003,
+            10
+          ]
+        },
+        {
+          "id": "p1-l6",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Attachment provided: Application form",
+          "page": 1,
+          "bbox": [
+            50,
+            670,
+            168.96000000000004,
+            10
+          ]
+        },
+        {
+          "id": "p1-l7",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Attachment provided: Project budget",
+          "page": 1,
+          "bbox": [
+            50,
+            648,
+            161.75000000000003,
+            10
+          ]
+        },
+        {
+          "id": "p1-l8",
+          "docId": "application-form",
+          "kind": "pdf-run",
+          "text": "Attachment provided: Registration certificate",
+          "page": 1,
+          "bbox": [
+            50,
+            626,
+            196.19000000000005,
+            10
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "blockId": "p1-l2",
+          "excerpt": "Organisation name: Green Valley Community Trust",
+          "value": "Green Valley Community Trust"
+        },
+        {
+          "field": "funding_requested",
+          "kind": "money",
+          "blockId": "p1-l3",
+          "excerpt": "Funding requested: R1.6 million",
+          "value": {
+            "amount": "1600000",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "project_start_date",
+          "kind": "date",
+          "blockId": "p1-l4",
+          "excerpt": "Project start date: 1 March 2026",
+          "value": "2026-03-01"
+        },
+        {
+          "field": "project_end_date",
+          "kind": "date",
+          "blockId": "p1-l5",
+          "excerpt": "Project end date: 28 February 2027",
+          "value": "2027-02-28"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "blockId": "p1-l6",
+          "excerpt": "Attachment provided: Application form",
+          "value": "Application form"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "blockId": "p1-l7",
+          "excerpt": "Attachment provided: Project budget",
+          "value": "Project budget"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "blockId": "p1-l8",
+          "excerpt": "Attachment provided: Registration certificate",
+          "value": "Registration certificate"
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "role": "budget",
+      "title": "Project budget summary",
+      "profile": "packcheck.grant.v2",
+      "recordedIn": "samples/benchmark-results/live-packcheck-budget-v2-2026-11-01T03-00-38-750Z.json",
+      "blocks": [
+        {
+          "id": "p1-l1",
+          "docId": "budget",
+          "kind": "pdf-run",
+          "text": "Project budget summary (fictional sample)",
+          "page": 1,
+          "bbox": [
+            50,
+            780,
+            186.72000000000006,
+            10
+          ]
+        },
+        {
+          "id": "p1-l2",
+          "docId": "budget",
+          "kind": "pdf-run",
+          "text": "Applicant: Green Valley Community Foundation",
+          "page": 1,
+          "bbox": [
+            50,
+            758,
+            210.6400000000001,
+            10
+          ]
+        },
+        {
+          "id": "p1-l3",
+          "docId": "budget",
+          "kind": "pdf-run",
+          "text": "Total project budget: R 2 000 000",
+          "page": 1,
+          "bbox": [
+            50,
+            736,
+            148.42000000000004,
+            10
+          ]
+        },
+        {
+          "id": "p1-l4",
+          "docId": "budget",
+          "kind": "pdf-run",
+          "text": "Funding requested from this grant: R 1 600 000",
+          "page": 1,
+          "bbox": [
+            50,
+            714,
+            210.11000000000007,
+            10
+          ]
+        },
+        {
+          "id": "p1-l5",
+          "docId": "budget",
+          "kind": "pdf-run",
+          "text": "Project period: 01/03/2026 to 28/02/2027",
+          "page": 1,
+          "bbox": [
+            50,
+            692,
+            181.23000000000005,
+            10
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "blockId": "p1-l2",
+          "excerpt": "Applicant: Green Valley Community Foundation",
+          "value": "Green Valley Community Foundation"
+        },
+        {
+          "field": "total_project_budget",
+          "kind": "money",
+          "blockId": "p1-l3",
+          "excerpt": "Total project budget: R 2 000 000",
+          "value": {
+            "amount": "2000000",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "funding_requested",
+          "kind": "money",
+          "blockId": "p1-l4",
+          "excerpt": "Funding requested from this grant: R 1 600 000",
+          "value": {
+            "amount": "1600000",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "project_start_date",
+          "kind": "date",
+          "blockId": "p1-l5",
+          "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+          "value": "2026-03-01"
+        },
+        {
+          "field": "project_end_date",
+          "kind": "date",
+          "blockId": "p1-l5",
+          "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+          "value": "2027-02-28"
+        }
+      ]
+    },
+    {
+      "id": "registration",
+      "role": "registration",
+      "title": "Certificate of registration",
+      "profile": "packcheck.grant.v2",
+      "recordedIn": "samples/benchmark-results/live-packcheck-registration-v2-2026-11-01T03-00-42-246Z.json",
+      "blocks": [
+        {
+          "id": "p1-l1",
+          "docId": "registration",
+          "kind": "pdf-run",
+          "text": "Certificate of registration (fictional sample)",
+          "page": 1,
+          "bbox": [
+            50,
+            780,
+            186.72000000000006,
+            10
+          ]
+        },
+        {
+          "id": "p1-l2",
+          "docId": "registration",
+          "kind": "pdf-run",
+          "text": "Registered name: Green Valley Community Trust",
+          "page": 1,
+          "bbox": [
+            50,
+            758,
+            218.4000000000001,
+            10
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "blockId": "p1-l2",
+          "excerpt": "Registered name: Green Valley Community Trust",
+          "value": "Green Valley Community Trust"
+        }
+      ]
+    }
+  ]
+}

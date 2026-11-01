@@ -1,0 +1,158 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "startedAt": "2026-11-01T03:00:42.246Z",
+  "label": "packcheck-registration-v2",
+  "attemptBudget": 1,
+  "attemptsCharged": 1,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "registration",
+      "chunk": 1,
+      "blocks": 2,
+      "chars": 91,
+      "ok": true,
+      "ms": 2039,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 1,
+      "dropped": 0
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "packcheck",
+      "docs": [
+        {
+          "docId": "registration",
+          "profile": {
+            "id": "packcheck.grant.v2",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "organisation_name",
+              "kind": "name",
+              "blockId": "p1-l2",
+              "excerpt": "Registered name: Green Valley Community Trust",
+              "value": "Green Valley Community Trust"
+            }
+          ],
+          "facts": [
+            {
+              "id": "registration:0e35219e7f77e0",
+              "field": "organisation_name",
+              "kind": "name",
+              "status": "validated",
+              "value": "Green Valley Community Trust",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 45,
+                  "text": "Registered name: Green Valley Community Trust"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 2,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "registration",
+            "expected": 1,
+            "validatable": 1,
+            "outcomes": {
+              "correct": 1,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "organisation_name",
+                "line": 1,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [],
+          "rates": {
+            "claims": 1,
+            "evidenceLocated": 1,
+            "valueSupported": 1
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 1,
+    "requestsOk": 1,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 2039,
+      "mean": 2039,
+      "max": 2039
+    },
+    "claimsReceived": 1,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 0,
+    "recall": 1,
+    "validatedPrecision": 1,
+    "missedFacts": 0,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 1,
+    "requestsReportingTokens": 1,
+    "promptTokens": 508,
+    "completionTokens": 43,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 22,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. PUBLISHED RATES, approximate: USD per million tokens ($0.293 input, $2.253 output) divided by $0.011 per 1,000 neurons. These are prices, not consumption. Dashboard-confirmed consumption exists only as one aggregate at checkpoint 1 (462.81 neurons against 462.76 estimated); no per-request figure has been confirmed."
+    }
+  },
+  "settings": {
+    "inferenceTimeoutMs": 25000,
+    "maxRepairAttempts": 1,
+    "note": "Worker configured timeout is 25000 ms"
+  }
+}

@@ -1,2 +1,33 @@
 @import "tailwindcss";
 @source "../../../packages/ui/src";
+
+/* Visible keyboard focus everywhere (R13.1). */
+:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}
+/* AA contrast for links and controls is set by the colour classes; nothing here relies on colour alone. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media print {
+  .no-print,
+  nav {
+    display: none !important;
+  }
+  details {
+    display: block;
+  }
+  details > summary {
+    font-weight: 600;
+  }
+}
+
+/* The sticky sample banner must not cover the target of an in-page link. */
+[id] {
+  scroll-margin-top: 7rem;
+}

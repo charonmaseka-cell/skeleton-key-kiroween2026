@@ -1,16 +1,24 @@
+// Chunking (all modes): --max-chars N (default 24000, the Worker limit), --max-blocks N (default 400), --overlap N blocks
+// (default 0). A live run first prints a PREFLIGHT of the chunk plan and refuses to start when it cannot work.
+//   --min-chunks N      refuse unless every requested document splits into at least N chunks (multi-chunk runs)
+//   --preflight-only    print the plan and stop; no model, no credentials needed
+//   --run-neuron-cap N  neurons this run may add, charged by conservative reservation (default 6000)
+//   --daily-neuron-cap N  cumulative neurons for the day, baseline included (default 8000)
 // Usage:
 //   npx tsx tools/benchmark/src/cli.ts --mode mock
 //   npx tsx tools/benchmark/src/cli.ts --mode live --sample scopecheck --doc quote-a --max-attempts 2
 // Live mode reads CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN from the environment. They are
 // never printed, logged or written to disk.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SqliteAdmission } from './admission';
+import { NeuronBudget, budgetedAi, loadDailyBaseline, worstCaseNeurons } from './budget';
+import { formatPlan, planRun } from './preflight';
+import { buildMessages } from '../../../services/extraction-api/src/profiles';
 import { oracleAi, restAi, type Ai } from './ai';
 import { formatSummary, runBenchmark } from './run';
 import { loadSample, SAMPLES_DIR } from './samples';
 import { LocalTransport, ReplayTransport, type Transport } from './transport';
-import { estimateNeurons } from './usage';
 import { modelConfig, withModel } from './candidates';
 import { PROFILES } from '../../../services/extraction-api/src/profiles';
 
@@ -37,6 +45,14 @@ for (const pair of (args.get('profile') ?? '').split(',').filter(Boolean)) {
 }
 const label = args.get('label') ?? (docFilter ? docFilter.join('+') : 'all');
 const simulate = args.get('simulate-coverage') === 'true';
+const intArg = (name: string, def: number, min: number, max: number) => {
+  const v = Number(args.get(name) ?? def);
+  if (!Number.isInteger(v) || v < min || v > max) { console.error(`error: --${name} must be an integer from ${min} to ${max}`); process.exit(1); }
+  return v;
+};
+// The chunk limits are configuration, never a constant: a benchmark of multi-chunk behaviour must be able to set them.
+const limits = { maxChars: intArg('max-chars', 24_000, 200, 100_000), maxBlocks: intArg('max-blocks', 400, 1, 2_000), overlap: intArg('overlap', 0, 0, 20) };
+const minChunks = intArg('min-chunks', 1, 1, 100);
 const REPO = new URL('../../../', import.meta.url).pathname;
 const STATE_DIR = join(REPO, '.benchmark-state');
 
@@ -56,7 +72,7 @@ let ai: Ai;
 let counter: SqliteAdmission;
 let attemptBudget: number;
 let ceiling: number;
-let statePath: string | null = null;
+let neuronBudget: NeuronBudget | undefined;
 
 if (mode === 'live') {
   const allowance = Number(args.get('max-attempts'));
@@ -70,13 +86,15 @@ if (mode === 'live') {
   attemptBudget = allowance;
   // Hard server-style ceiling: attempts already used today + this run's allowance.
   ceiling = counter.usedToday(Date.now()) + allowance;
-  // Account-wide free allowance is 10,000 neurons/day. Stay under a self-imposed budget using the estimate.
   const day = new Date().toISOString().slice(0, 10);
-  statePath = join(STATE_DIR, 'live-usage.json');
-  const state = existsSync(statePath) ? (JSON.parse(readFileSync(statePath, 'utf8')) as { day: string; neuronsEstimated: number }) : { day, neuronsEstimated: 0 };
-  const budget = Number(args.get('neuron-budget') ?? 8000);
-  if (state.day === day && state.neuronsEstimated >= budget) fail(`estimated neurons used today (${Math.round(state.neuronsEstimated)}) already reach the budget (${budget}). Stop here.`);
-  ai = model === profileModel ? restAi(accountId, token) : withModel(restAi(accountId, token), model);
+  const statePath = join(STATE_DIR, 'live-usage.json');
+  const runCap = intArg('run-neuron-cap', 6_000, 1, 10_000);
+  const dailyCap = intArg('daily-neuron-cap', 8_000, 1, 10_000);
+  const baseline = loadDailyBaseline(statePath, day);
+  if (baseline >= dailyCap) fail(`the day's cumulative charge (${Math.round(baseline)} neurons) already reaches the daily cap (${dailyCap}). Stop here.`);
+  neuronBudget = new NeuronBudget({ model, runCap, dailyCap, dailyBaseline: baseline, statePath, day });
+  // Every attempt, repairs included, reserves its worst case BEFORE the call and is refused if it would pass a cap.
+  ai = budgetedAi(model === profileModel ? restAi(accountId, token) : withModel(restAi(accountId, token), model), neuronBudget);
 } else if (mode === 'replay') {
   counter = new SqliteAdmission(':memory:');
   attemptBudget = 1000; // not binding: replay charges nothing
@@ -87,6 +105,28 @@ if (mode === 'live') {
   attemptBudget = 1000;
   ceiling = 1000;
   ai = oracleAi(sampleIds.map(loadSample));
+}
+
+// ---- preflight: before any inference ----
+if (mode === 'live' || args.get('preflight-only') === 'true') {
+  const plan = await planRun({
+    samples: sampleIds,
+    docFilter,
+    schemaOverrides,
+    limits,
+    timeoutMs,
+    model,
+    minChunks,
+    attemptBudget: mode === 'live' ? attemptBudget : Number(args.get('max-attempts') ?? 16),
+    runNeuronCap: mode === 'live' ? neuronBudget!.summary.runCap : Number(args.get('run-neuron-cap') ?? 6000),
+    dailyHeadroom: mode === 'live' ? neuronBudget!.summary.dailyCap - neuronBudget!.summary.dailyBaseline : undefined,
+  });
+  console.log(formatPlan(plan));
+  if (plan.problems.length) {
+    console.error('No inference was attempted. Nothing was charged.');
+    process.exit(2);
+  }
+  if (args.get('preflight-only') === 'true') process.exit(0);
 }
 
 let transport: Transport;
@@ -122,7 +162,11 @@ const result = await runBenchmark({
   transport,
   sampleIds,
   docFilter,
-  limits: { maxChars: 24_000, maxBlocks: 400 },
+  limits,
+  gate: mode === 'live' ? (schemaId, chunk) => {
+    const profile = PROFILES[schemaId]!;
+    return neuronBudget!.refusal(worstCaseNeurons({ messages: buildMessages(profile, chunk, false), max_tokens: profile.maxOutputTokens }, model).neurons);
+  } : undefined,
   attemptBudget,
   simulateCoverageConfirmation: simulate,
   identityRecovery: args.get('no-identity-recovery') !== 'true',
@@ -132,12 +176,6 @@ const result = await runBenchmark({
 });
 console.log(formatSummary(result));
 
-if (mode === 'live' && statePath) {
-  const day = new Date().toISOString().slice(0, 10);
-  const prev = existsSync(statePath) ? (JSON.parse(readFileSync(statePath, 'utf8')) as { day: string; neuronsEstimated: number }) : { day, neuronsEstimated: 0 };
-  const add = result.usage.promptTokens !== null ? estimateNeurons(result.usage.promptTokens, result.usage.completionTokens ?? 0, model) : 0;
-  writeFileSync(statePath, JSON.stringify({ day, neuronsEstimated: (prev.day === day ? prev.neuronsEstimated : 0) + add }));
-}
 if (mode === 'replay' && result.requests.some((r) => !r.ok)) {
   console.error('error: a requested document had no saved claims; do not trust this comparison');
   process.exitCode = 4;
@@ -147,7 +185,7 @@ counter.close();
 const outDir = join(SAMPLES_DIR, 'benchmark-results');
 mkdirSync(outDir, { recursive: true });
 const out = args.get('out') ?? join(outDir, `${mode}-${label}-${result.startedAt.replace(/[:.]/g, '-')}.json`);
-writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms' } : undefined }, null, 2) + '\n');
+writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
 
 // Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.

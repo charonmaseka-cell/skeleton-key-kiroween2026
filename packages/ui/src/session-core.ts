@@ -23,6 +23,7 @@ import {
   type ReviewStore,
   type ValueKind,
 } from '@skeleton-key/engine';
+import type { DocumentResult } from './extraction-client';
 
 // Pure session logic shared by both apps. Everything here runs in the browser from fixture inputs:
 //   source blocks + recorded model claims -> validation -> facts -> (user corrections) -> adapter
@@ -49,7 +50,8 @@ export type Fixture = {
   id: string;
   title: string;
   description: string;
-  sample: true;
+  /** true for fictional fixtures; false for documents the user uploaded. Drives every banner and export marker. */
+  sample: boolean;
   label: string;
   extraction: { model: string; note: string };
   docs: FixtureDoc[];
@@ -130,7 +132,7 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
     const ext = documents.get(d.id)!;
     return { docId: d.id, state: processingComplete(ext) ? ext.coverage.state : 'processing_incomplete', confirmedByUser: ext.coverage.state === 'user_confirmed', at: state.confirmed[d.id] };
   });
-  const exportModel = buildExport({ items, corrections: state.corrections, facts: effective, sample: true, comparisons: evaluation.comparisons, coverage, reverted: state.reverted });
+  const exportModel = buildExport({ items, corrections: state.corrections, facts: effective, sample: fixture.sample, comparisons: evaluation.comparisons, coverage, reverted: state.reverted });
   const uncovered = Object.fromEntries(fixture.docs.map((d) => [d.id, uncoveredBlocks(documents.get(d.id)!, facts.filter((f) => f.docId === d.id))]));
   return {
     fixture,
@@ -249,3 +251,33 @@ const REASONS: Record<string, string> = {
   not_found_in_verified_response: 'Not found in a document confirmed as fully extracted.',
 };
 export const explainReason = (code?: string): string => (code ? (REASONS[code] ?? code.replace(/_/g, ' ')) : '');
+
+
+// ---- live (uploaded) documents ----
+
+
+/**
+ * Turn extraction results for uploaded documents into the same Fixture shape the sample sets use, so the
+ * validation, rules, review and export code is identical for both. Chunk statuses carry over: a failed or unsent
+ * chunk makes the document "processing incomplete".
+ */
+export function buildLiveFixture(docs: { id: string; role: string; title: string; profile: string; result: DocumentResult }[], id = 'live-upload'): Fixture {
+  return {
+    id,
+    title: 'Your uploaded documents',
+    description: 'Documents you selected. They were read on your device; only their extracted text was sent for analysis.',
+    sample: false,
+    label: 'Live (your documents)',
+    extraction: { model: 'server-selected', note: 'Extracted text from your documents was sent to an AI service after you pressed Analyse. Everything else (validation, matching, rules, review, export) runs on your device.' },
+    docs: docs.map((d) => ({
+      id: d.id,
+      role: d.role,
+      title: d.title,
+      profile: d.profile,
+      recordedIn: 'live extraction',
+      blocks: d.result.blocks,
+      claims: d.result.claims,
+      chunks: d.result.chunks.map((c) => ({ blockIds: c.blockIds, status: c.status === 'ok' ? ('ok' as const) : ('failed' as const) })),
+    })),
+  };
+}

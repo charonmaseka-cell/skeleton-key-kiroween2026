@@ -15,9 +15,11 @@ The original task numbering and history above are kept. These corrections reflec
 4. **Haunted interface** (`haunted-ui`) as a committed task: visual system and Lights-on behaviour defined; implemented alongside the upload flow; complete before the final submission week; AA, keyboard, readable evidence and reduced motion in both modes.
 5. **After the two-quotation PDF path works and before final regression and submission preparation**: 2 to 5 quotations, DOCX, supplier-specific clarification email drafts (`scopecheck-real-documents` SC-7).
 
-**Dates.** ScopeCheck upload workflow **deployed by 2026-11-22**; PackCheck working upload workflow **by 2026-11-29**. The final submission date comes from the Build Brief and is not yet recorded here.
+**Dates.** ScopeCheck upload workflow **deployed by 2026-11-22**; PackCheck working upload workflow **by 2026-11-29**. **Submission deadline: 5 December 2026, 00:00 SAST** (recorded in `.kiro/steering/brief.md`). The haunted interface (HU-T5) and final regression must be complete before the final submission week.
 
 **If scope must be reduced** (protect both apps, evidence quality and the review states): cut DOCX, then extra quotations beyond three, then email drafts, then haunted effects beyond the Lights-on and Lights-off palettes, then extra rules. Never cut validated evidence, Needs review, Not evaluated, the coverage rules, honest sample and live labelling, keyboard access or AA contrast. PackCheck falls back to four core document roles with attachment mapping; if upload cannot ship it stays in labelled sample mode and says so.
+
+**Finding that changes the plan (2026-11-01).** The benchmark preflight shows the pre-registered 3-page documents cannot be extracted inside 16 attempts: a request returns about 14 values under the 25 s timeout and 1,500-token cap, and character-based chunks hold far more. Next engineering step is output-aware chunking (`scopecheck-real-documents` SC-2b / SC-T2b), then the live measurement; task 5.5 limits must be derived with it. The browser upload path (SC-T3) exists and is tested against a fake Worker; no real Worker is connected and admission stays closed.
 
 **Hooks (task 7.2 refined).** Two planned: rerun golden fixtures when engine or rule code changes (configured, not yet run); run accessibility checks when UI code changes (not configured until the accessibility tests of task 11 exist). `docs/hooks.md` distinguishes configured from actually run. CI in Web stays authoritative.
 

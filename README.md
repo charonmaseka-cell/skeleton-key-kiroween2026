@@ -7,7 +7,7 @@ A reusable document-checking engine powering two separate apps, built with Kiro 
 
 Models extract and suggest; deterministic rules produce findings backed by validated evidence.
 
-**Status (2026-11-01).** Both apps run in **sample mode** on clearly labelled fictional fixtures: validation, identity resolution, matching, rules, corrections, review decisions and export all run in the browser from fixture inputs (source text plus recorded model claims). **They do not yet process an uploaded document.** That is the next engineering milestone (see "Roadmap"). Production admission to the extraction Worker is closed (`DAILY_ADMISSION_CEILING = "0"`) until the limits and the deployed controls are validated.
+**Status (2026-11-01).** Both apps run in **sample mode** on clearly labelled fictional fixtures: validation, identity resolution, matching, rules, corrections, review decisions and export all run in the browser from fixture inputs (source text plus recorded model claims). ScopeCheck also has an **upload path** (choose an RFQ and quotation PDFs, read on your device, then an explicit Analyse step) that works against an analysis service when one is connected through `VITE_EXTRACTION_API_URL`; none is connected yet, so on this site it explains that analysis is unavailable. Real-document processing at scale is the next engineering milestone (see "Roadmap"). Production admission to the extraction Worker is closed (`DAILY_ADMISSION_CEILING = "0"`) until the limits and the deployed controls are validated.
 
 **Privacy note (planned design):** files will be parsed in the browser, but extracted text is sent to an AI service after you start analysis. Not all processing is local.
 

@@ -4,7 +4,11 @@ inclusion: manual
 
 # ScopeCheck Build Brief (reference material)
 
-**Import status (2026-11-01): the original brief text is NOT yet imported.** The attachment reached the agent as the raw bytes of a `.docx` file (a compressed zip), which cannot be read as text, and no copy exists in the workspace. Nothing in this file claims to quote the brief. To import it verbatim, either paste the text into the chat, or commit the file (for example `docs/reference/ScopeCheck-Build-Brief.docx`) and ask for the import. Until then the reconciliation of the project against the brief is **pending**; see "Reconciliation" below.
+## Submission deadline
+
+**5 December 2026, 00:00 SAST** (South Africa Standard Time, UTC+2; that is 4 December 2026, 22:00 UTC). Recorded from the project owner's instruction of 2026-11-01. Treat "00:00 on 5 December" as the cut-off: the last working day for the submission is 4 December, and everything must be pushed and verified before 22:00 UTC that day.
+
+**Import status (2026-11-01, second attempt): the original brief text is still NOT imported.** The first attachment was the raw bytes of a `.docx`; the Markdown version announced in the follow-up message did not arrive (no attachment text in the message, and no file in the workspace or the repository). Nothing in this file claims to quote the brief. To import it verbatim, paste the Markdown into the chat, or commit the file (for example `docs/reference/ScopeCheck-Build-Brief.docx`) and ask for the import. Until then the reconciliation of the project against the brief is **pending**; see "Reconciliation" below.
 
 This file is reference material, loaded on request. The accepted amendments below take precedence over anything in the original brief that conflicts with them. They are recorded here from the project owner's instruction of 2026-11-01.
 

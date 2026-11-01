@@ -11,5 +11,9 @@
   "dependencies": {
     "@skeleton-key/engine": "^0.0.0",
     "pdfjs-dist": "^6.4.299"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./browser": "./src/browser.ts"
   }
 }

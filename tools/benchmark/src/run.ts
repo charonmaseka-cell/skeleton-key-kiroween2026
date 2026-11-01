@@ -132,6 +132,8 @@ export type RunOptions = {
   docFilter?: string[];
   limits: { maxChars: number; maxBlocks: number };
   attemptBudget: number;
+  /** Called before each chunk is sent; returns a reason to NOT send it (for example, the neuron budget cannot cover one more attempt). */
+  gate?: (schemaId: string, chunk: Block[]) => string | null;
   simulateCoverageConfirmation?: boolean;
   /** ScopeCheck item-identity step (default on). Off reproduces the original matching. */
   identityRecovery?: boolean;
@@ -190,6 +192,13 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
           // Not sent: the budget is a hard stop. The chunk is recorded as not processed.
           records.push({ id: `${doc.id}#${i + 1}`, blockIds, status: 'failed' });
           requests.push({ docId: doc.id, chunk: i + 1, blocks: chunk.length, chars: 0, ok: false, code: 'attempt_budget_exhausted', ms: 0, attemptsCharged: 0, repaired: false, claims: 0, dropped: 0 });
+          continue;
+        }
+        const refused = opts.gate?.(schemaId, chunk);
+        if (refused) {
+          // Not sent: the budget cannot cover another attempt. The chunk is recorded as not processed.
+          records.push({ id: `${doc.id}#${i + 1}`, blockIds, status: 'failed' });
+          requests.push({ docId: doc.id, chunk: i + 1, blocks: chunk.length, chars: 0, ok: false, code: 'neuron_budget_exhausted', ms: 0, attemptsCharged: 0, repaired: false, claims: 0, dropped: 0 });
           continue;
         }
         const res = await opts.transport.extract(schemaId, chunk);
@@ -293,7 +302,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
   const docRes = samples.flatMap((s) => s.docs);
   const sum = (f: (d: DocResult) => number) => docRes.reduce((n, d) => n + f(d), 0);
   const okReqs = requests.filter((r) => r.ok);
-  const sent = requests.filter((r) => r.code !== 'attempt_budget_exhausted');
+  const sent = requests.filter((r) => r.code !== 'attempt_budget_exhausted' && r.code !== 'neuron_budget_exhausted');
   const claims = sum((d) => d.rates.claims);
   const located = sum((d) => d.rates.evidenceLocated);
   const findings = samples.map((s) => s.findings.score);

@@ -54,3 +54,13 @@ export function SampleBanner({ note }: { note: string }) {
     </div>
   );
 }
+
+/** Always-visible notice that documents are being analysed live. Not dismissible. */
+export function LiveBanner({ note }: { note: string }) {
+  return (
+    <div role="region" aria-label="Live mode" className="sticky top-0 z-10 border-b-4 border-blue-800 bg-blue-100 px-6 py-2 text-blue-950">
+      <p className="font-semibold">LIVE: your documents. Extracted text was sent to an AI service for analysis; not all processing is local.</p>
+      <p className="text-sm">{note}</p>
+    </div>
+  );
+}

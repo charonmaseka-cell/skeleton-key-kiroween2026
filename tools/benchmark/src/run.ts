@@ -167,6 +167,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
 
   for (const sampleId of opts.sampleIds) {
     const sample: Sample = loadSample(sampleId);
+    const family = sample.family ?? sampleId;
     const docs = sample.docs.filter((d) => !opts.docFilter || opts.docFilter.includes(d.id));
     const allFacts: Fact[] = [];
     const extractions = new Map<string, DocumentExtraction>();
@@ -249,7 +250,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
     // Checks and findings (rules are deterministic; the model only supplied facts).
     const effective = buildEffectiveFacts(allFacts, []);
     const base = { facts: effective, documents: extractions };
-    const complete = sampleId === 'scopecheck' ? extractions.has('rfq') && docs.length === sample.docs.length : docs.length === sample.docs.length;
+    const complete = family === 'scopecheck' ? extractions.has('rfq') && docs.length === sample.docs.length : docs.length === sample.docs.length;
     const scoreOf = (produced: Finding[]): FindingsBlock => ({
       produced: produced.map((f) => ({ code: f.code, subject: f.subjectId, response: f.responseDocId, severity: f.severity, state: f.state, reason: f.reason })),
       // Findings are only scored when every document of the sample was processed.
@@ -258,12 +259,12 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
         : { expected: 0, produced: 0, matchedExactState: 0, conservative: [], missed: [], falseCritical: [], overConfident: [], unexpectedOther: [], mustNotFlagViolations: [] },
     });
     const scopeRun = (identities?: IdentityReport['identities']): Finding[] => {
-      const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a', 'quote-b'].filter((q) => extractions.has(q)), identities };
-      return extractions.has('rfq') ? runChecks(sampleId, { ...base, matches: scopeMatches(effective, data), data }) : [];
+      const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a', 'quote-b', 'quote-c'].filter((q) => extractions.has(q)), identities };
+      return extractions.has('rfq') ? runChecks(family, { ...base, matches: scopeMatches(effective, data), data }) : [];
     };
 
     let sampleResult: SampleResult;
-    if (sampleId === 'scopecheck') {
+    if (family === 'scopecheck') {
       const before = complete ? scopeRun() : [];
       if (opts.identityRecovery === false) {
         sampleResult = { sampleId, docs: docResults, findings: scoreOf(before) };
@@ -281,7 +282,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
     } else {
       const data: PackData = { requirementsDocId: 'requirements', formDocId: 'application-form', otherDocIds: ['budget', 'registration'].filter((d) => extractions.has(d)) };
       const packCtx = { ...base, matches: packMatches(effective, data), data };
-      const produced = complete ? runChecks(sampleId, packCtx) : [];
+      const produced = complete ? runChecks(family, packCtx) : [];
       sampleResult = { sampleId, docs: docResults, findings: scoreOf(produced), comparisons: complete ? evaluatePack(packCtx).comparisons : undefined };
     }
     samples.push(sampleResult);

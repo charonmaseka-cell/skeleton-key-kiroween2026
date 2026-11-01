@@ -1,0 +1,255 @@
+{
+  "id": "scopecheck-layout",
+  "family": "scopecheck",
+  "label": "FICTIONAL SAMPLE: layout variant. The quotation is free-text and has no pipe delimiters. Compared against the same RFQ as the scopecheck sample.",
+  "preregistration": "Labels and expected findings written and committed BEFORE any model extraction on quote-c. The PG-6 line carries a second code-like token (SANS-1200), so its identity is expected to be UNCERTAIN: the correct outcome is Needs review, never a confirmed omission, even if coverage were confirmed.",
+  "docs": [
+    {
+      "id": "rfq",
+      "file": "../scopecheck/rfq.pdf",
+      "role": "requirements",
+      "schemaId": "scopecheck.rfq.v1",
+      "lines": [
+        "RFQ-0001 Request for Quotation (fictional sample)",
+        "Item CP-100 Centrifugal pump | qty 10 units | 316 stainless steel casing",
+        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure",
+        "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range"
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "Item CP-100 Centrifugal pump",
+          "value": "CP-100 Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 1,
+          "excerpt": "qty 10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "Item MS-20 Motor starter",
+          "value": "MS-20 Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 2,
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "Item PG-6 Pressure gauge",
+          "value": "PG-6 Pressure gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 3,
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "0-10 bar range",
+          "value": "0-10 bar range"
+        }
+      ]
+    },
+    {
+      "id": "quote-c",
+      "file": "quote-c.pdf",
+      "role": "response",
+      "schemaId": "scopecheck.quote.v1",
+      "lines": [
+        "Quotation QC-31 from Cedar Flow Components (fictional sample)",
+        "We offer 10 units of Centrifugal pump CP-100 with a cast iron casing at R 11 500 each.",
+        "Motor starter MS-20, quantity 6 units, IP55 enclosure, R 3 150 each.",
+        "Pressure gauge PG-6, 20 units, 0-10 bar range, certified to SANS-1200, R 450 each.",
+        "Installation and commissioning are excluded from this offer."
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "Centrifugal pump CP-100",
+          "value": "Centrifugal pump CP-100"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 1,
+          "excerpt": "10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "cast iron casing",
+          "value": "cast iron casing"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 1,
+          "excerpt": "R 11 500 each",
+          "value": {
+            "amount": "11500",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "Motor starter MS-20",
+          "value": "Motor starter MS-20"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 2,
+          "excerpt": "6 units",
+          "value": {
+            "value": "6",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 2,
+          "excerpt": "R 3 150 each",
+          "value": {
+            "amount": "3150",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "Pressure gauge PG-6",
+          "value": "Pressure gauge PG-6"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 3,
+          "excerpt": "20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "0-10 bar range",
+          "value": "0-10 bar range"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 3,
+          "excerpt": "R 450 each",
+          "value": {
+            "amount": "450",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "line": 4,
+          "excerpt": "Installation and commissioning are excluded",
+          "value": "Installation and commissioning are excluded"
+        }
+      ]
+    }
+  ],
+  "expectedFindings": [
+    {
+      "code": "spec.differs",
+      "subject": "CP-100:specification",
+      "response": "quote-c",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "quantity.differs",
+      "subject": "MS-20:quantity",
+      "response": "quote-c",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "exclusion.stated",
+      "subject": "quote-c:exclusion",
+      "response": "quote-c",
+      "severity": "info",
+      "state": "confirmed"
+    },
+    {
+      "code": "item.identity_uncertain",
+      "subject": "quote-c:p1-l4:item",
+      "response": "quote-c",
+      "severity": "warning",
+      "state": "needs_review"
+    },
+    {
+      "code": "item.absent",
+      "subject": "PG-6",
+      "response": "quote-c",
+      "severity": "critical",
+      "state": "needs_review"
+    }
+  ]
+}

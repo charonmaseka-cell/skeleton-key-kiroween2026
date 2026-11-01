@@ -11,8 +11,8 @@ import { summarizeUsage } from '../src/usage';
 
 const SAMPLES = ['scopecheck', 'packcheck'];
 
-async function run(opts: { defects?: MockDefects; budget?: number; simulate?: boolean; docs?: string[]; ceiling?: number; samples?: string[]; identityRecovery?: boolean } = {}): Promise<BenchmarkResult> {
-  const ai = oracleAi(SAMPLES.map(loadSample), opts.defects);
+async function run(opts: { defects?: MockDefects; budget?: number; simulate?: boolean; docs?: string[]; ceiling?: number; samples?: string[]; identityRecovery?: boolean; oracle?: string[] } = {}): Promise<BenchmarkResult> {
+  const ai = oracleAi((opts.oracle ?? SAMPLES).map(loadSample), opts.defects);
   const counter = new SqliteAdmission(':memory:');
   const transport = new LocalTransport({ ai, counter, env: { DAILY_ADMISSION_CEILING: String(opts.ceiling ?? 1000), MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '2000' } });
   const result = await runBenchmark({
@@ -246,6 +246,37 @@ describe('PackCheck comparisons: the checks actually run, or are marked Not eval
     expect(cmp(r, 'funding_within_budget:application-form~budget').reason).toMatch(/funding_requested in application-form not validated/);
     expect(findings(r, 'packcheck').some((f) => f.code.startsWith('funding.'))).toBe(false);
     expect(r.summary.falseCriticalFindings).toBe(0);
+  });
+});
+
+describe('ScopeCheck layout variant: a free-text quotation without pipe delimiters (pre-registered)', () => {
+  const layout = (o: Parameters<typeof run>[0] = {}) => run({ samples: ['scopecheck-layout'], oracle: ['scopecheck-layout'], ...o });
+
+  it('the pre-registered expectations hold: two confirmed differences, the exclusion, and the uncertain PG-6 line in Needs review', async () => {
+    const r = await layout();
+    const sc = r.samples[0]!;
+    expect(sc.findings.score).toMatchObject({ expected: 5, matchedExactState: 5, missed: [], falseCritical: [], overConfident: [] });
+    expect(sc.findings.score.unexpectedOther).toEqual([]);
+    expect(sc.identity!.uncertain.map((u) => [u.docId, u.reason, u.candidates])).toEqual([['quote-c', 'multiple_codes', ['PG-6', 'SANS-1200']]]);
+    for (const d of sc.docs) expect(d.coverage.state).toBe('unverified');
+  });
+
+  it('the same outcome when the model drops the item codes: codes are recovered from the source, the PG-6 line stays uncertain', async () => {
+    const r = await layout({ defects: { dropItemCodes: true } });
+    const sc = r.samples[0]!;
+    expect(sc.findings.score).toMatchObject({ matchedExactState: 5, missed: [], falseCritical: [], overConfident: [] });
+    expect(sc.identity!.recovered.filter((x) => x.docId === 'quote-c').map((x) => x.code).sort()).toEqual(['CP-100', 'MS-20']);
+    expect(sc.identity!.uncertain.map((u) => u.reason)).toEqual(['multiple_codes']);
+    expect(sc.findingsBefore!.score.missed.length).toBeGreaterThan(0); // the original matching cannot do this
+  });
+
+  it('even with (simulated) confirmed coverage the uncertain line is never turned into a confirmed omission', async () => {
+    const r = await layout({ simulate: true });
+    const f = r.samples[0]!.findings.produced;
+    expect(f.find((x) => x.code === 'item.absent' && x.response === 'quote-c')).toMatchObject({ subject: 'PG-6', state: 'needs_review', reason: 'match_unresolved' });
+    expect(f.find((x) => x.code === 'item.identity_uncertain')).toMatchObject({ state: 'needs_review', reason: 'multiple_codes' });
+    expect(r.summary.falseCriticalFindings).toBe(0);
+    expect(r.summary.overConfidentFindings).toBe(0);
   });
 });
 

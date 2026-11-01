@@ -5,10 +5,11 @@ import { join } from 'node:path';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { loadSample, SAMPLES_DIR } from './samples';
 
-for (const id of ['scopecheck', 'packcheck']) {
+for (const id of ['scopecheck', 'packcheck', 'scopecheck-layout']) {
   const sample = loadSample(id);
   mkdirSync(join(SAMPLES_DIR, id), { recursive: true });
   for (const doc of sample.docs) {
+    if (doc.file.startsWith('../')) continue; // referenced from another sample, not generated here
     const pdf = await PDFDocument.create();
     pdf.setCreationDate(new Date(0));
     pdf.setModificationDate(new Date(0));

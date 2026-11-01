@@ -34,8 +34,11 @@ export type SampleDoc = {
 };
 
 export type Sample = {
-  id: 'scopecheck' | 'packcheck';
+  id: string;
+  /** which check family applies; defaults to the id */
+  family?: 'scopecheck' | 'packcheck';
   label: string;
+  preregistration?: string;
   docs: SampleDoc[];
   expectedFindings: ExpectedFinding[];
   mustNotFlag?: string[];

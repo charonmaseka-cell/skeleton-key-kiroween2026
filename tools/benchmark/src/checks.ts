@@ -346,6 +346,6 @@ export const packRule: Rule<PackData> = {
   },
 };
 
-export function runChecks(sampleId: string, ctx: RuleContext<ScopeData> | RuleContext<PackData>): Finding[] {
-  return sampleId === 'scopecheck' ? runRules([scopeRule], ctx as RuleContext<ScopeData>) : runRules([packRule], ctx as RuleContext<PackData>);
+export function runChecks(family: string, ctx: RuleContext<ScopeData> | RuleContext<PackData>): Finding[] {
+  return family === 'scopecheck' ? runRules([scopeRule], ctx as RuleContext<ScopeData>) : runRules([packRule], ctx as RuleContext<PackData>);
 }

@@ -83,7 +83,7 @@ export async function planRun(opts: { samples: string[]; docFilter?: string[]; s
   const problems: string[] = [];
   const warnings: string[] = [];
   for (const d of docs) {
-    const n = d.chunks.filter((c) => c.chunk > 0).length;
+    const n = d.chunks.filter((c) => c.chunk > 0).length + (opts.skipChunks?.[d.docId]?.length ?? 0); // chunks reused from an earlier result still count as planned
     if (opts.minChunks && n < opts.minChunks) problems.push(`${d.docId}: ${n} chunk(s), but at least ${opts.minChunks} are required (this plan would not exercise multi-chunk extraction)`);
     for (const c of d.chunks) {
       for (const p of c.problems) problems.push(`${d.docId}#${c.chunk}: ${p}`);

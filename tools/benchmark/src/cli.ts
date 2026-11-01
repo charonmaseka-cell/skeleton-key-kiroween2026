@@ -22,12 +22,13 @@ import { formatPlan, planRun } from './preflight';
 import { DEFAULT_MAX_VALUES, buildFrozenPlan, frozenChunker, outputChunker, sizeChunker, type Chunker, type FrozenPlan } from './chunking';
 import { buildMessages } from '../../../services/extraction-api/src/profiles';
 import { oracleAi, restAi, type Ai } from './ai';
-import { formatSummary, runBenchmark } from './run';
+import { AUDIT_VERSION, formatSummary, runBenchmark } from './run';
 import { loadSample, SAMPLES_DIR } from './samples';
 import { LocalTransport, ReplayTransport, type Transport } from './transport';
 import { modelConfig, withModel } from './candidates';
 import { PROFILES } from '../../../services/extraction-api/src/profiles';
 
+const processStart = Date.now();
 const args = new Map<string, string>();
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
@@ -70,9 +71,12 @@ if (args.get('write-plan')) {
 let resume: Record<string, { okChunks: number[]; claims: unknown[] }> | undefined;
 if (args.get('resume-from')) {
   if (!args.get('frozen-plan')) { console.error('error: --resume-from needs --frozen-plan (the chunk numbers must mean the same chunks)'); process.exit(1); }
-  const prior = JSON.parse(readFileSync(args.get('resume-from')!, 'utf8')) as { requests: { docId: string; chunk: number; ok: boolean }[]; samples: { docs: { docId: string; claimsReturned?: unknown[] }[] }[] };
   resume = {};
-  for (const d of prior.samples.flatMap((x) => x.docs)) resume[d.docId] = { okChunks: prior.requests.filter((r) => r.docId === d.docId && r.ok).map((r) => r.chunk), claims: d.claimsReturned ?? [] };
+  // Several files may be given (comma separated); a later file replaces an earlier one for the same document.
+  for (const file of args.get('resume-from')!.split(',')) {
+    const prior = JSON.parse(readFileSync(file, 'utf8')) as { requests: { docId: string; chunk: number; ok: boolean }[]; samples: { docs: { docId: string; claimsReturned?: unknown[] }[] }[] };
+    for (const d of prior.samples.flatMap((x) => x.docs)) resume[d.docId] = { okChunks: prior.requests.filter((r) => r.docId === d.docId && r.ok).map((r) => r.chunk), claims: d.claimsReturned ?? [] };
+  }
 }
 let chunker: Chunker;
 if (args.get('frozen-plan')) {
@@ -205,6 +209,7 @@ const result = await runBenchmark({
   recordedProfiles: replayProfiles,
   measuredNeurons: args.has('measured-neurons') ? Number(args.get('measured-neurons')) : undefined,
 });
+const finishedAt = new Date().toISOString();
 console.log(formatSummary(result));
 
 if (mode === 'replay' && result.requests.some((r) => !r.ok)) {
@@ -216,7 +221,7 @@ counter.close();
 const outDir = join(SAMPLES_DIR, 'benchmark-results');
 mkdirSync(outDir, { recursive: true });
 const out = args.get('out') ?? join(outDir, `${mode}-${label}-${result.startedAt.replace(/[:.]/g, '-')}.json`);
-writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, resumedFrom: args.get('resume-from'), chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
+writeFileSync(out, JSON.stringify({ ...result, finishedAt, wallClockMs: Date.now() - processStart, auditVersion: AUDIT_VERSION, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, resumedFrom: args.get('resume-from'), chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
 
 // Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.

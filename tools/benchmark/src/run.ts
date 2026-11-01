@@ -155,6 +155,13 @@ export type RunOptions = {
 
 const digits = (t: string) => t.replace(/[\s,]/g, '');
 /** Independent, deliberately crude check that a validated value is visible in its own evidence. */
+/**
+ * Version of the benchmark audit of validated values. 1: tokens were stripped of ALL punctuation (false alarms on "7.5" and "l/h").
+ * 2 (2026-11-01): the value as written, or each word with only end punctuation ignored. Result files written before the
+ * `auditVersion` field existed were scored with 1 unless a build-log entry says otherwise.
+ */
+export const AUDIT_VERSION = 2;
+
 export function auditFact(f: Fact): FactRecord['audit'] {
   if (f.status !== 'validated') return null;
   const ev = f.evidence.map((e) => e.text).join(' ');

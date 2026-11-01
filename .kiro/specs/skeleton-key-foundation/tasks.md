@@ -1,6 +1,28 @@
 # Implementation Plan
 
-One milestone slice per PR. Checks must pass before each PR. Nothing below has been started. Update `docs/build-log.md` with actual results as tasks complete.
+One milestone slice per PR. Checks must pass before each PR. Update `docs/build-log.md` with actual results as tasks complete. Tasks 1 to 6 are done (see the ticks); task 5.5 and everything from task 7 on is not.
+
+## Plan corrections (2026-11-01)
+
+The original task numbering and history above are kept. These corrections reflect what exists and what is next.
+
+**State.** Both apps run end to end in clearly labelled **sample mode** on fictional fixtures (recorded model claims; rules run in the browser). They do **not** yet process an uploaded document. Merged: PRs #1 to #3. PR #4 (Tasks 4 to 5: samples, benchmark, 70B model decision) is ready for review and awaits merge; PR #5 (Task 6) is a draft on top of it and has passed a source review (`docs/reviews/`). Production admission is closed (`DAILY_ADMISSION_CEILING = "0"`).
+
+**Delivery order (next engineering milestone: real documents).**
+1. Merge PR #4; rebase PR #5 onto `main`, confirm its base is `main` and its diff is Task 6 only; merge after review.
+2. **Real-document path, multi-chunk first** (tasks 8 to 10): original, realistically sized, multi-page documents for both apps, expected outputs committed before extraction; extraction, matching and findings measured separately; a failed or missed chunk can never yield a confirmed absence. Detail: `scopecheck-real-documents`, `packcheck-real-documents`.
+3. **Task 5.5 and deployment validation**: limits from bounded inputs, output limits, repairs and measured consumption; Workers AI binding and the deployed Durable Object validated before any public access; admission stays closed until then.
+4. **Haunted interface** (`haunted-ui`) as a committed task: visual system and Lights-on behaviour defined; implemented alongside the upload flow; complete before the final submission week; AA, keyboard, readable evidence and reduced motion in both modes.
+5. **After the two-quotation PDF path works and before final regression and submission preparation**: 2 to 5 quotations, DOCX, supplier-specific clarification email drafts (`scopecheck-real-documents` SC-7).
+
+**Dates.** ScopeCheck upload workflow **deployed by 2026-11-22**; PackCheck working upload workflow **by 2026-11-29**. The final submission date comes from the Build Brief and is not yet recorded here.
+
+**If scope must be reduced** (protect both apps, evidence quality and the review states): cut DOCX, then extra quotations beyond three, then email drafts, then haunted effects beyond the Lights-on and Lights-off palettes, then extra rules. Never cut validated evidence, Needs review, Not evaluated, the coverage rules, honest sample and live labelling, keyboard access or AA contrast. PackCheck falls back to four core document roles with attachment mapping; if upload cannot ship it stays in labelled sample mode and says so.
+
+**Hooks (task 7.2 refined).** Two planned: rerun golden fixtures when engine or rule code changes (configured, not yet run); run accessibility checks when UI code changes (not configured until the accessibility tests of task 11 exist). `docs/hooks.md` distinguishes configured from actually run. CI in Web stays authoritative.
+
+**Task map.** Task 8 to ScopeCheck then PackCheck uploads (SC-T3, PC-T3); task 9 live wiring (SC-T5, PC-T6); task 10 end-to-end with the realistic fixtures (SC-T4, PC-T5); task 5.5 (SC-T6) and task 7.1 deployment checks come before opening admission; task 11 accessibility and Playwright flows include both haunted modes (HU-T4); tasks 17 to 19 are rescheduled by delivery-order item 5.
+
 
 ## M1: Foundation, Worker limits, live benchmark
 

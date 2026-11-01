@@ -3,3 +3,4 @@ export * from './session-core';
 export * from './useSession';
 export * from './Badges';
 export * from './Workspace';
+export * from './theme-tokens';

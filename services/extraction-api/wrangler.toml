@@ -1,0 +1,36 @@
+name = "skeleton-key-extraction"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+[ai]
+binding = "AI"
+
+[[durable_objects.bindings]]
+name = "ADMISSION"
+class_name = "AdmissionCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AdmissionCounter"]
+
+[vars]
+# Exact origins only. Add the deployed Pages origins at deploy time. Not authentication.
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174"
+# Provisional input limits; tune from benchmark results.
+MAX_BODY_BYTES = "65536"
+MAX_CHARS = "24000"
+MAX_BLOCKS = "400"
+MAX_BLOCK_CHARS = "4000"
+MAX_REPAIR_ATTEMPTS = "1"
+INFERENCE_TIMEOUT_MS = "25000"
+# Fail closed: 0 admits no inference. Set from benchmark measurements, not a guess
+# (see docs/build-log.md). Use .dev.vars for local benchmark runs.
+DAILY_ADMISSION_CEILING = "0"
+
+# Optional per-client abuse control (per-location, eventually consistent). The strict
+# global ceiling does NOT depend on it. Uncomment only after confirming availability.
+# [[unsafe.bindings]]
+# name = "CLIENT_LIMITER"
+# type = "ratelimit"
+# namespace_id = "1001"
+# simple = { limit = 6, period = 60 }

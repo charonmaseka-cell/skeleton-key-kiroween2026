@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "types": ["node"] },
+  "include": ["test"],
+  "exclude": ["src/index.ts", "src/counter-do.ts"]
+}

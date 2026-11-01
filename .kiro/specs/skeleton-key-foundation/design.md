@@ -95,21 +95,25 @@ A Correction never mutates the Fact. The effective value is labelled `user_suppl
 
 ## 6. Extraction Worker (R8)
 
-`POST /extract` JSON `{schemaId, blocks:[{id,text}], docKind}`; no filenames are accepted or logged.
+`POST /extract` with JSON `{schemaId, blocks:[{id,text}]}`, validated strictly: unknown keys (filenames, prompts, model names, token limits) are rejected. The client only picks a `schemaId` from a server allowlist of **extraction profiles** (`src/profiles.ts`). Each profile fixes the model, output token cap, instructions, field list and JSON schema. Document text is sent as JSON data in the user message; the system message says it is untrusted and to ignore instructions inside it. Model output is validated again server-side: fields outside the profile and block IDs that were not sent are dropped (counted in `meta.dropped`), and value shapes are checked per kind. The client still performs evidence and value-support validation (§3).
 
-Enforced server-side, in order (each returns a distinct JSON error code with no input echo):
-1. **Origin allowlist**: `Origin` must match configured Pages origins, else 403 (R8.9). Extra control only; it is not authentication (non-browser clients can spoof it), so the limits below carry the protection.
-2. **Body size**: reject if `Content-Length` or read length > `MAX_BODY_BYTES` (initial 64 KB), 413 (R8.6).
-3. **Text length**: sum of block text > `MAX_CHARS` (initial 24,000, tuned by benchmark) or blocks > `MAX_BLOCKS`, 413.
-4. **Per-client limit**: Workers Rate Limiting binding keyed by client IP (periods only 10 or 60 s; initial 6 per 60 s). Counters are per-location and eventually consistent, so it is abuse mitigation, not exact; free-plan availability is **to verify in task 3.1** (R8.7).
-5. **Global daily ceiling**: a Durable Object (SQLite-backed, available on Workers Free per Cloudflare documentation) holds atomic counters of request count per UTC day and, if the model reports it, estimated neurons used; no content or filenames are stored. The request ceiling is a placeholder (initial 200/day) and is NOT proof of staying within 10,000 neurons: set it, the size limits and the chunk budget from benchmark measurements, and stop on a neuron estimate where available → 429 `daily_limit` (R8.7).
-6. **Model call**: Workers AI with JSON mode, `max_tokens` capped, a fixed timeout, **no retry in the Worker**. Quota/capacity errors are mapped to 503 `quota_exhausted` (R8.10).
-Logs: only status code, error code, and counts (no content, no filenames) (R8.4). No AI Gateway caching, no KV/R2 for content (R8.5).
+Checks run in this order, each with a distinct error code and no echo of input, and the first five never touch the counter or model:
+1. **Path and origin**: only `/extract`. `Origin` must be in the exact allowlist, else 403 `origin_denied` (an additional control, not authentication; non-browser clients can spoof it). Preflight (`OPTIONS`) from an allowed origin returns 204 without calling anything.
+2. **Configuration**: all limits and the daily ceiling must parse within hard caps, else 503 `not_configured` (fail closed). The ceiling has no default.
+3. **Body size on actual bytes**: the stream is counted as it is read and cancelled at `MAX_BODY_BYTES`; `Content-Length` is only an early hint (R8.6) → 413 `too_large`.
+4. **Shape and size**: strict schema, unique block IDs, `MAX_BLOCKS`, `MAX_BLOCK_CHARS`, `MAX_CHARS` → 400 `invalid_input` / 413 `too_large`. Unknown `schemaId` → 400.
+5. **Optional per-client limiter** (Rate Limiting binding, per-location, eventually consistent) → 429 `rate_limited`. The strict global ceiling does not depend on it.
+6. **Admission (strict, global)**: a SQLite-backed Durable Object keeps one integer per UTC day (no text, filenames or client data). `admit(ceiling, now)` runs synchronously inside a storage transaction, so concurrent requests cannot exceed the ceiling; the count persists across restarts and a new UTC day starts at 00:00:00.000Z. **Every inference attempt, including a repair attempt, is admitted before the model is called.** There is no refund: a failed or timed-out call may still have consumed inference. If the counter call fails the request is refused (503 `limiter_unavailable`); it is never bypassed. Over the ceiling → 429 `daily_limit` with `Retry-After` to the next 00:00 UTC.
+7. **Model call**: Workers AI JSON mode, profile `max_tokens`, fixed timeout (504 `timeout`), no automatic retry. Invalid output allows at most `MAX_REPAIR_ATTEMPTS` (server-set, cap 1) repair attempt, each admitted first; then 502 `schema_invalid`. Daily free quota errors → 503 `quota_exhausted`; other upstream failures → 503 `model_unavailable`. Upstream messages are used for classification only and never returned.
+
+**Ceiling and limits come from the benchmark.** `DAILY_ADMISSION_CEILING` ships as `0` (closed). A request count does not equal neuron use (depends on model, input and output size), so the ceiling, `MAX_CHARS`, `MAX_BLOCKS` and the profile token caps are set together from measured neurons per call against the 10,000/day allowance, with margin for repairs and timeouts. Response `meta.usage` reports tokens when the model supplies them, to support that measurement.
+
+Logs: status, code, block and character counts, attempts and elapsed ms only (R8.4). No AI Gateway caching, KV or R2 (R8.5).
 
 ### Client bounds (R8.8)
-`MAX_CHUNKS_PER_DOC` (initial 8), `MAX_CALLS_PER_SESSION` (initial 30), one repair retry per chunk, no auto-retry on 429/503: UI shows a banner with a manual "Try again" and keeps already-extracted documents. No silent fallback to cache or partial findings; the sample path is a separate, explicit, labelled mode (R9).
+`MAX_CHUNKS_PER_DOC` (initial 8), `MAX_CALLS_PER_SESSION` (initial 30), no client-side repair (the Worker's single counted repair is the only one), no auto-retry on 429/503/504: UI shows a banner with a manual "Try again" and keeps already-extracted documents. No silent fallback to cache or partial findings; the sample path is a separate, explicit, labelled mode (R9).
 
-Errors: `schema_invalid`, `rate_limited`, `daily_limit`, `quota_exhausted`, `too_large`, `origin_denied`, `model_unavailable`. All recoverable in UI.
+Errors: `invalid_input`, `too_large`, `origin_denied`, `rate_limited`, `daily_limit`, `quota_exhausted`, `model_unavailable`, `timeout`, `schema_invalid`, `limiter_unavailable`, `not_configured`. The UI treats all but `invalid_input`, `origin_denied` and `not_configured` as recoverable. The one repair retry lives in the Worker (counted), so the client does not repair on its own.
 
 ## 7. UI, review and export
 
@@ -134,6 +138,6 @@ Errors: `schema_invalid`, `rate_limited`, `daily_limit`, `quota_exhausted`, `too
 Two Cloudflare Pages projects (build commands per app, output `apps/*/dist`) and one Worker. Config values (origins, limits) in `wrangler.toml` vars. No secrets in the client. Cost watch: Pages 500 builds/month, Workers 100k requests/day, Workers AI 10k neurons/day; the AI quota depends on measured neuron use per request and on bounded input and output sizes (§6, §8); the request ceiling is only one control and is set from benchmark results.
 
 ## 11. Open design assumptions
-- SQLite-backed Durable Objects are documented as available on Workers Free; the Rate Limiting binding's free-plan availability still needs confirming in task 3.1. Fallback is the stricter Durable Object-only limiter, and if neither is available the endpoint stays closed to the public (local/dev only) until a limiter exists.
+- SQLite-backed Durable Objects are documented as available on Workers Free and the counter is the strict global control. The Rate Limiting binding is optional and unverified on the free plan; the system works without it. If the counter is unavailable the endpoint stays closed.
 - Initial numeric limits are placeholders to be tuned by the benchmark.
 - Build Brief text is still missing; M5 checks (delivery, payment, warranty) will need its definitions.

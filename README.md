@@ -20,7 +20,7 @@ Models extract and suggest; deterministic rules produce findings backed by valid
 | `packages/ui` | Components shared by both apps |
 | `services/extraction-api` | Cloudflare Worker (extraction profiles, limits, admission counter) |
 | `tools/benchmark` | Live-extraction benchmark, model comparison, fixture builder |
-| `samples/` | Original fictional sample documents, `fixtures/` (app inputs), `benchmark-results/` |
+| `samples/` | Fictional sample documents (`scopecheck*`, `packcheck*`, realistic and fresh-validation sets with pre-registered labels), `fixtures/` (app inputs), `benchmark-results/` |
 | `.kiro/` | Steering and specs (requirements, design, tasks) |
 | `docs/build-log.md` | Factual build record |
 | `docs/model-comparison.md`, `docs/handoff-task-6.md` | Model decision; Task 6 handoff |

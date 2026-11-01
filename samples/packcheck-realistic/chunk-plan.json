@@ -1,0 +1,248 @@
+{
+  "version": 1,
+  "sample": "packcheck-realistic",
+  "chunker": "output-aware",
+  "parameters": {
+    "maxChars": 24000,
+    "maxBlocks": 400,
+    "overlap": 0,
+    "maxValues": 14,
+    "headingContext": true
+  },
+  "note": "Frozen output-aware chunk plan. Built from block text, structure and the extraction schema only. estimatedValues is the chunker estimate, not a label.",
+  "docs": [
+    {
+      "docId": "requirements",
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 30,
+      "documentHash": "017291c56f1779",
+      "chunks": [
+        {
+          "blockIds": [
+            "p1-l1",
+            "p1-l2",
+            "p1-l3",
+            "p1-l4",
+            "p1-l5",
+            "p1-l6",
+            "p1-l7",
+            "p1-l8",
+            "p1-l9",
+            "p1-l10",
+            "p1-l11",
+            "p1-l12",
+            "p1-l13",
+            "p1-l14",
+            "p1-l15",
+            "p1-l16",
+            "p1-l17",
+            "p1-l18",
+            "p1-l19",
+            "p1-l20",
+            "p1-l21",
+            "p1-l22",
+            "p1-l23",
+            "p1-l24",
+            "p1-l25",
+            "p1-l26",
+            "p1-l27",
+            "p1-l28",
+            "p1-l29",
+            "p1-l30"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 14,
+          "chars": 1839,
+          "overBudget": false,
+          "splitUnit": false
+        }
+      ],
+      "oversizedBlockIds": []
+    },
+    {
+      "docId": "application-form",
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 30,
+      "documentHash": "0cbd7255bd74b7",
+      "chunks": [
+        {
+          "blockIds": [
+            "p1-l1",
+            "p1-l2",
+            "p1-l3",
+            "p1-l4",
+            "p1-l5",
+            "p1-l6",
+            "p1-l7",
+            "p1-l8",
+            "p1-l9",
+            "p1-l10",
+            "p1-l11",
+            "p1-l12",
+            "p1-l13",
+            "p1-l14",
+            "p1-l15",
+            "p1-l16",
+            "p1-l17",
+            "p1-l18",
+            "p1-l19",
+            "p1-l20",
+            "p1-l21"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 13,
+          "chars": 1051,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l22",
+            "p1-l23",
+            "p1-l24",
+            "p1-l25",
+            "p1-l26",
+            "p1-l27",
+            "p1-l28",
+            "p1-l29",
+            "p1-l30"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 3,
+          "chars": 481,
+          "overBudget": false,
+          "splitUnit": false
+        }
+      ],
+      "oversizedBlockIds": []
+    },
+    {
+      "docId": "budget",
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 21,
+      "documentHash": "08004ecbbdf428",
+      "chunks": [
+        {
+          "blockIds": [
+            "p1-l1",
+            "p1-l2",
+            "p1-l3",
+            "p1-l4",
+            "p1-l5",
+            "p1-l6",
+            "p1-l7",
+            "p1-l8",
+            "p1-l9"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 11,
+          "chars": 354,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l10",
+            "p1-l11",
+            "p1-l12",
+            "p1-l13",
+            "p1-l14",
+            "p1-l15",
+            "p1-l16",
+            "p1-l17",
+            "p1-l18",
+            "p1-l19",
+            "p1-l20",
+            "p1-l21"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 10,
+          "chars": 504,
+          "overBudget": false,
+          "splitUnit": false
+        }
+      ],
+      "oversizedBlockIds": []
+    },
+    {
+      "docId": "registration",
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 9,
+      "documentHash": "1dcf440a1f2507",
+      "chunks": [
+        {
+          "blockIds": [
+            "p1-l1",
+            "p1-l2",
+            "p1-l3",
+            "p1-l4",
+            "p1-l5",
+            "p1-l6",
+            "p1-l7",
+            "p1-l8",
+            "p1-l9"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 4,
+          "chars": 459,
+          "overBudget": false,
+          "splitUnit": false
+        }
+      ],
+      "oversizedBlockIds": []
+    }
+  ],
+  "diagnostic": {
+    "note": "OFFLINE BENCHMARK DIAGNOSTIC: counts derived from the pre-registered labels. The chunker never read them and no run decision uses them.",
+    "docs": [
+      {
+        "docId": "requirements",
+        "labelledValues": 9,
+        "chunks": [
+          {
+            "chunk": 1,
+            "labelledValues": 9
+          }
+        ]
+      },
+      {
+        "docId": "application-form",
+        "labelledValues": 11,
+        "chunks": [
+          {
+            "chunk": 1,
+            "labelledValues": 8
+          },
+          {
+            "chunk": 2,
+            "labelledValues": 3
+          }
+        ]
+      },
+      {
+        "docId": "budget",
+        "labelledValues": 5,
+        "chunks": [
+          {
+            "chunk": 1,
+            "labelledValues": 3
+          },
+          {
+            "chunk": 2,
+            "labelledValues": 2
+          }
+        ]
+      },
+      {
+        "docId": "registration",
+        "labelledValues": 1,
+        "chunks": [
+          {
+            "chunk": 1,
+            "labelledValues": 1
+          }
+        ]
+      }
+    ]
+  }
+}

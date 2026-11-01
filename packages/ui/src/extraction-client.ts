@@ -1,4 +1,5 @@
-import { chunkBlocks, type Block, type ChunkLimits } from '@skeleton-key/engine';
+import type { Block, ChunkLimits } from '@skeleton-key/engine';
+import { chunkForSchema } from './schema-fields';
 
 // Browser client for the extraction Worker (design section on the client bounds; R5.4, R8.8, R8.10).
 //
@@ -15,12 +16,11 @@ export const MAX_CHUNKS_PER_DOC = 8;
 export const MAX_CALLS_PER_SESSION = 30;
 
 /**
- * Chunk limits for uploaded documents. DELIBERATELY SMALL: the benchmark found that output speed and the
- * profile's output cap bound a request to roughly 14 values (docs/build-log.md, preflight). Production limits are
- * task 5.5 and are NOT derived yet; until they are, longer documents fail honestly as "too long" or as
- * incomplete chunks, never as a guess.
+ * Uploaded documents are split by EXPECTED OUTPUT (schema-fields.ts): about 14 values per request, an estimate from
+ * small benchmark samples. Production limits are task 5.5 and are NOT derived yet; a document that needs more than
+ * MAX_CHUNKS_PER_DOC requests, or a chunk that fails, is reported as incomplete, never guessed. Passing `limits`
+ * explicitly selects the size-only chunker (tests).
  */
-export const UPLOAD_CHUNK_LIMITS: ChunkLimits = { maxChars: 1200, maxBlocks: 400, overlap: 0 };
 
 export type ErrorKind = 'daily_limit' | 'rate_limited' | 'quota_exhausted' | 'model_unavailable' | 'timeout' | 'schema_invalid' | 'limiter_unavailable' | 'too_large' | 'origin_denied' | 'not_configured' | 'invalid_input' | 'network' | 'unknown';
 
@@ -101,7 +101,7 @@ export async function extractDocument(
   doc: { docId: string; schemaId: string; blocks: Block[] },
   opts: { previous?: DocumentResult; signal?: AbortSignal; onProgress?: (done: number, total: number) => void } = {},
 ): Promise<DocumentResult> {
-  const { chunks, oversized } = chunkBlocks(doc.blocks, cfg.limits ?? UPLOAD_CHUNK_LIMITS);
+  const { chunks, oversized } = chunkForSchema(doc.schemaId, doc.blocks, cfg.limits);
   const result: DocumentResult = {
     docId: doc.docId,
     blocks: doc.blocks,
@@ -171,8 +171,7 @@ export async function analyseAll(
   for (const doc of docs) {
     const previous = opts.previous?.[doc.docId];
     if (stoppedBy) {
-      const limits = cfg.limits ?? UPLOAD_CHUNK_LIMITS;
-      const { chunks } = chunkBlocks(doc.blocks, limits);
+      const { chunks } = chunkForSchema(doc.schemaId, doc.blocks, cfg.limits);
       results.push(previous ?? { docId: doc.docId, blocks: doc.blocks, claims: [], chunks: chunks.map((c, index) => ({ index, blockIds: c.map((b) => b.id), status: 'not_sent' as const, claims: 0 })), stoppedBy });
       continue;
     }

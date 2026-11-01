@@ -12,6 +12,7 @@ import { planRun } from '../src/preflight';
 import { runBenchmark } from '../src/run';
 import { loadSample } from '../src/samples';
 import { LocalTransport } from '../src/transport';
+import { DEFAULT_MAX_VALUES, outputChunker } from '../src/chunking';
 
 // Conservative per-attempt budget reservations, and the preflight. No model is called anywhere here.
 
@@ -276,5 +277,75 @@ describe('preflight: the plan is checked before any inference', () => {
   it('the CLI exits 0 for a plan that fits', () => {
     const out = execFileSync('npx', ['tsx', 'tools/benchmark/src/cli.ts', '--mode', 'mock', '--sample', 'scopecheck', '--preflight-only', '--max-attempts', '8'], { cwd: join(__dirname, '../../..'), encoding: 'utf8' });
     expect(out).toMatch(/preflight passed/);
+  });
+});
+
+describe('preflight with the output-aware chunker', () => {
+  const params = { maxChars: 24_000, maxBlocks: 400, maxValues: DEFAULT_MAX_VALUES, overlap: 0, headingContext: true };
+  const base = { limits: { maxChars: 24_000, maxBlocks: 400 }, chunker: outputChunker(params), model: M, samples: ['scopecheck-realistic'] };
+
+  it('plans the full-length RFQ within the budget, and every request within the output cap and the timeout by estimate', async () => {
+    const p = await planRun({ ...base, docFilter: ['rfq'], timeoutMs: 25_000, attemptBudget: 16, runNeuronCap: 6000, dailyHeadroom: 6000 });
+    expect(p.problems).toEqual([]);
+    expect(p.requests).toBe(6);
+    expect(p.expectedNeurons).toBeLessThan(p.worstCaseNeurons); // the sum of worst cases is not the spend
+    expect(p.peakReservation).toBeLessThan(p.worstCaseNeurons);
+  });
+
+  it('the complete comparison does not fit the 16 attempts, and the plan says so', async () => {
+    const p = await planRun({ ...base, timeoutMs: 25_000, attemptBudget: 16, runNeuronCap: 6000, dailyHeadroom: 6000 });
+    expect(p.requests).toBeGreaterThan(16);
+    expect(p.problems.some((x) => /only 16 attempts/.test(x))).toBe(true);
+    expect(p.problems.some((x) => /neurons/.test(x))).toBe(false); // neurons are not the binding limit
+  });
+
+  it('a forecast that passes 90% of the timeout only at the slowest measured rate is a warning, not a refusal', async () => {
+    const p = await planRun({ ...base, docFilter: ['rfq'], timeoutMs: 22_000, attemptBudget: 16 });
+    expect(p.problems.filter((x) => /timeout/.test(x))).toEqual([]);
+    expect(p.warnings.some((x) => /slowest measured rate/.test(x))).toBe(true);
+  });
+
+  it('a forecast over the whole timeout at the typical rate is refused', async () => {
+    const p = await planRun({ ...base, docFilter: ['rfq'], timeoutMs: 15_000, attemptBudget: 16 });
+    expect(p.problems.some((x) => /typical rate/.test(x))).toBe(true);
+  });
+
+  it('the label counts are a diagnostic: refusals do not change when they are absent', async () => {
+    const a = await planRun({ ...base, docFilter: ['rfq'], timeoutMs: 25_000, attemptBudget: 16 });
+    expect(a.docs[0]!.chunks.every((c) => typeof c.labelledValues === 'number')).toBe(true);
+    expect(a.docs[0]!.chunks.map((c) => c.estimatedValues)).toEqual([14, 12, 12, 12, 12, 12]);
+  });
+
+  it('an end-to-end offline run with the output-aware chunker sends every chunk and completes every document', async () => {
+    const counter = new SqliteAdmission(':memory:');
+    const transport = new LocalTransport({ ai: oracleAi([loadSample('scopecheck-realistic')]), counter, env: { DAILY_ADMISSION_CEILING: '1000', MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '5000' } });
+    const r = await runBenchmark({ mode: 'mock', model: 'mock-oracle', label: 't', transport, sampleIds: ['scopecheck-realistic'], limits: params, chunker: outputChunker(params), attemptBudget: 1000 });
+    counter.close();
+    expect(r.requests.map((q) => q.docId + ':' + q.ok).filter((x) => x.endsWith('false'))).toEqual([]);
+    expect(r.requests.filter((q) => q.docId === 'rfq')).toHaveLength(6);
+    expect(r.samples[0]!.docs.every((d) => d.processingComplete)).toBe(true);
+  });
+});
+
+describe('an overrun in a multi-chunk run stops the remaining chunks', () => {
+  it('reported usage far above the reservation passes the cap; every later chunk is recorded as not sent', async () => {
+    const SAMPLE = 'scopecheck-realistic';
+    const params = { maxChars: 24_000, maxBlocks: 400, maxValues: DEFAULT_MAX_VALUES, overlap: 0, headingContext: true };
+    const budget = mkBudget({ runCap: 1000 });
+    const oracle = oracleAi([loadSample(SAMPLE)]);
+    const heavy: Ai = { run: async (m, i) => { const o = (await oracle.run(m, i)) as { usage?: unknown }; o.usage = { prompt_tokens: 40_000, completion_tokens: 1500 }; return o; } };
+    const counter = new SqliteAdmission(':memory:');
+    const transport = new LocalTransport({ ai: budgetedAi(heavy, budget), counter, env: { DAILY_ADMISSION_CEILING: '1000', MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '5000' } });
+    const r = await runBenchmark({
+      mode: 'mock', model: 'mock-oracle', label: 't', transport, sampleIds: [SAMPLE], docFilter: ['rfq'], limits: params, chunker: outputChunker(params), attemptBudget: 1000,
+      gate: (schemaId, chunk) => { const p = PROFILES[schemaId]!; return budget.refusal(worstCaseNeurons({ messages: buildMessages(p, chunk, false), max_tokens: p.maxOutputTokens }, M).neurons); },
+    });
+    counter.close();
+    expect(budget.attempts).toHaveLength(1); // exactly one call was made
+    expect(budget.attempts[0]!.overrun).toBe(true);
+    expect(budget.capReached).toBe(true);
+    expect(budget.runTotal).toBeGreaterThan(1000); // the overrun was recorded in full, not capped at the reservation
+    expect(r.requests.filter((q) => q.code === 'neuron_budget_exhausted')).toHaveLength(5);
+    expect(r.samples[0]!.docs[0]!.processingComplete).toBe(false);
   });
 });

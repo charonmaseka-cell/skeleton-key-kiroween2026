@@ -1,6 +1,5 @@
 import {
   buildEffectiveFacts,
-  chunkBlocks,
   confirmCoverage,
   issuesFromDocument,
   issuesFromFacts,
@@ -20,6 +19,7 @@ import { scoreExtraction, scoreFindings, type ExtractionScore, type FindingsScor
 import { resolveItemIdentities, type IdentityReport, type RecoveredIdentifier, type UncertainReason } from '../../../apps/scopecheck/src/adapter/identity';
 import { HINTS, loadBlocks, loadSample, type Sample } from './samples';
 import type { Transport } from './transport';
+import { sizeChunker, type Chunker } from './chunking';
 import { summarizeUsage, type UsageSummary } from './usage';
 
 export type RequestRecord = {
@@ -130,7 +130,9 @@ export type RunOptions = {
   transport: Transport;
   sampleIds: string[];
   docFilter?: string[];
-  limits: { maxChars: number; maxBlocks: number };
+  limits: { maxChars: number; maxBlocks: number; overlap?: number };
+  /** How a document is split into requests. Default: size-only chunking by `limits`. */
+  chunker?: Chunker;
   attemptBudget: number;
   /** Called before each chunk is sent; returns a reason to NOT send it (for example, the neuron budget cannot cover one more attempt). */
   gate?: (schemaId: string, chunk: Block[]) => string | null;
@@ -182,7 +184,8 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       const recorded = opts.recordedProfiles?.[doc.id];
       const profile: ProfileRecord = opts.mode === 'replay' ? (recorded ? { id: recorded, source: 'recorded' } : { id: doc.schemaId, source: 'inferred_from_manifest' }) : { id: schemaId, source: 'recorded' };
       blocksByDoc.set(doc.id, blocks);
-      const { chunks, oversized } = chunkBlocks(blocks, opts.limits);
+      const { chunks, oversized, unaccounted } = (opts.chunker ?? sizeChunker(opts.limits))(doc.id, blocks, schemaId);
+      if (unaccounted?.length) throw new Error(`${doc.id}: chunker left blocks unaccounted for: ${unaccounted.join(',')}`);
       const records: ChunkRecord[] = [];
       const claims: unknown[] = [];
       const dropped: Record<string, number> = {};

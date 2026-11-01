@@ -2,6 +2,10 @@
 // (default 0). A live run first prints a PREFLIGHT of the chunk plan and refuses to start when it cannot work.
 //   --min-chunks N      refuse unless every requested document splits into at least N chunks (multi-chunk runs)
 //   --preflight-only    print the plan and stop; no model, no credentials needed
+//   --chunking size|output  size (default): split by characters and blocks. output: output-aware, from text and schema.
+//   --values-per-request N  output-aware value budget per request (default 14; an estimate, see chunking.ts)
+//   --frozen-plan FILE  use exactly the chunks recorded in FILE (refused if the document text changed)
+//   --write-plan FILE   build the output-aware plan for --sample, write it to FILE, and stop (no model, no credentials)
 //   --run-neuron-cap N  neurons this run may add, charged by conservative reservation (default 6000)
 //   --daily-neuron-cap N  cumulative neurons for the day, baseline included (default 8000)
 // Usage:
@@ -14,6 +18,7 @@ import { join } from 'node:path';
 import { SqliteAdmission } from './admission';
 import { NeuronBudget, budgetedAi, loadDailyBaseline, worstCaseNeurons } from './budget';
 import { formatPlan, planRun } from './preflight';
+import { DEFAULT_MAX_VALUES, buildFrozenPlan, frozenChunker, outputChunker, sizeChunker, type Chunker, type FrozenPlan } from './chunking';
 import { buildMessages } from '../../../services/extraction-api/src/profiles';
 import { oracleAi, restAi, type Ai } from './ai';
 import { formatSummary, runBenchmark } from './run';
@@ -53,6 +58,20 @@ const intArg = (name: string, def: number, min: number, max: number) => {
 // The chunk limits are configuration, never a constant: a benchmark of multi-chunk behaviour must be able to set them.
 const limits = { maxChars: intArg('max-chars', 24_000, 200, 100_000), maxBlocks: intArg('max-blocks', 400, 1, 2_000), overlap: intArg('overlap', 0, 0, 20) };
 const minChunks = intArg('min-chunks', 1, 1, 100);
+const outputParams = { ...limits, maxValues: intArg('values-per-request', DEFAULT_MAX_VALUES, 1, 60), headingContext: true };
+if (args.get('write-plan')) {
+  const sampleId = sampleIds[0]!;
+  const plan = await buildFrozenPlan(sampleId, outputParams, schemaOverrides);
+  writeFileSync(args.get('write-plan')!, JSON.stringify(plan, null, 2) + '\n');
+  console.log(`plan written: ${args.get('write-plan')} (${plan.docs.map((d) => `${d.docId}: ${d.chunks.length} chunks`).join(', ')})`);
+  process.exit(0);
+}
+let chunker: Chunker;
+if (args.get('frozen-plan')) {
+  const plan = JSON.parse(readFileSync(args.get('frozen-plan')!, 'utf8')) as FrozenPlan;
+  if (plan.version !== 1 || plan.sample !== sampleIds[0] || sampleIds.length !== 1) { console.error('error: --frozen-plan needs the one sample it was built for'); process.exit(1); }
+  chunker = frozenChunker(plan);
+} else chunker = args.get('chunking') === 'output' ? outputChunker(outputParams) : sizeChunker(limits);
 const REPO = new URL('../../../', import.meta.url).pathname;
 const STATE_DIR = join(REPO, '.benchmark-state');
 
@@ -114,6 +133,7 @@ if (mode === 'live' || args.get('preflight-only') === 'true') {
     docFilter,
     schemaOverrides,
     limits,
+    chunker,
     timeoutMs,
     model,
     minChunks,
@@ -163,6 +183,7 @@ const result = await runBenchmark({
   sampleIds,
   docFilter,
   limits,
+  chunker,
   gate: mode === 'live' ? (schemaId, chunk) => {
     const profile = PROFILES[schemaId]!;
     return neuronBudget!.refusal(worstCaseNeurons({ messages: buildMessages(profile, chunk, false), max_tokens: profile.maxOutputTokens }, model).neurons);
@@ -185,7 +206,7 @@ counter.close();
 const outDir = join(SAMPLES_DIR, 'benchmark-results');
 mkdirSync(outDir, { recursive: true });
 const out = args.get('out') ?? join(outDir, `${mode}-${label}-${result.startedAt.replace(/[:.]/g, '-')}.json`);
-writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
+writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
 
 // Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.
@@ -201,6 +222,7 @@ if (mode === 'live') {
     // Observation only: validated, supported by evidence, but different from the label (for example an incomplete item name).
     if (d.extraction.outcomes.wrong_value > 0) observations.push(`${d.docId}: ${d.extraction.outcomes.wrong_value} validated value(s) differ from the label but are visible in their evidence`);
   }
+  if (neuronBudget?.capReached) stops.push(`neuron cap reached (${JSON.stringify({ runCharged: neuronBudget.summary.runCharged, dailyAfter: neuronBudget.summary.dailyAfter, overruns: neuronBudget.summary.overruns })}); no further calls are allowed`);
   for (const o of observations) console.log(`OBSERVATION: ${o}`);
   if (stops.length) {
     console.log(`STOP CONDITIONS:\n - ${stops.join('\n - ')}`);

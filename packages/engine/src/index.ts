@@ -23,3 +23,4 @@ export * from './export-render';
 export * from './adapter';
 export * from './chunk';
 export * from './issues';
+export * from './chunk-output';

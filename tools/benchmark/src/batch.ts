@@ -10,7 +10,8 @@ import type { NeuronBudget } from './budget';
 //
 // These are charges against a budget (published rates, margin applied); they are not dashboard-confirmed consumption.
 
-export type BatchInvocation = { label: string; startedAt: string; attemptsAtStart: number; neuronsAtStart: number; attemptsEnd?: number; neuronsEnd?: number; resultFile?: string; stop?: string | null };
+export type BatchInvocation = { label: string; startedAt: string; attemptsAtStart: number; neuronsAtStart: number; attemptsEnd?: number; neuronsEnd?: number; resultFile?: string; stop?: string | null; /** the process ended without recording an end: a call it dispatched may be unsettled and its reservation stands */ interrupted?: boolean };
+export type Reconciliation = { at: string; reason: string; before: number; after: number };
 export type BatchState = {
   id: string;
   createdAt: string;
@@ -21,6 +22,8 @@ export type BatchState = {
   /** result files of earlier invocations, oldest first; their successful chunks are reused, never resent */
   resultFiles: string[];
   invocations: BatchInvocation[];
+  /** upward corrections of the neuron charge (never downward), with the reason */
+  reconciliations?: Reconciliation[];
 };
 
 export class BatchExhausted extends Error {}
@@ -48,6 +51,9 @@ export class Batch {
   get remainingNeurons() { return Math.max(0, this.state.neuronCap - this.state.neuronsCharged); }
 
   begin(label: string): void {
+    // An earlier invocation that never recorded an end was interrupted: it is kept as such. What it had dispatched stays counted.
+    const prev = this.state.invocations.at(-1);
+    if (prev && prev.attemptsEnd === undefined) prev.interrupted = true;
     this.state.invocations.push({ label, startedAt: new Date().toISOString(), attemptsAtStart: this.state.attemptsUsed, neuronsAtStart: this.state.neuronsCharged });
     this.save();
   }
@@ -65,6 +71,22 @@ export class Batch {
   /** Set the batch's charge from this invocation's budget total (reservations that stand included). */
   syncNeurons(runTotal: number): void {
     this.state.neuronsCharged = Math.ceil((this.current.neuronsAtStart + runTotal) * 1000) / 1000; // rounded UP: never under-count
+    this.save();
+  }
+  /**
+   * Raise the neuron charge to `total` (never lower it), recording why. Used when a process died between a call's reservation and
+   * its settlement: the reservation stands, so the charge must include it.
+   */
+  reconcileNeurons(total: number, reason: string): void {
+    const before = this.state.neuronsCharged;
+    if (!(total > before)) return;
+    this.state.neuronsCharged = Math.ceil(total * 1000) / 1000;
+    (this.state.reconciliations ??= []).push({ at: new Date().toISOString(), reason, before, after: this.state.neuronsCharged });
+    this.save();
+  }
+  /** Register a result file (or a recovered partial result) whose successful chunks later invocations reuse. */
+  addResultFile(file: string): void {
+    if (!this.state.resultFiles.includes(file)) this.state.resultFiles.push(file);
     this.save();
   }
   end(resultFile: string | undefined, stop: string | null): void {
@@ -90,7 +112,9 @@ export class Batch {
  * to date after every call settles.
  */
 export function batchAi(raw: Ai, batch: Batch, makeBudgeted: (inner: Ai) => Ai, budget: () => NeuronBudget): Ai {
-  const counted: Ai = { run: async (model, input) => { batch.attemptStarted(); return raw.run(model, input); } };
+  // The attempt is counted, and the charge brought up to date, at the moment of dispatch: at that point the budget has already
+  // reserved this call, so a process that dies mid-call leaves a batch that includes the reservation.
+  const counted: Ai = { run: async (model, input) => { batch.attemptStarted(); batch.syncNeurons(budget().runTotal); return raw.run(model, input); } };
   const budgeted = makeBudgeted(counted);
   return {
     async run(model, input) {

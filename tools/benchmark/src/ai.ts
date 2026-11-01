@@ -47,6 +47,8 @@ export type MockDefects = {
   badJsonAlways?: boolean;
   /** strip item codes such as "CP-100" from item values while keeping the cited excerpt (what the live model did on the RFQ and quote-b) */
   dropItemCodes?: boolean;
+  /** drop the magnitude word from money values ("R1.6 million" -> amount "1.6"), as the live model did with packcheck.grant.v1 */
+  dropMagnitude?: boolean;
   /** make every call fail with this message */
   fail?: string;
 };
@@ -72,6 +74,7 @@ export function oracleAi(samples: Sample[], defects: MockDefects = {}): Ai & { c
             const block = sent.find((b) => b.text === doc.lines[f.line]);
             if (!block) continue;
             let value = f.value === null && f.kind === 'date' ? '2026-03-01' : f.value; // a plausible reading of an ambiguous date
+            if (defects.dropMagnitude && f.kind === 'money' && /million/i.test(f.excerpt)) value = { amount: '1.6', currency: 'ZAR' };
             if (defects.dropItemCodes && f.field === 'item' && typeof value === 'string') value = value.replace(/\b[A-Za-z]{1,4}-\d+\s*/g, '').trim();
             claims.push({ field: f.field, blockId: block.id, excerpt: f.excerpt, value });
           }

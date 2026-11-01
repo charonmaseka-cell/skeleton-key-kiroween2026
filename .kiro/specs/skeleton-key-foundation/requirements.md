@@ -68,6 +68,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 6. FOR DOCX (after the PDF path works), THE Engine SHALL use paragraph or table-cell references and SHALL NOT invent page numbers.
 7. THE UI SHALL NOT present reflowed extracted lines as original document lines.
 8. WHEN a user Corrects a Fact, THE system SHALL preserve the original Fact and Evidence alongside the Correction and SHALL mark the value as user-supplied. Findings and exports that depend on it SHALL identify it as user-supplied and SHALL NOT present the original evidence as supporting the corrected value.
+9. WHEN a critical Fact is rejected or held (unsupported value, ambiguous value, failed or missing evidence, unresolved identity), THE app SHALL place it in the **Needs review** queue as an item in its own right, not only as an extraction diagnostic. Every comparison or rule that depends on it SHALL be marked **Not evaluated**, with the reason and the input that blocked it. **Not evaluated** SHALL NOT be shown or exported as "no difference", "agrees" or "passed". (Benchmark evidence: with `packcheck.grant.v1` the model returned "R1.6 million" as 1.6; the value was held, and the funding comparisons could not run.)
 
 ### R5. Extraction and matching
 **User story:** As a developer, I want model use isolated and bounded.
@@ -95,6 +96,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 3. WHEN a Fact or match changes, THE rules SHALL rerun on the updated inputs (see R5.3).
 4. A Finding's identity SHALL include its comparison context and response document, so the same item missing from two responses yields two findings with independent decisions. A Finding's fingerprint SHALL include the rule version, relevant evidence and validation state, coverage and effective inputs. IF any of these change, THEN that Finding SHALL be reopened for review and SHALL NOT carry forward its earlier accepted or dismissed status; the earlier decision and note SHALL stay in the history.
 5. Exports (CSV, plain-text draft, and PDF via print or jsPDF) SHALL include unresolved **Needs review** items, clearly marked, alongside confirmed Findings, user decisions, Corrections and notes. THE app SHALL NOT send email.
+6. THE review interface and every export SHALL list **Not evaluated** comparisons in their own section, each with its reason and the blocked input, next to the unresolved **Needs review** items, and SHALL keep them distinct from comparisons that ran and found no difference (R4.9).
 
 ### R8. Privacy, limits and quota handling
 **User story:** As a user handling confidential documents, I want accurate privacy statements and a protected service.

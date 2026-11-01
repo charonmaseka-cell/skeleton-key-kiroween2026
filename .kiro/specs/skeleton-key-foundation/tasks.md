@@ -39,6 +39,7 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
   - [ ] 6.2 ScopeCheck Adapter (schemas, rules for quantity/spec/exclusion/omission) and minimal page on structured fixtures labelled "Sample (fictional)". (R2.4–2.7, R9)
   - [ ] 6.3 PackCheck grant Adapter (rules in design §4) and minimal page on structured fixtures labelled "Sample (fictional)". (R3.2–3.7, R9)
   - [ ] 6.4 Golden fixture tests: zero false critical findings. (R10.5)
+  - [ ] 6.5 Review interface and exports: rejected or held critical fields appear as Needs review items; dependent comparisons show **Not evaluated** with reason and blocked input, in a separate section of the panel and of every export; never rendered as "no difference". Reuse the ScopeCheck identity resolver (`apps/scopecheck/src/adapter/identity.ts`) and the benchmark's comparison ledger shape. (R4.9, R7.6)
 - [ ] 7. First deployments
   - [ ] 7.1 Two Pages projects and the Worker; origins and limits configured. Keep the endpoint closed to the public until 3.3 limits pass tests. (R11.5, R8.7)
   - [ ] 7.2 Optional hook: rerun golden fixtures on engine rule changes, only if supported; record honestly. (R12.3)

@@ -15,9 +15,9 @@ import {
   type Fact,
   type Finding,
 } from '@skeleton-key/engine';
-import { packMatches, runChecks, scopeMatches, type PackData, type ScopeData } from './checks';
+import { evaluatePack, packMatches, runChecks, scopeMatches, type Comparison, type PackData, type ScopeData } from './checks';
 import { scoreExtraction, scoreFindings, type ExtractionScore, type FindingsScore } from './score';
-import { resolveItemIdentities, type IdentityReport, type RecoveredIdentifier, type UncertainReason } from './scope-identity';
+import { resolveItemIdentities, type IdentityReport, type RecoveredIdentifier, type UncertainReason } from '../../../apps/scopecheck/src/adapter/identity';
 import { HINTS, loadBlocks, loadSample, type Sample } from './samples';
 import type { Transport } from './transport';
 import { summarizeUsage, type UsageSummary } from './usage';
@@ -51,8 +51,16 @@ export type FactRecord = {
   audit: 'consistent' | 'suspect' | 'manual' | null;
 };
 
+export type ProfileRecord = {
+  id: string;
+  /** 'recorded' = stored by the run that produced the response; 'inferred_from_manifest' = older result without a stored profile (the sample manifest id at the time) */
+  source: 'recorded' | 'inferred_from_manifest';
+};
+
 export type DocResult = {
   docId: string;
+  /** extraction profile (prompt) version the saved or live response was produced with */
+  profile: ProfileRecord;
   blocks: number;
   chunks: number;
   processingComplete: boolean;
@@ -76,6 +84,8 @@ export type SampleResult = {
   findings: FindingsBlock;
   /** ScopeCheck only, when identityRecovery is on: findings with the original matching, for comparison */
   findingsBefore?: FindingsBlock;
+  /** PackCheck only: every planned comparison and whether it ran (agree / flagged / not_evaluated with the reason) */
+  comparisons?: Comparison[];
   /** ScopeCheck only: identifiers recovered from the source and items left uncertain. Recorded separately; facts and extraction scores are not changed. */
   identity?: { recovered: RecoveredIdentifier[]; uncertain: { factId: string; docId: string; reason: UncertainReason; candidates: string[]; description: string }[]; counts: IdentityReport['counts'] };
 };
@@ -125,6 +135,10 @@ export type RunOptions = {
   simulateCoverageConfirmation?: boolean;
   /** ScopeCheck item-identity step (default on). Off reproduces the original matching. */
   identityRecovery?: boolean;
+  /** per-document profile override for live runs, for example { 'application-form': 'packcheck.grant.v2' } */
+  schemaOverrides?: Record<string, string>;
+  /** replay: profile ids recorded in the saved results, by document ID */
+  recordedProfiles?: Record<string, string>;
   measuredNeurons?: number;
 };
 
@@ -161,6 +175,9 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
 
     for (const doc of docs) {
       const blocks = await loadBlocks(sampleId, doc);
+      const schemaId = opts.schemaOverrides?.[doc.id] ?? doc.schemaId;
+      const recorded = opts.recordedProfiles?.[doc.id];
+      const profile: ProfileRecord = opts.mode === 'replay' ? (recorded ? { id: recorded, source: 'recorded' } : { id: doc.schemaId, source: 'inferred_from_manifest' }) : { id: schemaId, source: 'recorded' };
       blocksByDoc.set(doc.id, blocks);
       const { chunks, oversized } = chunkBlocks(blocks, opts.limits);
       const records: ChunkRecord[] = [];
@@ -174,7 +191,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
           requests.push({ docId: doc.id, chunk: i + 1, blocks: chunk.length, chars: 0, ok: false, code: 'attempt_budget_exhausted', ms: 0, attemptsCharged: 0, repaired: false, claims: 0, dropped: 0 });
           continue;
         }
-        const res = await opts.transport.extract(doc.schemaId, chunk);
+        const res = await opts.transport.extract(schemaId, chunk);
         charged += res.attemptsCharged;
         const chars = chunk.reduce((n, b) => n + b.text.length, 0);
         if (res.ok) {
@@ -211,6 +228,7 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       const unlabelled = new Set(extractionScore.unlabelledFactIds);
       docResults.push({
         docId: doc.id,
+        profile,
         claimsReturned: claims,
         facts: facts.map((f) => ({
           id: f.id, field: f.field, kind: f.kind, status: f.status, reason: f.reason, value: f.value,
@@ -262,8 +280,9 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       }
     } else {
       const data: PackData = { requirementsDocId: 'requirements', formDocId: 'application-form', otherDocIds: ['budget', 'registration'].filter((d) => extractions.has(d)) };
-      const produced = complete ? runChecks(sampleId, { ...base, matches: packMatches(effective, data), data }) : [];
-      sampleResult = { sampleId, docs: docResults, findings: scoreOf(produced) };
+      const packCtx = { ...base, matches: packMatches(effective, data), data };
+      const produced = complete ? runChecks(sampleId, packCtx) : [];
+      sampleResult = { sampleId, docs: docResults, findings: scoreOf(produced), comparisons: complete ? evaluatePack(packCtx).comparisons : undefined };
     }
     samples.push(sampleResult);
   }
@@ -324,9 +343,14 @@ export function formatSummary(r: BenchmarkResult): string {
     `usage: tokens ${r.usage.tokenSource} (prompt=${r.usage.promptTokens ?? 'n/a'}, completion=${r.usage.completionTokens ?? 'n/a'}); neurons ${r.usage.neurons.basis}=${r.usage.neurons.value ?? 'n/a'}`,
   ];
   for (const sm of r.samples) for (const d of sm.docs) {
-    lines.push(`  ${sm.sampleId}/${d.docId}: coverage=${d.coverage.state} processing-complete=${d.processingComplete} issues=${d.issues.length} outcomes=${JSON.stringify(d.extraction.outcomes)}`);
+    lines.push(`  ${sm.sampleId}/${d.docId} [${d.profile.id}${d.profile.source === 'recorded' ? '' : ' inferred'}]: coverage=${d.coverage.state} processing-complete=${d.processingComplete} issues=${d.issues.length} outcomes=${JSON.stringify(d.extraction.outcomes)}`);
   }
   for (const sm of r.samples) {
+    if (sm.comparisons) {
+      const c = sm.comparisons;
+      lines.push(`  ${sm.sampleId} comparisons: ${c.length} planned, agree=${c.filter((x) => x.status === 'agree').length} flagged=${c.filter((x) => x.status === 'flagged').length} NOT EVALUATED=${c.filter((x) => x.status === 'not_evaluated').length}`);
+      for (const x of c.filter((y) => y.status === 'not_evaluated')) lines.push(`    not evaluated: ${x.id} (${x.reason})`);
+    }
     if (sm.identity) {
       const c = sm.identity.counts;
       lines.push(`  ${sm.sampleId} identity: code-from-model=${c.codeFromModel} recovered=${c.recovered} description-only=${c.descriptionOnly} uncertain=${c.uncertain}`);

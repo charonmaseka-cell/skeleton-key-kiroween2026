@@ -1,11 +1,10 @@
-import { buildEffectiveFacts, confirmCoverage, isEvidenceIntact, newExtraction, runRules, validateClaims, type Block, type Fact, type DocumentExtraction } from '@skeleton-key/engine';
+import { isEvidenceIntact, validateClaims, type Block, type Fact } from '@skeleton-key/engine';
 import { describe, expect, it } from 'vitest';
-import { scopeMatches, scopeRule, type ScopeData } from '../src/checks';
-import { resolveItemIdentities } from '../src/scope-identity';
+import { descriptionOverlap, resolveItemIdentities } from './identity';
 
-// ScopeCheck item identity: a code the model left out of an item value is recovered from the
-// original source only when the source ties it unambiguously to that item. Uncertain identity
-// stays Needs review. These tests use small hand-made documents; they do not call any model.
+// The item-identity resolver, tested on its own with small hand-made documents (no model calls).
+// A code the model left out of an item value is recovered from the original source only when the
+// source ties it unambiguously to that item. Uncertain identity is never guessed.
 
 const block = (docId: string, id: string, text: string): Block => ({ id, docId, kind: 'pdf-run', text, page: 1, bbox: [0, 0, 100, 10] });
 const itemFact = (b: Block, excerpt: string, value: string): Fact => {
@@ -13,7 +12,6 @@ const itemFact = (b: Block, excerpt: string, value: string): Fact => {
   return f!;
 };
 const snapshot = (f: Fact[]) => JSON.stringify(f);
-const asDocs = (blocks: Block[]) => new Map<string, Block[]>(blocks.map((b) => [b.docId, blocks.filter((x) => x.docId === b.docId)]));
 
 describe('a code omitted from the value but present in the source', () => {
   const b = block('rfq', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 10 units | 316 stainless steel casing');
@@ -43,40 +41,68 @@ describe('a code omitted from the value but present in the source', () => {
   });
 });
 
+describe('layouts without literal pipe delimiters', () => {
+  it('a free-text sentence line: the single code is tied to the item by the whole line', () => {
+    const b = block('quote-c', 'p1-l2', 'We offer 10 units of Centrifugal pump CP-100 with a cast iron casing at R 11 500 each.');
+    const f = itemFact(b, 'Centrifugal pump CP-100', 'Centrifugal pump');
+    const r = resolveItemIdentities([f], [b]);
+    expect(r.identities.get(f.id)).toEqual({ kind: 'code', code: 'CP-100', origin: 'recovered' });
+    expect(r.recovered[0]!.codeSpan.text).toBe('CP-100');
+    expect(b.text.slice(r.recovered[0]!.codeSpan.start, r.recovered[0]!.codeSpan.end)).toBe('CP-100');
+  });
+
+  it('the code after the description, separated by a comma', () => {
+    const b = block('quote-c', 'p1-l3', 'Motor starter MS-20, quantity 6 units, IP55 enclosure, R 3 150 each.');
+    const f = itemFact(b, 'Motor starter MS-20', 'Motor starter');
+    expect(resolveItemIdentities([f], [b]).identities.get(f.id)).toEqual({ kind: 'code', code: 'MS-20', origin: 'recovered' });
+  });
+
+  it('semicolons and tabs also separate columns, so a code in another column is not tied to the item', () => {
+    const semi = block('d', 'b1', 'Item Centrifugal pump; qty 5; complies with ISO-9001');
+    const tab = block('d', 'b2', 'Item Centrifugal pump\tqty 5\tcomplies with ISO-9001');
+    for (const b of [semi, tab]) {
+      const f = itemFact(b, 'Item Centrifugal pump', 'Centrifugal pump');
+      expect(resolveItemIdentities([f], [b]).identities.get(f.id)).toMatchObject({ kind: 'description' });
+    }
+  });
+
+  it('a second code-like token in the same segment (a standard) makes identity uncertain, not a guess', () => {
+    const b = block('quote-c', 'p1-l4', 'Pressure gauge PG-6, 20 units, 0-10 bar range, certified to SANS-1200, R 450 each.');
+    const recovered = itemFact(b, 'Pressure gauge PG-6', 'Pressure gauge');
+    const r = resolveItemIdentities([recovered], [b]);
+    expect(r.identities.get(recovered.id)).toMatchObject({ kind: 'uncertain', reason: 'multiple_codes', candidates: ['PG-6', 'SANS-1200'] });
+    expect(r.recovered).toHaveLength(0);
+  });
+
+  it('a code the model put in its own value is also checked against competing codes in the source', () => {
+    const b = block('quote-c', 'p1-l4', 'Pressure gauge PG-6, 20 units, certified to SANS-1200, R 450 each.');
+    const f = itemFact(b, 'Pressure gauge PG-6', 'PG-6 Pressure gauge');
+    expect(f.status).toBe('validated');
+    expect(resolveItemIdentities([f], [b]).identities.get(f.id)).toMatchObject({ kind: 'uncertain', reason: 'multiple_codes' });
+  });
+
+  it('a code in the value that is not in the cited span is uncertain', () => {
+    const b = block('d', 'b1', 'Item CP-100 Centrifugal pump | qty 5');
+    const f: Fact = { ...itemFact(b, 'Item CP-100 Centrifugal pump', 'Centrifugal pump'), value: 'XX-9 Centrifugal pump' };
+    expect(resolveItemIdentities([f], [b]).identities.get(f.id)).toMatchObject({ kind: 'uncertain', reason: 'code_not_in_source' });
+  });
+});
+
 describe('two different codes sharing the same item description', () => {
-  const rfq = [block('rfq', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 10 units'), block('rfq', 'p1-l3', 'Item CP-200 Centrifugal pump | qty 4 units')];
-  const quote = [block('quote-a', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 8 units')];
-  const rfqFacts = rfq.map((b) => itemFact(b, b.text.split(' | ')[0]!, 'Centrifugal pump'));
-  const quoteFacts = quote.map((b) => itemFact(b, b.text.split(' | ')[0]!, 'Centrifugal pump'));
-  const all = [...rfqFacts, ...quoteFacts];
-
   it('keeps each code with its own line and span', () => {
-    const r = resolveItemIdentities(all, [...rfq, ...quote]);
+    const blocks = [block('rfq', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 10 units'), block('rfq', 'p1-l3', 'Item CP-200 Centrifugal pump | qty 4 units'), block('quote-a', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 8 units')];
+    const facts = blocks.map((b) => itemFact(b, b.text.split(' | ')[0]!, 'Centrifugal pump'));
+    const r = resolveItemIdentities(facts, blocks);
     expect(r.recovered.map((x) => [x.docId, x.code]).sort()).toEqual([['quote-a', 'CP-100'], ['rfq', 'CP-100'], ['rfq', 'CP-200']]);
-    const spans = r.recovered.filter((x) => x.docId === 'rfq').map((x) => x.codeSpan.blockId);
-    expect(new Set(spans).size).toBe(2);
-  });
-
-  it('matches only the same code: CP-100 is verified, CP-200 is not matched to the CP-100 line', () => {
-    const r = resolveItemIdentities(all, [...rfq, ...quote]);
-    const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a'], identities: r.identities };
-    const matches = scopeMatches(buildEffectiveFacts(all, []), data);
-    expect(matches.find((m) => m.subjectId === 'CP-100')).toMatchObject({ status: 'verified' });
-    expect(matches.find((m) => m.subjectId === 'CP-200')).toMatchObject({ status: 'none', candidateTargetIds: [] });
-  });
-
-  it('without the identity step the shared description collides (the original behaviour)', () => {
-    const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a'] };
-    const matches = scopeMatches(buildEffectiveFacts(all, []), data);
-    expect(matches.every((m) => m.subjectId === 'CENTRIFUGAL PUMP')).toBe(true);
+    expect(new Set(r.recovered.filter((x) => x.docId === 'rfq').map((x) => x.codeSpan.blockId)).size).toBe(2);
   });
 });
 
 describe('multiple possible codes in the source', () => {
   const bad = block('quote-a', 'p1-l2', 'Item CP-100 / CP-101 Centrifugal pump | qty 8 units');
-  const fact = itemFact(bad, 'Item CP-100 / CP-101 Centrifugal pump', 'Centrifugal pump');
 
   it('does not guess: identity is uncertain and nothing is recovered', () => {
+    const fact = itemFact(bad, 'Item CP-100 / CP-101 Centrifugal pump', 'Centrifugal pump');
     const r = resolveItemIdentities([fact], [bad]);
     expect(r.identities.get(fact.id)).toMatchObject({ kind: 'uncertain', reason: 'multiple_codes', candidates: ['CP-100', 'CP-101'] });
     expect(r.recovered).toHaveLength(0);
@@ -84,24 +110,8 @@ describe('multiple possible codes in the source', () => {
 
   it('also holds when the model itself put two codes in the value', () => {
     const two = itemFact(bad, 'Item CP-100 / CP-101 Centrifugal pump', 'CP-100 / CP-101 Centrifugal pump');
-    expect(two.status).toBe('validated'); // the value is supported by the source, so the engine accepted it
+    expect(two.status).toBe('validated'); // supported by the source, so the engine accepted it
     expect(resolveItemIdentities([two], [bad]).identities.get(two.id)).toMatchObject({ kind: 'uncertain', reason: 'multiple_codes' });
-  });
-
-  it('stays Needs review even when coverage is confirmed: never a confirmed omission', () => {
-    const rfqBlock = block('rfq', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 10 units');
-    const rfqFact = itemFact(rfqBlock, 'Item CP-100 Centrifugal pump', 'Centrifugal pump');
-    const facts = [rfqFact, fact];
-    const r = resolveItemIdentities(facts, [rfqBlock, bad]);
-    const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a'], identities: r.identities };
-    const effective = buildEffectiveFacts(facts, []);
-    const confirmed = (id: string, b: Block): DocumentExtraction => confirmCoverage(newExtraction(id, [b.id], [{ id: `${id}#1`, blockIds: [b.id], status: 'ok' }]), 'user');
-    const documents = new Map([['rfq', confirmed('rfq', rfqBlock)], ['quote-a', confirmed('quote-a', bad)]]);
-    const out = runRules([scopeRule], { facts: effective, documents, matches: scopeMatches(effective, data), data });
-    const absent = out.find((f) => f.code === 'item.absent')!;
-    expect(absent).toMatchObject({ subjectId: 'CP-100', state: 'needs_review', reason: 'match_unresolved' });
-    expect(out.find((f) => f.code === 'item.identity_uncertain')).toMatchObject({ state: 'needs_review', reason: 'multiple_codes' });
-    expect(out.some((f) => f.state === 'confirmed' && f.severity === 'critical')).toBe(false);
   });
 });
 
@@ -113,27 +123,6 @@ describe('a genuinely absent code', () => {
     expect(r.identities.get(fact.id)).toMatchObject({ kind: 'description' });
     expect(r.recovered).toHaveLength(0);
     expect(r.counts).toMatchObject({ descriptionOnly: 1, recovered: 0, uncertain: 0 });
-  });
-
-  it('a description-only item is never confirmed absent against a coded line, even with confirmed coverage', () => {
-    const rb = block('rfq', 'p1-l2', 'Item Centrifugal pump | qty 10 units');
-    const qb = block('quote-a', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 8 units');
-    const facts = [itemFact(rb, 'Item Centrifugal pump', 'Centrifugal pump'), itemFact(qb, 'Item CP-100 Centrifugal pump', 'CP-100 Centrifugal pump')];
-    const r = resolveItemIdentities(facts, [rb, qb]);
-    const data: ScopeData = { rfqDocId: 'rfq', quoteDocIds: ['quote-a'], identities: r.identities };
-    const effective = buildEffectiveFacts(facts, []);
-    const done = (id: string, b: Block) => confirmCoverage(newExtraction(id, [b.id], [{ id: `${id}#1`, blockIds: [b.id], status: 'ok' }]), 'user');
-    const out = runRules([scopeRule], { facts: effective, documents: new Map([['rfq', done('rfq', rb)], ['quote-a', done('quote-a', qb)]]), matches: scopeMatches(effective, data), data });
-    expect(out.find((f) => f.code === 'item.absent')).toMatchObject({ state: 'needs_review', reason: 'match_unresolved' });
-  });
-
-  it('two description-only items with the same description still match each other by key', () => {
-    const rb = block('rfq', 'p1-l2', 'Item Centrifugal pump | qty 10 units');
-    const qb = block('quote-a', 'p1-l2', 'Item Centrifugal pump | qty 8 units');
-    const facts = [itemFact(rb, 'Item Centrifugal pump', 'Centrifugal pump'), itemFact(qb, 'Item Centrifugal pump', 'Centrifugal pump')];
-    const r = resolveItemIdentities(facts, [rb, qb]);
-    const m = scopeMatches(buildEffectiveFacts(facts, []), { rfqDocId: 'rfq', quoteDocIds: ['quote-a'], identities: r.identities });
-    expect(m[0]).toMatchObject({ status: 'verified' });
   });
 });
 
@@ -178,8 +167,14 @@ describe('blocks across documents', () => {
     const rb = block('rfq', 'p1-l2', 'Item CP-100 Centrifugal pump | qty 10 units');
     const qb = block('quote-b', 'p1-l2', 'Item CP-200 Centrifugal pump | qty 10 units');
     const facts = [itemFact(rb, 'Item CP-100 Centrifugal pump', 'Centrifugal pump'), itemFact(qb, 'Item CP-200 Centrifugal pump', 'Centrifugal pump')];
-    const r = resolveItemIdentities(facts, [...asDocs([rb, qb]).values()].flat());
+    const r = resolveItemIdentities(facts, [rb, qb]);
     expect(r.recovered.map((x) => `${x.docId}:${x.code}`).sort()).toEqual(['quote-b:CP-200', 'rfq:CP-100']);
   });
 });
 
+describe('descriptionOverlap', () => {
+  it('is the share of the smaller description found in the other', () => {
+    expect(descriptionOverlap('Centrifugal pump', 'CP-100 Centrifugal pump')).toBe(1);
+    expect(descriptionOverlap('Centrifugal pump', 'Motor starter')).toBe(0);
+  });
+});

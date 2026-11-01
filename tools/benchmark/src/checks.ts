@@ -16,7 +16,7 @@ import {
   type Rule,
   type RuleContext,
 } from '@skeleton-key/engine';
-import { descriptionOverlap, type ItemIdentity } from './scope-identity';
+import { descriptionOverlap, type ItemIdentity } from '../../../apps/scopecheck/src/adapter/identity';
 
 // Benchmark-local checks, built only from engine primitives, so false critical findings can be
 // measured now. Task 6 turns these into the real app adapters.
@@ -219,85 +219,130 @@ export function packMatches(facts: Map<string, EffectiveFact>, data: PackData) {
   return resolveMatches(slots, candidates);
 }
 
-const AMBIGUOUS = new Set(['date_format_ambiguous', 'number_format_ambiguous', 'currency_ambiguous', 'multiple_candidates_no_context', 'ambiguous_candidates']);
 const CRITICAL_FIELDS = new Set(['organisation_name', 'funding_requested', 'total_project_budget', 'project_start_date', 'project_end_date']);
+
+/**
+ * One planned comparison and what happened to it. A comparison whose input is not validated is NOT
+ * silently skipped: it is recorded as not_evaluated with the reason, so "no finding" can never be
+ * mistaken for "checked and fine". (Requirement carried into the review interface and exports.)
+ */
+export type Comparison = {
+  id: string;
+  check: 'field_equivalence' | 'funding_within_budget' | 'attachment_listed';
+  field: string;
+  docs: string[];
+  /** agree = evaluated, nothing to report; flagged = evaluated and produced a finding (confirmed or Needs review); not_evaluated = an input was not validated */
+  status: 'agree' | 'flagged' | 'not_evaluated';
+  reason?: string;
+};
+
+const why = (e: EffectiveFact | undefined, doc: string, field: string) =>
+  !e ? `no ${field} fact in ${doc}` : `${field} in ${doc} not validated (${e.fact.reason ?? e.fact.status})`;
+
+export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft[]; comparisons: Comparison[] } {
+  const out: FindingDraft[] = [];
+  const comparisons: Comparison[] = [];
+  const { formDocId, requirementsDocId, otherDocIds } = ctx.data;
+  const formDoc = ctx.documents.get(formDocId) as DocumentExtraction;
+
+  // Required attachments vs those the form lists (absence needs verified coverage of the form).
+  for (const req of factsOf(ctx.facts, requirementsDocId, 'attachment_title')) {
+    const key = norm(req.value);
+    const base = { check: 'attachment_listed' as const, field: 'attachment_title', docs: [requirementsDocId, formDocId] };
+    if (!req.usable) {
+      comparisons.push({ ...base, id: `attachment_listed:${req.fact.id}`, status: 'not_evaluated', reason: why(req, requirementsDocId, 'attachment_title') });
+      continue;
+    }
+    const m = ctx.matches.find((x) => x.subjectId === key && x.responseDocId === formDocId);
+    if (!m) continue;
+    const verdict = concludeAbsence(m, formDoc);
+    if (verdict.kind === 'absent') {
+      const d = describeInputs([req]);
+      out.push(draft({ contextId: 'required-vs-listed', responseDocId: formDocId, code: 'attachment.missing', severity: 'critical', state: verdict.state, basis: 'absence', subjectId: key, message: `Required attachment not listed in form: ${key}`, reason: verdict.reason, matchStatus: m.status, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(formDoc)] }));
+    }
+    comparisons.push({ ...base, id: `attachment_listed:${key}`, status: verdict.kind === 'absent' ? 'flagged' : 'agree', reason: verdict.kind === 'absent' ? verdict.reason : undefined });
+  }
+
+  // Equivalent fields compared across documents, anchored on the application form.
+  const compare = (field: string, code: string, kind: 'name' | 'amount' | 'date') => {
+    const anchor = factsOf(ctx.facts, formDocId, field)[0];
+    for (const docId of otherDocIds) {
+      for (const other of factsOf(ctx.facts, docId, field)) {
+        const cmp = { check: 'field_equivalence' as const, field, docs: [formDocId, docId], id: `${field}:${formDocId}~${docId}` };
+        if (!anchor?.usable || !other.usable) {
+          // surfaced in the Needs-review pass below; the comparison itself did not run
+          comparisons.push({ ...cmp, status: 'not_evaluated', reason: !anchor?.usable ? why(anchor, formDocId, field) : why(other, docId, field) });
+          continue;
+        }
+        let state: 'confirmed' | 'needs_review' | null = null;
+        let reason: string | undefined;
+        if (kind === 'name') {
+          const c = compareNames(String(anchor.value), String(other.value));
+          if (c === 'different') state = 'confirmed';
+          else if (c === 'legal_form_differs') {
+            state = 'needs_review';
+            reason = 'legal_form_differs';
+          }
+        } else if (kind === 'amount') {
+          const c = compareAmounts(anchor.value as never, other.value as never);
+          if (c.result === 'different') state = 'confirmed';
+          else if (c.result === 'incomparable') {
+            state = 'needs_review';
+            reason = c.reason;
+          }
+        } else if (anchor.value !== other.value) state = 'confirmed';
+        comparisons.push({ ...cmp, status: state ? 'flagged' : 'agree', reason });
+        if (!state) continue;
+        const d = describeInputs([anchor, other]);
+        out.push(draft({ contextId: 'form-vs-supporting', responseDocId: docId, code, severity: 'critical', state, subjectId: field, message: `${field} differs between ${formDocId} and ${docId}`, reason, inputs: d.inputs, evidence: d.evidence }));
+      }
+    }
+  };
+  compare('organisation_name', 'org.name_differs', 'name');
+  compare('funding_requested', 'funding.differs', 'amount');
+  compare('project_start_date', 'date.differs', 'date');
+  compare('project_end_date', 'date.differs', 'date');
+
+  // Every critical-field value that was held (ambiguous, unsupported, rejected) enters the Needs-review
+  // queue as a finding. Comparisons that depend on it are recorded above as not_evaluated.
+  for (const e of ctx.facts.values()) {
+    if (e.fact.status === 'needs_review' && e.provenance === 'document' && CRITICAL_FIELDS.has(e.fact.field)) {
+      const d = describeInputs([e]);
+      out.push(draft({ contextId: 'values', responseDocId: e.fact.docId, code: 'value.needs_review', severity: 'warning', state: 'needs_review', subjectId: `${e.fact.docId}:${e.fact.field}`, message: `${e.fact.field} needs review`, reason: e.fact.reason, inputs: d.inputs, evidence: d.evidence }));
+    }
+  }
+
+  // Additional rule only: funding must not exceed the total budget (same currency, both validated).
+  const funding = factsOf(ctx.facts, formDocId, 'funding_requested')[0];
+  for (const docId of otherDocIds) {
+    const budget = factsOf(ctx.facts, docId, 'total_project_budget')[0];
+    if (!budget) continue;
+    const cmp = { check: 'funding_within_budget' as const, field: 'funding_requested<=total_project_budget', docs: [formDocId, docId], id: `funding_within_budget:${formDocId}~${docId}` };
+    if (!funding?.usable || !budget.usable) {
+      comparisons.push({ ...cmp, status: 'not_evaluated', reason: !funding?.usable ? why(funding, formDocId, 'funding_requested') : why(budget, docId, 'total_project_budget') });
+      continue;
+    }
+    const f = funding.value as { amount: string; currency: string | null };
+    const b = budget.value as { amount: string; currency: string | null };
+    if (!f.currency || !b.currency || f.currency !== b.currency) {
+      comparisons.push({ ...cmp, status: 'not_evaluated', reason: 'currency_not_comparable' });
+      continue;
+    }
+    const exceeds = Number(f.amount) > Number(b.amount);
+    comparisons.push({ ...cmp, status: exceeds ? 'flagged' : 'agree' });
+    if (exceeds) {
+      const d = describeInputs([funding, budget]);
+      out.push(draft({ contextId: 'budget', responseDocId: docId, code: 'funding.exceeds_budget', severity: 'critical', state: 'confirmed', subjectId: 'funding_vs_budget', message: 'Funding requested exceeds the total project budget', inputs: d.inputs, evidence: d.evidence }));
+    }
+  }
+  return { drafts: uniq(out), comparisons };
+}
 
 export const packRule: Rule<PackData> = {
   id: 'bench.pack',
-  version: '1',
+  version: '2',
   run(ctx: RuleContext<PackData>) {
-    const out: FindingDraft[] = [];
-    const { formDocId, requirementsDocId, otherDocIds } = ctx.data;
-    const formDoc = ctx.documents.get(formDocId) as DocumentExtraction;
-
-    // Required attachments vs those the form lists (absence needs verified coverage of the form).
-    for (const req of factsOf(ctx.facts, requirementsDocId, 'attachment_title').filter((e) => e.usable)) {
-      const key = norm(req.value);
-      const m = ctx.matches.find((x) => x.subjectId === key && x.responseDocId === formDocId);
-      if (!m) continue;
-      const verdict = concludeAbsence(m, formDoc);
-      if (verdict.kind === 'absent') {
-        const d = describeInputs([req]);
-        out.push(draft({ contextId: 'required-vs-listed', responseDocId: formDocId, code: 'attachment.missing', severity: 'critical', state: verdict.state, basis: 'absence', subjectId: key, message: `Required attachment not listed in form: ${key}`, reason: verdict.reason, matchStatus: m.status, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(formDoc)] }));
-      }
-    }
-
-    // Equivalent fields compared across documents, anchored on the application form.
-    const compare = (field: string, code: string, kind: 'name' | 'amount' | 'date') => {
-      const anchor = factsOf(ctx.facts, formDocId, field)[0];
-      if (!anchor) return;
-      for (const docId of otherDocIds) {
-        for (const other of factsOf(ctx.facts, docId, field)) {
-          if (!anchor.usable || !other.usable) continue; // surfaced by the needs-review pass below
-          let state: 'confirmed' | 'needs_review' | null = null;
-          let reason: string | undefined;
-          if (kind === 'name') {
-            const c = compareNames(String(anchor.value), String(other.value));
-            if (c === 'different') state = 'confirmed';
-            else if (c === 'legal_form_differs') {
-              state = 'needs_review';
-              reason = 'legal_form_differs';
-            }
-          } else if (kind === 'amount') {
-            const c = compareAmounts(anchor.value as never, other.value as never);
-            if (c.result === 'different') state = 'confirmed';
-            else if (c.result === 'incomparable') {
-              state = 'needs_review';
-              reason = c.reason;
-            }
-          } else if (anchor.value !== other.value) state = 'confirmed';
-          if (!state) continue;
-          const d = describeInputs([anchor, other]);
-          out.push(draft({ contextId: 'form-vs-supporting', responseDocId: docId, code, severity: 'critical', state, subjectId: field, message: `${field} differs between ${formDocId} and ${docId}`, reason, inputs: d.inputs, evidence: d.evidence }));
-        }
-      }
-    };
-    compare('organisation_name', 'org.name_differs', 'name');
-    compare('funding_requested', 'funding.differs', 'amount');
-    compare('project_start_date', 'date.differs', 'date');
-    compare('project_end_date', 'date.differs', 'date');
-
-    // Ambiguous or unsupported values on critical fields stay visible as Needs review.
-    for (const e of ctx.facts.values()) {
-      if (e.fact.status === 'needs_review' && e.provenance === 'document' && CRITICAL_FIELDS.has(e.fact.field) && AMBIGUOUS.has(e.fact.reason ?? '')) {
-        const d = describeInputs([e]);
-        out.push(draft({ contextId: 'values', responseDocId: e.fact.docId, code: 'value.needs_review', severity: 'warning', state: 'needs_review', subjectId: `${e.fact.docId}:${e.fact.field}`, message: `${e.fact.field} needs review`, reason: e.fact.reason, inputs: d.inputs, evidence: d.evidence }));
-      }
-    }
-
-    // Additional rule only: funding must not exceed the total budget (same currency, both validated).
-    const funding = factsOf(ctx.facts, formDocId, 'funding_requested')[0];
-    for (const docId of otherDocIds) {
-      const budget = factsOf(ctx.facts, docId, 'total_project_budget')[0];
-      if (!funding?.usable || !budget?.usable) continue;
-      const f = funding.value as { amount: string; currency: string | null };
-      const b = budget.value as { amount: string; currency: string | null };
-      if (f.currency && b.currency && f.currency === b.currency && Number(f.amount) > Number(b.amount)) {
-        const d = describeInputs([funding, budget]);
-        out.push(draft({ contextId: 'budget', responseDocId: docId, code: 'funding.exceeds_budget', severity: 'critical', state: 'confirmed', subjectId: 'funding_vs_budget', message: 'Funding requested exceeds the total project budget', inputs: d.inputs, evidence: d.evidence }));
-      }
-    }
-    return uniq(out);
+    return evaluatePack(ctx).drafts;
   },
 };
 

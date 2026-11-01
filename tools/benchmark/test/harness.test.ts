@@ -222,6 +222,33 @@ describe('ScopeCheck item identity in the harness', () => {
   });
 });
 
+describe('PackCheck comparisons: the checks actually run, or are marked Not evaluated', () => {
+  const pack = (r: BenchmarkResult) => r.samples.find((x) => x.sampleId === 'packcheck')!;
+  const cmp = (r: BenchmarkResult, id: string) => pack(r).comparisons!.find((c) => c.id === id)!;
+
+  it('clean run: funding fields agree across documents and funding vs budget is evaluated, not skipped', async () => {
+    const r = await run({ samples: ['packcheck'] });
+    expect(cmp(r, 'funding_requested:application-form~budget')).toMatchObject({ status: 'agree' });
+    expect(cmp(r, 'funding_within_budget:application-form~budget')).toMatchObject({ status: 'agree' });
+    expect(cmp(r, 'organisation_name:application-form~budget')).toMatchObject({ status: 'flagged' });
+    // the only comparison that cannot run is the one that depends on the ambiguous (01/03/2026) start date
+    expect(pack(r).comparisons!.filter((c) => c.status === 'not_evaluated').map((c) => [c.id, c.reason])).toEqual([['project_start_date:application-form~budget', 'project_start_date in budget not validated (date_format_ambiguous)']]);
+    expect(findings(r, 'packcheck').some((f) => f.code.startsWith('funding.'))).toBe(false);
+  });
+
+  it('a rejected critical field enters the Needs-review queue and dependent comparisons are Not evaluated (never "fine")', async () => {
+    const r = await run({ samples: ['packcheck'], defects: { dropMagnitude: true } });
+    const form = docOf(r, 'application-form');
+    expect(form.facts.find((f) => f.field === 'funding_requested')).toMatchObject({ status: 'needs_review', reason: 'value_not_in_excerpt' });
+    expect(findings(r, 'packcheck').find((f) => f.code === 'value.needs_review' && f.subject === 'application-form:funding_requested')).toMatchObject({ state: 'needs_review', reason: 'value_not_in_excerpt' });
+    expect(cmp(r, 'funding_requested:application-form~budget')).toMatchObject({ status: 'not_evaluated' });
+    expect(cmp(r, 'funding_within_budget:application-form~budget')).toMatchObject({ status: 'not_evaluated' });
+    expect(cmp(r, 'funding_within_budget:application-form~budget').reason).toMatch(/funding_requested in application-form not validated/);
+    expect(findings(r, 'packcheck').some((f) => f.code.startsWith('funding.'))).toBe(false);
+    expect(r.summary.falseCriticalFindings).toBe(0);
+  });
+});
+
 describe('usage labelling', () => {
   const rep = (p: number | null, c: number | null) => ({ promptTokens: p, completionTokens: c });
   it('measured tokens give an ESTIMATED neuron figure, labelled as such', () => {

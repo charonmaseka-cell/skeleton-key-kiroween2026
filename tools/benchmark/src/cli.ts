@@ -23,6 +23,12 @@ for (let i = 0; i < argv.length; i++) {
 const mode = args.get('mode') === 'live' ? 'live' : args.get('mode') === 'replay' ? 'replay' : 'mock';
 const sampleIds = (args.get('sample') ?? 'scopecheck,packcheck').split(',');
 const docFilter = args.get('doc')?.split(',');
+const schemaOverrides: Record<string, string> = {};
+for (const pair of (args.get('profile') ?? '').split(',').filter(Boolean)) {
+  const [doc, id] = pair.split('=');
+  if (!doc || !id || !PROFILES[id]) { console.error(`error: --profile expects doc=profileId with a known profile (got "${pair}")`); process.exit(1); }
+  schemaOverrides[doc] = id;
+}
 const label = args.get('label') ?? (docFilter ? docFilter.join('+') : 'all');
 const simulate = args.get('simulate-coverage') === 'true';
 const REPO = new URL('../../../', import.meta.url).pathname;
@@ -72,18 +78,22 @@ if (mode === 'live') {
 }
 
 let transport: Transport;
+let replayProfiles: Record<string, string> | undefined;
 if (mode === 'replay') {
   const from = args.get('from');
   if (!from) fail('replay mode requires --from <result.json[,result.json]>');
   const saved: unknown[][] = [];
+  const recordedProfiles: Record<string, string> = {};
   for (const f of from.split(',')) {
-    const r = JSON.parse(readFileSync(f, 'utf8')) as { samples: { docs: { claimsReturned?: unknown[] }[] }[] };
+    const r = JSON.parse(readFileSync(f, 'utf8')) as { samples: { docs: { docId: string; claimsReturned?: unknown[]; profile?: { id: string } }[] }[] };
     for (const sm of r.samples) for (const d of sm.docs) {
       if (!d.claimsReturned) fail(`${f} has no saved claims (older result format)`);
       saved.push(d.claimsReturned);
+      if (d.profile) recordedProfiles[d.docId] = d.profile.id;
     }
   }
   transport = new ReplayTransport(saved);
+  replayProfiles = recordedProfiles;
 } else {
   transport = new LocalTransport({
     ai,
@@ -104,6 +114,8 @@ const result = await runBenchmark({
   attemptBudget,
   simulateCoverageConfirmation: simulate,
   identityRecovery: args.get('no-identity-recovery') !== 'true',
+  schemaOverrides,
+  recordedProfiles: replayProfiles,
   measuredNeurons: args.has('measured-neurons') ? Number(args.get('measured-neurons')) : undefined,
 });
 console.log(formatSummary(result));

@@ -1,8 +1,9 @@
 import { isEvidenceIntact, nameTokens, type Block, type Evidence, type Fact } from '@skeleton-key/engine';
 
 // ScopeCheck adapter: item identity. All procurement-specific parsing (what an item code looks
-// like, how a quotation line is laid out) lives here. The shared engine stays generic and is only
-// used for its evidence primitives. This module moves into the ScopeCheck adapter in Task 6.
+// like, how a quotation line is laid out) lives here, in the ScopeCheck app, not in the shared
+// engine, which is only used for its evidence primitives. This is THE resolver: the benchmark and
+// the app's adapter (Task 6) both import it, so what is measured is what ships.
 //
 // Why it exists: models sometimes return an item as "Centrifugal pump" although the cited source
 // says "Item CP-100 Centrifugal pump". The code is the stable identifier the matcher keys on, so
@@ -10,15 +11,23 @@ import { isEvidenceIntact, nameTokens, type Block, type Evidence, type Fact } fr
 // text ties it unambiguously to that item. Anything else stays description-only or uncertain, and
 // uncertain identity can never produce a confirmed omission.
 //
+// Layout assumptions (documented limits): one item per block; an item's "segment" is the part of
+// its block between column separators (`|`, `;` or a tab), or the whole block when there are none;
+// a code looks like 1-4 letters, a hyphen and digits (CP-100). Codes without a hyphen are not
+// recognised and leave the item description-only. A second code-like token in the same segment
+// (a standard such as SANS-1200, an alternative part number) makes identity uncertain: the
+// resolver never chooses between them.
+//
 // Nothing here edits a fact, a claim or a score. Recovered identifiers are recorded separately.
 
 const CODE = /\b[A-Za-z]{1,4}-\d+\b/g;
-const SEGMENT_SEPARATOR = '|';
+const SEGMENT_SEPARATORS = ['|', ';', '\t'];
 
 export type UncertainReason =
   | 'evidence_missing' // the fact has no evidence span
   | 'evidence_invalid' // the block is missing or the span no longer equals the source slice
   | 'description_not_located' // the item description is not found exactly once inside its own cited span
+  | 'code_not_in_source' // the code in the model's value does not appear in the cited span
   | 'multiple_codes'; // more than one code is tied to the description
 
 export type ItemIdentity =
@@ -62,6 +71,19 @@ function locateWithin(block: Block, ev: Evidence, description: string): { start:
   return hits.length === 1 ? hits[0]! : null;
 }
 
+/** The part of the block between column separators that contains [start, end). */
+function segmentAround(text: string, start: number, end: number): { start: number; end: number } {
+  let segStart = 0;
+  let segEnd = text.length;
+  for (const sep of SEGMENT_SEPARATORS) {
+    const l = text.lastIndexOf(sep, start - 1);
+    if (l !== -1) segStart = Math.max(segStart, l + 1);
+    const r = text.indexOf(sep, end);
+    if (r !== -1) segEnd = Math.min(segEnd, r);
+  }
+  return { start: segStart, end: segEnd };
+}
+
 export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityReport {
   const byDoc = new Map<string, Map<string, Block>>();
   for (const b of blocks) {
@@ -93,15 +115,27 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
     }
     const block = docBlocks.get(ev.blockId)!;
 
-    // 1. The model already kept the code in its value.
+    // 1. The model kept a code in its value. Accept it only if the source segment holds no competing code.
     const inValue = [...new Set(codesIn(fact.value).map((c) => c.code))];
-    if (inValue.length === 1) {
-      report.identities.set(fact.id, { kind: 'code', code: inValue[0]!, origin: 'model_value' });
-      report.counts.codeFromModel++;
-      continue;
-    }
     if (inValue.length > 1) {
       uncertain(fact, 'multiple_codes', inValue);
+      continue;
+    }
+    if (inValue.length === 1) {
+      const code = inValue[0]!;
+      const at = codesIn(block.text.slice(ev.start, ev.end)).find((c) => c.code === code);
+      if (!at) {
+        uncertain(fact, 'code_not_in_source', [code]);
+        continue;
+      }
+      const seg = segmentAround(block.text, ev.start + at.start, ev.start + at.end);
+      const inSegment = [...new Set(codesIn(block.text.slice(seg.start, seg.end)).map((c) => c.code))];
+      if (inSegment.length > 1) {
+        uncertain(fact, 'multiple_codes', inSegment);
+        continue;
+      }
+      report.identities.set(fact.id, { kind: 'code', code, origin: 'model_value' });
+      report.counts.codeFromModel++;
       continue;
     }
 
@@ -111,10 +145,7 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
       uncertain(fact, 'description_not_located');
       continue;
     }
-    const left = block.text.lastIndexOf(SEGMENT_SEPARATOR, at.start - 1);
-    const right = block.text.indexOf(SEGMENT_SEPARATOR, at.end);
-    const segStart = left === -1 ? 0 : left + 1;
-    const segEnd = right === -1 ? block.text.length : right;
+    const { start: segStart, end: segEnd } = segmentAround(block.text, at.start, at.end);
     const found = codesIn(block.text.slice(segStart, segEnd));
 
     if (found.length === 0) {

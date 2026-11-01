@@ -110,6 +110,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 9. THE Worker SHALL accept requests only from the deployed app origins (CORS allowlist) and SHALL return generic error bodies without echoing input. The origin allowlist is an additional control, not authentication.
 10. WHEN free inference quota is exhausted or the model is unavailable, THE system SHALL return a distinct error, tell the user that analysis is temporarily unavailable, keep the session data and any already-extracted documents intact, and SHALL NOT fall back silently to cached or partial findings.
 11. Each limit SHALL have an automated test that exercises the Worker handler.
+12. THE Worker SHALL accept only a schema ID from a server allowlist; prompts, model and output limits SHALL be server-controlled, and document text SHALL be treated as data, not instructions. Request limits SHALL apply to actual bytes read, not only to Content-Length; preflight SHALL NOT invoke the model; every inference attempt, repairs included, SHALL be admitted by the counter before the model is called, SHALL NOT be refunded, and SHALL fail closed if the counter is unavailable. Quota exhaustion, model unavailability, timeout, invalid input and rate limiting SHALL be distinct errors.
 
 ### R9. Sample path
 1. ONLY original fictional bundled samples MAY use structured fixtures or prevalidated cached extraction.

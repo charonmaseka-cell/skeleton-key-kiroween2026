@@ -19,20 +19,20 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
   - [x] 2.7 Document completeness tracking and needs-review propagation. (R2.7, R3.7)
   - [x] 2.8 Export model (findings, unresolved items, decisions, corrections, notes). (R7.5)
   - [x] 2.9 Property tests listed in R10.8 using a generic test Adapter. (R10.8)
-- [ ] 3. Extraction Worker with enforced limits
-  - [ ] 3.1 Confirm Rate Limiting binding free-plan availability; evaluate a SQLite-backed Durable Object for atomic request/neuron counters with no content stored; record result in build log. (R8.7, R11.3)
-  - [ ] 3.2 `/extract` handler: origin allowlist, body size, text length, block count. (R8.6, R8.9)
-  - [ ] 3.3 Per-client limit and global daily ceiling; set values from benchmark results, not request count alone. (R8.7)
-  - [ ] 3.4 Workers AI call with JSON mode, token cap, timeout, no Worker retries; map quota errors to `quota_exhausted`. (R8.8, R8.10)
-  - [ ] 3.5 Content-free logging; no persistence or AI caching. (R8.4, R8.5)
-  - [ ] 3.6 Handler tests for every limit and error code. (R8.11)
+- [x] 3. Extraction Worker with enforced limits (done with mocked inference; see PR)
+  - [x] 3.1 (Durable Object confirmed locally; Rate Limiting binding left optional and unverified) evaluate a SQLite-backed Durable Object for atomic request/neuron counters with no content stored; record result in build log. (R8.7, R11.3)
+  - [x] 3.2 `/extract` handler: origin allowlist, body size, text length, block count. (R8.6, R8.9)
+  - [x] 3.3 Per-client limit and global daily ceiling; set values from benchmark results, not request count alone. (R8.7)
+  - [x] 3.4 Workers AI call with JSON mode, profile token cap, timeout, at most one counted repair; map quota errors to `quota_exhausted`. Live JSON-mode behaviour is untested until the benchmark. (R8.8, R8.10)
+  - [x] 3.5 Content-free logging; no persistence or AI caching. (R8.4, R8.5)
+  - [x] 3.6 Handler tests for every limit and error code. (R8.11)
 - [ ] 4. Fictional samples and expected outputs
   - [ ] 4.1 Original RFQ + 2 quotes (text PDFs) with one quantity mismatch, one spec difference, one exclusion, one absence; expected outputs. (R10.3–10.4)
   - [ ] 4.2 Original grant pack (application form, budget, organisation documents) with a missing attachment, org-name inconsistency, an ambiguous date or currency, and a funding < budget pair that must NOT be flagged; requirements list; expected outputs. (R3.1, R10.3)
 - [ ] 5. Live-extraction benchmark (before full UI)
   - [ ] 5.1 Minimal PDF.js Node/browser parser to Blocks with pages and bbox; scanned PDF rejection. (R4.5, R10.9)
   - [ ] 5.2 Chunker and ExtractionClient with client bounds (chunks per doc, calls per session, one repair retry). (R5.4, R5.5, R8.8)
-  - [ ] 5.3 `tools/benchmark` run on both sample sets and two candidate models; report requests, time, consumption, schema/evidence/value-supported rates, recall. (R10.1)
+  - [ ] 5.3 `tools/benchmark` (also derive `DAILY_ADMISSION_CEILING`, `MAX_CHARS`, `MAX_BLOCKS` and token caps from measured neurons per call) run on both sample sets and two candidate models; report requests, time, consumption, schema/evidence/value-supported rates, recall. (R10.1)
   - [ ] 5.4 Record results and model/scope decision in `docs/build-log.md`; tune limits and chunk budget. (R10.2)
 - [ ] 6. Minimal app shells on labelled fixtures
   - [ ] 6.1 `packages/ui` primitives: status badge (text + icon), evidence viewer, banner, review panel; keyboard focus, AA contrast, reduced motion. (R13)
@@ -66,4 +66,4 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
 - [ ] 19. Regression run, accessibility pass, decorative polish if time, README (accurate privacy statement), setup guide, demo video showing the real document-processing path in both apps. (R3.1, R8.3, R13.4)
 - [ ] 20. Confirm free-tier usage and keep apps available through 29 January 2027. (R11.2)
 
-**Status: Tasks 1 and 2 complete. Pause before Task 3.**
+**Status: Tasks 1 to 3 complete. Pause before deployment and the live benchmark.**

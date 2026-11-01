@@ -1,0 +1,34 @@
+{
+  "note": "Benchmark observations on fictional documents. Safe rejections and incomplete extractions are recorded here; none is an unsupported value accepted as validated.",
+  "recordedAt": "2026-11-01",
+  "observations": [
+    {
+      "id": "obs-1",
+      "doc": "packcheck/application-form",
+      "type": "claim_safely_rejected",
+      "reason": "value_not_in_excerpt",
+      "rawClaim": {
+        "field": "funding_requested",
+        "kind": "money",
+        "blockId": "p1-l3",
+        "excerpt": "Funding requested: R1.6 million",
+        "value": {
+          "amount": "1.6",
+          "currency": "ZAR"
+        }
+      },
+      "meaning": "The model dropped the 'million' scale (1.6 instead of 1600000). The engine held it as Needs review. Had it been accepted, R1.6 against the R2,000,000 budget would have produced a false critical funding difference.",
+      "consequence": "The funding-vs-budget comparison was not exercised on live data. A controlled replay with only this value corrected exercised it and produced no funding finding.",
+      "openIssue": "A held critical-field claim is visible as an extraction issue but not as a finding (value.needs_review fires only for ambiguity reasons)."
+    },
+    {
+      "id": "obs-2",
+      "docs": [
+        "scopecheck/rfq",
+        "scopecheck/quote-b"
+      ],
+      "type": "incomplete_value_validated",
+      "detail": "Item values returned without their codes (CP-100, MS-20, PG-6). Supported by the cited evidence, so validated; differs from the label. Identical claims on a repeat of the RFQ, so this is stable. Recovered deterministically by the ScopeCheck identity step; the original claims, facts and scores are unchanged."
+    }
+  ]
+}

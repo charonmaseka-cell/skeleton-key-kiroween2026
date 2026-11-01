@@ -1,0 +1,823 @@
+{
+  "mode": "replay",
+  "model": "replay",
+  "startedAt": "2026-11-01T02:22:49.992Z",
+  "label": "CONTROLLED-packcheck-funding-corrected",
+  "attemptBudget": 1000,
+  "attemptsCharged": 0,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "requirements",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 225,
+      "ok": true,
+      "ms": 0,
+      "attemptsCharged": 0,
+      "repaired": false,
+      "claims": 4,
+      "dropped": 0
+    },
+    {
+      "docId": "application-form",
+      "chunk": 1,
+      "blocks": 8,
+      "chars": 314,
+      "ok": true,
+      "ms": 0,
+      "attemptsCharged": 0,
+      "repaired": false,
+      "claims": 7,
+      "dropped": 0
+    },
+    {
+      "docId": "budget",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 204,
+      "ok": true,
+      "ms": 0,
+      "attemptsCharged": 0,
+      "repaired": false,
+      "claims": 5,
+      "dropped": 0
+    },
+    {
+      "docId": "registration",
+      "chunk": 1,
+      "blocks": 2,
+      "chars": 91,
+      "ok": true,
+      "ms": 0,
+      "attemptsCharged": 0,
+      "repaired": false,
+      "claims": 1,
+      "dropped": 0
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "packcheck",
+      "docs": [
+        {
+          "docId": "requirements",
+          "claimsReturned": [
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Required attachment: Application form",
+              "value": "Application form"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Required attachment: Project budget",
+              "value": "Project budget"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "Required attachment: Registration certificate",
+              "value": "Registration certificate"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "Required attachment: Tax clearance certificate",
+              "value": "Tax clearance certificate"
+            }
+          ],
+          "facts": [
+            {
+              "id": "requirements:0ff4808cb67e32",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Application form",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 37,
+                  "text": "Required attachment: Application form"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "requirements:16422b1c052fd5",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Project budget",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 35,
+                  "text": "Required attachment: Project budget"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "requirements:09f608fbca34ef",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Registration certificate",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 45,
+                  "text": "Required attachment: Registration certificate"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "requirements:04403bab28adda",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Tax clearance certificate",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 46,
+                  "text": "Required attachment: Tax clearance certificate"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "requirements",
+            "expected": 4,
+            "validatable": 4,
+            "outcomes": {
+              "correct": 4,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "attachment_title",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 4,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [],
+          "rates": {
+            "claims": 4,
+            "evidenceLocated": 4,
+            "valueSupported": 4
+          }
+        },
+        {
+          "docId": "application-form",
+          "claimsReturned": [
+            {
+              "field": "organisation_name",
+              "kind": "name",
+              "blockId": "p1-l2",
+              "excerpt": "Organisation name: Green Valley Community Trust",
+              "value": "Green Valley Community Trust"
+            },
+            {
+              "field": "funding_requested",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "Funding requested: R1.6 million",
+              "value": {
+                "amount": "1600000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "project_start_date",
+              "kind": "date",
+              "blockId": "p1-l4",
+              "excerpt": "Project start date: 1 March 2026",
+              "value": "2026-03-01"
+            },
+            {
+              "field": "project_end_date",
+              "kind": "date",
+              "blockId": "p1-l5",
+              "excerpt": "Project end date: 28 February 2027",
+              "value": "2027-02-28"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l6",
+              "excerpt": "Attachment provided: Application form",
+              "value": "Application form"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l7",
+              "excerpt": "Attachment provided: Project budget",
+              "value": "Project budget"
+            },
+            {
+              "field": "attachment_title",
+              "kind": "text",
+              "blockId": "p1-l8",
+              "excerpt": "Attachment provided: Registration certificate",
+              "value": "Registration certificate"
+            }
+          ],
+          "facts": [
+            {
+              "id": "application-form:1af26188da5f4d",
+              "field": "organisation_name",
+              "kind": "name",
+              "status": "validated",
+              "value": "Green Valley Community Trust",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 47,
+                  "text": "Organisation name: Green Valley Community Trust"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "application-form:00e30bbaab44e9",
+              "field": "funding_requested",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "1600000",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 31,
+                  "text": "Funding requested: R1.6 million"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "application-form:166438af3dbc1a",
+              "field": "project_start_date",
+              "kind": "date",
+              "status": "validated",
+              "value": "2026-03-01",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 32,
+                  "text": "Project start date: 1 March 2026"
+                }
+              ],
+              "label": "labelled",
+              "audit": "manual"
+            },
+            {
+              "id": "application-form:103dcec2a3e59f",
+              "field": "project_end_date",
+              "kind": "date",
+              "status": "validated",
+              "value": "2027-02-28",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 34,
+                  "text": "Project end date: 28 February 2027"
+                }
+              ],
+              "label": "labelled",
+              "audit": "manual"
+            },
+            {
+              "id": "application-form:17318943344fff",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Application form",
+              "evidence": [
+                {
+                  "blockId": "p1-l6",
+                  "start": 0,
+                  "end": 37,
+                  "text": "Attachment provided: Application form"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "application-form:1f961e685a6f20",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Project budget",
+              "evidence": [
+                {
+                  "blockId": "p1-l7",
+                  "start": 0,
+                  "end": 35,
+                  "text": "Attachment provided: Project budget"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "application-form:1952eb9b934f3d",
+              "field": "attachment_title",
+              "kind": "text",
+              "status": "validated",
+              "value": "Registration certificate",
+              "evidence": [
+                {
+                  "blockId": "p1-l8",
+                  "start": 0,
+                  "end": 45,
+                  "text": "Attachment provided: Registration certificate"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 8,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "application-form",
+            "expected": 7,
+            "validatable": 7,
+            "outcomes": {
+              "correct": 7,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "organisation_name",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "funding_requested",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "project_start_date",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "project_end_date",
+                "line": 4,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 5,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 6,
+                "outcome": "correct"
+              },
+              {
+                "field": "attachment_title",
+                "line": 7,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [],
+          "rates": {
+            "claims": 7,
+            "evidenceLocated": 7,
+            "valueSupported": 7
+          }
+        },
+        {
+          "docId": "budget",
+          "claimsReturned": [
+            {
+              "field": "organisation_name",
+              "kind": "name",
+              "blockId": "p1-l2",
+              "excerpt": "Applicant: Green Valley Community Foundation",
+              "value": "Green Valley Community Foundation"
+            },
+            {
+              "field": "total_project_budget",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "Total project budget: R 2 000 000",
+              "value": {
+                "amount": "2000000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "funding_requested",
+              "kind": "money",
+              "blockId": "p1-l4",
+              "excerpt": "Funding requested from this grant: R 1 600 000",
+              "value": {
+                "amount": "1600000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "project_start_date",
+              "kind": "date",
+              "blockId": "p1-l5",
+              "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+              "value": "2026-03-01"
+            },
+            {
+              "field": "project_end_date",
+              "kind": "date",
+              "blockId": "p1-l5",
+              "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+              "value": "2027-02-28"
+            }
+          ],
+          "facts": [
+            {
+              "id": "budget:040cffcc413c0e",
+              "field": "organisation_name",
+              "kind": "name",
+              "status": "validated",
+              "value": "Green Valley Community Foundation",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 44,
+                  "text": "Applicant: Green Valley Community Foundation"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "budget:1146081ba86fd5",
+              "field": "total_project_budget",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "2000000",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 33,
+                  "text": "Total project budget: R 2 000 000"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "budget:19823f7b75c19a",
+              "field": "funding_requested",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "1600000",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 46,
+                  "text": "Funding requested from this grant: R 1 600 000"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "budget:04d8879d918e6f",
+              "field": "project_start_date",
+              "kind": "date",
+              "status": "needs_review",
+              "reason": "date_format_ambiguous",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 40,
+                  "text": "Project period: 01/03/2026 to 28/02/2027"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "budget:16f3a46976f298",
+              "field": "project_end_date",
+              "kind": "date",
+              "status": "validated",
+              "value": "2027-02-28",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 40,
+                  "text": "Project period: 01/03/2026 to 28/02/2027"
+                }
+              ],
+              "label": "labelled",
+              "audit": "manual"
+            }
+          ],
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "budget",
+            "expected": 5,
+            "validatable": 4,
+            "outcomes": {
+              "correct": 4,
+              "correct_conservative": 1,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "organisation_name",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "total_project_budget",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "funding_requested",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "project_start_date",
+                "line": 4,
+                "outcome": "correct_conservative",
+                "reason": "date_format_ambiguous"
+              },
+              {
+                "field": "project_end_date",
+                "line": 4,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {
+              "date_format_ambiguous": 1
+            },
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [
+            {
+              "docId": "budget",
+              "kind": "claim_ambiguous",
+              "reason": "date_format_ambiguous",
+              "count": 1,
+              "factId": "budget:04d8879d918e6f"
+            }
+          ],
+          "rates": {
+            "claims": 5,
+            "evidenceLocated": 5,
+            "valueSupported": 4
+          }
+        },
+        {
+          "docId": "registration",
+          "claimsReturned": [
+            {
+              "field": "organisation_name",
+              "kind": "name",
+              "blockId": "p1-l2",
+              "excerpt": "Registered name: Green Valley Community Trust",
+              "value": "Green Valley Community Trust"
+            }
+          ],
+          "facts": [
+            {
+              "id": "registration:0e35219e7f77e0",
+              "field": "organisation_name",
+              "kind": "name",
+              "status": "validated",
+              "value": "Green Valley Community Trust",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 45,
+                  "text": "Registered name: Green Valley Community Trust"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 2,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "registration",
+            "expected": 1,
+            "validatable": 1,
+            "outcomes": {
+              "correct": 1,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "organisation_name",
+                "line": 1,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [],
+          "rates": {
+            "claims": 1,
+            "evidenceLocated": 1,
+            "valueSupported": 1
+          }
+        }
+      ],
+      "findings": {
+        "produced": [
+          {
+            "code": "attachment.missing",
+            "subject": "tax clearance certificate",
+            "response": "application-form",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "org.name_differs",
+            "subject": "organisation_name",
+            "response": "budget",
+            "severity": "critical",
+            "state": "confirmed"
+          },
+          {
+            "code": "value.needs_review",
+            "subject": "budget:project_start_date",
+            "response": "budget",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "date_format_ambiguous"
+          }
+        ],
+        "score": {
+          "expected": 3,
+          "produced": 3,
+          "matchedExactState": 3,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 4,
+    "requestsOk": 4,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "claimsReceived": 17,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 0.9411764705882353,
+    "serverDropped": 0,
+    "recall": 1,
+    "validatedPrecision": 1,
+    "missedFacts": 0,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 4,
+    "requestsReportingTokens": 0,
+    "promptTokens": null,
+    "completionTokens": null,
+    "tokenSource": "unavailable",
+    "neurons": {
+      "value": null,
+      "basis": "unavailable",
+      "note": "No token usage was reported."
+    }
+  }
+}

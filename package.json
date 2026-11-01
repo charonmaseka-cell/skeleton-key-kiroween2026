@@ -1,0 +1,33 @@
+{
+  "name": "skeleton-key",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*",
+    "tools/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:scopecheck": "npm run dev -w @skeleton-key/scopecheck",
+    "dev:packcheck": "npm run dev -w @skeleton-key/packcheck",
+    "build:scopecheck": "npm run build -w @skeleton-key/scopecheck",
+    "build:packcheck": "npm run build -w @skeleton-key/packcheck",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  }
+}

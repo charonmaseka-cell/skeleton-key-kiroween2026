@@ -1,0 +1,2453 @@
+{
+  "id": "scopecheck-realistic",
+  "family": "scopecheck",
+  "label": "FICTIONAL SAMPLE: realistically sized, multi-page RFQ (24 items) and two quotations, one with table-like lines and one in free text",
+  "preregistration": "Written and committed BEFORE any model extraction on these documents (spec SC-4). Expected findings follow from the seeded differences in tools/benchmark/src/realistic-scopecheck.ts: quote-a has 3 quantity mismatches, 2 specification differences, 2 absent items, one item line naming two code-like tokens (identity uncertain) and an exclusion; quote-b has 2 quantity mismatches, 2 specification differences, 3 absent items and an exclusion. Because quote-a contains an uncertain candidate line, its omissions stay Needs review even if coverage is confirmed; quote-b omissions become confirmed only if coverage is confirmed on a completely processed document.",
+  "docs": [
+    {
+      "id": "rfq",
+      "file": "rfq.pdf",
+      "role": "requirements",
+      "schemaId": "scopecheck.rfq.v1",
+      "lines": [
+        "RFQ-0420 Request for Quotation: Pump station refurbishment (fictional sample)",
+        "Issued by Northfield Water Works, a fictional municipal utility.",
+        "Closing date for quotations: 15 December 2026. Currency: South African rand.",
+        "Quotations must be priced per unit and must follow the order of the schedule below.",
+        "Instructions to bidders",
+        "Bidders should read every clause of this document before preparing a quotation.",
+        "The site is a treatment works with restricted access; deliveries must be booked in advance.",
+        "Working hours on site are Monday to Friday, seven in the morning to four in the afternoon.",
+        "Safety induction is compulsory for every driver and every installer entering the works.",
+        "The utility will not accept responsibility for goods left unattended at the gate.",
+        "Offloading equipment is the responsibility of the supplier unless agreed otherwise in writing.",
+        "Every delivery must be accompanied by a delivery note that lists the goods by description.",
+        "Damaged or incomplete deliveries will be recorded and reported to the supplier on the day.",
+        "The supplier must replace faulty goods at its own cost and within a reasonable time.",
+        "Test certificates, where applicable, must be supplied with the goods and not after delivery.",
+        "Electrical equipment must comply with the applicable national wiring and safety standards.",
+        "Mechanical equipment must be supplied with the lubricants required for first operation.",
+        "Where an item is superseded, the bidder must offer the current equivalent and say so.",
+        "Alternative offers are welcome but must be priced separately from the compliant offer.",
+        "The utility keeps the right to inspect goods at the premises of the supplier before dispatch.",
+        "Confidential information received during this process must be kept confidential by all parties.",
+        "Bidders must not communicate with the staff of the utility about this request except as set out.",
+        "Conflicts of interest must be declared in writing together with the quotation.",
+        "The utility applies a preference scheme in line with its published procurement policy.",
+        "Currency fluctuations after the closing date are for the account of the supplier.",
+        "Schedule of items",
+        "Item CP-101 Centrifugal pump | qty 10 units | 316 stainless steel casing",
+        "Item CP-102 Submersible pump | qty 6 units | cast iron body, 7.5 kW",
+        "Item CP-103 Dosing pump | qty 4 units | PVC head, 0-20 l/h",
+        "Item VL-201 Gate valve DN50 | qty 40 units | ductile iron, flanged PN16",
+        "Item VL-202 Ball valve DN25 | qty 60 units | brass, threaded",
+        "Item VL-203 Check valve DN80 | qty 24 units | cast steel, flanged PN16",
+        "Item VL-204 Butterfly valve DN100 | qty 18 units | wafer type, EPDM seat",
+        "Item MT-301 Electric motor 5.5 kW | qty 8 units | IE3, 4 pole, IP55",
+        "Item MT-302 Electric motor 11 kW | qty 4 units | IE3, 4 pole, IP55",
+        "Item MT-310 Motor starter | qty 6 units | DOL, IP55 enclosure",
+        "Item SN-401 Level sensor | qty 14 units | ultrasonic, IP67",
+        "Item SN-402 Pressure transmitter | qty 12 units | 0-16 bar, 4-20 mA",
+        "Item SN-403 Flow meter DN50 | qty 5 units | electromagnetic, IP68",
+        "Item PG-601 Pressure gauge | qty 30 units | 0-10 bar, 100 mm dial",
+        "Item PG-612 Temperature gauge | qty 20 units | 0-120 C, bimetal",
+        "Item CB-501 Control cable 4 core | qty 500 m | 2.5 mm2, armoured",
+        "Item CB-503 Power cable 3 core | qty 300 m | 6 mm2, armoured",
+        "Item FL-701 Flange set DN50 | qty 36 units | carbon steel, PN16",
+        "Item FL-702 Flange set DN100 | qty 20 units | carbon steel, PN16",
+        "Item GK-801 Gasket kit DN50 | qty 50 units | graphite, spiral wound",
+        "Item TK-110 Storage tank 5 m3 | qty 2 units | HDPE, vertical",
+        "Item TK-120 Dosing tank 500 l | qty 3 units | HDPE, with bund",
+        "Item PN-130 Pipe DN50 PN16 | qty 120 lengths | HDPE, 6 m lengths",
+        "Item PN-140 Pipe DN100 PN16 | qty 80 lengths | HDPE, 6 m lengths",
+        "General conditions",
+        "Prices are fixed for the validity period stated in the quotation and exclude VAT.",
+        "Bidders must state clearly anything that is excluded from their price.",
+        "Delivery is to the Northfield depot unless the bidder states another point of delivery.",
+        "Goods must be new and unused and must carry the manufacturer warranty.",
+        "Deviations from the specification must be listed and explained in the quotation.",
+        "Quotations remain valid for sixty days from the closing date.",
+        "The utility may split the award between bidders by item.",
+        "Late quotations are returned unopened and are not considered.",
+        "Technical queries must be sent in writing before the closing date.",
+        "Samples may be requested before award and are returned at the bidder cost.",
+        "Payment is made thirty days after receipt of a correct invoice.",
+        "Bidders must hold valid tax and registration documents on request.",
+        "The utility is not bound to accept the lowest or any quotation.",
+        "Pricing for optional extras must be shown separately from the schedule.",
+        "All dimensions are nominal unless the specification says otherwise.",
+        "Packaging must protect the goods during transport and storage on site.",
+        "Spare parts lists and manuals must accompany the delivery of machines.",
+        "Any change to the schedule is issued as a written addendum to all bidders.",
+        "Queries and clarifications will be answered to all bidders at the same time.",
+        "Evaluation is by price and by compliance with the specification.",
+        "The successful bidder will receive a purchase order before delivery.",
+        "Cancellation of an order for late delivery is at the discretion of the utility.",
+        "Delivery periods start on the date of a written order and are stated in calendar weeks.",
+        "The supplier must keep the utility informed of any expected delay as soon as it is known.",
+        "Variations to quantities after award require a written instruction from the utility.",
+        "Invoices must show the order reference, the description and the quantity delivered.",
+        "Disputes will first be referred to the procurement officer named in the covering letter.",
+        "Any matter not covered here is governed by the general conditions of the utility.",
+        "This document is written for a fictional exercise and is not a real invitation to bid.",
+        "Names of places, companies and people in this document are invented for testing.",
+        "No real product, price or supplier is described by the figures in this document.",
+        "References to standards are illustrative and have no legal effect in this exercise.",
+        "The exercise tests software that reads documents and compares what suppliers offer.",
+        "A reader should be able to follow every line of this document without outside knowledge.",
+        "Clarification meetings, if held, will be recorded and minutes sent to every bidder.",
+        "Photographs and drawings, if supplied, form part of the description of the goods.",
+        "Where a drawing and the written description differ, the written description applies.",
+        "Bidders must price every line; a line left blank is read as not offered.",
+        "Prices for spare parts recommended for two years of operation may be shown at the end.",
+        "Training for operators, if offered, must be priced separately from the goods.",
+        "The utility reserves the right to withdraw this request at any time without liability.",
+        "This request is a fictional sample created for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 26,
+          "excerpt": "Item CP-101 Centrifugal pump",
+          "value": "CP-101 Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 26,
+          "excerpt": "qty 10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 26,
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 27,
+          "excerpt": "Item CP-102 Submersible pump",
+          "value": "CP-102 Submersible pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 27,
+          "excerpt": "qty 6 units",
+          "value": {
+            "value": "6",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 27,
+          "excerpt": "cast iron body, 7.5 kW",
+          "value": "cast iron body, 7.5 kW"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 28,
+          "excerpt": "Item CP-103 Dosing pump",
+          "value": "CP-103 Dosing pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 28,
+          "excerpt": "qty 4 units",
+          "value": {
+            "value": "4",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 28,
+          "excerpt": "PVC head, 0-20 l/h",
+          "value": "PVC head, 0-20 l/h"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 29,
+          "excerpt": "Item VL-201 Gate valve DN50",
+          "value": "VL-201 Gate valve DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 29,
+          "excerpt": "qty 40 units",
+          "value": {
+            "value": "40",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 29,
+          "excerpt": "ductile iron, flanged PN16",
+          "value": "ductile iron, flanged PN16"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 30,
+          "excerpt": "Item VL-202 Ball valve DN25",
+          "value": "VL-202 Ball valve DN25"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 30,
+          "excerpt": "qty 60 units",
+          "value": {
+            "value": "60",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 30,
+          "excerpt": "brass, threaded",
+          "value": "brass, threaded"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 31,
+          "excerpt": "Item VL-203 Check valve DN80",
+          "value": "VL-203 Check valve DN80"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 31,
+          "excerpt": "qty 24 units",
+          "value": {
+            "value": "24",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 31,
+          "excerpt": "cast steel, flanged PN16",
+          "value": "cast steel, flanged PN16"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 32,
+          "excerpt": "Item VL-204 Butterfly valve DN100",
+          "value": "VL-204 Butterfly valve DN100"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 32,
+          "excerpt": "qty 18 units",
+          "value": {
+            "value": "18",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 32,
+          "excerpt": "wafer type, EPDM seat",
+          "value": "wafer type, EPDM seat"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 33,
+          "excerpt": "Item MT-301 Electric motor 5.5 kW",
+          "value": "MT-301 Electric motor 5.5 kW"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 33,
+          "excerpt": "qty 8 units",
+          "value": {
+            "value": "8",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 33,
+          "excerpt": "IE3, 4 pole, IP55",
+          "value": "IE3, 4 pole, IP55"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 34,
+          "excerpt": "Item MT-302 Electric motor 11 kW",
+          "value": "MT-302 Electric motor 11 kW"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 34,
+          "excerpt": "qty 4 units",
+          "value": {
+            "value": "4",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 34,
+          "excerpt": "IE3, 4 pole, IP55",
+          "value": "IE3, 4 pole, IP55"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 35,
+          "excerpt": "Item MT-310 Motor starter",
+          "value": "MT-310 Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 35,
+          "excerpt": "qty 6 units",
+          "value": {
+            "value": "6",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 35,
+          "excerpt": "DOL, IP55 enclosure",
+          "value": "DOL, IP55 enclosure"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 36,
+          "excerpt": "Item SN-401 Level sensor",
+          "value": "SN-401 Level sensor"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 36,
+          "excerpt": "qty 14 units",
+          "value": {
+            "value": "14",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 36,
+          "excerpt": "ultrasonic, IP67",
+          "value": "ultrasonic, IP67"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 37,
+          "excerpt": "Item SN-402 Pressure transmitter",
+          "value": "SN-402 Pressure transmitter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 37,
+          "excerpt": "qty 12 units",
+          "value": {
+            "value": "12",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 37,
+          "excerpt": "0-16 bar, 4-20 mA",
+          "value": "0-16 bar, 4-20 mA"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 38,
+          "excerpt": "Item SN-403 Flow meter DN50",
+          "value": "SN-403 Flow meter DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 38,
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 38,
+          "excerpt": "electromagnetic, IP68",
+          "value": "electromagnetic, IP68"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 39,
+          "excerpt": "Item PG-601 Pressure gauge",
+          "value": "PG-601 Pressure gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 39,
+          "excerpt": "qty 30 units",
+          "value": {
+            "value": "30",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 39,
+          "excerpt": "0-10 bar, 100 mm dial",
+          "value": "0-10 bar, 100 mm dial"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 40,
+          "excerpt": "Item PG-612 Temperature gauge",
+          "value": "PG-612 Temperature gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 40,
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 40,
+          "excerpt": "0-120 C, bimetal",
+          "value": "0-120 C, bimetal"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 41,
+          "excerpt": "Item CB-501 Control cable 4 core",
+          "value": "CB-501 Control cable 4 core"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 41,
+          "excerpt": "qty 500 m",
+          "value": {
+            "value": "500",
+            "unit": "m"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 41,
+          "excerpt": "2.5 mm2, armoured",
+          "value": "2.5 mm2, armoured"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 42,
+          "excerpt": "Item CB-503 Power cable 3 core",
+          "value": "CB-503 Power cable 3 core"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 42,
+          "excerpt": "qty 300 m",
+          "value": {
+            "value": "300",
+            "unit": "m"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 42,
+          "excerpt": "6 mm2, armoured",
+          "value": "6 mm2, armoured"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 43,
+          "excerpt": "Item FL-701 Flange set DN50",
+          "value": "FL-701 Flange set DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 43,
+          "excerpt": "qty 36 units",
+          "value": {
+            "value": "36",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 43,
+          "excerpt": "carbon steel, PN16",
+          "value": "carbon steel, PN16"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 44,
+          "excerpt": "Item FL-702 Flange set DN100",
+          "value": "FL-702 Flange set DN100"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 44,
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 44,
+          "excerpt": "carbon steel, PN16",
+          "value": "carbon steel, PN16"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 45,
+          "excerpt": "Item GK-801 Gasket kit DN50",
+          "value": "GK-801 Gasket kit DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 45,
+          "excerpt": "qty 50 units",
+          "value": {
+            "value": "50",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 45,
+          "excerpt": "graphite, spiral wound",
+          "value": "graphite, spiral wound"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 46,
+          "excerpt": "Item TK-110 Storage tank 5 m3",
+          "value": "TK-110 Storage tank 5 m3"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 46,
+          "excerpt": "qty 2 units",
+          "value": {
+            "value": "2",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 46,
+          "excerpt": "HDPE, vertical",
+          "value": "HDPE, vertical"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 47,
+          "excerpt": "Item TK-120 Dosing tank 500 l",
+          "value": "TK-120 Dosing tank 500 l"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 47,
+          "excerpt": "qty 3 units",
+          "value": {
+            "value": "3",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 47,
+          "excerpt": "HDPE, with bund",
+          "value": "HDPE, with bund"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 48,
+          "excerpt": "Item PN-130 Pipe DN50 PN16",
+          "value": "PN-130 Pipe DN50 PN16"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 48,
+          "excerpt": "qty 120 lengths",
+          "value": {
+            "value": "120",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 48,
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 49,
+          "excerpt": "Item PN-140 Pipe DN100 PN16",
+          "value": "PN-140 Pipe DN100 PN16"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 49,
+          "excerpt": "qty 80 lengths",
+          "value": {
+            "value": "80",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 49,
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        }
+      ]
+    },
+    {
+      "id": "quote-a",
+      "file": "quote-a.pdf",
+      "role": "response",
+      "schemaId": "scopecheck.quote.v1",
+      "lines": [
+        "Quotation QA-52 from Alder Pump Supplies, a fictional supplier.",
+        "In response to RFQ-0420. Prices are in South African rand and exclude VAT.",
+        "Valid for sixty days from the closing date. Delivery to the Northfield depot.",
+        "Our general conditions of supply",
+        "Offloading equipment is the responsibility of the supplier unless agreed otherwise in writing.",
+        "Every delivery must be accompanied by a delivery note that lists the goods by description.",
+        "Damaged or incomplete deliveries will be recorded and reported to the supplier on the day.",
+        "The supplier must replace faulty goods at its own cost and within a reasonable time.",
+        "Test certificates, where applicable, must be supplied with the goods and not after delivery.",
+        "Electrical equipment must comply with the applicable national wiring and safety standards.",
+        "Mechanical equipment must be supplied with the lubricants required for first operation.",
+        "Where an item is superseded, the bidder must offer the current equivalent and say so.",
+        "Alternative offers are welcome but must be priced separately from the compliant offer.",
+        "The utility keeps the right to inspect goods at the premises of the supplier before dispatch.",
+        "Confidential information received during this process must be kept confidential by all parties.",
+        "Bidders must not communicate with the staff of the utility about this request except as set out.",
+        "Priced schedule",
+        "Item CP-101 Centrifugal pump | qty 10 units | 316 stainless steel casing | R 12 500 each",
+        "Item CP-102 Submersible pump | qty 6 units | cast iron body, 7.5 kW | R 18 900 each",
+        "Item CP-103 Dosing pump | qty 4 units | PVC head, 0-30 l/h | R 6 400 each",
+        "Item VL-201 Gate valve DN50 | qty 40 units | ductile iron, flanged PN16 | R 1 450 each",
+        "Item VL-202 Ball valve DN25 | qty 60 units | brass, threaded | R 380 each",
+        "Item VL-203 Check valve DN80 | qty 24 units | cast steel, flanged PN16 | R 2 100 each",
+        "Item VL-204 Butterfly valve DN100 | qty 16 units | wafer type, EPDM seat | R 1 750 each",
+        "Item MT-301 Electric motor 5.5 kW | qty 8 units | IE3, 4 pole, IP55 | R 7 800 each",
+        "Item MT-302 Electric motor 11 kW | qty 4 units | IE3, 4 pole, IP55 | R 12 900 each",
+        "Item MT-310 Motor starter | qty 5 units | DOL, IP55 enclosure | R 3 200 each",
+        "Item SN-401 Level sensor | qty 14 units | ultrasonic, IP65 | R 2 950 each",
+        "Item SN-402 Pressure transmitter | qty 12 units | 0-16 bar, 4-20 mA | R 3 300 each",
+        "Item SN-403 Flow meter DN50 certified to SANS-1200 | qty 5 units | electromagnetic, IP68 | R 14 800 each",
+        "Item PG-601 Pressure gauge | qty 30 units | 0-10 bar, 100 mm dial | R 450 each",
+        "Item CB-501 Control cable 4 core | qty 500 m | 2.5 mm2, armoured | R 62 each",
+        "Item FL-701 Flange set DN50 | qty 36 units | carbon steel, PN16 | R 520 each",
+        "Item FL-702 Flange set DN100 | qty 20 units | carbon steel, PN16 | R 880 each",
+        "Item GK-801 Gasket kit DN50 | qty 50 units | graphite, spiral wound | R 210 each",
+        "Item TK-110 Storage tank 5 m3 | qty 2 units | HDPE, vertical | R 21 500 each",
+        "Item TK-120 Dosing tank 500 l | qty 3 units | HDPE, with bund | R 5 200 each",
+        "Item PN-130 Pipe DN50 PN16 | qty 100 lengths | HDPE, 6 m lengths | R 340 each",
+        "Item PN-140 Pipe DN100 PN16 | qty 80 lengths | HDPE, 6 m lengths | R 690 each",
+        "Terms of this quotation",
+        "Payment: thirty days from a correct invoice.",
+        "Delivery: six weeks from a written order for stock items.",
+        "Warranty: twelve months from delivery on all items.",
+        "Excluded: delivery, installation and commissioning are not included in these prices.",
+        "Spare parts and manuals are supplied with machines as listed.",
+        "Prices are fixed for the validity period.",
+        "Electrical equipment must comply with the applicable national wiring and safety standards.",
+        "Mechanical equipment must be supplied with the lubricants required for first operation.",
+        "Where an item is superseded, the bidder must offer the current equivalent and say so.",
+        "Alternative offers are welcome but must be priced separately from the compliant offer.",
+        "The utility keeps the right to inspect goods at the premises of the supplier before dispatch.",
+        "Confidential information received during this process must be kept confidential by all parties.",
+        "Bidders must not communicate with the staff of the utility about this request except as set out.",
+        "Conflicts of interest must be declared in writing together with the quotation.",
+        "The utility applies a preference scheme in line with its published procurement policy.",
+        "Currency fluctuations after the closing date are for the account of the supplier.",
+        "Cancellation of an order for late delivery is at the discretion of the utility.",
+        "Delivery periods start on the date of a written order and are stated in calendar weeks.",
+        "The supplier must keep the utility informed of any expected delay as soon as it is known.",
+        "Variations to quantities after award require a written instruction from the utility.",
+        "Invoices must show the order reference, the description and the quantity delivered.",
+        "Disputes will first be referred to the procurement officer named in the covering letter.",
+        "Any matter not covered here is governed by the general conditions of the utility.",
+        "This document is written for a fictional exercise and is not a real invitation to bid.",
+        "Names of places, companies and people in this document are invented for testing.",
+        "No real product, price or supplier is described by the figures in this document.",
+        "References to standards are illustrative and have no legal effect in this exercise.",
+        "The exercise tests software that reads documents and compares what suppliers offer.",
+        "A reader should be able to follow every line of this document without outside knowledge.",
+        "Clarification meetings, if held, will be recorded and minutes sent to every bidder.",
+        "This quotation is a fictional sample created for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 17,
+          "excerpt": "Item CP-101 Centrifugal pump",
+          "value": "CP-101 Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 17,
+          "excerpt": "qty 10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 17,
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 17,
+          "excerpt": "R 12 500 each",
+          "value": {
+            "amount": "12500",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 18,
+          "excerpt": "Item CP-102 Submersible pump",
+          "value": "CP-102 Submersible pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 18,
+          "excerpt": "qty 6 units",
+          "value": {
+            "value": "6",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 18,
+          "excerpt": "cast iron body, 7.5 kW",
+          "value": "cast iron body, 7.5 kW"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 18,
+          "excerpt": "R 18 900 each",
+          "value": {
+            "amount": "18900",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 19,
+          "excerpt": "Item CP-103 Dosing pump",
+          "value": "CP-103 Dosing pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 19,
+          "excerpt": "qty 4 units",
+          "value": {
+            "value": "4",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 19,
+          "excerpt": "PVC head, 0-30 l/h",
+          "value": "PVC head, 0-30 l/h"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 19,
+          "excerpt": "R 6 400 each",
+          "value": {
+            "amount": "6400",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 20,
+          "excerpt": "Item VL-201 Gate valve DN50",
+          "value": "VL-201 Gate valve DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 20,
+          "excerpt": "qty 40 units",
+          "value": {
+            "value": "40",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 20,
+          "excerpt": "ductile iron, flanged PN16",
+          "value": "ductile iron, flanged PN16"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 20,
+          "excerpt": "R 1 450 each",
+          "value": {
+            "amount": "1450",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 21,
+          "excerpt": "Item VL-202 Ball valve DN25",
+          "value": "VL-202 Ball valve DN25"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 21,
+          "excerpt": "qty 60 units",
+          "value": {
+            "value": "60",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 21,
+          "excerpt": "brass, threaded",
+          "value": "brass, threaded"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 21,
+          "excerpt": "R 380 each",
+          "value": {
+            "amount": "380",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 22,
+          "excerpt": "Item VL-203 Check valve DN80",
+          "value": "VL-203 Check valve DN80"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 22,
+          "excerpt": "qty 24 units",
+          "value": {
+            "value": "24",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 22,
+          "excerpt": "cast steel, flanged PN16",
+          "value": "cast steel, flanged PN16"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 22,
+          "excerpt": "R 2 100 each",
+          "value": {
+            "amount": "2100",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 23,
+          "excerpt": "Item VL-204 Butterfly valve DN100",
+          "value": "VL-204 Butterfly valve DN100"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 23,
+          "excerpt": "qty 16 units",
+          "value": {
+            "value": "16",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 23,
+          "excerpt": "wafer type, EPDM seat",
+          "value": "wafer type, EPDM seat"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 23,
+          "excerpt": "R 1 750 each",
+          "value": {
+            "amount": "1750",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 24,
+          "excerpt": "Item MT-301 Electric motor 5.5 kW",
+          "value": "MT-301 Electric motor 5.5 kW"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 24,
+          "excerpt": "qty 8 units",
+          "value": {
+            "value": "8",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 24,
+          "excerpt": "IE3, 4 pole, IP55",
+          "value": "IE3, 4 pole, IP55"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 24,
+          "excerpt": "R 7 800 each",
+          "value": {
+            "amount": "7800",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 25,
+          "excerpt": "Item MT-302 Electric motor 11 kW",
+          "value": "MT-302 Electric motor 11 kW"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 25,
+          "excerpt": "qty 4 units",
+          "value": {
+            "value": "4",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 25,
+          "excerpt": "IE3, 4 pole, IP55",
+          "value": "IE3, 4 pole, IP55"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 25,
+          "excerpt": "R 12 900 each",
+          "value": {
+            "amount": "12900",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 26,
+          "excerpt": "Item MT-310 Motor starter",
+          "value": "MT-310 Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 26,
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 26,
+          "excerpt": "DOL, IP55 enclosure",
+          "value": "DOL, IP55 enclosure"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 26,
+          "excerpt": "R 3 200 each",
+          "value": {
+            "amount": "3200",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 27,
+          "excerpt": "Item SN-401 Level sensor",
+          "value": "SN-401 Level sensor"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 27,
+          "excerpt": "qty 14 units",
+          "value": {
+            "value": "14",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 27,
+          "excerpt": "ultrasonic, IP65",
+          "value": "ultrasonic, IP65"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 27,
+          "excerpt": "R 2 950 each",
+          "value": {
+            "amount": "2950",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 28,
+          "excerpt": "Item SN-402 Pressure transmitter",
+          "value": "SN-402 Pressure transmitter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 28,
+          "excerpt": "qty 12 units",
+          "value": {
+            "value": "12",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 28,
+          "excerpt": "0-16 bar, 4-20 mA",
+          "value": "0-16 bar, 4-20 mA"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 28,
+          "excerpt": "R 3 300 each",
+          "value": {
+            "amount": "3300",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 29,
+          "excerpt": "Item SN-403 Flow meter DN50",
+          "value": "SN-403 Flow meter DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 29,
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 29,
+          "excerpt": "electromagnetic, IP68",
+          "value": "electromagnetic, IP68"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 29,
+          "excerpt": "R 14 800 each",
+          "value": {
+            "amount": "14800",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 30,
+          "excerpt": "Item PG-601 Pressure gauge",
+          "value": "PG-601 Pressure gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 30,
+          "excerpt": "qty 30 units",
+          "value": {
+            "value": "30",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 30,
+          "excerpt": "0-10 bar, 100 mm dial",
+          "value": "0-10 bar, 100 mm dial"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 30,
+          "excerpt": "R 450 each",
+          "value": {
+            "amount": "450",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 31,
+          "excerpt": "Item CB-501 Control cable 4 core",
+          "value": "CB-501 Control cable 4 core"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 31,
+          "excerpt": "qty 500 m",
+          "value": {
+            "value": "500",
+            "unit": "m"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 31,
+          "excerpt": "2.5 mm2, armoured",
+          "value": "2.5 mm2, armoured"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 31,
+          "excerpt": "R 62 each",
+          "value": {
+            "amount": "62",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 32,
+          "excerpt": "Item FL-701 Flange set DN50",
+          "value": "FL-701 Flange set DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 32,
+          "excerpt": "qty 36 units",
+          "value": {
+            "value": "36",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 32,
+          "excerpt": "carbon steel, PN16",
+          "value": "carbon steel, PN16"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 32,
+          "excerpt": "R 520 each",
+          "value": {
+            "amount": "520",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 33,
+          "excerpt": "Item FL-702 Flange set DN100",
+          "value": "FL-702 Flange set DN100"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 33,
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 33,
+          "excerpt": "carbon steel, PN16",
+          "value": "carbon steel, PN16"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 33,
+          "excerpt": "R 880 each",
+          "value": {
+            "amount": "880",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 34,
+          "excerpt": "Item GK-801 Gasket kit DN50",
+          "value": "GK-801 Gasket kit DN50"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 34,
+          "excerpt": "qty 50 units",
+          "value": {
+            "value": "50",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 34,
+          "excerpt": "graphite, spiral wound",
+          "value": "graphite, spiral wound"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 34,
+          "excerpt": "R 210 each",
+          "value": {
+            "amount": "210",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 35,
+          "excerpt": "Item TK-110 Storage tank 5 m3",
+          "value": "TK-110 Storage tank 5 m3"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 35,
+          "excerpt": "qty 2 units",
+          "value": {
+            "value": "2",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 35,
+          "excerpt": "HDPE, vertical",
+          "value": "HDPE, vertical"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 35,
+          "excerpt": "R 21 500 each",
+          "value": {
+            "amount": "21500",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 36,
+          "excerpt": "Item TK-120 Dosing tank 500 l",
+          "value": "TK-120 Dosing tank 500 l"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 36,
+          "excerpt": "qty 3 units",
+          "value": {
+            "value": "3",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 36,
+          "excerpt": "HDPE, with bund",
+          "value": "HDPE, with bund"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 36,
+          "excerpt": "R 5 200 each",
+          "value": {
+            "amount": "5200",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 37,
+          "excerpt": "Item PN-130 Pipe DN50 PN16",
+          "value": "PN-130 Pipe DN50 PN16"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 37,
+          "excerpt": "qty 100 lengths",
+          "value": {
+            "value": "100",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 37,
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 37,
+          "excerpt": "R 340 each",
+          "value": {
+            "amount": "340",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 38,
+          "excerpt": "Item PN-140 Pipe DN100 PN16",
+          "value": "PN-140 Pipe DN100 PN16"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 38,
+          "excerpt": "qty 80 lengths",
+          "value": {
+            "value": "80",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 38,
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 38,
+          "excerpt": "R 690 each",
+          "value": {
+            "amount": "690",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "line": 43,
+          "excerpt": "delivery, installation and commissioning are not included",
+          "value": "delivery, installation and commissioning are not included"
+        }
+      ]
+    },
+    {
+      "id": "quote-b",
+      "file": "quote-b.pdf",
+      "role": "response",
+      "schemaId": "scopecheck.quote.v1",
+      "lines": [
+        "Quotation QB-19 from Birch Industrial Trading, a fictional supplier.",
+        "Our offer for RFQ-0420 follows, written line by line. Prices exclude VAT.",
+        "Offer valid for sixty days. All goods are new and carry the maker warranty.",
+        "About our offer",
+        "The supplier must replace faulty goods at its own cost and within a reasonable time.",
+        "Test certificates, where applicable, must be supplied with the goods and not after delivery.",
+        "Electrical equipment must comply with the applicable national wiring and safety standards.",
+        "Mechanical equipment must be supplied with the lubricants required for first operation.",
+        "Where an item is superseded, the bidder must offer the current equivalent and say so.",
+        "Alternative offers are welcome but must be priced separately from the compliant offer.",
+        "The utility keeps the right to inspect goods at the premises of the supplier before dispatch.",
+        "Confidential information received during this process must be kept confidential by all parties.",
+        "Bidders must not communicate with the staff of the utility about this request except as set out.",
+        "Conflicts of interest must be declared in writing together with the quotation.",
+        "The utility applies a preference scheme in line with its published procurement policy.",
+        "Currency fluctuations after the closing date are for the account of the supplier.",
+        "Cancellation of an order for late delivery is at the discretion of the utility.",
+        "Delivery periods start on the date of a written order and are stated in calendar weeks.",
+        "Our offer",
+        "We offer 10 units of Centrifugal pump CP-101 with 316 stainless steel casing at R 12 500 each.",
+        "We offer 6 units of Submersible pump CP-102 with cast iron body, 7.5 kW at R 18 900 each.",
+        "We offer 4 units of Dosing pump CP-103 with PVC head, 0-20 l/h at R 6 400 each.",
+        "We offer 44 units of Gate valve DN50 VL-201 with ductile iron, flanged PN16 at R 1 450 each.",
+        "We offer 60 units of Ball valve DN25 VL-202 with brass, threaded at R 380 each.",
+        "We offer 24 units of Check valve DN80 VL-203 with cast steel, flanged PN16 at R 2 100 each.",
+        "We offer 18 units of Butterfly valve DN100 VL-204 with wafer type, EPDM seat at R 1 750 each.",
+        "We offer 8 units of Electric motor 5.5 kW MT-301 with IE2, 4 pole, IP55 at R 7 800 each.",
+        "We offer 4 units of Electric motor 11 kW MT-302 with IE3, 4 pole, IP55 at R 12 900 each.",
+        "We offer 6 units of Motor starter MT-310 with DOL, IP55 enclosure at R 3 200 each.",
+        "We offer 14 units of Level sensor SN-401 with ultrasonic, IP67 at R 2 950 each.",
+        "We offer 10 units of Pressure transmitter SN-402 with 0-16 bar, 4-20 mA at R 3 300 each.",
+        "We offer 5 units of Flow meter DN50 SN-403 with electromagnetic, IP68 at R 14 800 each.",
+        "We offer 30 units of Pressure gauge PG-601 with 0-10 bar, 100 mm dial at R 450 each.",
+        "We offer 20 units of Temperature gauge PG-612 with 0-120 C, bimetal at R 390 each.",
+        "We offer 500 m of Control cable 4 core CB-501 with 2.5 mm2, unarmoured at R 62 each.",
+        "We offer 300 m of Power cable 3 core CB-503 with 6 mm2, armoured at R 95 each.",
+        "We offer 20 units of Flange set DN100 FL-702 with carbon steel, PN16 at R 880 each.",
+        "We offer 2 units of Storage tank 5 m3 TK-110 with HDPE, vertical at R 21 500 each.",
+        "We offer 120 lengths of Pipe DN50 PN16 PN-130 with HDPE, 6 m lengths at R 340 each.",
+        "We offer 80 lengths of Pipe DN100 PN16 PN-140 with HDPE, 6 m lengths at R 690 each.",
+        "Conditions of our offer",
+        "Terms of payment are thirty days from invoice.",
+        "Freight to site is excluded from this offer.",
+        "Delivery times are quoted on request for items not held in stock.",
+        "Goods remain our property until paid for in full.",
+        "The utility keeps the right to inspect goods at the premises of the supplier before dispatch.",
+        "Confidential information received during this process must be kept confidential by all parties.",
+        "Bidders must not communicate with the staff of the utility about this request except as set out.",
+        "Conflicts of interest must be declared in writing together with the quotation.",
+        "The utility applies a preference scheme in line with its published procurement policy.",
+        "Currency fluctuations after the closing date are for the account of the supplier.",
+        "Cancellation of an order for late delivery is at the discretion of the utility.",
+        "Delivery periods start on the date of a written order and are stated in calendar weeks.",
+        "The supplier must keep the utility informed of any expected delay as soon as it is known.",
+        "Variations to quantities after award require a written instruction from the utility.",
+        "Invoices must show the order reference, the description and the quantity delivered.",
+        "Disputes will first be referred to the procurement officer named in the covering letter.",
+        "Any matter not covered here is governed by the general conditions of the utility.",
+        "This document is written for a fictional exercise and is not a real invitation to bid.",
+        "Names of places, companies and people in this document are invented for testing.",
+        "No real product, price or supplier is described by the figures in this document.",
+        "References to standards are illustrative and have no legal effect in this exercise.",
+        "The exercise tests software that reads documents and compares what suppliers offer.",
+        "A reader should be able to follow every line of this document without outside knowledge.",
+        "Clarification meetings, if held, will be recorded and minutes sent to every bidder.",
+        "Photographs and drawings, if supplied, form part of the description of the goods.",
+        "Where a drawing and the written description differ, the written description applies.",
+        "This offer is a fictional sample created for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 19,
+          "excerpt": "Centrifugal pump CP-101",
+          "value": "Centrifugal pump CP-101"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 19,
+          "excerpt": "10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 19,
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 19,
+          "excerpt": "R 12 500 each",
+          "value": {
+            "amount": "12500",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 20,
+          "excerpt": "Submersible pump CP-102",
+          "value": "Submersible pump CP-102"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 20,
+          "excerpt": "6 units",
+          "value": {
+            "value": "6",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 20,
+          "excerpt": "cast iron body, 7.5 kW",
+          "value": "cast iron body, 7.5 kW"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 20,
+          "excerpt": "R 18 900 each",
+          "value": {
+            "amount": "18900",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 21,
+          "excerpt": "Dosing pump CP-103",
+          "value": "Dosing pump CP-103"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 21,
+          "excerpt": "4 units",
+          "value": {
+            "value": "4",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 21,
+          "excerpt": "PVC head, 0-20 l/h",
+          "value": "PVC head, 0-20 l/h"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 21,
+          "excerpt": "R 6 400 each",
+          "value": {
+            "amount": "6400",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 22,
+          "excerpt": "Gate valve DN50 VL-201",
+          "value": "Gate valve DN50 VL-201"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 22,
+          "excerpt": "44 units",
+          "value": {
+            "value": "44",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 22,
+          "excerpt": "ductile iron, flanged PN16",
+          "value": "ductile iron, flanged PN16"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 22,
+          "excerpt": "R 1 450 each",
+          "value": {
+            "amount": "1450",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 23,
+          "excerpt": "Ball valve DN25 VL-202",
+          "value": "Ball valve DN25 VL-202"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 23,
+          "excerpt": "60 units",
+          "value": {
+            "value": "60",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 23,
+          "excerpt": "brass, threaded",
+          "value": "brass, threaded"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 23,
+          "excerpt": "R 380 each",
+          "value": {
+            "amount": "380",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 24,
+          "excerpt": "Check valve DN80 VL-203",
+          "value": "Check valve DN80 VL-203"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 24,
+          "excerpt": "24 units",
+          "value": {
+            "value": "24",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 24,
+          "excerpt": "cast steel, flanged PN16",
+          "value": "cast steel, flanged PN16"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 24,
+          "excerpt": "R 2 100 each",
+          "value": {
+            "amount": "2100",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 25,
+          "excerpt": "Butterfly valve DN100 VL-204",
+          "value": "Butterfly valve DN100 VL-204"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 25,
+          "excerpt": "18 units",
+          "value": {
+            "value": "18",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 25,
+          "excerpt": "wafer type, EPDM seat",
+          "value": "wafer type, EPDM seat"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 25,
+          "excerpt": "R 1 750 each",
+          "value": {
+            "amount": "1750",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 26,
+          "excerpt": "Electric motor 5.5 kW MT-301",
+          "value": "Electric motor 5.5 kW MT-301"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 26,
+          "excerpt": "8 units",
+          "value": {
+            "value": "8",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 26,
+          "excerpt": "IE2, 4 pole, IP55",
+          "value": "IE2, 4 pole, IP55"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 26,
+          "excerpt": "R 7 800 each",
+          "value": {
+            "amount": "7800",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 27,
+          "excerpt": "Electric motor 11 kW MT-302",
+          "value": "Electric motor 11 kW MT-302"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 27,
+          "excerpt": "4 units",
+          "value": {
+            "value": "4",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 27,
+          "excerpt": "IE3, 4 pole, IP55",
+          "value": "IE3, 4 pole, IP55"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 27,
+          "excerpt": "R 12 900 each",
+          "value": {
+            "amount": "12900",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 28,
+          "excerpt": "Motor starter MT-310",
+          "value": "Motor starter MT-310"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 28,
+          "excerpt": "6 units",
+          "value": {
+            "value": "6",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 28,
+          "excerpt": "DOL, IP55 enclosure",
+          "value": "DOL, IP55 enclosure"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 28,
+          "excerpt": "R 3 200 each",
+          "value": {
+            "amount": "3200",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 29,
+          "excerpt": "Level sensor SN-401",
+          "value": "Level sensor SN-401"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 29,
+          "excerpt": "14 units",
+          "value": {
+            "value": "14",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 29,
+          "excerpt": "ultrasonic, IP67",
+          "value": "ultrasonic, IP67"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 29,
+          "excerpt": "R 2 950 each",
+          "value": {
+            "amount": "2950",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 30,
+          "excerpt": "Pressure transmitter SN-402",
+          "value": "Pressure transmitter SN-402"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 30,
+          "excerpt": "10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 30,
+          "excerpt": "0-16 bar, 4-20 mA",
+          "value": "0-16 bar, 4-20 mA"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 30,
+          "excerpt": "R 3 300 each",
+          "value": {
+            "amount": "3300",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 31,
+          "excerpt": "Flow meter DN50 SN-403",
+          "value": "Flow meter DN50 SN-403"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 31,
+          "excerpt": "5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 31,
+          "excerpt": "electromagnetic, IP68",
+          "value": "electromagnetic, IP68"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 31,
+          "excerpt": "R 14 800 each",
+          "value": {
+            "amount": "14800",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 32,
+          "excerpt": "Pressure gauge PG-601",
+          "value": "Pressure gauge PG-601"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 32,
+          "excerpt": "30 units",
+          "value": {
+            "value": "30",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 32,
+          "excerpt": "0-10 bar, 100 mm dial",
+          "value": "0-10 bar, 100 mm dial"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 32,
+          "excerpt": "R 450 each",
+          "value": {
+            "amount": "450",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 33,
+          "excerpt": "Temperature gauge PG-612",
+          "value": "Temperature gauge PG-612"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 33,
+          "excerpt": "20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 33,
+          "excerpt": "0-120 C, bimetal",
+          "value": "0-120 C, bimetal"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 33,
+          "excerpt": "R 390 each",
+          "value": {
+            "amount": "390",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 34,
+          "excerpt": "Control cable 4 core CB-501",
+          "value": "Control cable 4 core CB-501"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 34,
+          "excerpt": "500 m",
+          "value": {
+            "value": "500",
+            "unit": "m"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 34,
+          "excerpt": "2.5 mm2, unarmoured",
+          "value": "2.5 mm2, unarmoured"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 34,
+          "excerpt": "R 62 each",
+          "value": {
+            "amount": "62",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 35,
+          "excerpt": "Power cable 3 core CB-503",
+          "value": "Power cable 3 core CB-503"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 35,
+          "excerpt": "300 m",
+          "value": {
+            "value": "300",
+            "unit": "m"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 35,
+          "excerpt": "6 mm2, armoured",
+          "value": "6 mm2, armoured"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 35,
+          "excerpt": "R 95 each",
+          "value": {
+            "amount": "95",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 36,
+          "excerpt": "Flange set DN100 FL-702",
+          "value": "Flange set DN100 FL-702"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 36,
+          "excerpt": "20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 36,
+          "excerpt": "carbon steel, PN16",
+          "value": "carbon steel, PN16"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 36,
+          "excerpt": "R 880 each",
+          "value": {
+            "amount": "880",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 37,
+          "excerpt": "Storage tank 5 m3 TK-110",
+          "value": "Storage tank 5 m3 TK-110"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 37,
+          "excerpt": "2 units",
+          "value": {
+            "value": "2",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 37,
+          "excerpt": "HDPE, vertical",
+          "value": "HDPE, vertical"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 37,
+          "excerpt": "R 21 500 each",
+          "value": {
+            "amount": "21500",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 38,
+          "excerpt": "Pipe DN50 PN16 PN-130",
+          "value": "Pipe DN50 PN16 PN-130"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 38,
+          "excerpt": "120 lengths",
+          "value": {
+            "value": "120",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 38,
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 38,
+          "excerpt": "R 340 each",
+          "value": {
+            "amount": "340",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 39,
+          "excerpt": "Pipe DN100 PN16 PN-140",
+          "value": "Pipe DN100 PN16 PN-140"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 39,
+          "excerpt": "80 lengths",
+          "value": {
+            "value": "80",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 39,
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 39,
+          "excerpt": "R 690 each",
+          "value": {
+            "amount": "690",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "line": 42,
+          "excerpt": "Freight to site is excluded",
+          "value": "Freight to site is excluded"
+        }
+      ]
+    }
+  ],
+  "expectedFindings": [
+    {
+      "code": "quantity.differs",
+      "subject": "VL-204:quantity",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "quantity.differs",
+      "subject": "MT-310:quantity",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "quantity.differs",
+      "subject": "PN-130:quantity",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "SN-401:specification",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "CP-103:specification",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "item.absent",
+      "subject": "CB-503",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "needs_review"
+    },
+    {
+      "code": "item.absent",
+      "subject": "PG-612",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "needs_review"
+    },
+    {
+      "code": "item.identity_uncertain",
+      "subject": "quote-a:p1-l30:item",
+      "response": "quote-a",
+      "severity": "warning",
+      "state": "needs_review"
+    },
+    {
+      "code": "item.absent",
+      "subject": "SN-403",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "needs_review"
+    },
+    {
+      "code": "exclusion.stated",
+      "subject": "quote-a:exclusion",
+      "response": "quote-a",
+      "severity": "info",
+      "state": "confirmed"
+    },
+    {
+      "code": "quantity.differs",
+      "subject": "VL-201:quantity",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "quantity.differs",
+      "subject": "SN-402:quantity",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "MT-301:specification",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "CB-501:specification",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "item.absent",
+      "subject": "FL-701",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "item.absent",
+      "subject": "TK-120",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "item.absent",
+      "subject": "GK-801",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "exclusion.stated",
+      "subject": "quote-b:exclusion",
+      "response": "quote-b",
+      "severity": "info",
+      "state": "confirmed"
+    }
+  ]
+}

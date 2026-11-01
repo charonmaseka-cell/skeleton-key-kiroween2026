@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { BASELINE_MODEL } from '../src/candidates';
 import { oracleAi, type Ai } from '../src/ai';
 import { SqliteAdmission } from '../src/admission';
-import { BudgetExceeded, NeuronBudget, budgetedAi, loadDailyBaseline, worstCaseNeurons } from '../src/budget';
+import { BudgetExceeded, NeuronBudget, SAFETY_MARGIN, budgetedAi, charge, loadDailyBaseline, worstCaseNeurons } from '../src/budget';
 import { PROFILES, buildMessages } from '../../../services/extraction-api/src/profiles';
 import { planRun } from '../src/preflight';
 import { runBenchmark } from '../src/run';
@@ -25,14 +25,66 @@ const spyAi = (reply: unknown | (() => never)): Ai & { calls: number } => {
 };
 
 describe('worst-case reservation', () => {
-  it('assumes the whole output allowance and a prompt of one token per three characters', () => {
+  it('assumes the whole output allowance and a calibrated 2 bytes per prompt token plus template overhead, with the one margin', () => {
     const w = worstCaseNeurons(input(3000, 1500), M);
-    expect(w.promptTokens).toBe(1000);
+    expect(w.promptTokens).toBe(1500 + 64);
     expect(w.completionTokens).toBe(1500);
-    expect(w.neurons).toBeCloseTo((1000 * 26_636 + 1500 * 204_818) / 1e6, 5);
+    expect(w.neurons).toBeCloseTo(((1564 * 26_636 + 1500 * 204_818) / 1e6) * SAFETY_MARGIN, 5);
+    expect(w.neurons).toBeCloseTo(charge(1564, 1500, M), 5);
+  });
+  it('counts UTF-8 bytes, not characters', () => {
+    const multi = { messages: [{ content: '€'.repeat(100) }], max_tokens: 10 }; // 300 bytes
+    expect(worstCaseNeurons(multi, M).promptTokens).toBe(150 + 64);
   });
   it('an input without an output allowance is reserved as if it were large', () => {
     expect(worstCaseNeurons({ messages: [{ content: 'x' }] }, M).completionTokens).toBeGreaterThanOrEqual(4096);
+  });
+});
+
+describe('settlement records the FULL estimate (regression: the old Math.min discarded consumption above the reservation)', () => {
+  const over = { response: {}, usage: { prompt_tokens: 9000, completion_tokens: 1500 } }; // far more prompt than reserved for a 3,000-char input
+  it('reported usage above the reservation is charged in full, flagged as an overrun, and persisted', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'sk-over-'));
+    try {
+      const statePath = join(dir, 'usage.json');
+      const b = mkBudget({ statePath });
+      await budgetedAi(spyAi(over), b).run(M, input());
+      const a = b.attempts[0]!;
+      expect(a.charged).toBeGreaterThan(a.reserved);
+      expect(a.charged).toBeCloseTo(charge(9000, 1500, M), 5);
+      expect(a.overrun).toBe(true);
+      expect(b.runTotal).toBeCloseTo(a.charged, 5);
+      expect(b.summary.overruns).toBe(1);
+      expect(JSON.parse(readFileSync(statePath, 'utf8')).neuronsEstimated).toBeCloseTo(a.charged, 5);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('an overrun that reaches a cap stops further calls', async () => {
+    const inner = spyAi(over);
+    const b2 = mkBudget({ runCap: 400 }); // one reservation (~384) fits under it
+    expect(b2.capReached).toBe(false);
+    const ai = budgetedAi(inner, b2);
+    await ai.run(M, input()); // reserved ~384 < 400; charged ~ 1.1*(9000*26636+1500*204818)/1e6 = ~600
+    expect(b2.capReached).toBe(true);
+    await expect(ai.run(M, input())).rejects.toBeInstanceOf(BudgetExceeded);
+    expect(inner.calls).toBe(1);
+  });
+
+  it('usage that is missing or partial leaves the reservation standing', async () => {
+    for (const reply of [{ response: {} }, { response: {}, usage: {} }, { response: {}, usage: { prompt_tokens: 100 } }, { response: {}, usage: { prompt_tokens: 'x', completion_tokens: 5 } }]) {
+      const b = mkBudget();
+      await budgetedAi(spyAi(reply), b).run(M, input());
+      expect(b.attempts[0]).toMatchObject({ basis: 'reserved_only', charged: b.attempts[0]!.reserved, overrun: false });
+    }
+  });
+
+  it('a daily cap passed by an overrun is reported as reached', () => {
+    const b = mkBudget({ dailyBaseline: 7_990 });
+    expect(b.capReached).toBe(false);
+    expect(mkBudget({ dailyBaseline: 8_000 }).capReached).toBe(true);
+    expect(mkBudget({ dailyBaseline: 8_100 }).refusal(1)).toMatch(/already reached/);
   });
 });
 

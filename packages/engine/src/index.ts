@@ -1,5 +1,20 @@
 // Skeleton Key engine: domain-neutral document checking.
-// Task 1 scaffold only; real types, validators and rules arrive in Task 2.
-
 export const ENGINE_NAME = 'skeleton-key-engine';
-export const ENGINE_VERSION = '0.0.0';
+export const ENGINE_VERSION = '0.1.0';
+
+export * from './types';
+export * from './text';
+export * from './evidence';
+export * from './parse';
+export * from './names';
+export * from './support';
+export * from './pipeline';
+export * from './facts';
+export * from './coverage';
+export * from './matcher';
+export * from './compare';
+export * from './hash';
+export * from './findings';
+export * from './review';
+export * from './export';
+export * from './adapter';

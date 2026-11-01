@@ -9,16 +9,16 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
   - [x] 1.2 Empty `apps/scopecheck`, `apps/packcheck`, `packages/*`, `services/extraction-api`, `samples/*`, `tools/benchmark`, `docs/build-log.md` with independent build commands. (R1.1–1.2)
   - [x] 1.3 GitHub Actions: lint, typecheck, test, build both apps. (R11.4)
   - [x] 1.4 Engine boundary test and `no-restricted-imports` rule. (R1.3)
-- [ ] 2. Engine core (no app code)
-  - [ ] 2.1 Types and Zod schemas: Block, Evidence, Fact, Correction, Finding, ReviewDecision. (R4.1)
-  - [ ] 2.2 Evidence validator with normalisation and code-computed offsets. (R4.2, R4.4)
-  - [ ] 2.3 Value support validators: money (with magnitude words, currency), date, quantity/unit, name, text. Table-driven tests including "R1.6 million". (R4.3, R6.4)
-  - [ ] 2.4 Effective-value resolution with Corrections preserving originals. (R4.8)
-  - [ ] 2.5 Matcher with configurable threshold and decision states. (R5.6)
-  - [ ] 2.6 Rule runner, fingerprinting and review-state reopening. (R7.3, R7.4)
-  - [ ] 2.7 Document completeness tracking and needs-review propagation. (R2.7, R3.7)
-  - [ ] 2.8 Export model (findings, unresolved items, decisions, corrections, notes). (R7.5)
-  - [ ] 2.9 Property tests listed in R10.8 using a generic test Adapter. (R10.8)
+- [x] 2. Engine core (no app code) (done; see PR)
+  - [x] 2.1 Types and Zod schemas: Block, Evidence, Fact, Correction, Finding, ReviewDecision. (R4.1)
+  - [x] 2.2 Evidence validator with normalisation and code-computed offsets. (R4.2, R4.4)
+  - [x] 2.3 Value support validators: money (with magnitude words, currency), date, quantity/unit, name, text. Table-driven tests including "R1.6 million". (R4.3, R6.4)
+  - [x] 2.4 Effective-value resolution with Corrections preserving originals. (R4.8)
+  - [x] 2.5 Matcher with configurable threshold and decision states. (R5.6)
+  - [x] 2.6 Rule runner, fingerprinting and review-state reopening. (R7.3, R7.4)
+  - [x] 2.7 Document completeness tracking and needs-review propagation. (R2.7, R3.7)
+  - [x] 2.8 Export model (findings, unresolved items, decisions, corrections, notes). (R7.5)
+  - [x] 2.9 Property tests listed in R10.8 using a generic test Adapter. (R10.8)
 - [ ] 3. Extraction Worker with enforced limits
   - [ ] 3.1 Confirm Rate Limiting binding free-plan availability; evaluate a SQLite-backed Durable Object for atomic request/neuron counters with no content stored; record result in build log. (R8.7, R11.3)
   - [ ] 3.2 `/extract` handler: origin allowlist, body size, text length, block count. (R8.6, R8.9)
@@ -66,4 +66,4 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
 - [ ] 19. Regression run, accessibility pass, decorative polish if time, README (accurate privacy statement), setup guide, demo video showing the real document-processing path in both apps. (R3.1, R8.3, R13.4)
 - [ ] 20. Confirm free-tier usage and keep apps available through 29 January 2027. (R11.2)
 
-**Status: Task 1 scaffold complete and under PR review. Pause before Task 2.**
+**Status: Tasks 1 and 2 complete. Pause before Task 3.**

@@ -41,7 +41,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 4. WHEN a requirement has a validated matching offer with a differing quantity or specification, THE rules SHALL emit a Finding citing both RFQ and quote Evidence.
 5. WHEN a requirement has no match in a fully processed quote, THE rules SHALL emit an omission Finding citing the RFQ requirement and naming the quote examined, with no fabricated quote evidence.
 6. WHEN a quote states an exclusion, THE app SHALL report it; an exclusion with no stated price SHALL remain "unpriced".
-7. WHEN extraction of a quote is incomplete or a match is uncertain, THE app SHALL mark the item **Needs review** and SHALL NOT emit a confirmed omission or mismatch.
+7. WHEN extraction of a quote is incomplete or a match is uncertain, THE app SHALL mark the item **Needs review** and SHALL NOT emit a confirmed omission or mismatch. Successful processing of every chunk does not prove the model extracted every item: an unmatched requirement SHALL stay **Needs review** until coverage of that quote is verified or explicitly confirmed by the user.
 8. THE app SHALL NOT produce award recommendations or supplier rankings.
 9. LATER MILESTONES (M5) SHALL add: delivery lead-time and Incoterm differences; changed payment terms; missing or shorter warranty coverage; and arithmetic inconsistencies where quantities, prices, discounts, tax and rounding give a clear calculation basis. Each SHALL follow R4 and R6, and unclear terms SHALL remain **Needs review**.
 
@@ -61,13 +61,13 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 **User story:** As a user, I want every cited value to be genuinely supported by its source.
 
 1. THE Engine SHALL retain, per Evidence item, the document ID, Block ID, character offsets and original text.
-2. THE Engine SHALL verify that each model-supplied excerpt exists in the cited Block; excerpts not found SHALL be rejected.
-3. THE Engine SHALL also verify that each critical Fact's value is supported by its cited excerpt (e.g. the normalised amount, date, quantity or name can be parsed from that text). Unsupported values SHALL be rejected or marked **Needs review**.
+2. THE Engine SHALL verify that each model-supplied excerpt exists in the cited Block. Offsets SHALL refer to the original block text (normalisation of whitespace or hyphens SHALL keep a mapping to original characters), and the stored excerpt SHALL equal the original text slice at those offsets. Excerpts not found SHALL be rejected.
+3. THE Engine SHALL also verify that each critical Fact's value is supported by its cited excerpt (e.g. the normalised amount, date, quantity or name can be parsed from that text). Unsupported values SHALL be rejected or marked **Needs review**. WHERE an excerpt contains several plausible amounts, dates or quantities, the field SHALL be identified by enough context (a field label); otherwise the value SHALL stay **Needs review**. Differences in organisation names that are not purely case, punctuation or spacing SHALL be preserved, not normalised away.
 4. WHEN a source Block is missing or validation fails, THE Engine SHALL NOT produce an evidence-backed confirmed Finding for it.
 5. FOR PDFs, THE Engine SHALL retain page numbers and text coordinates where PDF.js provides them.
 6. FOR DOCX (after the PDF path works), THE Engine SHALL use paragraph or table-cell references and SHALL NOT invent page numbers.
 7. THE UI SHALL NOT present reflowed extracted lines as original document lines.
-8. WHEN a user Corrects a Fact, THE system SHALL preserve the original Fact and Evidence alongside the Correction and SHALL mark the value as user-supplied.
+8. WHEN a user Corrects a Fact, THE system SHALL preserve the original Fact and Evidence alongside the Correction and SHALL mark the value as user-supplied. Findings and exports that depend on it SHALL identify it as user-supplied and SHALL NOT present the original evidence as supporting the corrected value.
 
 ### R5. Extraction and matching
 **User story:** As a developer, I want model use isolated and bounded.
@@ -77,7 +77,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 3. User Corrections and match confirmations SHALL rerun matching-dependent rules locally and SHALL NOT call the model unless extraction itself must be repeated.
 4. THE system SHALL validate all model output with Zod; on invalid JSON it SHALL perform at most one controlled retry per chunk, then show a recoverable error.
 5. THE system SHALL chunk documents within the model's context and output limits.
-6. Match confidence thresholds (initially 0.7) SHALL be treated as uncalibrated heuristics until measured against fixtures; scores SHALL NOT be presented as probabilities.
+6. Match confidence thresholds (initially 0.7) SHALL be treated as uncalibrated heuristics until measured against fixtures; scores SHALL NOT be presented as probabilities. A score above the threshold alone SHALL NOT establish a verified match; verification requires user confirmation or deterministic key agreement, and uncertain matches SHALL remain reviewable.
 7. Rule execution SHALL NOT depend on the model provider.
 
 ### R6. Deterministic rules and arithmetic
@@ -93,7 +93,7 @@ Planning inputs: the Kiro Handoff (amendments take precedence) and the ScopeChec
 1. THE user SHALL be able to confirm or correct critical Facts and uncertain matches.
 2. THE user SHALL be able to accept or dismiss each Finding and add a note.
 3. WHEN a Fact or match changes, THE rules SHALL rerun on the updated inputs (see R5.3).
-4. IF a Correction changes a Finding's inputs or result, THEN that Finding SHALL be reopened for review and SHALL NOT carry forward its earlier accepted or dismissed status; the earlier decision and note SHALL stay in the history.
+4. A Finding's identity SHALL include its comparison context and response document, so the same item missing from two responses yields two findings with independent decisions. A Finding's fingerprint SHALL include the rule version, relevant evidence and validation state, coverage and effective inputs. IF any of these change, THEN that Finding SHALL be reopened for review and SHALL NOT carry forward its earlier accepted or dismissed status; the earlier decision and note SHALL stay in the history.
 5. Exports (CSV, plain-text draft, and PDF via print or jsPDF) SHALL include unresolved **Needs review** items, clearly marked, alongside confirmed Findings, user decisions, Corrections and notes. THE app SHALL NOT send email.
 
 ### R8. Privacy, limits and quota handling

@@ -70,6 +70,23 @@ export function stripLeadingConnectors(text: string): { text: string; removed: s
   }
   return { text: rest, removed };
 }
+const CODE_TOKEN = /\b[A-Za-z]{1,4}-\d+\b/g;
+
+/**
+ * A specification value is CONTAMINATED when it carries the identifier of the very row it belongs to: the extraction pulled
+ * part of the item's identification into the specification field, so what is left is not a clean specification to compare.
+ * Source-grounded and general: it uses only the item identity already resolved for the same source line (code recovered or
+ * kept) and the specification text. It does not remove anything from the value and does not name any item. A code that
+ * belongs to something else (a standard such as SANS-1200, another item referred to) is not contamination.
+ */
+export function specContamination(spec: EffectiveFact, item: EffectiveFact | undefined, identities?: Map<string, ItemIdentity>): string | null {
+  if (!item || spec.provenance !== 'document') return null; // a value the user typed or corrected is trusted as typed
+  const id = identities && item.provenance === 'document' ? identities.get(item.fact.id) : undefined;
+  if (id?.kind !== 'code') return null;
+  const codes = (String(spec.value ?? '').match(CODE_TOKEN) ?? []).map((c) => c.toUpperCase());
+  return codes.includes(id.code) ? 'item_code_in_specification' : null;
+}
+
 export const sameSpec = (a: unknown, b: unknown): { same: boolean; removed: string[] } => {
   const sa = stripLeadingConnectors(String(a ?? ''));
   const sb = stripLeadingConnectors(String(b ?? ''));
@@ -287,6 +304,16 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
           out.push(makeDraft({ ...base, matchStatus: m.status, code: `${field}.unverified`, severity: 'warning', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: `${field === 'quantity' ? 'Quantity' : 'Specification'} for ${r.key} in ${q} needs review`, reason: 'unvalidated_input', inputs: d.inputs, evidence: d.evidence }));
           return;
         }
+        if (field === 'specification') {
+          // Contaminated specification fields never produce a difference or an agreement: Needs review, Not evaluated.
+          const bad = specContamination(a, r.line.f.item, data.identities) ? { e: a, line: r.line, doc: data.rfqDocId } : specContamination(b, offer.f.item, data.identities) ? { e: b, line: offer, doc: q } : null;
+          if (bad) {
+            comparisons.push({ ...cmp, status: 'not_evaluated', reason: `specification in ${bad.doc} contains the item's own code, so it is not a clean specification to compare`, blocked: { docId: bad.doc, field, reason: 'contaminated_value', factId: bad.e.fact.id } });
+            const d = describeInputs([a, b]);
+            out.push(makeDraft({ ...base, matchStatus: m.status, code: 'specification.contaminated', severity: 'warning', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: `Specification for ${r.key} in ${bad.doc} includes the item's own code; check it against the source`, reason: 'item_code_in_specification', inputs: d.inputs, evidence: d.evidence }));
+            return;
+          }
+        }
         const verdict2 = equal(a, b);
         comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} <-> ${showValue(b.value)}${note?.(a, b) ?? ''}` });
         if (verdict2 === 'equal') return;
@@ -334,9 +361,10 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
 
 export const scopeRule: Rule<ScopeData> = {
   id: 'bench.scope',
+  // 4 (2026-11-02): a specification that carries the row's own item code is contaminated: Needs review, comparison Not evaluated.
   // 3 (2026-11-02): leading connectors are not a specification difference; unresolved requirement lines list their
   // comparisons as Not evaluated; each stated exclusion is its own finding (identified by its source line).
-  version: '3',
+  version: '4',
   run(ctx: RuleContext<ScopeData>) {
     return evaluateScope(ctx).drafts;
   },

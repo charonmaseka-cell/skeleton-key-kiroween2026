@@ -38,3 +38,22 @@ Extraction scores are unchanged (the claims are the same): RFQ 60 correct, 12 di
 - **Missed values are unchanged:** quotation A's PN-140 specification, and nine specifications in quotation B. Their comparisons are now listed as Not evaluated (22 in total) with `no_fact` or `coverage_unverified` as the blocked input.
 - Three of the expected findings are absences that are Needs review because coverage is unverified; "exact" for them means exactly Needs review, as pre-registered.
 - Item values with an appended column are still produced by the model; they are now identified from the source but remain `wrong_value` in the extraction score.
+
+---
+
+# Rules v4: contaminated specification fields (SN-403), offline
+
+Same saved responses; **no model call; the 3 remaining attempts and admission 0 are untouched**. The rules-v3 replay file above is kept as saved (a test reads it); the next replay is `samples/benchmark-results/replay-sc-t4-replay-rules4-ingest2-*.json` (rules v4, `ingest/2-cells`, audit 2).
+
+**The check.** A specification is *contaminated* when it contains the item code of the same row (resolved for that source line), because then the extraction put part of the row's identity into the specification and what is left is not a clean specification. Nothing is removed from the value, no item is named in the code, and only a code that is the row's own counts: a standard (`SANS-1200`), another item's code or a longer number that merely starts like it does not. A value the user typed is trusted. When it applies: a Needs-review finding `specification.contaminated` and the comparison is Not evaluated with `contaminated_value` as the blocked input.
+Honest limits: the check was designed after seeing this case, so this replay cannot show it generalises; it is a narrow, general signal (own code in the specification), not a detector of all contamination. It would also turn a genuine difference into Needs review when the specification carries the row's own code, which is the intended conservative direction. The item-description overlap signal was rejected: several correct quotation B specifications are repeated inside the model's item text.
+
+| Reported separately | Rules v3 | Rules v4 |
+|---|---|---|
+| **Expected detections** (exact of 18) | 18 | **18** (none given up; missed 0, over-confident 0) |
+| **False criticals** | 1 (SN-403 specification) | **0** |
+| **Not evaluated** (of 96 planned) | 22 | **23** (+ SN-403 specification, `contaminated_value`) |
+| Agree / flagged | 64 / 10 | 64 / 9 |
+| Unexpected extra findings | 1 (VAT exclusion, confirmed, info) | 2: `specification.contaminated` SN-403 (Needs review) and the unlabelled VAT exclusion (confirmed, info) |
+
+Not evaluated, by blocked input: 10 `specification/no_fact`, 10 `item/coverage_unverified`, 2 `item/match_unresolved`, 1 `specification/contaminated_value`. Remaining misses are unchanged: the PN-140 specification (quotation A) and nine specifications (quotation B) were never extracted. Regression tests: `contamination.test.ts` (own code, case, standard, other item, longer number, no resolved code, user-typed), and `baseline-replay.test.ts` (genuine differences MT-301, CB-501, CP-103, SN-401 still confirmed; the old replay file unchanged).

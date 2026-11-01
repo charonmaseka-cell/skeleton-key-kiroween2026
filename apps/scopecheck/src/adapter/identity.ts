@@ -46,7 +46,7 @@ export type RecoveredIdentifier = {
   codeSpan: Evidence;
   /** the span the model cited for the item (unchanged) */
   itemEvidence: Evidence;
-  method: 'single_code_in_item_segment' | 'single_code_in_item_cell';
+  method: 'single_code_in_item_segment' | 'single_code_in_item_cell' | 'row_reference_cell';
   /**
    * 'single_code_in_item_cell' only: the model returned several cells of the row joined by "|" in one item value. Each part
    * was located exactly once in a DIFFERENT source cell of the cited span; these are those spans (all intact). The raw
@@ -114,6 +114,16 @@ function locateCells(block: Block, ev: Evidence, value: string, docBlocks: Map<s
   return { first: spans[0]!, parts };
 }
 
+/** Codes held alone in a cell of a positioned row, other than the cell [segStart, segEnd) the item description is in. */
+function referenceCodes(block: Block, segStart: number, segEnd: number): { code: string; start: number; end: number }[] {
+  if (block.layout !== 'positioned' || !block.cells) return [];
+  return block.cells
+    .filter((c) => c.end <= segStart || c.start >= segEnd)
+    .map((c) => ({ c, codes: codesIn(block.text.slice(c.start, c.end)) }))
+    .filter(({ c, codes }) => codes.length === 1 && codes[0]!.start === 0 && codes[0]!.end === c.end - c.start)
+    .map(({ c, codes }) => ({ code: codes[0]!.code, start: c.start, end: c.end }));
+}
+
 export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityReport {
   const byDoc = new Map<string, Map<string, Block>>();
   for (const b of blocks) {
@@ -162,7 +172,7 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
         continue;
       }
       const seg = segmentAround(block, ev.start + at.start, ev.start + at.end);
-      const inSegment = [...new Set(codesIn(block.text.slice(seg.start, seg.end)).map((c) => c.code))];
+      const inSegment = [...new Set([...codesIn(block.text.slice(seg.start, seg.end)).map((c) => c.code), ...referenceCodes(block, seg.start, seg.end).map((c) => c.code)])];
       if (inSegment.length > 1) {
         uncertain(fact, 'multiple_codes', inSegment);
         continue;
@@ -188,22 +198,29 @@ export function resolveItemIdentities(facts: Fact[], blocks: Block[]): IdentityR
       parts = located.parts;
     }
     const { start: segStart, end: segEnd } = segmentAround(block, at.start, at.end);
-    const found = codesIn(block.text.slice(segStart, segEnd));
+    const found = codesIn(block.text.slice(segStart, segEnd)).map((c) => ({ ...c, start: segStart + c.start, end: segStart + c.end }));
+    // A genuinely positioned row may carry its reference in a cell of its own ("LB-3101 | Digital pH meter | ..."). That cell
+    // is the row's reference only when it holds nothing but a code. Codes in the description cell and in reference cells
+    // are weighed together: more than one distinct code is never resolved.
+    const refs = referenceCodes(block, segStart, segEnd);
+    const all = [...found, ...refs];
+    const distinct = [...new Set(all.map((c) => c.code))];
 
-    if (found.length === 0) {
+    if (distinct.length === 0) {
       report.identities.set(fact.id, { kind: 'description', key: nameTokens(parts ? fact.value.split('|')[0]!.trim() : fact.value).join(' ') });
       report.counts.descriptionOnly++;
-    } else if (found.length > 1) {
-      uncertain(fact, 'multiple_codes', [...new Set(found.map((c) => c.code))]);
+    } else if (distinct.length > 1 || found.length > 1) {
+      uncertain(fact, 'multiple_codes', distinct);
     } else {
-      const c = found[0]!;
-      const codeSpan: Evidence = { docId: block.docId, blockId: block.id, start: segStart + c.start, end: segStart + c.end, text: block.text.slice(segStart + c.start, segStart + c.end) };
+      const c = all[0]!;
+      const codeSpan: Evidence = { docId: block.docId, blockId: block.id, start: c.start, end: c.end, text: block.text.slice(c.start, c.end) };
       if (!isEvidenceIntact(codeSpan, docBlocks)) {
         uncertain(fact, 'evidence_invalid');
         continue;
       }
+      const fromRef = found.length === 0;
       report.identities.set(fact.id, { kind: 'code', code: c.code, origin: 'recovered' });
-      report.recovered.push({ factId: fact.id, docId: fact.docId, description: fact.value, code: c.code, codeSpan, itemEvidence: ev, method: parts ? 'single_code_in_item_cell' : 'single_code_in_item_segment', ...(parts ? { parts } : {}) });
+      report.recovered.push({ factId: fact.id, docId: fact.docId, description: fact.value, code: c.code, codeSpan, itemEvidence: ev, method: fromRef ? 'row_reference_cell' : parts ? 'single_code_in_item_cell' : 'single_code_in_item_segment', ...(parts ? { parts } : {}) });
       report.counts.recovered++;
     }
   }

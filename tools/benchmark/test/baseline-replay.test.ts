@@ -49,16 +49,26 @@ describe('versioned offline replay of the saved responses', () => {
     expect(JSON.stringify(r.samples[0]!.docs.map((d) => d.claimsReturned))).toBe(JSON.stringify(baseline.samples[0]!.docs.map((d) => d.claimsReturned)));
   });
 
-  it('the three leading-"with" cases are no longer false criticals; the SN-403 case, a different extraction fault, remains and is reported', async () => {
-    const s = (await replay()).samples[0]!.findings;
-    expect(s.score.falseCritical).toEqual(['spec.differs|SN-403:specification|quote-b']);
-    const specs = s.produced.filter((f) => f.code === 'spec.differs' && f.response === 'quote-b').map((f) => f.subject);
-    expect(specs).not.toContain('MT-310:specification');
-    expect(specs).not.toContain('SN-401:specification');
-    expect(specs).not.toContain('SN-402:specification');
-    expect(specs).toEqual(expect.arrayContaining(['MT-301:specification', 'CB-501:specification'])); // genuine differences kept
-    expect(s.produced.filter((f) => f.code === 'spec.differs' && f.response === 'quote-a').map((f) => f.subject).sort()).toEqual(['CP-103:specification', 'SN-401:specification']);
-    expect(s.score.overConfident).toEqual([]);
+  it('the three leading-"with" cases are no longer false criticals, and the SN-403 case, a contaminated specification, is Needs review and Not evaluated instead of a confirmed difference', async () => {
+    const s = (await replay()).samples[0]!;
+    expect(s.findings.score.falseCritical).toEqual([]);
+    const specs = s.findings.produced.filter((f) => f.code === 'spec.differs' && f.response === 'quote-b').map((f) => f.subject);
+    for (const gone of ['MT-310', 'SN-401', 'SN-402', 'SN-403']) expect(specs).not.toContain(`${gone}:specification`);
+    expect(specs.sort()).toEqual(['CB-501:specification', 'MT-301:specification']); // genuine differences kept
+    expect(s.findings.produced.filter((f) => f.code === 'spec.differs' && f.response === 'quote-a').map((f) => f.subject).sort()).toEqual(['CP-103:specification', 'SN-401:specification']);
+    expect(s.findings.produced).toContainEqual(expect.objectContaining({ code: 'specification.contaminated', subject: 'SN-403:specification', response: 'quote-b', state: 'needs_review', reason: 'item_code_in_specification' }));
+    const c = s.comparisons!.find((x) => x.id === 'specification:SN-403~quote-b')!;
+    expect(c).toMatchObject({ status: 'not_evaluated', blocked: { docId: 'quote-b', field: 'specification', reason: 'contaminated_value' } });
+    expect(s.findings.score.overConfident).toEqual([]);
+    expect(s.findings.score.matchedExactState).toBe(18); // no genuine detection was given up
+  });
+
+  it('REGRESSION: a genuine difference in a CLEAN specification is still confirmed even when the item code sits elsewhere in the row', async () => {
+    // quotation B: MT-301 (IE3 -> IE2) and CB-501 (armoured -> unarmoured) are genuine; neither specification holds its own code
+    const s = (await replay()).samples[0]!;
+    for (const id of ['MT-301', 'CB-501']) {
+      expect(s.comparisons!.find((x) => x.id === `specification:${id}~quote-b`)).toMatchObject({ status: 'flagged' });
+    }
   });
 
   it('the four unresolved RFQ rows are recovered from validated source cells; the ambiguous quotation line stays in review', async () => {
@@ -75,7 +85,7 @@ describe('versioned offline replay of the saved responses', () => {
     expect(s.comparisons).toHaveLength(96);
     expect(new Set(s.comparisons!.map((c) => c.id)).size).toBe(96);
     const ne = s.comparisons!.filter((c) => c.status === 'not_evaluated');
-    expect(ne).toHaveLength(22);
+    expect(ne).toHaveLength(23); // 22 for missing facts or unverified coverage, plus the contaminated SN-403 specification
     expect(ne.every((c) => !!c.reason && !!c.blocked?.docId && !!c.blocked.field && !!c.blocked.reason)).toBe(true);
     // the missed PN-140 specification (quotation A) is now listed, with the missing fact as the blocked input
     const pn140 = ne.find((c) => c.id === 'specification:PN-140~quote-a')!;
@@ -99,6 +109,16 @@ describe('versioned offline replay of the saved responses', () => {
     const s = r.samples[0]!;
     expect(s.comparisons).toHaveLength(92);
     expect(s.comparisonCompleteness).toEqual({ labelledRequirementRows: 24, quotations: 2, aspects: 2, expected: 96, planned: 92, complete: false });
+  });
+});
+
+describe('earlier replays are kept as saved', () => {
+  it('the rules-v3 replay file still shows what it showed: 18 of 18 expected, 1 false critical (SN-403), 22 Not evaluated', () => {
+    const f = readdirSync(RESULTS).find((x) => x.startsWith('replay-sc-t4-replay-rules3-ingest2-'))!;
+    const r = JSON.parse(readFileSync(join(RESULTS, f), 'utf8')) as BenchmarkResult & { replay: { rescoredWith: { scopeRuleVersion: string } } };
+    expect(r.replay.rescoredWith.scopeRuleVersion).toBe('3');
+    expect(r.samples[0]!.findings.score.falseCritical).toEqual(['spec.differs|SN-403:specification|quote-b']);
+    expect(r.samples[0]!.comparisons!.filter((c) => c.status === 'not_evaluated')).toHaveLength(22);
   });
 });
 

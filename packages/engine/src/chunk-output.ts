@@ -85,9 +85,29 @@ export function isHeading(text: string): boolean {
   return t.length > 0 && t.length <= 60 && !SEPARATOR.test(t) && !/[.:;,!?]$/.test(t) && t.split(/\s+/).length <= 8;
 }
 
-function continues(prev: string, text: string): boolean {
-  const t = text.trimStart();
-  return /^[a-z|;,)\-–]/.test(t) || /[|\-–]\s*$/.test(prev.trimEnd());
+function continues(prev: Block, b: Block): boolean {
+  // A line the parser found to be the wrapped continuation of a cell above belongs to that row (parser 'ingest/2-cells').
+  if (b.layout === 'positioned' && b.cells?.length === 1 && b.cells[0]!.wrapOf) return true;
+  const t = b.text.trimStart();
+  return /^[a-z|;,)\-–]/.test(t) || /[|\-–]\s*$/.test(prev.text.trimEnd());
+}
+
+/** A cell that is only a short identifier (letters and digits, no spaces): a row reference, not a value to extract. */
+const isReferenceCell = (t: string) => t.length <= 12 && !/\s/.test(t) && /[A-Za-z]/.test(t) && /\d/.test(t);
+
+/**
+ * Expected values in a unit. A line with validated positioned cells counts one value per cell (a reference cell and a
+ * wrapped continuation count none); other lines use the text estimate over the unit's joined text.
+ */
+function unitValues(blocks: Block[], estimate: (t: string) => number): number {
+  if (!blocks.some((b) => b.layout === 'positioned' && b.cells)) return estimate(blocks.map((b) => b.text).join(' '));
+  return blocks.reduce((n, b) => {
+    if (b.layout === 'positioned' && b.cells) {
+      if (b.cells.length === 1 && b.cells[0]!.wrapOf) return n;
+      return n + b.cells.filter((c) => !isReferenceCell(b.text.slice(c.start, c.end))).length;
+    }
+    return n + estimate(b.text);
+  }, 0);
 }
 
 type Unit = { blocks: Block[]; values: number; chars: number; heading: boolean };
@@ -106,7 +126,7 @@ export function chunkByOutput(blocks: Block[], o: OutputChunkOptions): OutputChu
       continue;
     }
     const last = units[units.length - 1];
-    if (last && continues(last.blocks[last.blocks.length - 1]!.text, b.text)) {
+    if (last && continues(last.blocks[last.blocks.length - 1]!, b)) {
       last.blocks.push(b);
       last.chars += b.text.length;
       last.heading = false;
@@ -114,7 +134,7 @@ export function chunkByOutput(blocks: Block[], o: OutputChunkOptions): OutputChu
       units.push({ blocks: [b], values: 0, chars: b.text.length, heading: isHeading(b.text) });
     }
   }
-  for (const u of units) u.values = estimate(u.blocks.map((b) => b.text).join(' '));
+  for (const u of units) u.values = unitValues(u.blocks, estimate);
 
   // 2. Greedy fill by values, characters and blocks.
   type Draft = { own: Unit[]; context: Block[]; values: number; chars: number; blocks: number; overBudget: boolean; splitUnit: boolean };

@@ -113,3 +113,38 @@ describe('chunkByOutput', () => {
     expect(chunkByOutput(blocks, O)).toEqual(chunkByOutput(blocks.map((b) => ({ ...b })), O));
   });
 });
+
+describe('chunkByOutput with parser cells', () => {
+  const cellBlock = (id: string, text: string, cells: { start: number; end: number; wrapOf?: { blockId: string; cell: number } }[]) => ({
+    ...block('d', id, text), layout: 'positioned' as const, parser: 'ingest/2-cells', cells: cells.map((c) => ({ x0: 0, x1: 1, ...c })),
+  });
+  // a row laid out in four cells: a reference, a description, a quantity and a specification
+  const r = (id: string, n: number) => {
+    const parts = [`LB-31${n}`, `Pump ${n}`, `${n} each`, `spec ${n}`];
+    let pos = 0;
+    const cells = parts.map((t) => { const c = { start: pos, end: pos + t.length }; pos += t.length + 1; return c; });
+    return cellBlock(id, parts.join(' '), cells);
+  };
+
+  it('counts one value per cell, not counting a reference cell, where the text has no separators', () => {
+    const b = r('b1', 1);
+    expect(b.text.slice(b.cells[0]!.start, b.cells[0]!.end)).toBe('LB-311');
+    const out = chunkByOutput([b as never], { ...O, maxValues: 100 });
+    expect(out.info[0]!.expectedValues).toBe(3);
+  });
+
+  it('a wrapped continuation stays with its row and adds no value', () => {
+    const a = r('b1', 1);
+    const w = cellBlock('b2', 'continued on a second line', [{ start: 0, end: 26, wrapOf: { blockId: 'b1', cell: 1 } }]);
+    const next = r('b3', 2);
+    const out = chunkByOutput([a, w, next] as never[], { ...O, maxValues: 3 });
+    expect(a.cells).toHaveLength(4);
+    expect(out.info.map((i) => i.blockIds)).toEqual([['b1', 'b2'], ['b3']]);
+    expect(out.info[0]!.expectedValues).toBe(3);
+  });
+
+  it('without cells the old text rules apply (a lowercase line still continues a row)', () => {
+    const out = chunkByOutput(mk(['Item A | qty 1 units | steel', 'and more detail']), { ...O, maxValues: 100 });
+    expect(own(out)).toEqual([['b1', 'b2']]);
+  });
+});

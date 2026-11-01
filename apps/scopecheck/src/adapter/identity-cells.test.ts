@@ -86,3 +86,50 @@ describe('positioned cells from the parser take precedence over separators in th
     expect(resolveItemIdentities([f], [u]).identities.get(f.id)).toEqual({ kind: 'code', code: 'CP-100', origin: 'recovered' });
   });
 });
+
+describe('a reference in a cell of its own (genuinely positioned rows)', () => {
+  const T = 'LB-3101 Digital pH meter 6 each 0.01 pH resolution';
+  const cells = [{ start: 0, end: 7, x0: 50, x1: 90 }, { start: 8, end: 24, x0: 115, x1: 190 }, { start: 25, end: 31, x0: 300, x1: 330 }, { start: 32, end: T.length, x0: 360, x1: 470 }];
+  const mk = (text: string, c = cells, layout: Block['layout'] = 'positioned') => row('p1-l9', text, { layout, cells: c, parser: 'ingest/2-cells' });
+
+  it('the code in the reference cell is tied to the row\'s description, with its own intact span', () => {
+    const b = mk(T);
+    const f = itemFact(b, 'Digital pH meter', 'Digital pH meter');
+    const r = resolveItemIdentities([f], [b]);
+    expect(r.identities.get(f.id)).toEqual({ kind: 'code', code: 'LB-3101', origin: 'recovered' });
+    expect(r.recovered[0]).toMatchObject({ method: 'row_reference_cell', code: 'LB-3101' });
+    expect(r.recovered[0]!.codeSpan.text).toBe('LB-3101');
+    expect(isEvidenceIntact(r.recovered[0]!.codeSpan, new Map([[b.id, b]]))).toBe(true);
+  });
+
+  it('a second code in the description cell makes the row uncertain; nothing is chosen', () => {
+    const t = 'LB-3101 Digital pH meter to ISO-17034 6 each';
+    const b = mk(t, [{ start: 0, end: 7, x0: 50, x1: 90 }, { start: 8, end: 37, x0: 115, x1: 250 }, { start: 38, end: t.length, x0: 300, x1: 330 }]);
+    const f = itemFact(b, 'Digital pH meter to ISO-17034', 'Digital pH meter to ISO-17034');
+    expect(resolveItemIdentities([f], [b]).identities.get(f.id)).toMatchObject({ kind: 'uncertain', reason: 'multiple_codes' });
+  });
+
+  it('a code that shares a cell with other words is not a reference cell (no code is invented)', () => {
+    const t = 'Digital pH meter 6 each model LB-3101 plus';
+    const b = mk(t, [{ start: 0, end: 16, x0: 50, x1: 130 }, { start: 17, end: 23, x0: 200, x1: 230 }, { start: 24, end: t.length, x0: 300, x1: 420 }]);
+    const f = itemFact(b, 'Digital pH meter', 'Digital pH meter');
+    expect(resolveItemIdentities([f], [b]).identities.get(f.id)).toEqual({ kind: 'description', key: 'digital ph meter' });
+  });
+
+  it('without cells the whole line is one segment, as before (the code is still found, by the older rule)', () => {
+    const b = row('p1-l9', T);
+    const f = itemFact(b, 'Digital pH meter', 'Digital pH meter');
+    const r = resolveItemIdentities([f], [b]);
+    expect(r.identities.get(f.id)).toEqual({ kind: 'code', code: 'LB-3101', origin: 'recovered' });
+    expect(r.recovered[0]!.method).toBe('single_code_in_item_segment');
+  });
+
+  it('a code the model kept in its value is checked against the reference cell too: a different reference makes the row uncertain', () => {
+    const t = 'LB-3101 Digital pH meter to ISO-17034 6 each';
+    const b = mk(t, [{ start: 0, end: 7, x0: 50, x1: 90 }, { start: 8, end: 37, x0: 115, x1: 250 }, { start: 38, end: t.length, x0: 300, x1: 330 }]);
+    const f = itemFact(b, 'Digital pH meter to ISO-17034', 'Digital pH meter to ISO-17034');
+    expect(resolveItemIdentities([f], [b]).identities.get(f.id)).toMatchObject({ kind: 'uncertain', reason: 'multiple_codes' });
+    const same = itemFact(b, 'LB-3101 Digital pH meter', 'LB-3101 Digital pH meter');
+    expect(resolveItemIdentities([same], [b]).identities.get(same.id)).toMatchObject({ kind: 'code', code: 'LB-3101' });
+  });
+});

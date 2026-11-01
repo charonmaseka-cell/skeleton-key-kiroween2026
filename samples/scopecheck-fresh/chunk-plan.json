@@ -1,0 +1,327 @@
+{
+  "version": 1,
+  "sample": "scopecheck-fresh",
+  "chunker": "output-aware",
+  "parameters": {
+    "maxChars": 24000,
+    "maxBlocks": 400,
+    "overlap": 0,
+    "maxValues": 14,
+    "headingContext": true
+  },
+  "note": "Frozen output-aware chunk plan. Built from block text, structure and the extraction schema only. estimatedValues is the chunker estimate, not a label.",
+  "docs": [
+    {
+      "docId": "rfq",
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 42,
+      "documentHash": "13bc206a8f7953",
+      "chunks": [
+        {
+          "blockIds": [
+            "p1-l1",
+            "p1-l2",
+            "p1-l3",
+            "p1-l4",
+            "p1-l5",
+            "p1-l6",
+            "p1-l7",
+            "p1-l8",
+            "p1-l9",
+            "p1-l10",
+            "p1-l11",
+            "p1-l12",
+            "p1-l13",
+            "p1-l14",
+            "p1-l15",
+            "p1-l16",
+            "p1-l17",
+            "p1-l18",
+            "p1-l19",
+            "p1-l20"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 14,
+          "chars": 1262,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l21",
+            "p1-l22",
+            "p1-l23",
+            "p1-l24",
+            "p1-l25"
+          ],
+          "contextBlockIds": [
+            "p1-l17"
+          ],
+          "estimatedValues": 12,
+          "chars": 267,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l26",
+            "p1-l27",
+            "p1-l28",
+            "p1-l29",
+            "p1-l30"
+          ],
+          "contextBlockIds": [
+            "p1-l17"
+          ],
+          "estimatedValues": 12,
+          "chars": 272,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l31",
+            "p1-l32",
+            "p1-l33",
+            "p1-l34",
+            "p2-l1",
+            "p2-l2",
+            "p2-l3",
+            "p2-l4",
+            "p2-l5",
+            "p2-l6",
+            "p2-l7",
+            "p2-l8"
+          ],
+          "contextBlockIds": [
+            "p1-l17"
+          ],
+          "estimatedValues": 3,
+          "chars": 718,
+          "overBudget": false,
+          "splitUnit": false
+        }
+      ],
+      "oversizedBlockIds": []
+    },
+    {
+      "docId": "quote-a",
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 24,
+      "documentHash": "14c1d690606eeb",
+      "chunks": [
+        {
+          "blockIds": [
+            "p1-l1",
+            "p1-l2",
+            "p1-l3",
+            "p1-l4",
+            "p1-l5",
+            "p1-l6"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 13,
+          "chars": 328,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l7",
+            "p1-l8",
+            "p1-l9",
+            "p1-l10"
+          ],
+          "contextBlockIds": [
+            "p1-l4"
+          ],
+          "estimatedValues": 12,
+          "chars": 250,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l11",
+            "p1-l12",
+            "p1-l13"
+          ],
+          "contextBlockIds": [
+            "p1-l4"
+          ],
+          "estimatedValues": 12,
+          "chars": 211,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l14",
+            "p1-l15",
+            "p1-l16",
+            "p1-l17",
+            "p1-l18",
+            "p1-l19",
+            "p1-l20",
+            "p1-l21",
+            "p1-l22",
+            "p1-l23",
+            "p1-l24"
+          ],
+          "contextBlockIds": [
+            "p1-l4"
+          ],
+          "estimatedValues": 13,
+          "chars": 570,
+          "overBudget": false,
+          "splitUnit": false
+        }
+      ],
+      "oversizedBlockIds": []
+    },
+    {
+      "docId": "quote-b",
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 22,
+      "documentHash": "10464dbf846204",
+      "chunks": [
+        {
+          "blockIds": [
+            "p1-l1",
+            "p1-l2",
+            "p1-l3",
+            "p1-l4",
+            "p1-l5",
+            "p1-l6"
+          ],
+          "contextBlockIds": [],
+          "estimatedValues": 12,
+          "chars": 371,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l7",
+            "p1-l8",
+            "p1-l9"
+          ],
+          "contextBlockIds": [
+            "p1-l3"
+          ],
+          "estimatedValues": 12,
+          "chars": 289,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l10",
+            "p1-l11",
+            "p1-l12"
+          ],
+          "contextBlockIds": [
+            "p1-l3"
+          ],
+          "estimatedValues": 12,
+          "chars": 285,
+          "overBudget": false,
+          "splitUnit": false
+        },
+        {
+          "blockIds": [
+            "p1-l13",
+            "p1-l14",
+            "p1-l15",
+            "p1-l16",
+            "p1-l17",
+            "p1-l18",
+            "p1-l19",
+            "p1-l20",
+            "p1-l21",
+            "p1-l22"
+          ],
+          "contextBlockIds": [
+            "p1-l3"
+          ],
+          "estimatedValues": 8,
+          "chars": 542,
+          "overBudget": false,
+          "splitUnit": false
+        }
+      ],
+      "oversizedBlockIds": []
+    }
+  ],
+  "diagnostic": {
+    "note": "OFFLINE BENCHMARK DIAGNOSTIC: counts derived from the pre-registered labels. The chunker never read them and no run decision uses them.",
+    "docs": [
+      {
+        "docId": "rfq",
+        "labelledValues": 36,
+        "chunks": [
+          {
+            "chunk": 1,
+            "labelledValues": 9
+          },
+          {
+            "chunk": 2,
+            "labelledValues": 12
+          },
+          {
+            "chunk": 3,
+            "labelledValues": 12
+          },
+          {
+            "chunk": 4,
+            "labelledValues": 3
+          }
+        ]
+      },
+      {
+        "docId": "quote-a",
+        "labelledValues": 45,
+        "chunks": [
+          {
+            "chunk": 1,
+            "labelledValues": 8
+          },
+          {
+            "chunk": 2,
+            "labelledValues": 12
+          },
+          {
+            "chunk": 3,
+            "labelledValues": 12
+          },
+          {
+            "chunk": 4,
+            "labelledValues": 13
+          }
+        ]
+      },
+      {
+        "docId": "quote-b",
+        "labelledValues": 46,
+        "chunks": [
+          {
+            "chunk": 1,
+            "labelledValues": 13
+          },
+          {
+            "chunk": 2,
+            "labelledValues": 12
+          },
+          {
+            "chunk": 3,
+            "labelledValues": 12
+          },
+          {
+            "chunk": 4,
+            "labelledValues": 9
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -5,6 +5,7 @@
 //   --chunking size|output  size (default): split by characters and blocks. output: output-aware, from text and schema.
 //   --values-per-request N  output-aware value budget per request (default 14; an estimate, see chunking.ts)
 //   --frozen-plan FILE  use exactly the chunks recorded in FILE (refused if the document text changed)
+//   --resume-from FILE  with --frozen-plan: reuse the chunks that succeeded in an earlier live result; send only the rest
 //   --write-plan FILE   build the output-aware plan for --sample, write it to FILE, and stop (no model, no credentials)
 //   --run-neuron-cap N  neurons this run may add, charged by conservative reservation (default 6000)
 //   --daily-neuron-cap N  cumulative neurons for the day, baseline included (default 8000)
@@ -65,6 +66,13 @@ if (args.get('write-plan')) {
   writeFileSync(args.get('write-plan')!, JSON.stringify(plan, null, 2) + '\n');
   console.log(`plan written: ${args.get('write-plan')} (${plan.docs.map((d) => `${d.docId}: ${d.chunks.length} chunks`).join(', ')})`);
   process.exit(0);
+}
+let resume: Record<string, { okChunks: number[]; claims: unknown[] }> | undefined;
+if (args.get('resume-from')) {
+  if (!args.get('frozen-plan')) { console.error('error: --resume-from needs --frozen-plan (the chunk numbers must mean the same chunks)'); process.exit(1); }
+  const prior = JSON.parse(readFileSync(args.get('resume-from')!, 'utf8')) as { requests: { docId: string; chunk: number; ok: boolean }[]; samples: { docs: { docId: string; claimsReturned?: unknown[] }[] }[] };
+  resume = {};
+  for (const d of prior.samples.flatMap((x) => x.docs)) resume[d.docId] = { okChunks: prior.requests.filter((r) => r.docId === d.docId && r.ok).map((r) => r.chunk), claims: d.claimsReturned ?? [] };
 }
 let chunker: Chunker;
 if (args.get('frozen-plan')) {
@@ -134,6 +142,7 @@ if (mode === 'live' || args.get('preflight-only') === 'true') {
     schemaOverrides,
     limits,
     chunker,
+    skipChunks: resume ? Object.fromEntries(Object.entries(resume).map(([k, v]) => [k, v.okChunks])) : undefined,
     timeoutMs,
     model,
     minChunks,
@@ -184,6 +193,7 @@ const result = await runBenchmark({
   docFilter,
   limits,
   chunker,
+  resume,
   gate: mode === 'live' ? (schemaId, chunk) => {
     const profile = PROFILES[schemaId]!;
     return neuronBudget!.refusal(worstCaseNeurons({ messages: buildMessages(profile, chunk, false), max_tokens: profile.maxOutputTokens }, model).neurons);
@@ -206,7 +216,7 @@ counter.close();
 const outDir = join(SAMPLES_DIR, 'benchmark-results');
 mkdirSync(outDir, { recursive: true });
 const out = args.get('out') ?? join(outDir, `${mode}-${label}-${result.startedAt.replace(/[:.]/g, '-')}.json`);
-writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
+writeFileSync(out, JSON.stringify({ ...result, settings: mode === 'live' ? { inferenceTimeoutMs: timeoutMs, maxRepairAttempts: 1, note: 'Worker configured timeout is 25000 ms', chunkLimits: limits, resumedFrom: args.get('resume-from'), chunking: args.get('frozen-plan') ? { kind: 'frozen-plan', file: args.get('frozen-plan') } : args.get('chunking') === 'output' ? { kind: 'output-aware', ...outputParams } : { kind: 'size' }, neuronBudget: neuronBudget ? { ...neuronBudget.summary, perAttempt: neuronBudget.attempts, note: 'CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption' } : undefined } : undefined }, null, 2) + '\n');
 console.log(`results: ${out.replace(REPO, '')}`);
 
 // Stop conditions for live batches (see the PR): the exit code lets a caller halt the batch.

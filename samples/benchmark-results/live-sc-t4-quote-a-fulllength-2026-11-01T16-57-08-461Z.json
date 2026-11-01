@@ -1,0 +1,2981 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "startedAt": "2026-11-01T16:57:08.461Z",
+  "label": "sc-t4-quote-a-fulllength",
+  "attemptBudget": 10,
+  "attemptsCharged": 8,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "quote-a",
+      "chunk": 1,
+      "blocks": 20,
+      "chars": 1587,
+      "ok": false,
+      "status": 504,
+      "code": "timeout",
+      "ms": 25017,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 0,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 2,
+      "blocks": 4,
+      "chars": 259,
+      "ok": true,
+      "ms": 13033,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 3,
+      "blocks": 4,
+      "chars": 266,
+      "ok": true,
+      "ms": 16478,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 4,
+      "blocks": 4,
+      "chars": 246,
+      "ok": true,
+      "ms": 12750,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 5,
+      "blocks": 4,
+      "chars": 273,
+      "ok": true,
+      "ms": 14279,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 6,
+      "blocks": 4,
+      "chars": 248,
+      "ok": true,
+      "ms": 15489,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 7,
+      "blocks": 4,
+      "chars": 244,
+      "ok": true,
+      "ms": 15500,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 8,
+      "blocks": 34,
+      "chars": 2575,
+      "ok": true,
+      "ms": 5410,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 4,
+      "dropped": 0
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "scopecheck-realistic",
+      "docs": [
+        {
+          "docId": "quote-a",
+          "profile": {
+            "id": "scopecheck.quote.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l21",
+              "excerpt": "Item VL-201 Gate valve DN50",
+              "value": "Gate valve DN50"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l21",
+              "excerpt": "qty 40 units",
+              "value": {
+                "value": "40",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l21",
+              "excerpt": "R 1 450 each",
+              "value": {
+                "amount": "1450",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l21",
+              "excerpt": "ductile iron, flanged PN16",
+              "value": "ductile iron, flanged PN16"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l22",
+              "excerpt": "Item VL-202 Ball valve DN25",
+              "value": "Ball valve DN25"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l22",
+              "excerpt": "qty 60 units",
+              "value": {
+                "value": "60",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l22",
+              "excerpt": "R 380 each",
+              "value": {
+                "amount": "380",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l22",
+              "excerpt": "brass, threaded",
+              "value": "brass, threaded"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l23",
+              "excerpt": "Item VL-203 Check valve DN80",
+              "value": "Check valve DN80"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l23",
+              "excerpt": "qty 24 units",
+              "value": {
+                "value": "24",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l23",
+              "excerpt": "R 2 100 each",
+              "value": {
+                "amount": "2100",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l23",
+              "excerpt": "cast steel, flanged PN16",
+              "value": "cast steel, flanged PN16"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l24",
+              "excerpt": "Item VL-204 Butterfly valve DN100",
+              "value": "VL-204 Butterfly valve DN100"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l24",
+              "excerpt": "qty 16 units",
+              "value": {
+                "value": "16",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l24",
+              "excerpt": "R 1 750 each",
+              "value": {
+                "amount": "1750",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l24",
+              "excerpt": "wafer type, EPDM seat",
+              "value": "wafer type, EPDM seat"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l25",
+              "excerpt": "Item MT-301 Electric motor 5.5 kW",
+              "value": "MT-301 Electric motor 5.5 kW"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l25",
+              "excerpt": "qty 8 units",
+              "value": {
+                "value": "8",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l25",
+              "excerpt": "R 7 800 each",
+              "value": {
+                "amount": "7800",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l25",
+              "excerpt": "IE3, 4 pole, IP55",
+              "value": "IE3, 4 pole, IP55"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l26",
+              "excerpt": "Item MT-302 Electric motor 11 kW",
+              "value": "MT-302 Electric motor 11 kW"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l26",
+              "excerpt": "qty 4 units",
+              "value": {
+                "value": "4",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l26",
+              "excerpt": "R 12 900 each",
+              "value": {
+                "amount": "12900",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l26",
+              "excerpt": "IE3, 4 pole, IP55",
+              "value": "IE3, 4 pole, IP55"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l27",
+              "excerpt": "Item MT-310 Motor starter",
+              "value": "MT-310 Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l27",
+              "excerpt": "qty 5 units",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l27",
+              "excerpt": "R 3 200 each",
+              "value": {
+                "amount": "3200",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l27",
+              "excerpt": "DOL, IP55 enclosure",
+              "value": "DOL, IP55 enclosure"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l28",
+              "excerpt": "Item SN-401 Level sensor",
+              "value": "SN-401 Level sensor"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l28",
+              "excerpt": "qty 14 units",
+              "value": {
+                "value": "14",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l28",
+              "excerpt": "R 2 950 each",
+              "value": {
+                "amount": "2950",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l28",
+              "excerpt": "ultrasonic, IP65",
+              "value": "ultrasonic, IP65"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l29",
+              "excerpt": "Item SN-402 Pressure transmitter",
+              "value": "SN-402 Pressure transmitter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l29",
+              "excerpt": "qty 12 units",
+              "value": {
+                "value": "12",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l29",
+              "excerpt": "R 3 300 each",
+              "value": {
+                "amount": "3300",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l29",
+              "excerpt": "0-16 bar, 4-20 mA",
+              "value": "0-16 bar, 4-20 mA"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l30",
+              "excerpt": "Item SN-403 Flow meter DN50 certified to SANS-1200",
+              "value": "SN-403 Flow meter DN50 certified to SANS-1200"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l30",
+              "excerpt": "qty 5 units",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l30",
+              "excerpt": "R 14 800 each",
+              "value": {
+                "amount": "14800",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l30",
+              "excerpt": "electromagnetic, IP68",
+              "value": "electromagnetic, IP68"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l31",
+              "excerpt": "Item PG-601 Pressure gauge",
+              "value": "PG-601 Pressure gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l31",
+              "excerpt": "qty 30 units",
+              "value": {
+                "value": "30",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l31",
+              "excerpt": "R 450 each",
+              "value": {
+                "amount": "450",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l31",
+              "excerpt": "0-10 bar, 100 mm dial",
+              "value": "0-10 bar, 100 mm dial"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l32",
+              "excerpt": "Item CB-501 Control cable 4 core",
+              "value": "CB-501 Control cable 4 core"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l32",
+              "excerpt": "qty 500 m",
+              "value": {
+                "value": "500",
+                "unit": "m"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l32",
+              "excerpt": "R 62 each",
+              "value": {
+                "amount": "62",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l32",
+              "excerpt": "2.5 mm2, armoured",
+              "value": "2.5 mm2, armoured"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l33",
+              "excerpt": "Item FL-701 Flange set DN50",
+              "value": "FL-701 Flange set DN50"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l33",
+              "excerpt": "qty 36 units",
+              "value": {
+                "value": "36",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l33",
+              "excerpt": "R 520 each",
+              "value": {
+                "amount": "520",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l33",
+              "excerpt": "carbon steel, PN16",
+              "value": "carbon steel, PN16"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p2-l1",
+              "excerpt": "Item FL-702 Flange set DN100",
+              "value": "FL-702 Flange set DN100"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p2-l1",
+              "excerpt": "qty 20 units",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p2-l1",
+              "excerpt": "R 880 each",
+              "value": {
+                "amount": "880",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p2-l1",
+              "excerpt": "carbon steel, PN16",
+              "value": "carbon steel, PN16"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p2-l2",
+              "excerpt": "Item GK-801 Gasket kit DN50",
+              "value": "GK-801 Gasket kit DN50"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p2-l2",
+              "excerpt": "qty 50 units",
+              "value": {
+                "value": "50",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p2-l2",
+              "excerpt": "R 210 each",
+              "value": {
+                "amount": "210",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p2-l2",
+              "excerpt": "graphite, spiral wound",
+              "value": "graphite, spiral wound"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p2-l3",
+              "excerpt": "Item TK-110 Storage tank 5 m3 | qty 2 units | HDPE, vertical",
+              "value": "Storage tank 5 m3 | qty 2 units | HDPE, vertical"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p2-l3",
+              "excerpt": "qty 2 units",
+              "value": {
+                "value": "2",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p2-l3",
+              "excerpt": "R 21 500 each",
+              "value": {
+                "amount": "21500",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p2-l3",
+              "excerpt": "HDPE, vertical",
+              "value": "HDPE, vertical"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p2-l4",
+              "excerpt": "Item TK-120 Dosing tank 500 l | qty 3 units | HDPE, with bund",
+              "value": "Dosing tank 500 l | qty 3 units | HDPE, with bund"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p2-l4",
+              "excerpt": "qty 3 units",
+              "value": {
+                "value": "3",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p2-l4",
+              "excerpt": "R 5 200 each",
+              "value": {
+                "amount": "5200",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p2-l4",
+              "excerpt": "HDPE, with bund",
+              "value": "HDPE, with bund"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p2-l5",
+              "excerpt": "Item PN-130 Pipe DN50 PN16 | qty 100 lengths | HDPE, 6 m lengths",
+              "value": "Pipe DN50 PN16 | qty 100 lengths | HDPE, 6 m lengths"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p2-l5",
+              "excerpt": "qty 100 lengths",
+              "value": {
+                "value": "100",
+                "unit": "lengths"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p2-l5",
+              "excerpt": "R 340 each",
+              "value": {
+                "amount": "340",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p2-l5",
+              "excerpt": "HDPE, 6 m lengths",
+              "value": "HDPE, 6 m lengths"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p2-l6",
+              "excerpt": "Item PN-140 Pipe DN100 PN16 | qty 80 lengths | HDPE, 6 m lengths | R 690 each",
+              "value": "PN-140 Pipe DN100 PN16"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p2-l6",
+              "excerpt": "qty 80 lengths",
+              "value": {
+                "value": "80",
+                "unit": "lengths"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p2-l6",
+              "excerpt": "R 690 each",
+              "value": {
+                "amount": "690",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "exclusion",
+              "kind": "text",
+              "blockId": "p2-l11",
+              "excerpt": "Excluded: delivery, installation and commissioning are not included in these prices.",
+              "value": "delivery, installation and commissioning"
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-a:00eddc361d8fe4",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Gate valve DN50",
+              "evidence": [
+                {
+                  "blockId": "p1-l21",
+                  "start": 0,
+                  "end": 27,
+                  "text": "Item VL-201 Gate valve DN50"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:14b17d0c630bc1",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "40",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l21",
+                  "start": 30,
+                  "end": 42,
+                  "text": "qty 40 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1cb91214f2880b",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "1450",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l21",
+                  "start": 74,
+                  "end": 86,
+                  "text": "R 1 450 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:05ce40bfe213d4",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "ductile iron, flanged PN16",
+              "evidence": [
+                {
+                  "blockId": "p1-l21",
+                  "start": 45,
+                  "end": 71,
+                  "text": "ductile iron, flanged PN16"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1e3ecbba3e4758",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Ball valve DN25",
+              "evidence": [
+                {
+                  "blockId": "p1-l22",
+                  "start": 0,
+                  "end": 27,
+                  "text": "Item VL-202 Ball valve DN25"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0621ea824a7348",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "60",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l22",
+                  "start": 30,
+                  "end": 42,
+                  "text": "qty 60 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1e3f1e21356816",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "380",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l22",
+                  "start": 63,
+                  "end": 73,
+                  "text": "R 380 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1b09b9f3df20c2",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "brass, threaded",
+              "evidence": [
+                {
+                  "blockId": "p1-l22",
+                  "start": 45,
+                  "end": 60,
+                  "text": "brass, threaded"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1217e6123019a5",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Check valve DN80",
+              "evidence": [
+                {
+                  "blockId": "p1-l23",
+                  "start": 0,
+                  "end": 28,
+                  "text": "Item VL-203 Check valve DN80"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1b4e1012ada91e",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "24",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l23",
+                  "start": 31,
+                  "end": 43,
+                  "text": "qty 24 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:07c6e33d4d503d",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "2100",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l23",
+                  "start": 73,
+                  "end": 85,
+                  "text": "R 2 100 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0d0332ccd921aa",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "cast steel, flanged PN16",
+              "evidence": [
+                {
+                  "blockId": "p1-l23",
+                  "start": 46,
+                  "end": 70,
+                  "text": "cast steel, flanged PN16"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1e0d387bd972df",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "VL-204 Butterfly valve DN100",
+              "evidence": [
+                {
+                  "blockId": "p1-l24",
+                  "start": 0,
+                  "end": 33,
+                  "text": "Item VL-204 Butterfly valve DN100"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:190ed80ff68781",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "16",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l24",
+                  "start": 36,
+                  "end": 48,
+                  "text": "qty 16 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0838a270026903",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "1750",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l24",
+                  "start": 75,
+                  "end": 87,
+                  "text": "R 1 750 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1d94c24cd3b6c6",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "wafer type, EPDM seat",
+              "evidence": [
+                {
+                  "blockId": "p1-l24",
+                  "start": 51,
+                  "end": 72,
+                  "text": "wafer type, EPDM seat"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:06bc4eafecd631",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "MT-301 Electric motor 5.5 kW",
+              "evidence": [
+                {
+                  "blockId": "p1-l25",
+                  "start": 0,
+                  "end": 33,
+                  "text": "Item MT-301 Electric motor 5.5 kW"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0738cdce62545d",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "8",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l25",
+                  "start": 36,
+                  "end": 47,
+                  "text": "qty 8 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1e7439018514f6",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "7800",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l25",
+                  "start": 70,
+                  "end": 82,
+                  "text": "R 7 800 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:00cd9bf63eaaae",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "IE3, 4 pole, IP55",
+              "evidence": [
+                {
+                  "blockId": "p1-l25",
+                  "start": 50,
+                  "end": 67,
+                  "text": "IE3, 4 pole, IP55"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:15e89d83075619",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "MT-302 Electric motor 11 kW",
+              "evidence": [
+                {
+                  "blockId": "p1-l26",
+                  "start": 0,
+                  "end": 32,
+                  "text": "Item MT-302 Electric motor 11 kW"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:03ab234ca03d89",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "4",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l26",
+                  "start": 35,
+                  "end": 46,
+                  "text": "qty 4 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:060bfb221c1467",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "12900",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l26",
+                  "start": 69,
+                  "end": 82,
+                  "text": "R 12 900 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:075740ba9fbfc1",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "IE3, 4 pole, IP55",
+              "evidence": [
+                {
+                  "blockId": "p1-l26",
+                  "start": 49,
+                  "end": 66,
+                  "text": "IE3, 4 pole, IP55"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:19ce064eba5060",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "MT-310 Motor starter",
+              "evidence": [
+                {
+                  "blockId": "p1-l27",
+                  "start": 0,
+                  "end": 25,
+                  "text": "Item MT-310 Motor starter"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0550e636eed067",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l27",
+                  "start": 28,
+                  "end": 39,
+                  "text": "qty 5 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1474c45eef5f8e",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "3200",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l27",
+                  "start": 64,
+                  "end": 76,
+                  "text": "R 3 200 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1870d955dae352",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "DOL, IP55 enclosure",
+              "evidence": [
+                {
+                  "blockId": "p1-l27",
+                  "start": 42,
+                  "end": 61,
+                  "text": "DOL, IP55 enclosure"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:04e77031318c2c",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "SN-401 Level sensor",
+              "evidence": [
+                {
+                  "blockId": "p1-l28",
+                  "start": 0,
+                  "end": 24,
+                  "text": "Item SN-401 Level sensor"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:108702bf457e63",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "14",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l28",
+                  "start": 27,
+                  "end": 39,
+                  "text": "qty 14 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1105a6bde1506f",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "2950",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l28",
+                  "start": 61,
+                  "end": 73,
+                  "text": "R 2 950 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0958ff7d278686",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "ultrasonic, IP65",
+              "evidence": [
+                {
+                  "blockId": "p1-l28",
+                  "start": 42,
+                  "end": 58,
+                  "text": "ultrasonic, IP65"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:11e54290c053c8",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "SN-402 Pressure transmitter",
+              "evidence": [
+                {
+                  "blockId": "p1-l29",
+                  "start": 0,
+                  "end": 32,
+                  "text": "Item SN-402 Pressure transmitter"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:11144aa0a60248",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "12",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l29",
+                  "start": 35,
+                  "end": 47,
+                  "text": "qty 12 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0847adac3f55ac",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "3300",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l29",
+                  "start": 70,
+                  "end": 82,
+                  "text": "R 3 300 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1526fb20d5c0f9",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0-16 bar, 4-20 mA",
+              "evidence": [
+                {
+                  "blockId": "p1-l29",
+                  "start": 50,
+                  "end": 67,
+                  "text": "0-16 bar, 4-20 mA"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0cff890cb5a660",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "SN-403 Flow meter DN50 certified to SANS-1200",
+              "evidence": [
+                {
+                  "blockId": "p1-l30",
+                  "start": 0,
+                  "end": 50,
+                  "text": "Item SN-403 Flow meter DN50 certified to SANS-1200"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0c646bf969736f",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l30",
+                  "start": 53,
+                  "end": 64,
+                  "text": "qty 5 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0f222556aa47c1",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "14800",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l30",
+                  "start": 91,
+                  "end": 104,
+                  "text": "R 14 800 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1c34def7e5861d",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "electromagnetic, IP68",
+              "evidence": [
+                {
+                  "blockId": "p1-l30",
+                  "start": 67,
+                  "end": 88,
+                  "text": "electromagnetic, IP68"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:01b4ab640a1365",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "PG-601 Pressure gauge",
+              "evidence": [
+                {
+                  "blockId": "p1-l31",
+                  "start": 0,
+                  "end": 26,
+                  "text": "Item PG-601 Pressure gauge"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:10bc09de70c685",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "30",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l31",
+                  "start": 29,
+                  "end": 41,
+                  "text": "qty 30 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0af9a05bd60b6f",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "450",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l31",
+                  "start": 68,
+                  "end": 78,
+                  "text": "R 450 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1f24e030793fd8",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0-10 bar, 100 mm dial",
+              "evidence": [
+                {
+                  "blockId": "p1-l31",
+                  "start": 44,
+                  "end": 65,
+                  "text": "0-10 bar, 100 mm dial"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0c8a1d2678a20c",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "CB-501 Control cable 4 core",
+              "evidence": [
+                {
+                  "blockId": "p1-l32",
+                  "start": 0,
+                  "end": 32,
+                  "text": "Item CB-501 Control cable 4 core"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:034bc08784b7d6",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "500",
+                "unit": "m"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l32",
+                  "start": 35,
+                  "end": 44,
+                  "text": "qty 500 m"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0ca2eb84f85e1a",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "62",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l32",
+                  "start": 67,
+                  "end": 76,
+                  "text": "R 62 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:04a1e968c99881",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "2.5 mm2, armoured",
+              "evidence": [
+                {
+                  "blockId": "p1-l32",
+                  "start": 47,
+                  "end": 64,
+                  "text": "2.5 mm2, armoured"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0c7a42a19e060d",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "FL-701 Flange set DN50",
+              "evidence": [
+                {
+                  "blockId": "p1-l33",
+                  "start": 0,
+                  "end": 27,
+                  "text": "Item FL-701 Flange set DN50"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:19e058111d9888",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "36",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l33",
+                  "start": 30,
+                  "end": 42,
+                  "text": "qty 36 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1179defea8b566",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "520",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l33",
+                  "start": 66,
+                  "end": 76,
+                  "text": "R 520 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:06b6ba485ece35",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "carbon steel, PN16",
+              "evidence": [
+                {
+                  "blockId": "p1-l33",
+                  "start": 45,
+                  "end": 63,
+                  "text": "carbon steel, PN16"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:13275cddee262a",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "FL-702 Flange set DN100",
+              "evidence": [
+                {
+                  "blockId": "p2-l1",
+                  "start": 0,
+                  "end": 28,
+                  "text": "Item FL-702 Flange set DN100"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:14b6c15ea4f7db",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l1",
+                  "start": 31,
+                  "end": 43,
+                  "text": "qty 20 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:081520e609bcf4",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "880",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l1",
+                  "start": 67,
+                  "end": 77,
+                  "text": "R 880 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:079b591dbbcf18",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "carbon steel, PN16",
+              "evidence": [
+                {
+                  "blockId": "p2-l1",
+                  "start": 46,
+                  "end": 64,
+                  "text": "carbon steel, PN16"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:04637ea53e7d80",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "GK-801 Gasket kit DN50",
+              "evidence": [
+                {
+                  "blockId": "p2-l2",
+                  "start": 0,
+                  "end": 27,
+                  "text": "Item GK-801 Gasket kit DN50"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:13daf8a1fb584c",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "50",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l2",
+                  "start": 30,
+                  "end": 42,
+                  "text": "qty 50 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:03c8ce051fd042",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "210",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l2",
+                  "start": 70,
+                  "end": 80,
+                  "text": "R 210 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0c4a5b106e1851",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "graphite, spiral wound",
+              "evidence": [
+                {
+                  "blockId": "p2-l2",
+                  "start": 45,
+                  "end": 67,
+                  "text": "graphite, spiral wound"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1537e81f0eeb1c",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Storage tank 5 m3 | qty 2 units | HDPE, vertical",
+              "evidence": [
+                {
+                  "blockId": "p2-l3",
+                  "start": 0,
+                  "end": 60,
+                  "text": "Item TK-110 Storage tank 5 m3 | qty 2 units | HDPE, vertical"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:03511b3a9a5ddf",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "2",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l3",
+                  "start": 32,
+                  "end": 43,
+                  "text": "qty 2 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:14da6aaf3f10db",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "21500",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l3",
+                  "start": 63,
+                  "end": 76,
+                  "text": "R 21 500 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1a37013db4686b",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "HDPE, vertical",
+              "evidence": [
+                {
+                  "blockId": "p2-l3",
+                  "start": 46,
+                  "end": 60,
+                  "text": "HDPE, vertical"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0d15be8dec5ecf",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Dosing tank 500 l | qty 3 units | HDPE, with bund",
+              "evidence": [
+                {
+                  "blockId": "p2-l4",
+                  "start": 0,
+                  "end": 61,
+                  "text": "Item TK-120 Dosing tank 500 l | qty 3 units | HDPE, with bund"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:16bfbcbf80e85c",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "3",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l4",
+                  "start": 32,
+                  "end": 43,
+                  "text": "qty 3 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:189c99f16f74a4",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "5200",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l4",
+                  "start": 64,
+                  "end": 76,
+                  "text": "R 5 200 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1750283c88ad76",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "HDPE, with bund",
+              "evidence": [
+                {
+                  "blockId": "p2-l4",
+                  "start": 46,
+                  "end": 61,
+                  "text": "HDPE, with bund"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0f7e7282018227",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Pipe DN50 PN16 | qty 100 lengths | HDPE, 6 m lengths",
+              "evidence": [
+                {
+                  "blockId": "p2-l5",
+                  "start": 0,
+                  "end": 64,
+                  "text": "Item PN-130 Pipe DN50 PN16 | qty 100 lengths | HDPE, 6 m lengths"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0b92f3be222145",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "100",
+                "unit": "lengths"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l5",
+                  "start": 29,
+                  "end": 44,
+                  "text": "qty 100 lengths"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0d290e944c4531",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "340",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l5",
+                  "start": 67,
+                  "end": 77,
+                  "text": "R 340 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:14cdbead6e16a4",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "HDPE, 6 m lengths",
+              "evidence": [
+                {
+                  "blockId": "p2-l5",
+                  "start": 47,
+                  "end": 64,
+                  "text": "HDPE, 6 m lengths"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:069f42d38f120a",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "PN-140 Pipe DN100 PN16",
+              "evidence": [
+                {
+                  "blockId": "p2-l6",
+                  "start": 0,
+                  "end": 77,
+                  "text": "Item PN-140 Pipe DN100 PN16 | qty 80 lengths | HDPE, 6 m lengths | R 690 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1b5d08244f86ed",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "80",
+                "unit": "lengths"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l6",
+                  "start": 30,
+                  "end": 44,
+                  "text": "qty 80 lengths"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:1b5db7b81a7eb5",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "690",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p2-l6",
+                  "start": 67,
+                  "end": 77,
+                  "text": "R 690 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0cb2f61c2f7db7",
+              "field": "exclusion",
+              "kind": "text",
+              "status": "validated",
+              "value": "delivery, installation and commissioning",
+              "evidence": [
+                {
+                  "blockId": "p2-l11",
+                  "start": 0,
+                  "end": 84,
+                  "text": "Excluded: delivery, installation and commissioning are not included in these prices."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 71,
+          "chunks": 8,
+          "processingComplete": false,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-a",
+            "expected": 89,
+            "validatable": 89,
+            "outcomes": {
+              "correct": 69,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 7,
+              "wrongly_validated": 0,
+              "missed": 13
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 17,
+                "outcome": "missed"
+              },
+              {
+                "field": "quantity",
+                "line": 17,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 17,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 17,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 18,
+                "outcome": "missed"
+              },
+              {
+                "field": "quantity",
+                "line": 18,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 18,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 18,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 19,
+                "outcome": "missed"
+              },
+              {
+                "field": "quantity",
+                "line": 19,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 19,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 19,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 20,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 20,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 20,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 20,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 21,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 21,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 21,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 21,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 22,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 22,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 22,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 22,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 23,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 23,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 23,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 23,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 24,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 24,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 24,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 24,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 25,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 25,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 25,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 25,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 26,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 26,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 26,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 26,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 27,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 27,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 27,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 27,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 28,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 28,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 28,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 28,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 29,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 29,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 29,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 29,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 30,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 30,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 30,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 30,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 31,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 31,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 31,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 31,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 32,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 32,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 32,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 32,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 33,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 33,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 33,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 33,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 34,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 34,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 34,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 34,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 35,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 35,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 35,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 35,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 36,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 36,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 36,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 36,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 37,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 37,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 37,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 37,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 38,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 38,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 38,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 38,
+                "outcome": "correct"
+              },
+              {
+                "field": "exclusion",
+                "line": 43,
+                "outcome": "wrong_value"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 0.7752808988764045,
+            "validatedPrecision": 0.9078947368421053
+          },
+          "issues": [
+            {
+              "docId": "quote-a",
+              "kind": "chunk_failed",
+              "reason": "quote-a#1",
+              "count": 20
+            },
+            {
+              "docId": "quote-a",
+              "kind": "block_unprocessed",
+              "reason": "not_in_successful_chunk",
+              "count": 19
+            }
+          ],
+          "rates": {
+            "claims": 76,
+            "evidenceLocated": 76,
+            "valueSupported": 76
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "findingsBefore": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "identity": {
+        "recovered": [
+          {
+            "factId": "quote-a:00eddc361d8fe4",
+            "docId": "quote-a",
+            "description": "Gate valve DN50",
+            "code": "VL-201",
+            "codeSpan": {
+              "docId": "quote-a",
+              "blockId": "p1-l21",
+              "start": 5,
+              "end": 11,
+              "text": "VL-201"
+            },
+            "itemEvidence": {
+              "docId": "quote-a",
+              "blockId": "p1-l21",
+              "start": 0,
+              "end": 27,
+              "text": "Item VL-201 Gate valve DN50"
+            },
+            "method": "single_code_in_item_segment"
+          },
+          {
+            "factId": "quote-a:1e3ecbba3e4758",
+            "docId": "quote-a",
+            "description": "Ball valve DN25",
+            "code": "VL-202",
+            "codeSpan": {
+              "docId": "quote-a",
+              "blockId": "p1-l22",
+              "start": 5,
+              "end": 11,
+              "text": "VL-202"
+            },
+            "itemEvidence": {
+              "docId": "quote-a",
+              "blockId": "p1-l22",
+              "start": 0,
+              "end": 27,
+              "text": "Item VL-202 Ball valve DN25"
+            },
+            "method": "single_code_in_item_segment"
+          },
+          {
+            "factId": "quote-a:1217e6123019a5",
+            "docId": "quote-a",
+            "description": "Check valve DN80",
+            "code": "VL-203",
+            "codeSpan": {
+              "docId": "quote-a",
+              "blockId": "p1-l23",
+              "start": 5,
+              "end": 11,
+              "text": "VL-203"
+            },
+            "itemEvidence": {
+              "docId": "quote-a",
+              "blockId": "p1-l23",
+              "start": 0,
+              "end": 28,
+              "text": "Item VL-203 Check valve DN80"
+            },
+            "method": "single_code_in_item_segment"
+          },
+          {
+            "factId": "quote-a:1537e81f0eeb1c",
+            "docId": "quote-a",
+            "description": "Storage tank 5 m3 | qty 2 units | HDPE, vertical",
+            "code": "TK-110",
+            "codeSpan": {
+              "docId": "quote-a",
+              "blockId": "p2-l3",
+              "start": 5,
+              "end": 11,
+              "text": "TK-110"
+            },
+            "itemEvidence": {
+              "docId": "quote-a",
+              "blockId": "p2-l3",
+              "start": 0,
+              "end": 60,
+              "text": "Item TK-110 Storage tank 5 m3 | qty 2 units | HDPE, vertical"
+            },
+            "method": "single_code_in_item_segment"
+          },
+          {
+            "factId": "quote-a:0d15be8dec5ecf",
+            "docId": "quote-a",
+            "description": "Dosing tank 500 l | qty 3 units | HDPE, with bund",
+            "code": "TK-120",
+            "codeSpan": {
+              "docId": "quote-a",
+              "blockId": "p2-l4",
+              "start": 5,
+              "end": 11,
+              "text": "TK-120"
+            },
+            "itemEvidence": {
+              "docId": "quote-a",
+              "blockId": "p2-l4",
+              "start": 0,
+              "end": 61,
+              "text": "Item TK-120 Dosing tank 500 l | qty 3 units | HDPE, with bund"
+            },
+            "method": "single_code_in_item_segment"
+          },
+          {
+            "factId": "quote-a:0f7e7282018227",
+            "docId": "quote-a",
+            "description": "Pipe DN50 PN16 | qty 100 lengths | HDPE, 6 m lengths",
+            "code": "PN-130",
+            "codeSpan": {
+              "docId": "quote-a",
+              "blockId": "p2-l5",
+              "start": 5,
+              "end": 11,
+              "text": "PN-130"
+            },
+            "itemEvidence": {
+              "docId": "quote-a",
+              "blockId": "p2-l5",
+              "start": 0,
+              "end": 64,
+              "text": "Item PN-130 Pipe DN50 PN16 | qty 100 lengths | HDPE, 6 m lengths"
+            },
+            "method": "single_code_in_item_segment"
+          }
+        ],
+        "uncertain": [
+          {
+            "factId": "quote-a:0cff890cb5a660",
+            "docId": "quote-a",
+            "reason": "multiple_codes",
+            "candidates": [
+              "SN-403",
+              "SANS-1200"
+            ],
+            "description": "SN-403 Flow meter DN50 certified to SANS-1200"
+          }
+        ],
+        "counts": {
+          "codeFromModel": 12,
+          "recovered": 6,
+          "descriptionOnly": 0,
+          "uncertain": 1
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 8,
+    "requestsOk": 7,
+    "schemaValidRate": 0.875,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 117956,
+      "mean": 14745,
+      "max": 25017
+    },
+    "claimsReceived": 76,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 0,
+    "recall": 0.7752808988764045,
+    "validatedPrecision": 0.9078947368421053,
+    "missedFacts": 13,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 8,
+    "requestsReportingTokens": 7,
+    "promptTokens": 3890,
+    "completionTokens": 3314,
+    "tokenSource": "partial",
+    "neurons": {
+      "value": 782,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. PUBLISHED RATES, approximate: USD per million tokens ($0.293 input, $2.253 output) divided by $0.011 per 1,000 neurons. These are prices, not consumption. Dashboard-confirmed consumption exists only as one aggregate at checkpoint 1 (462.81 neurons against 462.76 estimated); no per-request figure has been confirmed."
+    }
+  },
+  "settings": {
+    "inferenceTimeoutMs": 25000,
+    "maxRepairAttempts": 1,
+    "note": "Worker configured timeout is 25000 ms",
+    "chunkLimits": {
+      "maxChars": 24000,
+      "maxBlocks": 400,
+      "overlap": 0
+    },
+    "chunking": {
+      "kind": "frozen-plan",
+      "file": "samples/scopecheck-realistic/chunk-plan.json"
+    },
+    "neuronBudget": {
+      "runCap": 5000,
+      "dailyCap": 8000,
+      "dailyBaseline": 2191.1798082,
+      "runCharged": 1006.8,
+      "dailyAfter": 3197.9,
+      "attempts": 8,
+      "overruns": 0,
+      "capReached": false,
+      "perAttempt": [
+        {
+          "n": 1,
+          "reserved": 390.1322876,
+          "charged": 146.1341464,
+          "basis": "measured",
+          "promptTokens": 866,
+          "completionTokens": 536,
+          "overrun": false
+        },
+        {
+          "n": 2,
+          "reserved": 364.7295344,
+          "charged": 124.99212000000001,
+          "basis": "measured",
+          "promptTokens": 452,
+          "completionTokens": 496,
+          "overrun": false
+        },
+        {
+          "n": 3,
+          "reserved": 364.81743320000004,
+          "charged": 132.58260840000003,
+          "basis": "measured",
+          "promptTokens": 465,
+          "completionTokens": 528,
+          "overrun": false
+        },
+        {
+          "n": 4,
+          "reserved": 364.5244372,
+          "charged": 126.34391880000001,
+          "basis": "measured",
+          "promptTokens": 452,
+          "completionTokens": 502,
+          "overrun": false
+        },
+        {
+          "n": 5,
+          "reserved": 364.93463160000005,
+          "charged": 131.1136112,
+          "basis": "measured",
+          "promptTokens": 461,
+          "completionTokens": 522,
+          "overrun": false
+        },
+        {
+          "n": 6,
+          "reserved": 364.5244372,
+          "charged": 125.29622160000001,
+          "basis": "measured",
+          "promptTokens": 447,
+          "completionTokens": 498,
+          "overrun": false
+        },
+        {
+          "n": 7,
+          "reserved": 364.465838,
+          "charged": 141.52690420000002,
+          "basis": "measured",
+          "promptTokens": 455,
+          "completionTokens": 569,
+          "overrun": false
+        },
+        {
+          "n": 8,
+          "reserved": 409.9388172,
+          "charged": 78.763597,
+          "basis": "measured",
+          "promptTokens": 1158,
+          "completionTokens": 199,
+          "overrun": false
+        }
+      ],
+      "note": "CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption"
+    }
+  }
+}

@@ -35,7 +35,7 @@ export type ChunkPlan = { docId: string; chunk: number; blocks: number; chars: n
 export type DocPlan = { docId: string; blocks: number; chars: number; chunks: ChunkPlan[] };
 export type Plan = { docs: DocPlan[]; requests: number; expectedNeurons: number; peakReservation: number; worstCaseNeurons: number; problems: string[]; warnings: string[]; limits: ChunkLimits; timeoutMs: number };
 
-export async function planRun(opts: { samples: string[]; docFilter?: string[]; schemaOverrides?: Record<string, string>; limits: ChunkLimits; chunker?: Chunker; timeoutMs: number; model: string; minChunks?: number; attemptBudget?: number; runNeuronCap?: number; dailyHeadroom?: number }): Promise<Plan> {
+export async function planRun(opts: { samples: string[]; docFilter?: string[]; schemaOverrides?: Record<string, string>; limits: ChunkLimits; chunker?: Chunker; /** chunks already done in an earlier result (resume): not planned, not counted */ skipChunks?: Record<string, number[]>; timeoutMs: number; model: string; minChunks?: number; attemptBudget?: number; runNeuronCap?: number; dailyHeadroom?: number }): Promise<Plan> {
   const docs: DocPlan[] = [];
   const chunker = opts.chunker ?? sizeChunker(opts.limits);
   const reservations: { expected: number; worst: number }[] = [];
@@ -50,6 +50,7 @@ export async function planRun(opts: { samples: string[]; docFilter?: string[]; s
       const plan: DocPlan = { docId: doc.id, blocks: blocks.length, chars: blocks.reduce((n, b) => n + b.text.length, 0), chunks: [] };
       if (unaccounted?.length) plan.chunks.push({ docId: doc.id, chunk: 0, blocks: unaccounted.length, chars: 0, estimatedValues: 0, labelledValues: null, expectedOutputTokens: 0, expectedSeconds: 0, slowestSeconds: 0, expectedNeurons: 0, worstCaseNeurons: 0, problems: [`${unaccounted.length} block(s) are not accounted for by the chunk plan: ${unaccounted.slice(0, 5).join(',')}`], warnings: [] });
       chunks.forEach((chunk, i) => {
+        if (opts.skipChunks?.[doc.id]?.includes(i + 1)) return;
         const texts = new Set(chunk.map((b) => b.text));
         const labelledValues = doc.facts.filter((f) => texts.has(doc.lines[f.line]!)).length; // DIAGNOSTIC ONLY
         const estimatedValues = info?.[i]?.expectedValues ?? chunk.reduce((n, b) => n + estimate(b.text), 0);

@@ -349,3 +349,28 @@ describe('an overrun in a multi-chunk run stops the remaining chunks', () => {
     expect(r.samples[0]!.docs[0]!.processingComplete).toBe(false);
   });
 });
+
+describe('resuming a document after a failed chunk', () => {
+  it('reuses the chunks that succeeded, sends only the failed one, and the document becomes complete', async () => {
+    const SAMPLE = 'scopecheck-realistic';
+    const params = { maxChars: 24_000, maxBlocks: 400, maxValues: DEFAULT_MAX_VALUES, overlap: 0, headingContext: true };
+    const go = async (defects: Parameters<typeof oracleAi>[1], resume?: Parameters<typeof runBenchmark>[0]['resume']) => {
+      const counter = new SqliteAdmission(':memory:');
+      const transport = new LocalTransport({ ai: oracleAi([loadSample(SAMPLE)], defects), counter, env: { DAILY_ADMISSION_CEILING: '1000', MAX_REPAIR_ATTEMPTS: '0', INFERENCE_TIMEOUT_MS: '5000' } });
+      const r = await runBenchmark({ mode: 'mock', model: 'mock-oracle', label: 't', transport, sampleIds: [SAMPLE], docFilter: ['rfq'], limits: params, chunker: outputChunker(params), attemptBudget: 1000, resume });
+      counter.close();
+      return r;
+    };
+    const first = await go({ failChunkWhen: (b) => b.some((x) => x.id === 'rfq-p1-l30' || x.id.endsWith('p2-l3')) });
+    const failed = first.requests.filter((q) => !q.ok).map((q) => q.chunk);
+    expect(failed.length).toBe(1);
+    expect(first.samples[0]!.docs[0]!.processingComplete).toBe(false);
+    const okChunks = first.requests.filter((q) => q.ok).map((q) => q.chunk);
+    const second = await go(undefined, { rfq: { okChunks, claims: first.samples[0]!.docs[0]!.claimsReturned } });
+    expect(second.requests.filter((q) => !q.reused)).toHaveLength(1); // only the failed chunk was sent
+    expect(second.requests.filter((q) => q.reused)).toHaveLength(5);
+    expect(second.samples[0]!.docs[0]!.processingComplete).toBe(true);
+    const whole = await go(undefined);
+    expect(second.samples[0]!.docs[0]!.claimsReturned).toHaveLength(whole.samples[0]!.docs[0]!.claimsReturned.length);
+  });
+});

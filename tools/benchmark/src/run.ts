@@ -28,6 +28,8 @@ export type RequestRecord = {
   blocks: number;
   chars: number;
   ok: boolean;
+  /** taken from an earlier result by --resume-from: no call was made now */
+  reused?: boolean;
   status?: number;
   code?: string;
   ms: number;
@@ -133,6 +135,11 @@ export type RunOptions = {
   limits: { maxChars: number; maxBlocks: number; overlap?: number };
   /** How a document is split into requests. Default: size-only chunking by `limits`. */
   chunker?: Chunker;
+  /**
+   * Resume a document from an earlier live result: chunks that succeeded there are reused (their claims are taken from the
+   * saved result by the chunk's own block ids, no call is made), and only the other chunks are sent. Requires the same chunk plan.
+   */
+  resume?: Record<string, { okChunks: number[]; claims: unknown[] }>;
   attemptBudget: number;
   /** Called before each chunk is sent; returns a reason to NOT send it (for example, the neuron budget cannot cover one more attempt). */
   gate?: (schemaId: string, chunk: Block[]) => string | null;
@@ -148,7 +155,7 @@ export type RunOptions = {
 
 const digits = (t: string) => t.replace(/[\s,]/g, '');
 /** Independent, deliberately crude check that a validated value is visible in its own evidence. */
-function auditFact(f: Fact): FactRecord['audit'] {
+export function auditFact(f: Fact): FactRecord['audit'] {
   if (f.status !== 'validated') return null;
   const ev = f.evidence.map((e) => e.text).join(' ');
   const v = f.value as Record<string, unknown> | string | null;
@@ -156,7 +163,10 @@ function auditFact(f: Fact): FactRecord['audit'] {
   if (f.kind === 'quantity' && v && typeof v === 'object') return digits(ev).includes(String(v.value ?? '')) ? 'consistent' : 'suspect';
   if ((f.kind === 'text' || f.kind === 'name') && typeof v === 'string') {
     const hay = ev.toLowerCase();
-    return v.toLowerCase().split(/\s+/).filter(Boolean).every((t) => hay.includes(t.replace(/[^\w-]/g, ''))) ? 'consistent' : 'suspect';
+    // The value as written is visible in the evidence, or every word is (only punctuation at a word's ends is
+    // ignored: stripping inside a word turned "7.5" into "75" and "l/h" into "lh", a false alarm on 2026-11-01).
+    if (hay.includes(v.toLowerCase().trim())) return 'consistent';
+    return v.toLowerCase().split(/\s+/).filter(Boolean).every((t) => hay.includes(t.replace(/^[^\w]+|[^\w]+$/g, ''))) ? 'consistent' : 'suspect';
   }
   return 'manual';
 }
@@ -184,13 +194,23 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
       const recorded = opts.recordedProfiles?.[doc.id];
       const profile: ProfileRecord = opts.mode === 'replay' ? (recorded ? { id: recorded, source: 'recorded' } : { id: doc.schemaId, source: 'inferred_from_manifest' }) : { id: schemaId, source: 'recorded' };
       blocksByDoc.set(doc.id, blocks);
-      const { chunks, oversized, unaccounted } = (opts.chunker ?? sizeChunker(opts.limits))(doc.id, blocks, schemaId);
+      const { chunks, oversized, unaccounted, info } = (opts.chunker ?? sizeChunker(opts.limits))(doc.id, blocks, schemaId);
       if (unaccounted?.length) throw new Error(`${doc.id}: chunker left blocks unaccounted for: ${unaccounted.join(',')}`);
       const records: ChunkRecord[] = [];
       const claims: unknown[] = [];
       const dropped: Record<string, number> = {};
       for (const [i, chunk] of chunks.entries()) {
         const blockIds = chunk.map((b) => b.id);
+        const prior = opts.resume?.[doc.id];
+        if (prior?.okChunks.includes(i + 1)) {
+          if (!info) throw new Error('resume needs a chunker that reports its own block ids');
+          const own = new Set(info[i]!.blockIds);
+          const reused = prior.claims.filter((c) => own.has((c as { blockId?: string }).blockId ?? ''));
+          records.push({ id: `${doc.id}#${i + 1}`, blockIds, status: 'ok' });
+          claims.push(...reused);
+          requests.push({ docId: doc.id, chunk: i + 1, blocks: chunk.length, chars: 0, ok: true, ms: 0, attemptsCharged: 0, repaired: false, claims: reused.length, dropped: 0, reused: true });
+          continue;
+        }
         if (charged >= opts.attemptBudget) {
           // Not sent: the budget is a hard stop. The chunk is recorded as not processed.
           records.push({ id: `${doc.id}#${i + 1}`, blockIds, status: 'failed' });
@@ -304,8 +324,8 @@ export async function runBenchmark(opts: RunOptions): Promise<BenchmarkResult> {
 
   const docRes = samples.flatMap((s) => s.docs);
   const sum = (f: (d: DocResult) => number) => docRes.reduce((n, d) => n + f(d), 0);
-  const okReqs = requests.filter((r) => r.ok);
-  const sent = requests.filter((r) => r.code !== 'attempt_budget_exhausted' && r.code !== 'neuron_budget_exhausted');
+  const okReqs = requests.filter((r) => r.ok && !r.reused);
+  const sent = requests.filter((r) => r.code !== 'attempt_budget_exhausted' && r.code !== 'neuron_budget_exhausted' && !r.reused);
   const claims = sum((d) => d.rates.claims);
   const located = sum((d) => d.rates.evidenceLocated);
   const findings = samples.map((s) => s.findings.score);

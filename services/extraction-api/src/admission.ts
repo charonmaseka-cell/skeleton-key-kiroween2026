@@ -49,13 +49,16 @@ export function usedOn(sql: SqlLike, nowMs: number): number {
 //   charged   what counts against the day's budget: the reservation until settled; then the full estimate from the tokens the
 //             model reported (NOT clipped to the reservation), or the reservation again when usage is unknown
 //   state     'reserved' (call outstanding, or the Worker died before settling: it stands), 'measured', 'kept' (usage unknown)
-// Admission needs BOTH: attempts below the attempt ceiling, and (sum of charged today) + this reservation <= the neuron budget.
+// Admission needs ALL of: attempts below the attempt ceiling; (sum of charged today) + this reservation <= the neuron budget; and
+// NO recorded overrun today. An overrun means the cost bound (cost.ts A1 to A4) was wrong for a real call, so the day's total can
+// no longer be trusted: the day is locked against every further admission, repairs included, even when nominal budget remains.
+// The lock is per UTC day and ends at 00:00 UTC with the day's rows.
 // Rows hold no document text, no client data: day, three numbers, a state.
 
 export type ReserveRequest = { ceiling: number; budget: number; neurons: number };
 export type ReserveResult =
   | { ok: true; id: number; used: number; charged: number }
-  | { ok: false; reason: 'attempts' | 'neurons'; used: number; charged: number };
+  | { ok: false; reason: 'attempts' | 'neurons' | 'overrun'; used: number; charged: number };
 export type SettleResult = { settled: boolean; charged: number; reserved: number; overrun: boolean };
 export type BudgetDay = { attempts: number; charged: number; unsettled: number; overruns: number };
 
@@ -67,12 +70,16 @@ export function initLedger(sql: SqlLike): void {
   sql.exec('CREATE INDEX IF NOT EXISTS reservations_day ON reservations (day)');
 }
 
+const overrunsOn = (sql: SqlLike, day: string): number =>
+  Number((sql.exec('SELECT COALESCE(SUM(overrun), 0) AS o FROM reservations WHERE day = ?', day).toArray()[0] as { o: number } | undefined)?.o ?? 0);
+
 const chargedOn = (sql: SqlLike, day: string): number =>
   Number((sql.exec('SELECT COALESCE(SUM(charged), 0) AS c FROM reservations WHERE day = ?', day).toArray()[0] as { c: number } | undefined)?.c ?? 0);
 
 /**
  * Reserve one attempt. Must run inside a synchronous transaction (the Durable Object runs one at a time, so concurrent callers
- * cannot both take the same headroom). Never writes when refused.
+ * cannot both take the same headroom). Never writes when refused. Refused with 'overrun' for the rest of the UTC day once any
+ * settlement today was an overrun (this covers a repair of the request that overran, and every other request).
  */
 export function reserve(sql: SqlLike, req: ReserveRequest, nowMs: number): ReserveResult {
   const { ceiling, budget, neurons } = req;
@@ -81,6 +88,7 @@ export function reserve(sql: SqlLike, req: ReserveRequest, nowMs: number): Reser
   const used = (sql.exec('SELECT admitted FROM usage WHERE day = ?', day).toArray()[0] as { admitted: number } | undefined)?.admitted ?? 0;
   const charged = chargedOn(sql, day);
   if (used >= ceiling) return { ok: false, reason: 'attempts', used, charged };
+  if (overrunsOn(sql, day) > 0) return { ok: false, reason: 'overrun', used, charged }; // locked for the day, whatever headroom remains
   if (charged + neurons > budget) return { ok: false, reason: 'neurons', used, charged };
   sql.exec('INSERT INTO usage (day, admitted) VALUES (?, ?) ON CONFLICT(day) DO UPDATE SET admitted = excluded.admitted', day, used + 1);
   sql.exec("INSERT INTO reservations (day, reserved, charged, state) VALUES (?, ?, ?, 'reserved')", day, neurons, neurons);

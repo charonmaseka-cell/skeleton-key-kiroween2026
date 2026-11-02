@@ -105,13 +105,22 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
       const reservationId = admission.id;
       stats.attempts = attempt;
       // Settlement: the full estimate from reported tokens (an overrun is logged, never clipped), or null (the reservation stands).
-      const settleWith = async (charged: number | null) => {
-        try {
-          const r = await deps.counter.settle(reservationId, charged);
-          deps.log({ evt: 'settle', attempt, reserved: r.reserved, charged: r.charged, measured: charged !== null, overrun: r.overrun });
-        } catch {
-          deps.log({ evt: 'settle', attempt, reserved: neurons, charged: null, measured: false, overrun: charged !== null && charged > neurons, error: 'ledger_unavailable' }); // reservation stands
+      // Returns false when the ledger could not record it (after one retry; settle is once-only, so a retry cannot double-charge).
+      // The caller then STOPS the request: no repair, no further attempt, no claims returned. A known overrun that could not be
+      // recorded must not leave the smaller reservation standing while the request carries on; it is logged with the estimate.
+      const settleWith = async (charged: number | null): Promise<boolean> => {
+        for (let tries = 1; tries <= 2; tries++) {
+          try {
+            const r = await deps.counter.settle(reservationId, charged);
+            if (!r.settled && r.reserved <= 0) continue; // the ledger has no such reservation: not recorded
+            deps.log({ evt: 'settle', attempt, reserved: r.reserved, charged: r.charged, measured: charged !== null, overrun: r.overrun });
+            return true;
+          } catch {
+            /* retry once */
+          }
         }
+        deps.log({ evt: 'settle', attempt, reserved: neurons, charged: null, measured: false, overrun: charged !== null && charged > neurons, knownOverrun: charged !== null && charged > neurons, estimate: charged, error: 'ledger_unavailable' });
+        return false;
       };
 
       let raw: unknown;
@@ -125,11 +134,11 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
           cfg.timeoutMs,
         );
       } catch (err) {
-        await settleWith(null); // consumption unknown: the reservation stands (and is not refunded)
-        return fail(classifyUpstream(err));
+        const recorded = await settleWith(null); // consumption unknown: the reservation stands (and is not refunded)
+        return recorded ? fail(classifyUpstream(err)) : fail('limiter_unavailable');
       }
       const u = (raw as { usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } } | null)?.usage;
-      await settleWith(settlementCharge(profile.model, u));
+      if (!(await settleWith(settlementCharge(profile.model, u)))) return fail('limiter_unavailable'); // ledger not updated: stop before any repair
 
       const payload = (raw as { response?: unknown } | null)?.response ?? raw;
       const out = parseModelOutput(profile, blockIds, payload);

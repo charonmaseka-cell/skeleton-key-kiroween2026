@@ -201,10 +201,12 @@ describe('runner gap 2: neuron reservations against the run cap (2,000) and the 
   });
 
   it('reservations are the guaranteed (1 byte per token) worst case of the exact payloads, and the worst 4-attempt path fits 2,000', () => {
-    expect(Math.round(payloads.T1.reserve.first * 10) / 10).toBe(384.6);
+    // Published neuron rates (26,668 / 204,805 per million). The run of 2 Nov 2026 used the earlier rates (384.6, 387.8, 512.9,
+    // 516.0 here); its record keeps those figures.
+    expect(Math.round(payloads.T1.reserve.first * 10) / 10).toBe(384.7);
     expect(Math.round(payloads.T1.reserve.repair * 10) / 10).toBe(387.8);
-    expect(Math.round(payloads.T2.reserve.first * 10) / 10).toBe(512.9);
-    expect(Math.round(payloads.T2.reserve.repair * 10) / 10).toBe(516);
+    expect(Math.round(payloads.T2.reserve.first * 10) / 10).toBe(513.1);
+    expect(Math.round(payloads.T2.reserve.repair * 10) / 10).toBe(516.2);
     const worst = payloads.T1.reserve.first + payloads.T2.reserve.first + payloads.T2.reserve.repair + payloads.T3.reserve.first;
     expect(worst).toBeLessThan(2000);
     expect(worst).toBeGreaterThan(1893);
@@ -213,7 +215,7 @@ describe('runner gap 2: neuron reservations against the run cap (2,000) and the 
   it('measured attempts are charged from reported tokens; unused repair reservations are released', async () => {
     const r = await run(fakeWorker([]));
     expect(r.budget.attempts.map((a) => [a.step, a.basis])).toEqual([['T1', 'measured'], ['T2', 'measured'], ['T3', 'measured'], ['T4', 'measured']]);
-    const one = Math.ceil(((600 * 26_636 + 400 * 204_818) / 1e6) * 1.1 * 1000) / 1000;
+    const one = Math.ceil(((600 * 26_668 + 400 * 204_805) / 1e6) * 1.1 * 1000) / 1000;
     expect(r.budget.runCharged).toBeCloseTo(4 * one, 2);
   });
 
@@ -229,7 +231,7 @@ describe('runner gap 2: neuron reservations against the run cap (2,000) and the 
     const a = r.budget.attempts[0]!;
     expect(a.overrun).toBe(true);
     expect(a.charged).toBeGreaterThan(a.reserved);
-    expect(a.charged).toBeCloseTo(((3000 * 26_636 + 2500 * 204_818) / 1e6) * 1.1, 1);
+    expect(a.charged).toBeCloseTo(((3000 * 26_668 + 2500 * 204_805) / 1e6) * 1.1, 1);
     expect(r.budget.overruns).toBeGreaterThanOrEqual(1);
   });
 

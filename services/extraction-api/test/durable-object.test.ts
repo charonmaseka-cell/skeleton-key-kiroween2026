@@ -276,6 +276,23 @@ describe('neuron budget in the real Durable Object', () => {
     }
   }, 60_000);
 
+  it('a recorded overrun locks the day in the real Durable Object: its repair and every later request are refused, budget left', async () => {
+    const mf = start(freshPersist(), 1000, { DAILY_NEURON_BUDGET: '10000' });
+    const t = { 'x-test-now': String(DAY1) };
+    try {
+      expect((await call(mf, { ...t, 'x-mock': 'overrun_bad' })).code).toBe('daily_limit'); // first attempt overruns: its repair is refused
+      expect(await modelCalls(mf)).toBe(1);
+      for (let i = 0; i < 3; i++) expect((await call(mf, t)).code).toBe('daily_limit');
+      expect(await modelCalls(mf)).toBe(1);
+      const h = (await (await mf.dispatchFetch('http://worker.test/health', { headers: t })).json()) as { checks: { durableObject: { budgetToday: { charged: number; attempts: number; overruns: number } } } };
+      expect(h.checks.durableObject.budgetToday).toMatchObject({ attempts: 1, overruns: 1 });
+      expect(h.checks.durableObject.budgetToday.charged).toBeLessThan(10_000); // nominal headroom remains; the lock is what refuses
+      expect((await call(mf, { 'x-test-now': String(DAY1 + 86_400_000) })).code).toBe('ok'); // next UTC day: open again
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+
   it('measured settlements free headroom: many small successful calls fit where reservations alone would not', async () => {
     const mf = start(freshPersist(), 1000, { DAILY_NEURON_BUDGET: '1000' });
     const t = { 'x-test-now': String(DAY1) }; // mock reports 10 / 5 tokens

@@ -56,7 +56,37 @@ describe('ledger', () => {
     if (!a.ok) throw new Error('setup');
     expect(settle(s, a.id, 950)).toEqual({ settled: true, charged: 950, reserved: 300, overrun: true });
     expect(budgetOn(s, DAY)).toMatchObject({ charged: 950, overruns: 1 });
-    expect(reserve(s, { ceiling: 10, budget: 1000, neurons: 60 }, DAY)).toMatchObject({ ok: false, reason: 'neurons', charged: 950 });
+    expect(reserve(s, { ceiling: 10, budget: 1000, neurons: 60 }, DAY)).toMatchObject({ ok: false, reason: 'overrun', charged: 950 });
+  });
+
+  it('a recorded overrun locks the UTC day even when nominal budget remains; refusals write nothing; the next day is open', () => {
+    const s = db();
+    const a = reserve(s, { ceiling: 10, budget: 5000, neurons: 300 }, DAY);
+    if (!a.ok) throw new Error('setup');
+    expect(settle(s, a.id, 301)).toMatchObject({ overrun: true, charged: 301 }); // just over: 4,699 nominal headroom left
+    const before = budgetOn(s, DAY);
+    for (const n of [0.001, 1, 300]) expect(reserve(s, { ceiling: 10, budget: 5000, neurons: n }, DAY)).toEqual({ ok: false, reason: 'overrun', used: 1, charged: 301 });
+    expect(budgetOn(s, DAY)).toEqual(before);
+    expect(before).toEqual({ attempts: 1, charged: 301, unsettled: 0, overruns: 1 });
+    // A charge exactly at the reservation is not an overrun and does not lock.
+    const t = db();
+    const b = reserve(t, { ceiling: 10, budget: 5000, neurons: 300 }, DAY);
+    if (!b.ok) throw new Error('setup');
+    expect(settle(t, b.id, 300)).toMatchObject({ overrun: false });
+    expect(reserve(t, { ceiling: 10, budget: 5000, neurons: 300 }, DAY)).toMatchObject({ ok: true });
+    // The lock is per UTC day: the next day starts open.
+    expect(reserve(s, { ceiling: 10, budget: 5000, neurons: 300 }, DAY + 86_400_000)).toMatchObject({ ok: true, used: 1, charged: 300 });
+  });
+
+  it('a call outstanding when another overruns cannot add a further admission after it settles', () => {
+    const s = db();
+    const a = reserve(s, { ceiling: 10, budget: 5000, neurons: 300 }, DAY);
+    const b = reserve(s, { ceiling: 10, budget: 5000, neurons: 300 }, DAY);
+    if (!a.ok || !b.ok) throw new Error('setup');
+    settle(s, a.id, 400); // overrun
+    expect(settle(s, b.id, 100)).toMatchObject({ settled: true, overrun: false }); // still settled in full, not lost
+    expect(reserve(s, { ceiling: 10, budget: 5000, neurons: 1 }, DAY)).toMatchObject({ ok: false, reason: 'overrun' });
+    expect(budgetOn(s, DAY)).toEqual({ attempts: 2, charged: 500, unsettled: 0, overruns: 1 });
   });
 
   it('an overrun can take the day past the budget; it is recorded, and nothing more is admitted', () => {
@@ -65,7 +95,7 @@ describe('ledger', () => {
     if (!a.ok) throw new Error('setup');
     settle(s, a.id, 1300);
     expect(budgetOn(s, DAY).charged).toBe(1300);
-    expect(reserve(s, { ceiling: 10, budget: 1000, neurons: 0.001 }, DAY)).toMatchObject({ ok: false, reason: 'neurons' });
+    expect(reserve(s, { ceiling: 10, budget: 1000, neurons: 0.001 }, DAY)).toMatchObject({ ok: false, reason: 'overrun' });
   });
 
   it('a reservation never settled (the Worker died mid-call) stands for the day', () => {
@@ -255,17 +285,82 @@ describe('handler: reserve before every attempt, settle after', () => {
     }
   });
 
-  it('a settlement failure leaves the reservation standing and is logged', async () => {
+  // A counter whose settle fails (throws) or reports an unknown reservation, while reserve works.
+  function brokenSettle(replies: (() => Promise<unknown>)[], mode: 'throw' | 'unknown', e: EnvVars = env) {
     const s = db();
     const logs: Record<string, unknown>[] = [];
+    let calls = 0, settles = 0;
     const deps: Deps = {
       now: () => DAY,
-      counter: { reserve: async (r, n) => s.tx(() => reserve(s, r, n)), settle: async () => { throw new Error('down'); } },
-      ai: { run: async () => ({ response: GOOD, usage: { prompt_tokens: 1, completion_tokens: 1 } }) },
+      counter: {
+        reserve: async (r, n) => s.tx(() => reserve(s, r, n)),
+        settle: async () => { settles++; if (mode === 'throw') throw new Error('down'); return { settled: false, charged: 0, reserved: 0, overrun: false }; },
+      },
+      ai: { run: async () => { const f = replies[calls++]; if (!f) throw new Error('unexpected call'); return f(); } },
       log: (x) => logs.push(x),
     };
-    expect((await handle(req(), env, deps)).status).toBe(200);
-    expect(budgetOn(s, DAY)).toMatchObject({ charged: expectedReservation(false), unsettled: 1 });
-    expect(logs.find((l) => l.evt === 'settle')).toMatchObject({ error: 'ledger_unavailable' });
+    return { s, logs, calls: () => calls, settles: () => settles, run: () => handle(req(), e, deps) };
+  }
+
+  it('a settlement failure stops the request: 503 limiter_unavailable, no claims, the reservation stands, retried once, logged', async () => {
+    for (const mode of ['throw', 'unknown'] as const) {
+      const t = brokenSettle([async () => ({ response: GOOD, usage: { prompt_tokens: 1, completion_tokens: 1 } })], mode);
+      const r = await t.run();
+      expect(r.status).toBe(503);
+      const body = (await r.json()) as { error?: { code: string }; claims?: unknown };
+      expect(body.error?.code).toBe('limiter_unavailable');
+      expect(body.claims).toBeUndefined();
+      expect(t.settles()).toBe(2);
+      expect(budgetOn(t.s, DAY)).toMatchObject({ attempts: 1, charged: expectedReservation(false), unsettled: 1 });
+      expect(t.logs.find((l) => l.evt === 'settle')).toMatchObject({ error: 'ledger_unavailable', knownOverrun: false });
+    }
+  });
+
+  it('a settlement failure after an unusable answer stops BEFORE the repair: one model call, one attempt', async () => {
+    const t = brokenSettle([async () => ({ response: 'not json', usage: { prompt_tokens: 500, completion_tokens: 20 } }), async () => ({ response: GOOD, usage: { prompt_tokens: 1, completion_tokens: 1 } })], 'throw');
+    const r = await t.run();
+    expect(r.status).toBe(503);
+    expect(((await r.json()) as { error: { code: string } }).error.code).toBe('limiter_unavailable');
+    expect(t.calls()).toBe(1);
+    expect(budgetOn(t.s, DAY)).toMatchObject({ attempts: 1, unsettled: 1 });
+  });
+
+  it('a settlement failure after a model error or timeout also stops with limiter_unavailable (no repair, no retry of the call)', async () => {
+    const t = brokenSettle([async () => { throw new Error('capacity temporarily exceeded'); }], 'throw');
+    expect((await t.run()).status).toBe(503);
+    expect(t.calls()).toBe(1);
+    expect(t.logs.find((l) => l.evt === 'settle')).toMatchObject({ error: 'ledger_unavailable', measured: false });
+  });
+
+  it('a known overrun whose settlement fails is not silently kept at the smaller charge: the request stops and the log carries the estimate', async () => {
+    const t = brokenSettle([async () => ({ response: GOOD, usage: { prompt_tokens: 50_000, completion_tokens: 5000 } })], 'throw');
+    const r = await t.run();
+    expect(r.status).toBe(503);
+    const settleLog = t.logs.find((l) => l.evt === 'settle')!;
+    expect(settleLog).toMatchObject({ error: 'ledger_unavailable', knownOverrun: true, overrun: true, estimate: charge(BASELINE_MODEL, 50_000, 5000) });
+    expect(settleLog.estimate as number).toBeGreaterThan(expectedReservation(false));
+    expect(t.logs.find((l) => l.evt === 'extract')).toMatchObject({ status: 503, code: 'limiter_unavailable' });
+  });
+
+  it('an overrun on the first attempt blocks its own repair, even with budget left', async () => {
+    // Unusable first answer whose reported usage exceeds its reservation; 5,000 budget leaves plenty of headroom.
+    const t = setup([async () => ({ response: 'not json', usage: { prompt_tokens: 50_000, completion_tokens: 5000 } }), async () => ({ response: GOOD, usage: { prompt_tokens: 1, completion_tokens: 1 } })]);
+    const r = await t.run();
+    expect(r.status).toBe(429);
+    expect(((await r.json()) as { error: { code: string } }).error.code).toBe('daily_limit');
+    expect(t.calls()).toBe(1);
+    const b = budgetOn(t.s, DAY);
+    expect(b).toMatchObject({ attempts: 1, overruns: 1, charged: charge(BASELINE_MODEL, 50_000, 5000) });
+    expect(b.charged).toBeLessThan(5000);
+    expect(t.logs.find((l) => l.evt === 'admission')).toMatchObject({ refused: 'overrun' });
+  });
+
+  it('after an overrun, every later request that day is refused before the model, with budget left', async () => {
+    const t = setup([async () => ({ response: GOOD, usage: { prompt_tokens: 50_000, completion_tokens: 5000 } })]);
+    expect((await t.run()).status).toBe(200); // the overrunning answer itself is valid and returned; its charge is recorded in full
+    const second = await t.run();
+    expect(second.status).toBe(429);
+    expect(t.calls()).toBe(1);
+    expect(budgetOn(t.s, DAY)).toMatchObject({ attempts: 1, overruns: 1 });
   });
 });

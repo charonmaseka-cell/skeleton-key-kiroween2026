@@ -1,86 +1,110 @@
 # Task 5.5 (offline): proposed limits and a gated binding test plan
 
-Status: **PROPOSAL, 2 November 2026. Nothing here is applied.** Production stays at release `0c5d339`, `DAILY_ADMISSION_CEILING=0`. No inference was made to write this; every figure comes from the saved results cited. Task 5.5 and the inference-through-binding validation stay **open**.
+Status: **PROPOSAL, revision 2 (2 November 2026). Nothing here is applied.** Production stays at release `0c5d339` (Worker version `665dbf8d`), `DAILY_ADMISSION_CEILING=0`. No inference was made to write this. Task 5.5 and the inference-through-binding validation stay **open**.
 
-## 1. What the evidence supports
+Revision 2 corrects revision 1: the production ceiling is no longer derived from an average; reservations are computed for the exact test payloads (363.6 was one request's figure, not a maximum); T4 is corrected; the staging gate is explicit and required; the secret is generated in the sandbox; the dashboard history is corrected.
 
-| Quantity | Value | Source | Kind |
-|---|---|---|---|
-| Realistic set | 3 documents, 21 chunks (6 + 8 + 7) | `samples/scopecheck-realistic/chunk-plan.json` | fixed plan |
-| Largest chunk | 3,471 chars, 48 blocks (incl. context) | same | measured input |
-| Whole document | 5,463 to 6,934 chars, 68 to 93 blocks | same | measured input |
-| Attempts for the set | 22 (21 chunks + 1 timeout retry), 0 repairs | `results/sc-t4-scopecheck-baseline.md` | measured |
-| Tokens for the set | 14,235 prompt, 11,047 completion (about 647 in / 502 out per attempt) | same | measured (model-reported) |
-| Neurons for the set | about 2,906 estimated, about 132 per attempt | same | **estimate** (published rates x 1.1), not dashboard-confirmed |
-| Fresh set | 12 answered calls, provider-reported 1,256.6 neurons (about 105 per call) | `results/sc-t12-fresh-results.md` | provider figure, not dashboard-confirmed |
-| Latency per attempt | typically 11 to 20 s, one 25 s timeout (cap is 25 s) | baseline | measured, n = 22 |
-| Request time for 3 documents | 297 to 322 s sequential | baseline | one run |
-| Worst-case reservation per attempt | 363.6 neurons | `tools/benchmark/src/budget.ts` | calculated bound |
+Sources: `docs/results/task-5-5-reservations.json` (written by `tools/benchmark/src/reservations.ts`: exact request bodies and Worker messages for all 48 chunks of every sample and frozen plan, built from the PDFs; no model call), `results/sc-t4-scopecheck-baseline.md`, `results/sc-t12-fresh-results.md`, `build-log.md`. Gate implementation: PR #12.
 
-Gaps that block a public ceiling: neuron consumption has never been read from the Cloudflare dashboard (only estimated); the binding path in the deployed Worker has never been exercised (the benchmark ran through the same handler logic but not the deployed binding and Durable Object); latency in the deployed Worker is unmeasured; n is one run per document.
+## 1. Measured offline (exact payloads)
 
-## 2. Proposed limits (to apply only after section 4 passes)
+How a reservation is computed (`tools/benchmark/src/budget.ts`): input tokens bound = ceil(UTF-8 bytes of the messages / bytes-per-token) + 64; output = the profile's whole `max_tokens`; charged at published rates (26,636 / 204,818 neurons per million input / output tokens) x 1.1. **Guaranteed** bound: 1 byte per token (a token covers at least one byte). **Calibrated** bound: 2 bytes per token (observed 4.45 to 5.40 bytes per token over 14 live requests; not a guarantee). The output allowance alone is 1,500 x 204,818 / 10^6 x 1.1 = **338.0** neurons for ScopeCheck profiles (270.4 for PackCheck, cap 1,200), so every reservation is dominated by it.
 
-Rule: choose limits from what was measured, with stated headroom, never from the code defaults.
+| Quantity (all 48 chunks) | Maximum | Where |
+|---|---|---|
+| Request body | 4,753 bytes | `scopecheck-realistic/rfq#6` |
+| Characters as the Worker counts them (text + cells) | 3,471 | same |
+| Blocks | 48 | same |
+| Messages sent to the model (initial / with repair) | 5,907 / 6,014 bytes | same |
+| Longest block (text only / text + cells) | 118 / 142 characters | `scopecheck-fresh/quote-b#3` / `scopecheck-fresh/quote-a#4` |
+| Per-attempt reservation, guaranteed / calibrated (repair) | 516.0 / 427.9 | same as the largest body |
+
+## 2. Production ceiling: replaced
+
+Revision 1 divided 5,000 neurons by the average measured attempt (about 132, estimated) and proposed 36 attempts. That is withdrawn: an average says nothing about what a request the limits allow can cost, and one full three-document session per day was never more than an estimate.
+
+**The bound that matters is the largest attempt the limits permit**, for any profile and any body they accept. User message bytes are at most its fixed prefix plus the body bytes (the Worker re-serialises parsed blocks, which is never longer than the JSON it was parsed from), plus the system prompt with the cells rule and the repair message:
+
+| `MAX_BODY_BYTES` | Worst profile | Guaranteed (1 B/token) | Calibrated (2 B/token) | Attempts in 5,000, guaranteed | calibrated |
+|---|---|---|---|---|---|
+| **8,192 (proposed)** | `scopecheck.quote.v1` | **630.5** | 485.2 | **7** | 10 |
+| 12,288 | same | 750.5 | 545.2 | 6 | 9 |
+| 32,768 (revision 1) | same | 1,350.6 | 845.2 | 3 | 5 |
+| 65,536 (current default) | same | 2,310.7 | 1,325.3 | 2 | 3 |
+
+So a strictly safe **attempt** ceiling (option B) is **7 attempts per day** at the proposed limits. A three-document realistic session took 22 attempts, so option B serves about a third of one session a day.
+
+**Recommendation: option A, server-enforced neuron reservations and settlement**, with an attempt ceiling kept as a backstop. In the Durable Object, in one transaction per attempt:
+1. Reserve, before the model is called: `charge(messageBytes + 64, max_tokens)` computed in the Worker from the exact messages (guaranteed 1 B/token bound; at most 630.5 at the proposed limits). Admit only if `settled + outstanding + reservation <= 5,000` for the UTC day, and the attempt count is below the backstop.
+2. Settle after the call: if the model reports both token counts, the charge becomes `charge(promptTokens, completionTokens)`, rounded up, **even if larger than the reservation**. If usage is missing, or the call errors or times out, the reservation **stands** (consumption unknown). No refunds below the settled figure.
+3. A reservation that is never settled (the Worker died mid-call) stands for the day.
+This holds the day at or under 5,000 **estimated** neurons by construction, whatever the inputs. How many attempts that admits is not fixed: at the measured average settlement (about 132 per attempt) it would be about 37, which is roughly 1.7 realistic sessions, but that is an **estimate from one run, not a guarantee**; a day of large chunks admits fewer, and in-flight reservations (up to 630.5 each) temporarily reduce headroom. The interface must state the limit as "a small shared daily allowance", not as a number of sessions.
+
+Caveat that remains in both options: the charge uses published rates, not dashboard consumption. The only dashboard comparison so far (section 5) agreed, but it is one aggregate of 5 attempts. The 5,000 public share keeps half of the free allocation (10,000 neurons per day on the free plan, **to be confirmed in the dashboard**) as margin for that error and for owner testing. On the free plan exhausting the allocation fails closed (`quota_exhausted`); there is no overage charge.
+
+Proposed input limits (apply with option A; these also bound option B):
 
 | Setting | Current | Proposed | Basis |
 |---|---|---|---|
-| `DAILY_ADMISSION_CEILING` (attempts per UTC day, repairs included) | 0 | **36** | See the budget below. Applies to the whole service, not per user |
-| `MAX_CHARS` (per request) | 24000 | **6000** | Largest measured chunk is 3,471 chars; about 1.7x headroom. The client's output-aware chunker already caps chunks well below this |
-| `MAX_BLOCKS` | 400 | **80** | Largest chunk 48 blocks; about 1.7x |
-| `MAX_BLOCK_CHARS` | 4000 | **keep 4000 until the longest block in the realistic set is read from the fixtures** (not checked offline here); then set about 2x that | not measured in this plan |
-| `MAX_BODY_BYTES` | 65536 | **32768** | 6000 chars of JSON blocks with ids stays well under this; confirm with a test |
-| `MAX_REPAIR_ATTEMPTS` | 1 | 1 | 0 repairs in 22 baseline attempts, but the schema gate G3 needs the single repair |
-| `INFERENCE_TIMEOUT_MS` | 25000 | 25000 | 1 of 22 attempts timed out and succeeded on retry (13.6 s). Do not raise without measuring |
-| Profile `maxOutputTokens` | 1500 / 1200 | unchanged | the baseline averaged about 502 completion tokens; the cap is a safety bound |
+| `MAX_BODY_BYTES` | 65,536 | **8,192** | largest measured body 4,753 (1.72x). This is the limit that bounds cost |
+| `MAX_CHARS` | 24,000 | **6,000** | largest measured 3,471 (1.73x) |
+| `MAX_BLOCKS` | 400 | **80** | largest measured 48 (1.67x) |
+| `MAX_BLOCK_CHARS` | 4,000 | **1,000** | longest measured 142 with cells (7x). Generous because it does not affect cost (the body limit does) and unusually long lines should not be rejected |
+| `MAX_REPAIR_ATTEMPTS`, `INFERENCE_TIMEOUT_MS`, output caps | 1, 25,000, 1,500/1,200 | unchanged | 0 repairs and 1 timeout in 22 baseline attempts |
+| Neuron budget (option A) | none | **5,000 estimated per UTC day** | half the free allocation, see above |
+| Attempt backstop | `DAILY_ADMISSION_CEILING` = 0 | **40** (with option A) / **7** (option B alone) | backstop only under A |
 
-### Ceiling budget (current free plan, no paid upgrade)
-- Free daily allocation is **10,000 neurons per day** (Cloudflare's published Workers AI free tier; **confirm in the dashboard** before relying on it).
-- Proposed public share: **about 5,000 neurons per day**; the other half is reserved for owner testing and for the estimate error, because no dashboard figure exists yet.
-- At about 132 neurons per attempt (baseline average, estimated) a ceiling of 36 is about 4,750 neurons, and about 5,400 at 150 per attempt. One full three-document session is about 22 attempts, so **the ceiling allows roughly one full session per day**, or several shorter ones. That is a small free-tier service and the interface must say so (the upload panel already states live limits in numbers).
-- If every attempt hit the worst-case reservation (363.6) the ceiling would be 13,090 neurons, above the allocation. On the free plan the allocation then fails safe (the Worker maps the provider's neuron/quota error to `quota_exhausted`, see `src/inference.ts`), so there is no overage charge; the cost is lost availability, not money.
-- **Adjust rule:** after the section 4 test, if the dashboard figure for N attempts is within +/-25% of the estimate, keep 36. If dashboard consumption per attempt is higher by more than 25%, set the ceiling to `floor(5000 / measured neurons per attempt)`. If lower, leave 36 (do not raise on one measurement).
-- The ceiling counts attempts, not neurons, and is global (one Durable Object). It is not per-client; the optional `CLIENT_LIMITER` is eventually consistent and is not relied on.
+Option A needs its own PR (Durable Object ledger, settlement, tests including concurrency and a crash between reserve and settle). It is not part of PR #12 and nothing is opened before it passes and the binding test below has passed.
 
-## 3. Gate design: how to test without opening public admission
+## 3. Staging gate (PR #12, offline, tested)
 
-Problem: the Worker has no authentication. `ALLOWED_ORIGINS` is a browser CORS control and is **not** access control, so setting the production ceiling above 0 would let anyone who can send an `/extract` request (a script can send any Origin header) consume the allocation. So the production Worker must not be the test target with a non-zero ceiling.
+The production Worker has no authentication; `ALLOWED_ORIGINS` is CORS, not access control. The test therefore runs against a **throwaway** Worker, never the production one:
+- `wrangler.gate.toml`: script `skeleton-key-extraction-gate` (its own Durable Object counter), `ACCESS_GATE = "token"`, `ALLOWED_ORIGINS = "https://gate-test-client.invalid"` (an explicit dummy origin for the authenticated test client; `.invalid` is reserved and no page can hold it), the proposed input limits above, `DAILY_ADMISSION_CEILING = "4"`.
+- **The gate is explicit and required.** `ACCESS_GATE` must be `public` or `token`; anything else, including missing, closes the service (`not_configured`). In `token` mode a missing or short secret closes the service: authentication cannot disappear because the secret was not bound. A secret alone never selects a mode. Production `wrangler.toml` sets `ACCESS_GATE = "public"` (unchanged behaviour); production is not redeployed by this work.
+- The check runs before the origin check, the body, admission and the model; constant-time comparison of SHA-256 digests; the token is never logged or returned. `/health` shows the mode, whether it is valid and whether a credential is bound (never its value).
+- Secret: `tools/deploy/gate-secret.ts --create` generates 32 bytes from the OS CSPRNG (43 base64url characters) into the git-ignored `.benchmark-state/gate/secret` with mode 600, never printed; `--put` pipes it to `wrangler secret put` on stdin; `--destroy` removes it after the Worker is deleted. You do not need to supply one.
 
-**Recommended: a separate, throwaway test Worker** (`skeleton-key-extraction-gate`), same source and bindings (`AI`, its own Durable Object), with:
-- `DAILY_ADMISSION_CEILING=4`, `ALLOWED_ORIGINS` empty or a non-existent origin (no Pages site can call it);
-- a **secret** `TEST_GATE_TOKEN` checked before body parsing and before admission, constant-time compare, refusing with 404/401 otherwise;
-- deleted after the test (`wrangler delete`), so nothing persists and the production Worker, DO counter and ceiling are untouched.
+## 4. Test sequence (exact payloads and reservations)
 
-This needs one small code change (the optional gate check, active only when `TEST_GATE_TOKEN` is bound, so production behaviour is unchanged) plus unit tests for: missing/wrong token refused before admission and before any AI call; correct token reaches admission; the production configuration without the secret behaves exactly as today. That change is **not made in this plan**; it is its own reviewed PR with CI, and it does not redeploy production unless separately decided.
+Runner: `tools/deploy/gate-test.ts` (tested offline against the real handler and health check with a mocked model). Sequential; one request at a time.
 
-Alternative considered and rejected: temporarily raising the production ceiling to 1 with Pages origins removed. It leaves the real endpoint open to any script for the duration, and a mistake in the revert would leave admission open.
+| Step | Payload (built from the sample PDF and frozen plan) | Profile | Blocks | Chars | Body bytes | Message bytes | Reservation, guaranteed (repair) | calibrated (repair) |
+|---|---|---|---|---|---|---|---|---|
+| T1 tiny | `scopecheck/rfq` | `scopecheck.rfq.v1` | 4 | 232 | 375 | 1,529 | 384.6 (387.8) | 362.2 (363.8) |
+| T2 largest realistic chunk | `scopecheck-realistic/rfq#6` | `scopecheck.rfq.v1` | 48 | 3,471 | 4,753 | 5,907 | 512.9 (516.0) | 426.4 (427.9) |
+| T3 second document | `scopecheck-realistic/quote-a#8` | `scopecheck.quote.v1` | 34 | 2,575 | 3,495 | 4,786 | 480.1 (483.2) | 409.9 (411.5) |
+| T4 tiny (only if a slot is left) | `packcheck/registration` | `packcheck.grant.v1` | 2 | 91 | 185 | 1,547 | 317.6 (320.7) | 294.9 (296.5) |
 
-## 4. Minimal test plan (inference through the binding)
+**Attempt budget: exactly 4 inference attempts at most** (the staging Worker's ceiling; repairs count; refused requests consume none). The 5 ways 4 attempts can be spent: T1 T2 T3 T4 (no repair: 1,695.2 guaranteed); T1 T1r T2 T2r; T1 T1r T2 T3; T1 T2 T2r T3; T1 T2 T3 T3r. **Worst case: T1 T2 T2r T3 = 1,893.6 guaranteed / 1,626.4 calibrated.** Expected, from earlier measured runs of similar requests, a few hundred estimated neurons; not a promise.
 
-Preconditions: gate PR merged with green CI; owner approves the run and supplies the secret; confirmed baseline of the dashboard neuron counter (screenshot or figure) taken immediately before; production `/health` still shows admission closed at 0.
+Order and stop rules:
+1. **P0** at least 60 minutes before 00:00 UTC (the counter resets at midnight, which would re-open admission).
+2. **P1** `/health` of the gate Worker: ok, gate `token` valid with a credential bound, ceiling 4, counter 0, binding present (not called).
+3. **P2** zero-cost refusals: no token -> 401 `unauthorized`; random wrong token -> 401; right token from a non-allowed origin (the ScopeCheck Pages origin) -> 403 `origin_denied`; counter still 0.
+4. **T1, T2, T3** with the token and the dummy origin. After each: HTTP 200, token usage reported, counter = before + `meta.attempts`, latency under 25 s.
+5. **T4 only while the counter is below 4.** If a repair in T1 to T3 used the fourth slot, T4 is skipped. If no repair happened, the counter is 3 after T3 and T4 is the fourth (tiny) attempt, which is what exhausts the ceiling.
+6. **R** only if the counter is exactly 4, no stop fired, and it is still the same UTC day: one more request (the T4 payload) must get 429 `daily_limit` and the counter must still be 4. Under any other condition R is not sent, because a request below the ceiling would be admitted.
 
-Budget: **4 attempts total** (the test Worker's ceiling), worst-case reservation 4 x 363.6 = 1,454 neurons, expected about 400 to 550.
+**Stop immediately** (no further `/extract` request of any kind; only `/health` is read) on: any failed precheck; a non-200 from an inference step (including the case where a step's first attempt is the fourth and its repair is refused, which returns `daily_limit` after one inference); missing token usage; a counter that does not match the attempts reported; latency at or above the timeout.
 
-| Step | Request | Pass criteria | Stop if |
-|---|---|---|---|
-| T1 | One tiny known request: the `rfq` sample (357 chars, 8 blocks, `scopecheck.rfq.v1`) | HTTP 200; schema-valid claims; `meta.usage` present with token counts; latency under the 25 s timeout; counter reads 1 | any non-200, schema error, no usage, `quota_exhausted` |
-| T2 | One realistic chunk: the largest planned chunk (3,471 chars, 48 blocks) | same; latency recorded; claims have located evidence | timeout (record it, do not retry beyond the budget) |
-| T3 | One more realistic chunk from a second document | same; gives a second latency and usage point | as above |
-| T4 | One request when the ceiling is reached (the 4th admitted, then a 5th) | the 5th is refused `daily_limit` **without** calling the model; counter stays 4 | the 5th calls the model, or the counter exceeds 4 |
+After the run: record the result (`docs/results/task-5-5-binding-test.json` is written by the runner, without the token), take the dashboard reading (section 5), delete the gate Worker, destroy the secret file, and confirm production `/health` is unchanged (ceiling 0).
 
-(T1 to T3 use 3 attempts; the 4th attempt is held in reserve for one repair or one retry; the refused 5th request consumes nothing. If no repair/retry is needed the reserve is simply unused.)
+## 5. Dashboard readings
 
-Measurements to record: HTTP status, latency, `meta.usage` tokens, repairs, dropped claims; the Durable Object counter before and after each step; the **dashboard neuron delta for the whole test** (this is the first dashboard-confirmed figure, to compare with the 132 per attempt estimate). Do not read the dashboard mid-test and keep the sequence strictly sequential (one request at a time) so attempts map to consumption.
+Correction: revision 1 said consumption had never been read from the dashboard. It has, once: **checkpoint 1, 462.81 neurons dashboard-confirmed after 5 attempts, against 462.76 estimated** (`build-log.md`). Every later figure (about 869 after 11 attempts, the SC-T4 2,906, the SC-T12 batch) is an estimate from measured tokens, pending a dashboard reading.
 
-Output: `docs/results/task-5-5-binding-test.md` with the raw figures, the verdict against the pass criteria, and the section 2 adjust rule applied. Then delete the test Worker, confirm production `/health` unchanged, and only then decide the production limits in a separate PR.
+For this test, preserve a fresh pair: a **before** reading (value, model breakdown if shown, UTC date and time) taken immediately before P0, and an **after** reading taken at least 15 minutes after the last request and again at 60 minutes; if the figure is still moving at 60 minutes it is recorded as unsettled. The delta is compared with the settled estimate from the reported tokens. The dashboard figure is per account per UTC day, so no other inference may run that day (production is at 0; no benchmark run is planned).
 
-What this does **not** do: it does not validate public use, concurrency (the Durable Object serialises admission; a concurrency test is a separate decision), quality of extraction (already measured offline), or per-client abuse control.
+## 6. Blocker for live execution from the sandbox
 
-## 5. Decisions needed from the owner
-1. Approve the throwaway gated test Worker design (section 3) and the 4-attempt budget.
-2. Confirm the free daily allocation figure and the 5,000-neuron public share in the dashboard.
-3. Provide the gate secret out of band when the run is authorised; it is never committed.
-4. Acceptance that a free-tier public service supports about one full three-document session per day.
+This sandbox cannot reach `*.workers.dev`: the egress proxy refuses the CONNECT (403, re-checked 2 November). Deploying the gate Worker and binding the secret work from here (they use `api.cloudflare.com`), but P1 to R cannot. Options:
+- allow sandbox egress to `skeleton-key-extraction-gate.teddykgroup.workers.dev`, so the whole run (secret included) stays in the sandbox; or
+- run `gate-secret.ts --create/--put` and `gate-test.ts` on a machine that can reach the Worker, so the secret is generated where it is used. The sandbox-generated secret would not be copied out.
 
-## 6. What stays unchanged until then
-Production Worker `skeleton-key-extraction` version `665dbf8d`, ceiling 0, Pages apps in sample mode, Task 5.5 open, binding inference unvalidated, no inference calls made.
+## 7. Decisions needed before live execution
+1. Approve option A (or B with 7 attempts per day) and the proposed input limits.
+2. Approve the 4-attempt gated test, worst-case reservation 1,893.6 estimated neurons.
+3. Choose how to resolve section 6.
+4. Provide the before dashboard reading at the start of the run, and confirm the free daily allocation.
+
+Unchanged until then: production Worker `665dbf8d`, ceiling 0, Pages apps in sample mode, task 5.5 open, binding inference unvalidated, no inference calls made.

@@ -130,3 +130,26 @@ Worker `GET /health` (configuration, AI binding present but not called, Durable 
 
 ## Merges and partial deployment (2 Nov 2026)
 PRs #4 to #7 merged in order (`f8b34e7`, `532c792`, `b4a78f3`, `722b4fd`). Each branch was brought up to date with main by merging main into it, not by rebasing, so that the commits the accepted SC-T12 freeze and the SC-T15 run are pinned to (`18e0f36`, `03a8733`, `005072f`, `e35df62`) stay in history; CI passed on each PR's combined state and on main after each merge. Public builds now set `VITE_EXTRACTION_API_URL=""` explicitly (control: a custom API domain in `.env.production.local` is otherwise built in). From `main` `722b4fd`: **both Pages apps deployed** (Cloudflare reports production, deploy success); **the Worker was refused** (token lacks Workers Scripts: Edit and Account Settings: Read). The sites could not be opened from this environment (egress proxy refuses `*.pages.dev`), so no browser check was done. No inference; admission 0; no plan change. `docs/deployment.md`.
+
+## Task 5.5 gated binding test: passed (2 Nov 2026, 21:36:13 to 21:36:48 UTC)
+One foreground run of the gate runner from `staging-gate` at `22b447a` (PR #12, CI green on that exact commit; this results branch does not change it) against a throwaway Worker `skeleton-key-extraction-gate` (`ACCESS_GATE=token`, ceiling 4, secret generated and bound inside the sandbox). Model `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, concurrency 1, frozen payloads. Record: `docs/results/task-5-5-binding-test.json` (unchanged as written by the runner).
+
+**MEASURED**
+- 4 inference attempts of the 4 allowed, 0 repairs, counter 4. T1 to T4: 200 `ok`, 9.6 / 14.9 / 5.1 / 2.5 s (timeout 25 s), 9 / 12 / 4 / 1 claims, 0 dropped. Tokens 3,414 prompt and 1,126 completion in total.
+- All seven prechecks in the record passed (time guard, health, no token and wrong token 401, right token from a non-allowed origin 403, counter 0 before). The 5th request (R) was refused 429 `daily_limit` in 64 ms, counter still 4: the attempt ceiling holds.
+- No stop condition fired. No validated value was unsupported by its evidence. Holds, drops and misses would have been observations.
+
+**ESTIMATED neurons** (published 70B rates from the measured tokens; totals recomputed from the tokens, not by adding the rounded per-attempt figures in the file)
+- Token-cost estimate, **before** the 10% budget margin: **321.560** neurons. This is the figure to compare with the dashboard increase.
+- Budget charge, **with** the 1.1 margin: **353.716** (the file's `runCharged` 353.718 is the sum of per-attempt values rounded to 3 decimals). Run cap 2,000: not reached; no overrun.
+- Daily ledger: baseline 746.897 (SC-T15 record) + 353.716 = **1,100.613** of 8,000 (the file shows 1,100.615 for the same reason). A charge against a budget, not consumption.
+
+**Dashboard reconciliation: PENDING.** Before-reading (screenshot supplied by the owner): **266.79 of 10,000 neurons used today, at 23:32 SAST (21:32 UTC), 2 Nov 2026**; the "Last 24 hours" model figures (70B 1.26k, 8B 266.79) are a separate view and are not used for the comparison. The run began 4 minutes later. To close: take the "after" reading once the dashboard has caught up (it lags), subtract 266.79, and compare with 321.560 (not 353.716). Nothing else should have been run on the account in between; if it was, the comparison is void. Until then the estimate is unconfirmed.
+
+**Cleanup and state**
+- Staging Worker deleted (the Cloudflare API lists only `skeleton-key-extraction`; the staging URL returns 404). Local secret file destroyed (`absent`); it never appeared in the record or in output. Wrangler's delete printed a membership-permission warning, so the deletion was verified through the API.
+- Production untouched: Worker `665dbf8d`, release `0c5d339`, `DAILY_ADMISSION_CEILING=0`. `/health` after the run: 200, admission closed, 0 used today. No production deployment, no opening of public admission.
+
+**What this does not show**
+- Only the attempt ceiling and the client-side neuron budget were exercised. The server-side reservations and settlement (PR #13, proposed 5,000-neuron public budget) were not run live and stay offline and disabled.
+- The repair path was not observed (0 repairs). Four small payloads (largest request 4,753 bytes) from one sandbox, one model, one run; latency of the largest was 14.9 s against the 25 s timeout. This does not establish a public request ceiling, `MAX_CHARS`, `MAX_BLOCKS` or token caps. Task 5.5 stays open; admission stays 0.

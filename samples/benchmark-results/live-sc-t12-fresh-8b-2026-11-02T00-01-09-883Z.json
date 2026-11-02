@@ -1,0 +1,5204 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.1-8b-instruct",
+  "startedAt": "2026-11-02T00:01:09.883Z",
+  "label": "sc-t12-fresh-8b",
+  "attemptBudget": 16,
+  "attemptsCharged": 12,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "rfq",
+      "chunk": 1,
+      "blocks": 20,
+      "chars": 1262,
+      "ok": true,
+      "ms": 3847,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 9,
+      "dropped": 0,
+      "t0": 11,
+      "t1": 3859
+    },
+    {
+      "docId": "rfq",
+      "chunk": 2,
+      "blocks": 6,
+      "chars": 267,
+      "ok": true,
+      "ms": 4041,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0,
+      "t0": 3865,
+      "t1": 7906
+    },
+    {
+      "docId": "rfq",
+      "chunk": 3,
+      "blocks": 6,
+      "chars": 272,
+      "ok": true,
+      "ms": 2948,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 8,
+      "dropped": 0,
+      "t0": 7907,
+      "t1": 10855
+    },
+    {
+      "docId": "rfq",
+      "chunk": 4,
+      "blocks": 13,
+      "chars": 718,
+      "ok": true,
+      "ms": 1164,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 2,
+      "dropped": 0,
+      "t0": 10856,
+      "t1": 12020
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 1,
+      "blocks": 6,
+      "chars": 328,
+      "ok": true,
+      "ms": 2154,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 6,
+      "dropped": 0,
+      "t0": 12030,
+      "t1": 14184
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 2,
+      "blocks": 5,
+      "chars": 250,
+      "ok": true,
+      "ms": 5477,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 9,
+      "dropped": 3,
+      "t0": 14185,
+      "t1": 19662
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 3,
+      "blocks": 4,
+      "chars": 211,
+      "ok": true,
+      "ms": 5183,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 9,
+      "dropped": 3,
+      "t0": 19663,
+      "t1": 24846
+    },
+    {
+      "docId": "quote-a",
+      "chunk": 4,
+      "blocks": 12,
+      "chars": 570,
+      "ok": true,
+      "ms": 4053,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 7,
+      "dropped": 3,
+      "t0": 24847,
+      "t1": 28900
+    },
+    {
+      "docId": "quote-b",
+      "chunk": 1,
+      "blocks": 6,
+      "chars": 371,
+      "ok": true,
+      "ms": 10128,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 6,
+      "dropped": 3,
+      "t0": 28913,
+      "t1": 39041
+    },
+    {
+      "docId": "quote-b",
+      "chunk": 2,
+      "blocks": 4,
+      "chars": 289,
+      "ok": true,
+      "ms": 4818,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 6,
+      "dropped": 3,
+      "t0": 39042,
+      "t1": 43860
+    },
+    {
+      "docId": "quote-b",
+      "chunk": 3,
+      "blocks": 4,
+      "chars": 285,
+      "ok": true,
+      "ms": 5190,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 6,
+      "dropped": 3,
+      "t0": 43860,
+      "t1": 49051
+    },
+    {
+      "docId": "quote-b",
+      "chunk": 4,
+      "blocks": 11,
+      "chars": 542,
+      "ok": true,
+      "ms": 3426,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 5,
+      "dropped": 2,
+      "t0": 49052,
+      "t1": 52478
+    }
+  ],
+  "samples": [
+    {
+      "comparisonCompleteness": {
+        "labelledRequirementRows": 12,
+        "quotations": 2,
+        "aspects": 2,
+        "expected": 48,
+        "planned": 52,
+        "complete": false
+      },
+      "sampleId": "scopecheck-fresh",
+      "docs": [
+        {
+          "docId": "rfq",
+          "profile": {
+            "id": "scopecheck.rfq.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l18",
+              "excerpt": "LB-3101 Digital pH meter 6 each 0.01 pH resolution",
+              "value": "Digital pH meter"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l19",
+              "excerpt": "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered",
+              "value": "Turbidity meter"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l20",
+              "excerpt": "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C",
+              "value": "Magnetic stirrer"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l18",
+              "excerpt": "LB-3101 Digital pH meter 6 each 0.01 pH resolution",
+              "value": {
+                "value": "6",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l19",
+              "excerpt": "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered",
+              "value": {
+                "value": "4",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l20",
+              "excerpt": "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C",
+              "value": {
+                "value": "8",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l18",
+              "excerpt": "LB-3101 Digital pH meter 6 each 0.01 pH resolution",
+              "value": "0.01 pH resolution"
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l19",
+              "excerpt": "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered",
+              "value": "0-1000 NTU, battery powered"
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l20",
+              "excerpt": "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C",
+              "value": "hotplate, up to 300 C"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l21",
+              "excerpt": "Analytical balance with 2 each 220 g, 0.1 mg readability",
+              "value": "LB-3115 Analytical balance with 2 each 220 g, 0.1 mg readability"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l21",
+              "excerpt": "2 each 220 g, 0.1 mg readability",
+              "value": {
+                "value": "2",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l23",
+              "excerpt": "20 each 10 m range, vented cable",
+              "value": {
+                "value": "20",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l21",
+              "excerpt": "220 g, 0.1 mg readability",
+              "value": "220 g, 0.1 mg readability"
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l23",
+              "excerpt": "10 m range, vented cable",
+              "value": "10 m range, vented cable"
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l24",
+              "excerpt": "0.1-5 m/s, IP68",
+              "value": "0.1-5 m/s, IP68"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l22",
+              "excerpt": "draught shield",
+              "value": "draught shield"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l23",
+              "excerpt": "Water level logger",
+              "value": "FD-4201 Water level logger"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l24",
+              "excerpt": "Flow velocity probe",
+              "value": "FD-4202 Flow velocity probe"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l25",
+              "excerpt": "Rain gauge",
+              "value": "FD-4210 Rain gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l25",
+              "excerpt": "12 each tipping bucket, 0.2 mm",
+              "value": {
+                "value": "12",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l25",
+              "excerpt": "tipping bucket, 0.2 mm",
+              "value": "tipping bucket, 0.2 mm"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l26",
+              "excerpt": "Soil moisture sensor with 30 each capacitance type, 3 m cable",
+              "value": "FD-4215 Soil moisture sensor with 30 each capacitance type, 3 m cable"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l26",
+              "excerpt": "30 each",
+              "value": {
+                "value": "30",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l28",
+              "excerpt": "Sample bottle 500 ml 400 each HDPE, wide neck",
+              "value": "SP-5301 Sample bottle 500 ml 400 each HDPE, wide neck"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l28",
+              "excerpt": "400 each",
+              "value": {
+                "value": "400",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l29",
+              "excerpt": "Sample bottle 1 l 200 each amber glass",
+              "value": "SP-5302 Sample bottle 1 l 200 each amber glass"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l29",
+              "excerpt": "200 each",
+              "value": {
+                "value": "200",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l30",
+              "excerpt": "Cool box 45 l 10 each insulated, 48 hour hold",
+              "value": "SP-5310 Cool box 45 l 10 each insulated, 48 hour hold"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l30",
+              "excerpt": "10 each",
+              "value": {
+                "value": "10",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l31",
+              "excerpt": "CL-6401 Calibration standard set 15 sets pH 4, 7 and 10, 250 ml",
+              "value": "CL-6401 Calibration standard set"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l31",
+              "excerpt": "CL-6401 Calibration standard set 15 sets pH 4, 7 and 10, 250 ml",
+              "value": {
+                "value": "15",
+                "unit": "sets"
+              }
+            }
+          ],
+          "facts": [
+            {
+              "id": "rfq:0d7c6f4c016fe7",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Digital pH meter",
+              "evidence": [
+                {
+                  "blockId": "p1-l18",
+                  "start": 0,
+                  "end": 50,
+                  "text": "LB-3101 Digital pH meter 6 each 0.01 pH resolution"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:05c275dcaae379",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Turbidity meter",
+              "evidence": [
+                {
+                  "blockId": "p1-l19",
+                  "start": 0,
+                  "end": 58,
+                  "text": "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:148121b8202eaf",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Magnetic stirrer",
+              "evidence": [
+                {
+                  "blockId": "p1-l20",
+                  "start": 0,
+                  "end": 53,
+                  "text": "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:0d959ed864f4da",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l18",
+                  "start": 0,
+                  "end": 50,
+                  "text": "LB-3101 Digital pH meter 6 each 0.01 pH resolution"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:1a3f78bb1cd632",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l19",
+                  "start": 0,
+                  "end": 58,
+                  "text": "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:0beb324a18d74f",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l20",
+                  "start": 0,
+                  "end": 53,
+                  "text": "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:108e2077a2c228",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0.01 pH resolution",
+              "evidence": [
+                {
+                  "blockId": "p1-l18",
+                  "start": 0,
+                  "end": 50,
+                  "text": "LB-3101 Digital pH meter 6 each 0.01 pH resolution"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1f76c924539df5",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0-1000 NTU, battery powered",
+              "evidence": [
+                {
+                  "blockId": "p1-l19",
+                  "start": 0,
+                  "end": 58,
+                  "text": "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1e441dbf720e70",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "hotplate, up to 300 C",
+              "evidence": [
+                {
+                  "blockId": "p1-l20",
+                  "start": 0,
+                  "end": 53,
+                  "text": "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1db2bb9af215ff",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l21",
+                  "start": 8,
+                  "end": 64,
+                  "text": "Analytical balance with 2 each 220 g, 0.1 mg readability"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:0f0451f0820157",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l21",
+                  "start": 32,
+                  "end": 64,
+                  "text": "2 each 220 g, 0.1 mg readability"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:1d278bab9e9efe",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l23",
+                  "start": 27,
+                  "end": 59,
+                  "text": "20 each 10 m range, vented cable"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:1a1ee7aefb0996",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "220 g, 0.1 mg readability",
+              "evidence": [
+                {
+                  "blockId": "p1-l21",
+                  "start": 39,
+                  "end": 64,
+                  "text": "220 g, 0.1 mg readability"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:00d9738a06164c",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "10 m range, vented cable",
+              "evidence": [
+                {
+                  "blockId": "p1-l23",
+                  "start": 35,
+                  "end": 59,
+                  "text": "10 m range, vented cable"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:178173e53ef5dd",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0.1-5 m/s, IP68",
+              "evidence": [
+                {
+                  "blockId": "p1-l24",
+                  "start": 35,
+                  "end": 50,
+                  "text": "0.1-5 m/s, IP68"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:16fa944373bb88",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "draught shield",
+              "evidence": [
+                {
+                  "blockId": "p1-l22",
+                  "start": 0,
+                  "end": 14,
+                  "text": "draught shield"
+                }
+              ],
+              "label": "unlabelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:0c8193f9e31d7f",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l23",
+                  "start": 8,
+                  "end": 26,
+                  "text": "Water level logger"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:193c9f6926b98d",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l24",
+                  "start": 8,
+                  "end": 27,
+                  "text": "Flow velocity probe"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:1499a7eb38a3f2",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l25",
+                  "start": 8,
+                  "end": 18,
+                  "text": "Rain gauge"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:142076a6d7b76c",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l25",
+                  "start": 19,
+                  "end": 49,
+                  "text": "12 each tipping bucket, 0.2 mm"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:1683436766820b",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "tipping bucket, 0.2 mm",
+              "evidence": [
+                {
+                  "blockId": "p1-l25",
+                  "start": 27,
+                  "end": 49,
+                  "text": "tipping bucket, 0.2 mm"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1f55dbeb3a68a1",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l26",
+                  "start": 8,
+                  "end": 69,
+                  "text": "Soil moisture sensor with 30 each capacitance type, 3 m cable"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:1c852a135938b6",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "30",
+                "unit": "each"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l26",
+                  "start": 34,
+                  "end": 41,
+                  "text": "30 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:0525f97d0a2236",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l28",
+                  "start": 8,
+                  "end": 53,
+                  "text": "Sample bottle 500 ml 400 each HDPE, wide neck"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:0eaa926877e9d9",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "400",
+                "unit": "each"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l28",
+                  "start": 29,
+                  "end": 37,
+                  "text": "400 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1fc9a6f3288459",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l29",
+                  "start": 8,
+                  "end": 46,
+                  "text": "Sample bottle 1 l 200 each amber glass"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:00b0ada1f859e1",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "200",
+                "unit": "each"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l29",
+                  "start": 26,
+                  "end": 34,
+                  "text": "200 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1708ccd31da5a8",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l30",
+                  "start": 8,
+                  "end": 53,
+                  "text": "Cool box 45 l 10 each insulated, 48 hour hold"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "rfq:16b0bb739091d1",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "10",
+                "unit": "each"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l30",
+                  "start": 22,
+                  "end": 29,
+                  "text": "10 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:1f324d2067d689",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "CL-6401 Calibration standard set",
+              "evidence": [
+                {
+                  "blockId": "p1-l31",
+                  "start": 0,
+                  "end": 63,
+                  "text": "CL-6401 Calibration standard set 15 sets pH 4, 7 and 10, 250 ml"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "rfq:12bd9e9738befe",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l31",
+                  "start": 0,
+                  "end": 63,
+                  "text": "CL-6401 Calibration standard set 15 sets pH 4, 7 and 10, 250 ml"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            }
+          ],
+          "blocks": 42,
+          "chunks": 4,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "rfq",
+            "expected": 36,
+            "validatable": 36,
+            "outcomes": {
+              "correct": 12,
+              "correct_conservative": 0,
+              "held_for_review": 15,
+              "wrong_value": 3,
+              "wrongly_validated": 0,
+              "missed": 6
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 17,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 17,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 17,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 18,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 18,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 18,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 19,
+                "outcome": "wrong_value"
+              },
+              {
+                "field": "quantity",
+                "line": 19,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 19,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 20,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 20,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 20,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 22,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 22,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 22,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 23,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 23,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 23,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 24,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 24,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 24,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 25,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 25,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 25,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 27,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 27,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 27,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 28,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 28,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 28,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 29,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 29,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 29,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 30,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 30,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 30,
+                "outcome": "missed"
+              }
+            ],
+            "unlabelledValidated": 1,
+            "unlabelledFactIds": [
+              "rfq:16fa944373bb88"
+            ],
+            "rejectedByReason": {
+              "value_not_in_excerpt": 8
+            },
+            "ambiguousByReason": {
+              "ambiguous_candidates": 7
+            },
+            "recall": 0.3333333333333333,
+            "validatedPrecision": 0.75
+          },
+          "issues": [
+            {
+              "docId": "rfq",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "rfq:0d959ed864f4da"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "rfq:1a3f78bb1cd632"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "rfq:0beb324a18d74f"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:1db2bb9af215ff"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "rfq:0f0451f0820157"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "rfq:1d278bab9e9efe"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:0c8193f9e31d7f"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:193c9f6926b98d"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:1499a7eb38a3f2"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "rfq:142076a6d7b76c"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:1f55dbeb3a68a1"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:0525f97d0a2236"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:1fc9a6f3288459"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "rfq:1708ccd31da5a8"
+            },
+            {
+              "docId": "rfq",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "rfq:12bd9e9738befe"
+            }
+          ],
+          "rates": {
+            "claims": 31,
+            "evidenceLocated": 31,
+            "valueSupported": 16
+          }
+        },
+        {
+          "docId": "quote-a",
+          "profile": {
+            "id": "scopecheck.quote.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "LB-3101 Digital pH meter 6 each R 3 450 c/w 0.01 pH resolution",
+              "value": "LB-3101 Digital pH meter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l5",
+              "excerpt": "LB-3101 Digital pH meter 6 each R 3 450 c/w 0.01 pH resolution",
+              "value": {
+                "value": "6",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l5",
+              "excerpt": "LB-3101 Digital pH meter 6 each R 3 450 c/w 0.01 pH resolution",
+              "value": {
+                "amount": "3450",
+                "currency": "RND"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l6",
+              "excerpt": "LB-3102 Turbidity meter 4 each R 6 900 0-1000 NTU, battery powered",
+              "value": "LB-3102 Turbidity meter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l6",
+              "excerpt": "LB-3102 Turbidity meter 4 each R 6 900 0-1000 NTU, battery powered",
+              "value": {
+                "value": "4",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l6",
+              "excerpt": "LB-3102 Turbidity meter 4 each R 6 900 0-1000 NTU, battery powered",
+              "value": {
+                "amount": "6900",
+                "currency": "RND"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l7",
+              "excerpt": "LB-3110 Magnetic stirrer 6 each R 2 150 hotplate, up to 300 C",
+              "value": "LB-3110 Magnetic stirrer"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l7",
+              "excerpt": "LB-3110 Magnetic stirrer 6 each R 2 150 hotplate, up to 300 C",
+              "value": {
+                "value": "6",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l7",
+              "excerpt": "LB-3110 Magnetic stirrer 6 each R 2 150 hotplate, up to 300 C",
+              "value": "up to 300 C, hotplate"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l8",
+              "excerpt": "LB-3115 Analytical balance with 2 each R 24 800 220 g, 1 mg readability",
+              "value": "LB-3115 Analytical balance with"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l8",
+              "excerpt": "LB-3115 Analytical balance with 2 each R 24 800 220 g, 1 mg readability",
+              "value": {
+                "value": "2",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l8",
+              "excerpt": "LB-3115 Analytical balance with 2 each R 24 800 220 g, 1 mg readability",
+              "value": "220 g, 1 mg readability"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l10",
+              "excerpt": "FD-4201 Water level logger 20 each R 4 300 10 m range, vented cable",
+              "value": "FD-4201 Water level logger"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l10",
+              "excerpt": "FD-4201 Water level logger 20 each R 4 300 10 m range, vented cable",
+              "value": {
+                "value": "20",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l10",
+              "excerpt": "FD-4201 Water level logger 20 each R 4 300 10 m range, vented cable",
+              "value": "10 m range, vented cable"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l11",
+              "excerpt": "Flow velocity probe 5 each R 18 200 0.1-5 m/s, IP65",
+              "value": "FD-4202 Flow velocity probe"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l11",
+              "excerpt": "5 each R 18 200 0.1-5 m/s, IP65",
+              "value": {
+                "value": "5",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l11",
+              "excerpt": "5 each R 18 200 0.1-5 m/s, IP65",
+              "value": "0.1-5 m/s, IP65"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l12",
+              "excerpt": "Rain gauge 12 each R 1 950 tipping bucket, 0.2 mm",
+              "value": "FD-4210 Rain gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l12",
+              "excerpt": "12 each R 1 950 tipping bucket, 0.2 mm",
+              "value": {
+                "value": "12",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l12",
+              "excerpt": "12 each R 1 950 tipping bucket, 0.2 mm",
+              "value": "tipping bucket, 0.2 mm"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l13",
+              "excerpt": "Sample bottle 500 ml 400 each R 18 HDPE, wide neck",
+              "value": "SP-5301 Sample bottle"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l13",
+              "excerpt": "Sample bottle 500 ml 400 each R 18 HDPE, wide neck",
+              "value": {
+                "value": "400",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l13",
+              "excerpt": "Sample bottle 500 ml 400 each R 18 HDPE, wide neck",
+              "value": "500 ml, HDPE, wide neck"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l14",
+              "excerpt": "Sample bottle 1 l 200 each R 42 amber glass",
+              "value": "SP-5302"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l14",
+              "excerpt": "Sample bottle 1 l 200 each R 42 amber glass",
+              "value": {
+                "value": "1",
+                "unit": "l"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l15",
+              "excerpt": "Cool box 45 l 10 each R 890 insulated, 48 hour hold",
+              "value": "SP-5310"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l15",
+              "excerpt": "Cool box 45 l 10 each R 890 insulated, 48 hour hold",
+              "value": {
+                "value": "10",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l16",
+              "excerpt": "Calibration set to ISO-17034 15 sets R 640 pH 4, 7 and 10, 250 ml",
+              "value": "CL-6401"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l16",
+              "excerpt": "Calibration set to ISO-17034 15 sets R 640 pH 4, 7 and 10, 250 ml",
+              "value": {
+                "value": "15",
+                "unit": "sets"
+              }
+            },
+            {
+              "field": "exclusion",
+              "kind": "text",
+              "blockId": "p1-l17",
+              "excerpt": "Not included in these prices: installation and training.",
+              "value": "installation and training"
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-a:03acbeaee2ef1b",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3101 Digital pH meter",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 62,
+                  "text": "LB-3101 Digital pH meter 6 each R 3 450 c/w 0.01 pH resolution"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0dc2aa6bdda0c3",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 62,
+                  "text": "LB-3101 Digital pH meter 6 each R 3 450 c/w 0.01 pH resolution"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:1b92c588c82c77",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "needs_review",
+              "reason": "currency_mismatch",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 62,
+                  "text": "LB-3101 Digital pH meter 6 each R 3 450 c/w 0.01 pH resolution"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:1a423ef7468788",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3102 Turbidity meter",
+              "evidence": [
+                {
+                  "blockId": "p1-l6",
+                  "start": 0,
+                  "end": 66,
+                  "text": "LB-3102 Turbidity meter 4 each R 6 900 0-1000 NTU, battery powered"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0422f4106474cc",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l6",
+                  "start": 0,
+                  "end": 66,
+                  "text": "LB-3102 Turbidity meter 4 each R 6 900 0-1000 NTU, battery powered"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:05b07d4143c8d0",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "needs_review",
+              "reason": "currency_mismatch",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l6",
+                  "start": 0,
+                  "end": 66,
+                  "text": "LB-3102 Turbidity meter 4 each R 6 900 0-1000 NTU, battery powered"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:03dc1ad958cad2",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3110 Magnetic stirrer",
+              "evidence": [
+                {
+                  "blockId": "p1-l7",
+                  "start": 0,
+                  "end": 61,
+                  "text": "LB-3110 Magnetic stirrer 6 each R 2 150 hotplate, up to 300 C"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:16a0d4646248ae",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l7",
+                  "start": 0,
+                  "end": 61,
+                  "text": "LB-3110 Magnetic stirrer 6 each R 2 150 hotplate, up to 300 C"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:0e75aecce122f1",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "up to 300 C, hotplate",
+              "evidence": [
+                {
+                  "blockId": "p1-l7",
+                  "start": 0,
+                  "end": 61,
+                  "text": "LB-3110 Magnetic stirrer 6 each R 2 150 hotplate, up to 300 C"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:06052cd01f130d",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3115 Analytical balance with",
+              "evidence": [
+                {
+                  "blockId": "p1-l8",
+                  "start": 0,
+                  "end": 71,
+                  "text": "LB-3115 Analytical balance with 2 each R 24 800 220 g, 1 mg readability"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:16f87e3be96866",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l8",
+                  "start": 0,
+                  "end": 71,
+                  "text": "LB-3115 Analytical balance with 2 each R 24 800 220 g, 1 mg readability"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:04e3153bf0561f",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "220 g, 1 mg readability",
+              "evidence": [
+                {
+                  "blockId": "p1-l8",
+                  "start": 0,
+                  "end": 71,
+                  "text": "LB-3115 Analytical balance with 2 each R 24 800 220 g, 1 mg readability"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0bcc8f3ec5e92f",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "FD-4201 Water level logger",
+              "evidence": [
+                {
+                  "blockId": "p1-l10",
+                  "start": 0,
+                  "end": 67,
+                  "text": "FD-4201 Water level logger 20 each R 4 300 10 m range, vented cable"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:10b13bf6935771",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l10",
+                  "start": 0,
+                  "end": 67,
+                  "text": "FD-4201 Water level logger 20 each R 4 300 10 m range, vented cable"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:146ac2bfe46b96",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "10 m range, vented cable",
+              "evidence": [
+                {
+                  "blockId": "p1-l10",
+                  "start": 0,
+                  "end": 67,
+                  "text": "FD-4201 Water level logger 20 each R 4 300 10 m range, vented cable"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:189e52e0bc3711",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l11",
+                  "start": 8,
+                  "end": 59,
+                  "text": "Flow velocity probe 5 each R 18 200 0.1-5 m/s, IP65"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:1a590d74b99991",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l11",
+                  "start": 28,
+                  "end": 59,
+                  "text": "5 each R 18 200 0.1-5 m/s, IP65"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:18935cafab7614",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0.1-5 m/s, IP65",
+              "evidence": [
+                {
+                  "blockId": "p1-l11",
+                  "start": 28,
+                  "end": 59,
+                  "text": "5 each R 18 200 0.1-5 m/s, IP65"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:189934eda65f48",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l12",
+                  "start": 8,
+                  "end": 57,
+                  "text": "Rain gauge 12 each R 1 950 tipping bucket, 0.2 mm"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:10a82d234ae899",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l12",
+                  "start": 19,
+                  "end": 57,
+                  "text": "12 each R 1 950 tipping bucket, 0.2 mm"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:089decee55cd66",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "tipping bucket, 0.2 mm",
+              "evidence": [
+                {
+                  "blockId": "p1-l12",
+                  "start": 19,
+                  "end": 57,
+                  "text": "12 each R 1 950 tipping bucket, 0.2 mm"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:0894aa4a9b87bb",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l13",
+                  "start": 8,
+                  "end": 58,
+                  "text": "Sample bottle 500 ml 400 each R 18 HDPE, wide neck"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:14467c5d7a2a1c",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l13",
+                  "start": 8,
+                  "end": 58,
+                  "text": "Sample bottle 500 ml 400 each R 18 HDPE, wide neck"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:1891ceaa20453a",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "500 ml, HDPE, wide neck",
+              "evidence": [
+                {
+                  "blockId": "p1-l13",
+                  "start": 8,
+                  "end": 58,
+                  "text": "Sample bottle 500 ml 400 each R 18 HDPE, wide neck"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-a:045a9b5d702ec3",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l14",
+                  "start": 8,
+                  "end": 51,
+                  "text": "Sample bottle 1 l 200 each R 42 amber glass"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:08a9217097038f",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l14",
+                  "start": 8,
+                  "end": 51,
+                  "text": "Sample bottle 1 l 200 each R 42 amber glass"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:0fa1d871372863",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l15",
+                  "start": 8,
+                  "end": 59,
+                  "text": "Cool box 45 l 10 each R 890 insulated, 48 hour hold"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:0ac5d7a5bfafa9",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l15",
+                  "start": 8,
+                  "end": 59,
+                  "text": "Cool box 45 l 10 each R 890 insulated, 48 hour hold"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:0045204eee9808",
+              "field": "item",
+              "kind": "text",
+              "status": "needs_review",
+              "reason": "value_not_in_excerpt",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l16",
+                  "start": 8,
+                  "end": 73,
+                  "text": "Calibration set to ISO-17034 15 sets R 640 pH 4, 7 and 10, 250 ml"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:0d54ba5d9b2a04",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l16",
+                  "start": 8,
+                  "end": 73,
+                  "text": "Calibration set to ISO-17034 15 sets R 640 pH 4, 7 and 10, 250 ml"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-a:1a6c4431cb9715",
+              "field": "exclusion",
+              "kind": "text",
+              "status": "validated",
+              "value": "installation and training",
+              "evidence": [
+                {
+                  "blockId": "p1-l17",
+                  "start": 0,
+                  "end": 56,
+                  "text": "Not included in these prices: installation and training."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 24,
+          "chunks": 4,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-a",
+            "expected": 45,
+            "validatable": 45,
+            "outcomes": {
+              "correct": 12,
+              "correct_conservative": 0,
+              "held_for_review": 19,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 14
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 4,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 4,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 4,
+                "outcome": "held_for_review",
+                "reason": "currency_mismatch"
+              },
+              {
+                "field": "specification",
+                "line": 4,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 5,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 5,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 5,
+                "outcome": "held_for_review",
+                "reason": "currency_mismatch"
+              },
+              {
+                "field": "specification",
+                "line": 5,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 6,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 6,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 6,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 6,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 7,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 7,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 7,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 7,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 9,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 9,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 9,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 9,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 10,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 10,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 10,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 10,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 11,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 11,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 11,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 11,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 12,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 12,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 12,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 12,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 13,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 13,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 13,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 13,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 14,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 14,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 14,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 14,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 15,
+                "outcome": "held_for_review",
+                "reason": "value_not_in_excerpt"
+              },
+              {
+                "field": "quantity",
+                "line": 15,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "unit_price",
+                "line": 15,
+                "outcome": "missed"
+              },
+              {
+                "field": "specification",
+                "line": 15,
+                "outcome": "missed"
+              },
+              {
+                "field": "exclusion",
+                "line": 16,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {
+              "currency_mismatch": 2,
+              "value_not_in_excerpt": 6
+            },
+            "ambiguousByReason": {
+              "ambiguous_candidates": 11
+            },
+            "recall": 0.26666666666666666,
+            "validatedPrecision": 1
+          },
+          "issues": [
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:0dc2aa6bdda0c3"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "currency_mismatch",
+              "count": 1,
+              "factId": "quote-a:1b92c588c82c77"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:0422f4106474cc"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "currency_mismatch",
+              "count": 1,
+              "factId": "quote-a:05b07d4143c8d0"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:16a0d4646248ae"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:16f87e3be96866"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:10b13bf6935771"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "quote-a:189e52e0bc3711"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:1a590d74b99991"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "quote-a:189934eda65f48"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:10a82d234ae899"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "quote-a:0894aa4a9b87bb"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:14467c5d7a2a1c"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "quote-a:045a9b5d702ec3"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:08a9217097038f"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "quote-a:0fa1d871372863"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:0ac5d7a5bfafa9"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_rejected",
+              "reason": "value_not_in_excerpt",
+              "count": 1,
+              "factId": "quote-a:0045204eee9808"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-a:0d54ba5d9b2a04"
+            },
+            {
+              "docId": "quote-a",
+              "kind": "server_dropped",
+              "reason": "invalid_value",
+              "count": 9
+            }
+          ],
+          "rates": {
+            "claims": 31,
+            "evidenceLocated": 31,
+            "valueSupported": 12
+          }
+        },
+        {
+          "docId": "quote-b",
+          "profile": {
+            "id": "scopecheck.quote.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "LB-3101 Digital pH meter: 5 each offered, 0.01 pH resolution, R 3 450 each.",
+              "value": "LB-3101 Digital pH meter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l4",
+              "excerpt": "LB-3101 Digital pH meter: 5 each offered, 0.01 pH resolution, R 3 450 each.",
+              "value": {
+                "value": "5",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "Offered: 4 each LB-3102 Turbidity meter (0-100 NTU, battery powered) at R 6 900 each.",
+              "value": "LB-3102 Turbidity meter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l5",
+              "excerpt": "Offered: 4 each LB-3102 Turbidity meter (0-100 NTU, battery powered) at R 6 900 each.",
+              "value": {
+                "value": "4",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l6",
+              "excerpt": "LB-3110 Magnetic stirrer: 8 each offered, hotplate, up to 300 C, R 2 150 each.",
+              "value": "LB-3110 Magnetic stirrer"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l6",
+              "excerpt": "LB-3110 Magnetic stirrer: 8 each offered, hotplate, up to 300 C, R 2 150 each.",
+              "value": {
+                "value": "8",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l7",
+              "excerpt": "Offered: 2 each LB-3115 Analytical balance with draught shield (220 g, 0.1 mg readability) at R 24 800 each.",
+              "value": "LB-3115 Analytical balance with draught shield"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l7",
+              "excerpt": "Offered: 2 each LB-3115 Analytical balance with draught shield (220 g, 0.1 mg readability) at R 24 800 each.",
+              "value": {
+                "value": "2",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l8",
+              "excerpt": "FD-4201 Water level logger: 20 each offered, 10 m range, vented cable, R 4 300 each.",
+              "value": "FD-4201 Water level logger"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l8",
+              "excerpt": "FD-4201 Water level logger: 20 each offered, 10 m range, vented cable, R 4 300 each.",
+              "value": {
+                "value": "20",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l9",
+              "excerpt": "Offered: 5 each FD-4202 Flow velocity probe (0.1-5 m/s, IP68) at R 18 200 each.",
+              "value": "FD-4202 Flow velocity probe"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l9",
+              "excerpt": "Offered: 5 each FD-4202 Flow velocity probe (0.1-5 m/s, IP68) at R 18 200 each.",
+              "value": {
+                "value": "5",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l10",
+              "excerpt": "FD-4210 Rain gauge: 12 each offered, tipping bucket, 0.2 mm, R 1 950 each.",
+              "value": "FD-4210 Rain gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l10",
+              "excerpt": "FD-4210 Rain gauge: 12 each offered, tipping bucket, 0.2 mm, R 1 950 each.",
+              "value": {
+                "value": "12",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l11",
+              "excerpt": "Offered: 30 each FD-4215 Soil moisture sensor with datalogger interface (capacitance type, 3 m cable) at R 1 250 each.",
+              "value": "FD-4215 Soil moisture sensor with datalogger interface"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l11",
+              "excerpt": "Offered: 30 each FD-4215 Soil moisture sensor with datalogger interface (capacitance type, 3 m cable) at R 1 250 each.",
+              "value": {
+                "value": "30",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l12",
+              "excerpt": "SP-5301 Sample bottle 500 ml: 400 each offered, HDPE, wide neck, R 18 each.",
+              "value": "SP-5301 Sample bottle 500 ml"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l12",
+              "excerpt": "SP-5301 Sample bottle 500 ml: 400 each offered, HDPE, wide neck, R 18 each.",
+              "value": {
+                "value": "400",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l13",
+              "excerpt": "10 each SP-5310 Cool box 45 l (insulated, 48 hour hold) at R 890 each.",
+              "value": "SP-5310 Cool box 45 l (insulated, 48 hour hold)"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l13",
+              "excerpt": "10 each SP-5310 Cool box 45 l (insulated, 48 hour hold) at R 890 each.",
+              "value": {
+                "value": "10",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l14",
+              "excerpt": "CL-6401 Calibration standard set: 15 sets offered, pH 4, 7 and 10, 250 ml, R 640 each.",
+              "value": "CL-6401 Calibration standard set"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l14",
+              "excerpt": "CL-6401 Calibration standard set: 15 sets offered, pH 4, 7 and 10, 250 ml, R 640 each.",
+              "value": {
+                "value": "15",
+                "unit": null
+              }
+            },
+            {
+              "field": "exclusion",
+              "kind": "text",
+              "blockId": "p1-l15",
+              "excerpt": "Carriage to site and installation are excluded from this offer.",
+              "value": "Carriage to site and installation"
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-b:0dcd92d99b7534",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3101 Digital pH meter",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 75,
+                  "text": "LB-3101 Digital pH meter: 5 each offered, 0.01 pH resolution, R 3 450 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:0f369ba6e2c1c0",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 75,
+                  "text": "LB-3101 Digital pH meter: 5 each offered, 0.01 pH resolution, R 3 450 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:03dbd75ead572b",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3102 Turbidity meter",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 85,
+                  "text": "Offered: 4 each LB-3102 Turbidity meter (0-100 NTU, battery powered) at R 6 900 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:15b62f79385d41",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 85,
+                  "text": "Offered: 4 each LB-3102 Turbidity meter (0-100 NTU, battery powered) at R 6 900 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:089c278c648428",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3110 Magnetic stirrer",
+              "evidence": [
+                {
+                  "blockId": "p1-l6",
+                  "start": 0,
+                  "end": 78,
+                  "text": "LB-3110 Magnetic stirrer: 8 each offered, hotplate, up to 300 C, R 2 150 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:012d052ad642d1",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l6",
+                  "start": 0,
+                  "end": 78,
+                  "text": "LB-3110 Magnetic stirrer: 8 each offered, hotplate, up to 300 C, R 2 150 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:109b9735832f27",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "LB-3115 Analytical balance with draught shield",
+              "evidence": [
+                {
+                  "blockId": "p1-l7",
+                  "start": 0,
+                  "end": 108,
+                  "text": "Offered: 2 each LB-3115 Analytical balance with draught shield (220 g, 0.1 mg readability) at R 24 800 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:1189e2e87f7a40",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l7",
+                  "start": 0,
+                  "end": 108,
+                  "text": "Offered: 2 each LB-3115 Analytical balance with draught shield (220 g, 0.1 mg readability) at R 24 800 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:16134be19414ba",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "FD-4201 Water level logger",
+              "evidence": [
+                {
+                  "blockId": "p1-l8",
+                  "start": 0,
+                  "end": 84,
+                  "text": "FD-4201 Water level logger: 20 each offered, 10 m range, vented cable, R 4 300 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:00a8853c3187d3",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l8",
+                  "start": 0,
+                  "end": 84,
+                  "text": "FD-4201 Water level logger: 20 each offered, 10 m range, vented cable, R 4 300 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:1d1cc969ef11a5",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "FD-4202 Flow velocity probe",
+              "evidence": [
+                {
+                  "blockId": "p1-l9",
+                  "start": 0,
+                  "end": 79,
+                  "text": "Offered: 5 each FD-4202 Flow velocity probe (0.1-5 m/s, IP68) at R 18 200 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:1e8b2b0faf1263",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l9",
+                  "start": 0,
+                  "end": 79,
+                  "text": "Offered: 5 each FD-4202 Flow velocity probe (0.1-5 m/s, IP68) at R 18 200 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:018676916b3e8c",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "FD-4210 Rain gauge",
+              "evidence": [
+                {
+                  "blockId": "p1-l10",
+                  "start": 0,
+                  "end": 74,
+                  "text": "FD-4210 Rain gauge: 12 each offered, tipping bucket, 0.2 mm, R 1 950 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:1b91f3ab34738f",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l10",
+                  "start": 0,
+                  "end": 74,
+                  "text": "FD-4210 Rain gauge: 12 each offered, tipping bucket, 0.2 mm, R 1 950 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:05e3b91d82cc01",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "FD-4215 Soil moisture sensor with datalogger interface",
+              "evidence": [
+                {
+                  "blockId": "p1-l11",
+                  "start": 0,
+                  "end": 118,
+                  "text": "Offered: 30 each FD-4215 Soil moisture sensor with datalogger interface (capacitance type, 3 m cable) at R 1 250 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:1d8aac8c10ff0f",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l11",
+                  "start": 0,
+                  "end": 118,
+                  "text": "Offered: 30 each FD-4215 Soil moisture sensor with datalogger interface (capacitance type, 3 m cable) at R 1 250 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:10b45b8bff7de6",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "SP-5301 Sample bottle 500 ml",
+              "evidence": [
+                {
+                  "blockId": "p1-l12",
+                  "start": 0,
+                  "end": 75,
+                  "text": "SP-5301 Sample bottle 500 ml: 400 each offered, HDPE, wide neck, R 18 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:126b896a851a21",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l12",
+                  "start": 0,
+                  "end": 75,
+                  "text": "SP-5301 Sample bottle 500 ml: 400 each offered, HDPE, wide neck, R 18 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:03ac4ed7746620",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "SP-5310 Cool box 45 l (insulated, 48 hour hold)",
+              "evidence": [
+                {
+                  "blockId": "p1-l13",
+                  "start": 9,
+                  "end": 79,
+                  "text": "10 each SP-5310 Cool box 45 l (insulated, 48 hour hold) at R 890 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:136801cad82c03",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l13",
+                  "start": 9,
+                  "end": 79,
+                  "text": "10 each SP-5310 Cool box 45 l (insulated, 48 hour hold) at R 890 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:1a2b4afd8535d3",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "CL-6401 Calibration standard set",
+              "evidence": [
+                {
+                  "blockId": "p1-l14",
+                  "start": 0,
+                  "end": 86,
+                  "text": "CL-6401 Calibration standard set: 15 sets offered, pH 4, 7 and 10, 250 ml, R 640 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-b:17eac6ed0e36e2",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "needs_review",
+              "reason": "ambiguous_candidates",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l14",
+                  "start": 0,
+                  "end": 86,
+                  "text": "CL-6401 Calibration standard set: 15 sets offered, pH 4, 7 and 10, 250 ml, R 640 each."
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "quote-b:160d7d32c002ee",
+              "field": "exclusion",
+              "kind": "text",
+              "status": "validated",
+              "value": "Carriage to site and installation",
+              "evidence": [
+                {
+                  "blockId": "p1-l15",
+                  "start": 0,
+                  "end": 63,
+                  "text": "Carriage to site and installation are excluded from this offer."
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 22,
+          "chunks": 4,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-b",
+            "expected": 46,
+            "validatable": 46,
+            "outcomes": {
+              "correct": 11,
+              "correct_conservative": 0,
+              "held_for_review": 11,
+              "wrong_value": 1,
+              "wrongly_validated": 0,
+              "missed": 23
+            },
+            "details": [
+              {
+                "field": "exclusion",
+                "line": 1,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 3,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 3,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 3,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 4,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 4,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 4,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 4,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 5,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 5,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 5,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 5,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 6,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 6,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 6,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 6,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 7,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 7,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 7,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 7,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 8,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 8,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 8,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 8,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 9,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 9,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 9,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 9,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 10,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 10,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 10,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 10,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 11,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 11,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 11,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 11,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 12,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 12,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 12,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 12,
+                "outcome": "missed"
+              },
+              {
+                "field": "item",
+                "line": 13,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 13,
+                "outcome": "held_for_review",
+                "reason": "ambiguous_candidates"
+              },
+              {
+                "field": "specification",
+                "line": 13,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 13,
+                "outcome": "missed"
+              },
+              {
+                "field": "exclusion",
+                "line": 14,
+                "outcome": "wrong_value"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {
+              "ambiguous_candidates": 11
+            },
+            "recall": 0.2391304347826087,
+            "validatedPrecision": 0.9166666666666666
+          },
+          "issues": [
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:0f369ba6e2c1c0"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:15b62f79385d41"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:012d052ad642d1"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:1189e2e87f7a40"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:00a8853c3187d3"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:1e8b2b0faf1263"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:1b91f3ab34738f"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:1d8aac8c10ff0f"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:126b896a851a21"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:136801cad82c03"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "claim_ambiguous",
+              "reason": "ambiguous_candidates",
+              "count": 1,
+              "factId": "quote-b:17eac6ed0e36e2"
+            },
+            {
+              "docId": "quote-b",
+              "kind": "server_dropped",
+              "reason": "invalid_value",
+              "count": 11
+            }
+          ],
+          "rates": {
+            "claims": 23,
+            "evidenceLocated": 23,
+            "valueSupported": 12
+          }
+        }
+      ],
+      "findings": {
+        "produced": [
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l21:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l23:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l24:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l25:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l26:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l28:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l29:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l30:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "LB-3101:quantity",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "LB-3102:quantity",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "LB-3110:quantity",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "item.absent",
+            "subject": "DRAUGHT SHIELD",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "CL-6401",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "exclusion.stated",
+            "subject": "quote-a:p1-l17:exclusion",
+            "response": "quote-a",
+            "severity": "info",
+            "state": "confirmed"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l11:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l12:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l13:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l14:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l15:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l16:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "LB-3101:quantity",
+            "response": "quote-b",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "LB-3102:quantity",
+            "response": "quote-b",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "LB-3110:quantity",
+            "response": "quote-b",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "item.absent",
+            "subject": "DRAUGHT SHIELD",
+            "response": "quote-b",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "match_unresolved"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "CL-6401:quantity",
+            "response": "quote-b",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "exclusion.stated",
+            "subject": "quote-b:p1-l15:exclusion",
+            "response": "quote-b",
+            "severity": "info",
+            "state": "confirmed"
+          }
+        ],
+        "score": {
+          "expected": 12,
+          "produced": 26,
+          "matchedExactState": 3,
+          "conservative": [],
+          "missed": [
+            "quantity.differs|LB-3110:quantity|quote-a",
+            "spec.differs|LB-3115:specification|quote-a",
+            "spec.differs|FD-4202:specification|quote-a",
+            "item.absent|FD-4215|quote-a",
+            "item.identity_uncertain|quote-a:p1-l16:item|quote-a",
+            "quantity.differs|LB-3101:quantity|quote-b",
+            "spec.differs|LB-3102:specification|quote-b",
+            "item.absent|SP-5302|quote-b",
+            "exclusion.stated|quote-b:p1-l2:exclusion|quote-b"
+          ],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [
+            "item.unverified|rfq:p1-l21:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l23:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l24:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l25:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l26:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l28:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l29:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l30:item|rfq(needs_review)",
+            "quantity.unverified|LB-3101:quantity|quote-a(needs_review)",
+            "quantity.unverified|LB-3102:quantity|quote-a(needs_review)",
+            "quantity.unverified|LB-3110:quantity|quote-a(needs_review)",
+            "item.absent|DRAUGHT SHIELD|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l11:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l12:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l13:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l14:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l15:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l16:item|quote-a(needs_review)",
+            "quantity.unverified|LB-3101:quantity|quote-b(needs_review)",
+            "quantity.unverified|LB-3102:quantity|quote-b(needs_review)",
+            "quantity.unverified|LB-3110:quantity|quote-b(needs_review)",
+            "item.absent|DRAUGHT SHIELD|quote-b(needs_review)",
+            "quantity.unverified|CL-6401:quantity|quote-b(needs_review)"
+          ],
+          "mustNotFlagViolations": []
+        }
+      },
+      "findingsBefore": {
+        "produced": [
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l21:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l23:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l24:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l25:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l26:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l28:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l29:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "rfq:p1-l30:item",
+            "response": "rfq",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.absent",
+            "subject": "DIGITAL PH METER",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "TURBIDITY METER",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "MAGNETIC STIRRER",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "DRAUGHT SHIELD",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "CL-6401",
+            "response": "quote-a",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "exclusion.stated",
+            "subject": "quote-a:p1-l17:exclusion",
+            "response": "quote-a",
+            "severity": "info",
+            "state": "confirmed"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l11:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l12:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l13:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l14:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l15:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.unverified",
+            "subject": "quote-a:p1-l16:item",
+            "response": "quote-a",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "value_not_in_excerpt"
+          },
+          {
+            "code": "item.absent",
+            "subject": "DIGITAL PH METER",
+            "response": "quote-b",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "TURBIDITY METER",
+            "response": "quote-b",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "MAGNETIC STIRRER",
+            "response": "quote-b",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "item.absent",
+            "subject": "DRAUGHT SHIELD",
+            "response": "quote-b",
+            "severity": "critical",
+            "state": "needs_review",
+            "reason": "coverage_unverified"
+          },
+          {
+            "code": "quantity.unverified",
+            "subject": "CL-6401:quantity",
+            "response": "quote-b",
+            "severity": "warning",
+            "state": "needs_review",
+            "reason": "unvalidated_input"
+          },
+          {
+            "code": "exclusion.stated",
+            "subject": "quote-b:p1-l15:exclusion",
+            "response": "quote-b",
+            "severity": "info",
+            "state": "confirmed"
+          }
+        ],
+        "score": {
+          "expected": 12,
+          "produced": 26,
+          "matchedExactState": 3,
+          "conservative": [],
+          "missed": [
+            "quantity.differs|LB-3110:quantity|quote-a",
+            "spec.differs|LB-3115:specification|quote-a",
+            "spec.differs|FD-4202:specification|quote-a",
+            "item.absent|FD-4215|quote-a",
+            "item.identity_uncertain|quote-a:p1-l16:item|quote-a",
+            "quantity.differs|LB-3101:quantity|quote-b",
+            "spec.differs|LB-3102:specification|quote-b",
+            "item.absent|SP-5302|quote-b",
+            "exclusion.stated|quote-b:p1-l2:exclusion|quote-b"
+          ],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [
+            "item.unverified|rfq:p1-l21:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l23:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l24:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l25:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l26:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l28:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l29:item|rfq(needs_review)",
+            "item.unverified|rfq:p1-l30:item|rfq(needs_review)",
+            "item.absent|DIGITAL PH METER|quote-a(needs_review)",
+            "item.absent|TURBIDITY METER|quote-a(needs_review)",
+            "item.absent|MAGNETIC STIRRER|quote-a(needs_review)",
+            "item.absent|DRAUGHT SHIELD|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l11:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l12:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l13:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l14:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l15:item|quote-a(needs_review)",
+            "item.unverified|quote-a:p1-l16:item|quote-a(needs_review)",
+            "item.absent|DIGITAL PH METER|quote-b(needs_review)",
+            "item.absent|TURBIDITY METER|quote-b(needs_review)",
+            "item.absent|MAGNETIC STIRRER|quote-b(needs_review)",
+            "item.absent|DRAUGHT SHIELD|quote-b(needs_review)",
+            "quantity.unverified|CL-6401:quantity|quote-b(needs_review)"
+          ],
+          "mustNotFlagViolations": []
+        }
+      },
+      "comparisons": [
+        {
+          "id": "quantity:held-rfq:1db2bb9af215ff~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1db2bb9af215ff"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1db2bb9af215ff~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1db2bb9af215ff"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1db2bb9af215ff~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1db2bb9af215ff"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1db2bb9af215ff~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1db2bb9af215ff"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:0c8193f9e31d7f~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0c8193f9e31d7f"
+          }
+        },
+        {
+          "id": "specification:held-rfq:0c8193f9e31d7f~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0c8193f9e31d7f"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:0c8193f9e31d7f~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0c8193f9e31d7f"
+          }
+        },
+        {
+          "id": "specification:held-rfq:0c8193f9e31d7f~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0c8193f9e31d7f"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:193c9f6926b98d~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:193c9f6926b98d"
+          }
+        },
+        {
+          "id": "specification:held-rfq:193c9f6926b98d~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:193c9f6926b98d"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:193c9f6926b98d~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:193c9f6926b98d"
+          }
+        },
+        {
+          "id": "specification:held-rfq:193c9f6926b98d~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:193c9f6926b98d"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1499a7eb38a3f2~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1499a7eb38a3f2"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1499a7eb38a3f2~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1499a7eb38a3f2"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1499a7eb38a3f2~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1499a7eb38a3f2"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1499a7eb38a3f2~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1499a7eb38a3f2"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1f55dbeb3a68a1~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1f55dbeb3a68a1"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1f55dbeb3a68a1~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1f55dbeb3a68a1"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1f55dbeb3a68a1~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1f55dbeb3a68a1"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1f55dbeb3a68a1~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1f55dbeb3a68a1"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:0525f97d0a2236~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0525f97d0a2236"
+          }
+        },
+        {
+          "id": "specification:held-rfq:0525f97d0a2236~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0525f97d0a2236"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:0525f97d0a2236~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0525f97d0a2236"
+          }
+        },
+        {
+          "id": "specification:held-rfq:0525f97d0a2236~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:0525f97d0a2236"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1fc9a6f3288459~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1fc9a6f3288459"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1fc9a6f3288459~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1fc9a6f3288459"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1fc9a6f3288459~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1fc9a6f3288459"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1fc9a6f3288459~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1fc9a6f3288459"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1708ccd31da5a8~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1708ccd31da5a8"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1708ccd31da5a8~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1708ccd31da5a8"
+          }
+        },
+        {
+          "id": "quantity:held-rfq:1708ccd31da5a8~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1708ccd31da5a8"
+          }
+        },
+        {
+          "id": "specification:held-rfq:1708ccd31da5a8~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "requested item in rfq not validated (value_not_in_excerpt)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "item",
+            "reason": "value_not_in_excerpt",
+            "factId": "rfq:1708ccd31da5a8"
+          }
+        },
+        {
+          "id": "quantity:LB-3101~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "quantity in rfq not validated (ambiguous_candidates)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "quantity",
+            "reason": "ambiguous_candidates",
+            "factId": "rfq:0d959ed864f4da"
+          }
+        },
+        {
+          "id": "specification:LB-3101~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "no specification fact in quote-a",
+          "blocked": {
+            "docId": "quote-a",
+            "field": "specification",
+            "reason": "no_fact"
+          }
+        },
+        {
+          "id": "quantity:LB-3102~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "quantity in rfq not validated (ambiguous_candidates)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "quantity",
+            "reason": "ambiguous_candidates",
+            "factId": "rfq:1a3f78bb1cd632"
+          }
+        },
+        {
+          "id": "specification:LB-3102~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "no specification fact in quote-a",
+          "blocked": {
+            "docId": "quote-a",
+            "field": "specification",
+            "reason": "no_fact"
+          }
+        },
+        {
+          "id": "quantity:LB-3110~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "quantity in rfq not validated (ambiguous_candidates)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "quantity",
+            "reason": "ambiguous_candidates",
+            "factId": "rfq:0beb324a18d74f"
+          }
+        },
+        {
+          "id": "specification:LB-3110~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "agree",
+          "userSupplied": [],
+          "detail": "hotplate, up to 300 C <-> up to 300 C, hotplate"
+        },
+        {
+          "id": "quantity:DRAUGHT SHIELD~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "item not matched in quote-a (coverage_unverified)",
+          "blocked": {
+            "docId": "quote-a",
+            "field": "item",
+            "reason": "coverage_unverified"
+          }
+        },
+        {
+          "id": "specification:DRAUGHT SHIELD~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "item not matched in quote-a (coverage_unverified)",
+          "blocked": {
+            "docId": "quote-a",
+            "field": "item",
+            "reason": "coverage_unverified"
+          }
+        },
+        {
+          "id": "quantity:CL-6401~quote-a",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "item not matched in quote-a (coverage_unverified)",
+          "blocked": {
+            "docId": "quote-a",
+            "field": "item",
+            "reason": "coverage_unverified"
+          }
+        },
+        {
+          "id": "specification:CL-6401~quote-a",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-a"
+          ],
+          "status": "not_evaluated",
+          "reason": "item not matched in quote-a (coverage_unverified)",
+          "blocked": {
+            "docId": "quote-a",
+            "field": "item",
+            "reason": "coverage_unverified"
+          }
+        },
+        {
+          "id": "quantity:LB-3101~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "quantity in rfq not validated (ambiguous_candidates)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "quantity",
+            "reason": "ambiguous_candidates",
+            "factId": "rfq:0d959ed864f4da"
+          }
+        },
+        {
+          "id": "specification:LB-3101~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "no specification fact in quote-b",
+          "blocked": {
+            "docId": "quote-b",
+            "field": "specification",
+            "reason": "no_fact"
+          }
+        },
+        {
+          "id": "quantity:LB-3102~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "quantity in rfq not validated (ambiguous_candidates)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "quantity",
+            "reason": "ambiguous_candidates",
+            "factId": "rfq:1a3f78bb1cd632"
+          }
+        },
+        {
+          "id": "specification:LB-3102~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "no specification fact in quote-b",
+          "blocked": {
+            "docId": "quote-b",
+            "field": "specification",
+            "reason": "no_fact"
+          }
+        },
+        {
+          "id": "quantity:LB-3110~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "quantity in rfq not validated (ambiguous_candidates)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "quantity",
+            "reason": "ambiguous_candidates",
+            "factId": "rfq:0beb324a18d74f"
+          }
+        },
+        {
+          "id": "specification:LB-3110~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "no specification fact in quote-b",
+          "blocked": {
+            "docId": "quote-b",
+            "field": "specification",
+            "reason": "no_fact"
+          }
+        },
+        {
+          "id": "quantity:DRAUGHT SHIELD~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "item not matched in quote-b (match_unresolved)",
+          "blocked": {
+            "docId": "quote-b",
+            "field": "item",
+            "reason": "match_unresolved"
+          }
+        },
+        {
+          "id": "specification:DRAUGHT SHIELD~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "item not matched in quote-b (match_unresolved)",
+          "blocked": {
+            "docId": "quote-b",
+            "field": "item",
+            "reason": "match_unresolved"
+          }
+        },
+        {
+          "id": "quantity:CL-6401~quote-b",
+          "check": "quote_aspect",
+          "field": "quantity",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "quantity in rfq not validated (ambiguous_candidates)",
+          "blocked": {
+            "docId": "rfq",
+            "field": "quantity",
+            "reason": "ambiguous_candidates",
+            "factId": "rfq:12bd9e9738befe"
+          }
+        },
+        {
+          "id": "specification:CL-6401~quote-b",
+          "check": "quote_aspect",
+          "field": "specification",
+          "docs": [
+            "rfq",
+            "quote-b"
+          ],
+          "status": "not_evaluated",
+          "reason": "no specification fact in rfq",
+          "blocked": {
+            "docId": "rfq",
+            "field": "specification",
+            "reason": "no_fact"
+          }
+        }
+      ],
+      "identity": {
+        "recovered": [
+          {
+            "factId": "rfq:0d7c6f4c016fe7",
+            "docId": "rfq",
+            "description": "Digital pH meter",
+            "code": "LB-3101",
+            "codeSpan": {
+              "docId": "rfq",
+              "blockId": "p1-l18",
+              "start": 0,
+              "end": 7,
+              "text": "LB-3101"
+            },
+            "itemEvidence": {
+              "docId": "rfq",
+              "blockId": "p1-l18",
+              "start": 0,
+              "end": 50,
+              "text": "LB-3101 Digital pH meter 6 each 0.01 pH resolution"
+            },
+            "method": "row_reference_cell"
+          },
+          {
+            "factId": "rfq:05c275dcaae379",
+            "docId": "rfq",
+            "description": "Turbidity meter",
+            "code": "LB-3102",
+            "codeSpan": {
+              "docId": "rfq",
+              "blockId": "p1-l19",
+              "start": 0,
+              "end": 7,
+              "text": "LB-3102"
+            },
+            "itemEvidence": {
+              "docId": "rfq",
+              "blockId": "p1-l19",
+              "start": 0,
+              "end": 58,
+              "text": "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered"
+            },
+            "method": "row_reference_cell"
+          },
+          {
+            "factId": "rfq:148121b8202eaf",
+            "docId": "rfq",
+            "description": "Magnetic stirrer",
+            "code": "LB-3110",
+            "codeSpan": {
+              "docId": "rfq",
+              "blockId": "p1-l20",
+              "start": 0,
+              "end": 7,
+              "text": "LB-3110"
+            },
+            "itemEvidence": {
+              "docId": "rfq",
+              "blockId": "p1-l20",
+              "start": 0,
+              "end": 53,
+              "text": "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C"
+            },
+            "method": "row_reference_cell"
+          }
+        ],
+        "uncertain": [],
+        "counts": {
+          "codeFromModel": 17,
+          "recovered": 3,
+          "descriptionOnly": 1,
+          "uncertain": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 12,
+    "requestsOk": 12,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "concurrency": {
+      "requested": 1,
+      "peakInFlight": 1,
+      "maxRepairAttempts": 1,
+      "stoppedAfter": null
+    },
+    "stop": null,
+    "elapsedMs": 52496,
+    "latencyMs": {
+      "total": 52429,
+      "mean": 4369,
+      "max": 10128
+    },
+    "claimsReceived": 85,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 0.47058823529411764,
+    "serverDropped": 20,
+    "recall": 0.2755905511811024,
+    "validatedPrecision": 0.875,
+    "missedFacts": 43,
+    "unsupportedFacts": 16,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 9,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 12,
+    "requestsReportingTokens": 12,
+    "promptTokens": 6217,
+    "completionTokens": 6917,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 679,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. UNVERIFIED RATES: approximately $0.28 input and $0.83 output per million tokens converted at $0.011 per 1,000 neurons. Cloudflare's pricing page could not be fetched from the sandbox (HTTP 403), so these come from secondary sources. No dashboard-confirmed consumption exists for this model yet."
+    }
+  },
+  "finishedAt": "2026-11-02T00:01:09.884Z",
+  "wallClockMs": 53033,
+  "auditVersion": 2,
+  "settings": {
+    "inferenceTimeoutMs": 25000,
+    "maxRepairAttempts": 1,
+    "note": "Worker configured timeout is 25000 ms",
+    "chunkLimits": {
+      "maxChars": 24000,
+      "maxBlocks": 400,
+      "overlap": 0
+    },
+    "chunking": {
+      "kind": "frozen-plan",
+      "file": "samples/scopecheck-fresh/chunk-plan.json"
+    },
+    "rawResponses": "samples/benchmark-results/raw-sc-t12-fresh-8b-2026-11-02T00-00-16-852Z.jsonl",
+    "batch": {
+      "id": "sc-t12-fresh-8b",
+      "createdAt": "2026-11-02T00:00:16.852Z",
+      "attemptCap": 16,
+      "neuronCap": 3000,
+      "attemptsUsed": 12,
+      "neuronsCharged": 746.897,
+      "resultFiles": [],
+      "invocations": [
+        {
+          "label": "sc-t12-fresh-8b",
+          "startedAt": "2026-11-02T00:00:16.854Z",
+          "attemptsAtStart": 0,
+          "neuronsAtStart": 0
+        }
+      ]
+    },
+    "neuronBudget": {
+      "runCap": 3000,
+      "dailyCap": 8000,
+      "dailyBaseline": 0,
+      "runCharged": 746.9,
+      "dailyAfter": 746.9,
+      "attempts": 12,
+      "overruns": 0,
+      "capReached": false,
+      "perAttempt": [
+        {
+          "n": 1,
+          "reserved": 167.62602120000003,
+          "charged": 68.14585140000001,
+          "basis": "measured",
+          "promptTokens": 770,
+          "completionTokens": 562,
+          "overrun": false
+        },
+        {
+          "n": 2,
+          "reserved": 148.6120812,
+          "charged": 64.22500260000001,
+          "basis": "measured",
+          "promptTokens": 443,
+          "completionTokens": 626,
+          "overrun": false
+        },
+        {
+          "n": 3,
+          "reserved": 148.69658760000002,
+          "charged": 49.533854700000006,
+          "basis": "measured",
+          "promptTokens": 435,
+          "completionTokens": 451,
+          "overrun": false
+        },
+        {
+          "n": 4,
+          "reserved": 157.4289156,
+          "charged": 27.936866100000003,
+          "basis": "measured",
+          "promptTokens": 578,
+          "completionTokens": 141,
+          "overrun": false
+        },
+        {
+          "n": 5,
+          "reserved": 151.34445480000002,
+          "charged": 48.57327420000001,
+          "basis": "measured",
+          "promptTokens": 486,
+          "completionTokens": 422,
+          "overrun": false
+        },
+        {
+          "n": 6,
+          "reserved": 149.90784600000003,
+          "charged": 80.21610300000002,
+          "basis": "measured",
+          "promptTokens": 459,
+          "completionTokens": 814,
+          "overrun": false
+        },
+        {
+          "n": 7,
+          "reserved": 149.0346132,
+          "charged": 73.42862010000002,
+          "basis": "measured",
+          "promptTokens": 444,
+          "completionTokens": 737,
+          "overrun": false
+        },
+        {
+          "n": 8,
+          "reserved": 157.0345524,
+          "charged": 69.35591190000001,
+          "basis": "measured",
+          "promptTokens": 587,
+          "completionTokens": 639,
+          "overrun": false
+        },
+        {
+          "n": 9,
+          "reserved": 151.96416840000003,
+          "charged": 68.8119795,
+          "basis": "measured",
+          "promptTokens": 509,
+          "completionTokens": 659,
+          "overrun": false
+        },
+        {
+          "n": 10,
+          "reserved": 150.1050276,
+          "charged": 70.46940120000001,
+          "basis": "measured",
+          "promptTokens": 471,
+          "completionTokens": 692,
+          "overrun": false
+        },
+        {
+          "n": 11,
+          "reserved": 150.0768588,
+          "charged": 68.89513950000001,
+          "basis": "measured",
+          "promptTokens": 465,
+          "completionTokens": 675,
+          "overrun": false
+        },
+        {
+          "n": 12,
+          "reserved": 156.27399480000003,
+          "charged": 57.3044043,
+          "basis": "measured",
+          "promptTokens": 570,
+          "completionTokens": 499,
+          "overrun": false
+        }
+      ],
+      "note": "CHARGES against a budget (measured estimates, or the conservative reservation where usage was unknown); not dashboard-confirmed consumption"
+    }
+  }
+}

@@ -158,3 +158,6 @@ Not validated and not supported yet: multi-chunk or long documents, noisy or sca
 - **Timeout:** these runs used the harness's 45 s timeout (not stored in the result files, recorded here). The Worker is configured for 25 s; integration runs from now on use 25 s (`--timeout-ms`, default 25000, stored in new results). The slowest 70B request was 18.1 s, so none of these requests would have hit 25 s, but the margin is thin.
 - The 8B used the profiles tuned and fixed for the 70B (same prompts, by design); the `invalid_value` drops suggest a profile or value-shape change might help it, but that would be a new profile version and a new comparison, which this stage does not run.
 - Attempts: 9 for the 8B (8 documents plus one repeat of `quote-a`) of the 16 authorised; no repair was needed or observed. Live repair stays unobserved (controlled offline tests only).
+
+## Second comparison on fresh documents (SC-T15, 2 November 2026)
+Same committed criteria, applied to the fresh SC-T12 set with the accepted implementation and byte-identical requests (only the model differed). The 8B passes G1 to G4 and **fails Q1 (3 of 12 findings vs 12 of 12) and Q2 (59 vs 7 missed plus rejected)**. Decision unchanged: **retain the 70B.** Details: `docs/results/sc-t15-second-model.md`.

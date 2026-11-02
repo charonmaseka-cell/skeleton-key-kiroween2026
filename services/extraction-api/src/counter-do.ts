@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { admit, initSchema, type AdmitResult } from './admission';
+import { admit, initSchema, usedOn, type AdmitResult } from './admission';
 
 /**
  * SQLite-backed Durable Object holding the strict global admission counter.
@@ -16,5 +16,10 @@ export class AdmissionCounter extends DurableObject<Record<string, unknown>> {
 
   admit(ceiling: number, nowMs: number): AdmitResult {
     return this.ctx.storage.transactionSync(() => admit(this.ctx.storage.sql, ceiling, nowMs));
+  }
+
+  /** Read-only: today's admitted count. Used by the deployment check; admits nothing. */
+  usedToday(nowMs: number): number {
+    return usedOn(this.ctx.storage.sql, nowMs);
   }
 }

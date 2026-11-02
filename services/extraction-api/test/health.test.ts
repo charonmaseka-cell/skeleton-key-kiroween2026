@@ -3,7 +3,7 @@ import { health } from '../src/health';
 
 // The deployment check, with fakes: what makes it fail, and that the response carries nothing sensitive.
 
-const env = { ALLOWED_ORIGINS: 'https://scopecheck.example', DAILY_ADMISSION_CEILING: '0' };
+const env = { ALLOWED_ORIGINS: 'https://scopecheck.example', DAILY_ADMISSION_CEILING: '0', ACCESS_GATE: 'public' };
 const counter = (used = 0, opts: { writes?: boolean; throws?: boolean } = {}) => {
   let n = used;
   return {

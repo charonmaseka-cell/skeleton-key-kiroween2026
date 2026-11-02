@@ -1,5 +1,6 @@
 import type { AdmitResult } from './admission';
 import { parseConfig, type EnvVars } from './config';
+import { gateConfig } from './gate';
 
 // GET /health: a deployment check of the bindings that makes NO inference call and admits nothing.
 //  - configuration: the variables parse to a valid configuration
@@ -7,6 +8,7 @@ import { parseConfig, type EnvVars } from './config';
 //  - Durable Object: a read of today's count, and a fail-closed admission at ceiling 0. admit() never writes when the ceiling is
 //    reached, so this exercises the deployed counter's admission path with zero consumption.
 //  - whether public admission is open (DAILY_ADMISSION_CEILING > 0)
+//  - the access gate: its mode and whether it is valid (never the secret, only whether one is bound)
 // The response carries no document content, no secrets and no account identifiers.
 
 export type HealthDeps = {
@@ -29,7 +31,8 @@ export async function health(env: EnvVars, deps: HealthDeps): Promise<Response> 
     durableObject = { reachable: false, usedToday: null, zeroCeilingRefused: null, unchangedAfterCheck: null, error: 'admission counter unreachable' };
   }
   const ceiling = cfg?.dailyCeiling ?? null;
-  const ok = !!cfg && aiBound && durableObject.reachable && durableObject.zeroCeilingRefused === true && durableObject.unchangedAfterCheck === true;
+  const gate = gateConfig(env);
+  const ok = !!cfg && gate.ok && aiBound && durableObject.reachable && durableObject.zeroCeilingRefused === true && durableObject.unchangedAfterCheck === true;
   const body = {
     ok,
     checks: {
@@ -37,6 +40,7 @@ export async function health(env: EnvVars, deps: HealthDeps): Promise<Response> 
       workersAiBinding: aiBound ? 'present (not called)' : 'missing',
       durableObject,
       admission: { dailyCeiling: ceiling, open: (ceiling ?? 0) > 0 },
+      accessGate: { mode: gate.mode, valid: gate.ok, credentialBound: typeof env.TEST_GATE_TOKEN === 'string' && env.TEST_GATE_TOKEN.length > 0, ...(gate.ok ? {} : { reason: gate.reason }) },
     },
     inference: 'not called by this check',
   };

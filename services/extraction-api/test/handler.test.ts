@@ -8,6 +8,7 @@ import { PROFILES } from '../src/profiles';
 const ORIGIN = 'http://localhost:5173';
 const env: EnvVars = {
   ALLOWED_ORIGINS: `${ORIGIN},http://localhost:5174`,
+  ACCESS_GATE: 'public',
   DAILY_ADMISSION_CEILING: '100',
   MAX_BODY_BYTES: '4096',
   MAX_CHARS: '500',

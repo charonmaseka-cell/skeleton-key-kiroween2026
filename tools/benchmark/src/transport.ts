@@ -46,7 +46,7 @@ export class LocalTransport implements Transport {
         headers: { origin: ORIGIN, 'content-type': 'application/json' },
         body: JSON.stringify({ schemaId, blocks: blocks.map((b) => toRequestBlock(b as Block)) }),
       }),
-      { ALLOWED_ORIGINS: ORIGIN, ...this.opts.env },
+      { ALLOWED_ORIGINS: ORIGIN, ACCESS_GATE: 'public', ...this.opts.env },
       { now, counter, ai: this.opts.ai, log: () => undefined },
     );
     const ms = Math.round(performance.now() - started);

@@ -16,7 +16,14 @@ Provenance of checks: **sandbox** = run from this build environment; **external*
 | `/extract` from an unlisted origin | **external**: 403 `origin_denied` | |
 | Counter after the checks | **external**: still 0 | |
 
-No inference was made and the plan is unchanged. **Still open:** (1) task 5.5, limits from measurement against the deployed Worker; (2) validation of real inference through the AI binding (needs one admitted request, so a non-zero ceiling); admission stays 0 until both pass. The deployed bundle's provenance is recorded below once redeployed from clean `main`.
+No inference was made and the plan is unchanged. **Still open:** (1) task 5.5, limits from measurement against the deployed Worker; (2) validation of real inference through the AI binding (needs one admitted request, so a non-zero ceiling); admission stays 0 until both pass. **Deployment provenance (2 November 2026, sandbox, from a clean checkout of `main` at `0c5d339eb558ea5de57386e81f0d9ce833cf08fc`, i.e. PR #9 merged after green CI):**
+| Part | ID | Evidence |
+|---|---|---|
+| ScopeCheck Pages | deployment `c1cdd1ac` | Cloudflare API: production, `commit_hash` = `0c5d339...`, `commit_dirty` = false, deploy stage success |
+| PackCheck Pages | deployment `4624810b` | same |
+| Extraction Worker | version `665dbf8d-013f-4436-ba94-6c35216519ff` | `wrangler deploy` output; `DAILY_ADMISSION_CEILING=0` unchanged |
+
+This redeploy used the same build as the externally verified one (only documentation changed in between) but **the HTTP checks above were run against the earlier deployments** (`0343bb09`, `75f39831`, earlier Worker version); they have not been repeated against these IDs. The deploy script's "project already exists" message on Pages is harmless. No inference calls were made; admission remains 0.
 
 Both apps were built by `buildApps()` with `VITE_EXTRACTION_API_URL=""` and passed the bundle check (no workers.dev host, no `/extract` URL, no env-file URL). So they open in labelled sample mode with analysis disabled and need no Worker. Production admission is 0 (the Worker does not exist); no live inference was made; no plan was changed. When the Worker is deployed, its `ALLOWED_ORIGINS` are exactly the two URLs above.
 

@@ -1,0 +1,333 @@
+{
+  "id": "scopecheck-layout",
+  "title": "RFQ and a free-text quotation",
+  "description": "The same RFQ against a quotation written as free text (no table columns), including a line whose item identity is genuinely uncertain, and a specification the extraction missed. All names, items and prices are invented.",
+  "sample": true,
+  "label": "Sample (fictional)",
+  "extraction": {
+    "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "note": "The claims are recorded model output for these fictional documents (selected benchmark configuration). Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+  },
+  "docs": [
+    {
+      "id": "rfq",
+      "role": "rfq",
+      "title": "RFQ-0001 Request for Quotation",
+      "profile": "scopecheck.rfq.v1",
+      "recordedIn": "samples/benchmark-results/live-repeat-rfq-2026-11-01T02-22-13-472Z.json",
+      "blocks": [
+        {
+          "id": "p1-l1",
+          "docId": "rfq",
+          "kind": "pdf-run",
+          "text": "RFQ-0001 Request for Quotation (fictional sample)",
+          "page": 1,
+          "bbox": [
+            50,
+            780,
+            225.6400000000001,
+            10
+          ]
+        },
+        {
+          "id": "p1-l2",
+          "docId": "rfq",
+          "kind": "pdf-run",
+          "text": "Item CP-100 Centrifugal pump | qty 10 units | 316 stainless steel casing",
+          "page": 1,
+          "bbox": [
+            50,
+            758,
+            316.45,
+            10
+          ]
+        },
+        {
+          "id": "p1-l3",
+          "docId": "rfq",
+          "kind": "pdf-run",
+          "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure",
+          "page": 1,
+          "bbox": [
+            50,
+            736,
+            239.74,
+            10
+          ]
+        },
+        {
+          "id": "p1-l4",
+          "docId": "rfq",
+          "kind": "pdf-run",
+          "text": "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range",
+          "page": 1,
+          "bbox": [
+            50,
+            714,
+            251.99,
+            10
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l2",
+          "excerpt": "Item CP-100 Centrifugal pump",
+          "value": "Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l2",
+          "excerpt": "qty 10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l2",
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l3",
+          "excerpt": "Item MS-20 Motor starter",
+          "value": "Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l3",
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l3",
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "Item PG-6 Pressure gauge",
+          "value": "Pressure gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l4",
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "0-10 bar range",
+          "value": "0-10 bar range"
+        }
+      ]
+    },
+    {
+      "id": "quote-c",
+      "role": "quote",
+      "title": "Quotation QC-31, Cedar Flow Components (free-text layout)",
+      "profile": "scopecheck.quote.v1",
+      "recordedIn": "samples/benchmark-results/live-layout-quote-c-2026-11-01T02-37-35-943Z.json",
+      "blocks": [
+        {
+          "id": "p1-l1",
+          "docId": "quote-c",
+          "kind": "pdf-run",
+          "text": "Quotation QC-31 from Cedar Flow Components (fictional sample)",
+          "page": 1,
+          "bbox": [
+            50,
+            780,
+            290.09000000000003,
+            10
+          ]
+        },
+        {
+          "id": "p1-l2",
+          "docId": "quote-c",
+          "kind": "pdf-run",
+          "text": "We offer 10 units of Centrifugal pump CP-100 with a cast iron casing at R 11 500 each.",
+          "page": 1,
+          "bbox": [
+            50,
+            758,
+            385.17999999999984,
+            10
+          ]
+        },
+        {
+          "id": "p1-l3",
+          "docId": "quote-c",
+          "kind": "pdf-run",
+          "text": "Motor starter MS-20, quantity 6 units, IP55 enclosure, R 3 150 each.",
+          "page": 1,
+          "bbox": [
+            50,
+            736,
+            301.80999999999995,
+            10
+          ]
+        },
+        {
+          "id": "p1-l4",
+          "docId": "quote-c",
+          "kind": "pdf-run",
+          "text": "Pressure gauge PG-6, 20 units, 0-10 bar range, certified to SANS-1200, R 450 each.",
+          "page": 1,
+          "bbox": [
+            50,
+            714,
+            375.19,
+            10
+          ]
+        },
+        {
+          "id": "p1-l5",
+          "docId": "quote-c",
+          "kind": "pdf-run",
+          "text": "Installation and commissioning are excluded from this offer.",
+          "page": 1,
+          "bbox": [
+            50,
+            692,
+            262.87999999999994,
+            10
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l2",
+          "excerpt": "Centrifugal pump CP-100",
+          "value": "Centrifugal pump CP-100"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l2",
+          "excerpt": "10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "blockId": "p1-l2",
+          "excerpt": "R 11 500 each",
+          "value": {
+            "amount": "11500",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l3",
+          "excerpt": "Motor starter MS-20",
+          "value": "Motor starter MS-20"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l3",
+          "excerpt": "6 units",
+          "value": {
+            "value": "6",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "blockId": "p1-l3",
+          "excerpt": "R 3 150 each",
+          "value": {
+            "amount": "3150",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l3",
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "Pressure gauge PG-6",
+          "value": "Pressure gauge PG-6"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l4",
+          "excerpt": "20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "blockId": "p1-l4",
+          "excerpt": "R 450 each",
+          "value": {
+            "amount": "450",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "0-10 bar range",
+          "value": "0-10 bar range"
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "certified to SANS-1200",
+          "value": "certified to SANS-1200"
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "blockId": "p1-l5",
+          "excerpt": "Installation and commissioning are excluded from this offer",
+          "value": "Installation and commissioning"
+        }
+      ]
+    }
+  ]
+}

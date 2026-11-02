@@ -142,9 +142,19 @@ export type FindingsScore = {
 
 const key = (c: string, s: string, r?: string) => `${c}|${s}|${r ?? ''}`;
 
-export function scoreFindings(produced: Finding[], expected: ExpectedFinding[], opts: { coverageConfirmed: boolean; mustNotFlag?: string[] }): FindingsScore {
+export function scoreFindings(produced: Finding[], expected: ExpectedFinding[], opts: { coverageConfirmed: boolean; mustNotFlag?: string[]; /** per document: ids of the blocks that carry a LABELLED exclusion; a stated exclusion counts as detecting the labelled one only if its evidence is in one of them */ exclusionBlocks?: Record<string, Set<string>> }): FindingsScore {
   const want = new Map(expected.map((e) => [key(e.code, e.subject, e.response), opts.coverageConfirmed && e.stateIfCoverageConfirmed ? e.stateIfCoverageConfirmed : e.state]));
-  const got = new Map(produced.map((f) => [key(f.code, f.subjectId, f.responseDocId), f]));
+  // A stated exclusion is identified by its own source line (see the ScopeCheck rules). The labels name one exclusion per
+  // document ("quote-b:exclusion"). A produced exclusion detects it only when its evidence is in the labelled line, so a
+  // different exclusion (VAT) can never count as detection of the labelled one (freight).
+  const exclusionLabel = (f: Finding) => {
+    if (f.code !== 'exclusion.stated' || !opts.exclusionBlocks) return null;
+    const labelled = opts.exclusionBlocks[f.responseDocId ?? ''];
+    if (!labelled || !f.evidence.some((e) => labelled.has(e.evidence.blockId))) return null;
+    const names = expected.filter((e) => e.code === f.code && e.response === f.responseDocId);
+    return names.length === 1 ? key(f.code, names[0]!.subject, f.responseDocId) : null;
+  };
+  const got = new Map(produced.map((f) => [exclusionLabel(f) ?? key(f.code, f.subjectId, f.responseDocId), f]));
   const score: FindingsScore = { expected: expected.length, produced: produced.length, matchedExactState: 0, conservative: [], missed: [], falseCritical: [], overConfident: [], unexpectedOther: [], mustNotFlagViolations: [] };
   for (const [k, state] of want) {
     const f = got.get(k);

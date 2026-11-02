@@ -1,6 +1,30 @@
 # Implementation Plan
 
-One milestone slice per PR. Checks must pass before each PR. Nothing below has been started. Update `docs/build-log.md` with actual results as tasks complete.
+One milestone slice per PR. Checks must pass before each PR. Update `docs/build-log.md` with actual results as tasks complete. Tasks 1 to 6 are done (see the ticks); task 5.5 and everything from task 7 on is not.
+
+## Plan corrections (2026-11-01)
+
+The original task numbering and history above are kept. These corrections reflect what exists and what is next.
+
+**State.** Both apps run end to end in clearly labelled **sample mode** on fictional fixtures (recorded model claims; rules run in the browser). They do **not** yet process an uploaded document. Merged: PRs #1 to #3. PR #4 (Tasks 4 to 5: samples, benchmark, 70B model decision) is ready for review and awaits merge; PR #5 (Task 6) is a draft on top of it and has passed a source review (`docs/reviews/`). Production admission is closed (`DAILY_ADMISSION_CEILING = "0"`).
+
+**Delivery order (next engineering milestone: real documents).**
+1. Merge PR #4; rebase PR #5 onto `main`, confirm its base is `main` and its diff is Task 6 only; merge after review.
+2. **Real-document path, multi-chunk first** (tasks 8 to 10): original, realistically sized, multi-page documents for both apps, expected outputs committed before extraction; extraction, matching and findings measured separately; a failed or missed chunk can never yield a confirmed absence. Detail: `scopecheck-real-documents`, `packcheck-real-documents`.
+3. **Task 5.5 and deployment validation**: limits from bounded inputs, output limits, repairs and measured consumption; Workers AI binding and the deployed Durable Object validated before any public access; admission stays closed until then.
+4. **Haunted interface** (`haunted-ui`) as a committed task: visual system and Lights-on behaviour defined; implemented alongside the upload flow; complete before the final submission week; AA, keyboard, readable evidence and reduced motion in both modes.
+5. **After the two-quotation PDF path works and before final regression and submission preparation**: 2 to 5 quotations, DOCX, supplier-specific clarification email drafts (`scopecheck-real-documents` SC-7).
+
+**Dates.** ScopeCheck upload workflow **deployed by 2026-11-22**; PackCheck working upload workflow **by 2026-11-29**. **Submission deadline: 5 December 2026, 00:00 SAST** (recorded in `.kiro/steering/brief.md`). The haunted interface (HU-T5) and final regression must be complete before the final submission week.
+
+**If scope must be reduced** (protect both apps, evidence quality and the review states): cut DOCX, then extra quotations beyond three, then email drafts, then haunted effects beyond the Lights-on and Lights-off palettes, then extra rules. Never cut validated evidence, Needs review, Not evaluated, the coverage rules, honest sample and live labelling, keyboard access or AA contrast. PackCheck falls back to four core document roles with attachment mapping; if upload cannot ship it stays in labelled sample mode and says so.
+
+**Finding that changes the plan (2026-11-01).** The benchmark preflight shows the pre-registered 3-page documents cannot be extracted inside 16 attempts: a request returns about 14 values under the 25 s timeout and 1,500-token cap, and character-based chunks hold far more. Next engineering step is output-aware chunking (`scopecheck-real-documents` SC-2b / SC-T2b), then the live measurement; task 5.5 limits must be derived with it. The browser upload path (SC-T3) exists and is tested against a fake Worker; no real Worker is connected and admission stays closed.
+
+**Hooks (task 7.2 refined).** Two planned: rerun golden fixtures when engine or rule code changes (configured, not yet run); run accessibility checks when UI code changes (not configured until the accessibility tests of task 11 exist). `docs/hooks.md` distinguishes configured from actually run. CI in Web stays authoritative.
+
+**Task map.** Task 8 to ScopeCheck then PackCheck uploads (SC-T3, PC-T3); task 9 live wiring (SC-T5, PC-T6); task 10 end-to-end with the realistic fixtures (SC-T4, PC-T5); task 5.5 (SC-T6) and task 7.1 deployment checks come before opening admission; task 11 accessibility and Playwright flows include both haunted modes (HU-T4); tasks 17 to 19 are rescheduled by delivery-order item 5.
+
 
 ## M1: Foundation, Worker limits, live benchmark
 
@@ -35,12 +59,12 @@ One milestone slice per PR. Checks must pass before each PR. Nothing below has b
   - [x] 5.3 `tools/benchmark` ran on both sample sets and a layout variant with two candidate models (`llama-3.3-70b-instruct-fp8-fast` baseline, `llama-3.1-8b-instruct`), same profiles, chunks, validators and identity resolver; reported requests, time, repairs, measured tokens, estimated neurons, schema/evidence/value-supported rates, recall, misses, safe holds, strict findings. Model selection stays in benchmark configuration (`tools/benchmark/src/candidates.ts`). Deriving production limits is NOT part of this tick: see 5.5. (R10.1)
   - [x] 5.4 Results and model/scope decision recorded in `docs/build-log.md` and `docs/model-comparison.md`: retain the 70B model (the 8B failed the quality bar: 21 vs 1 missed facts; strict findings 3/4 and 2/5 vs 4/4 and 4/5); supported scope = the measured benchmark envelope (single-chunk text PDFs of up to about 400 characters). (R10.2)
   - [ ] 5.5 **OPEN.** Derive and set `DAILY_ADMISSION_CEILING`, `MAX_CHARS`, `MAX_BLOCKS`, `MAX_BLOCK_CHARS` and the profile token caps from measurements on realistic-size documents against the deployed Worker and Durable Object (binding path, 25 s timeout). The benchmark envelope (documents of up to about 400 characters, single chunk, eight documents, one run each) does not support any public ceiling; `DAILY_ADMISSION_CEILING` stays `0`. Dashboard-confirmed consumption (not just per-token prices) is required for the neuron budget. (R8.7, R10.1)
-- [ ] 6. Minimal app shells on labelled fixtures
-  - [ ] 6.1 `packages/ui` primitives: status badge (text + icon), evidence viewer, banner, review panel; keyboard focus, AA contrast, reduced motion. (R13)
-  - [ ] 6.2 ScopeCheck Adapter (schemas, rules for quantity/spec/exclusion/omission) and minimal page on structured fixtures labelled "Sample (fictional)". (R2.4–2.7, R9)
-  - [ ] 6.3 PackCheck grant Adapter (rules in design §4) and minimal page on structured fixtures labelled "Sample (fictional)". (R3.2–3.7, R9)
-  - [ ] 6.4 Golden fixture tests: zero false critical findings. (R10.5)
-  - [ ] 6.5 Review interface and exports: rejected or held critical fields appear as Needs review items; dependent comparisons show **Not evaluated** with reason and blocked input, in a separate section of the panel and of every export; never rendered as "no difference". Reuse the ScopeCheck identity resolver (`apps/scopecheck/src/adapter/identity.ts`) and the benchmark's comparison ledger shape. (R4.9, R7.6)
+- [x] 6. Minimal app shells on labelled fixtures (done in sample mode; live upload path is task 8)
+  - [x] 6.1 `packages/ui` primitives: status badge (text + icon), evidence viewer, banner, review panel; keyboard focus, AA contrast, reduced motion. (R13) Done: `StatusBadge`, `SampleBanner`, `EvidenceView`, `FindingCard`, `ReviewQueue`, `NotEvaluatedList`, `DocumentsPanel`, `ExportPanel`, session logic. Colours are dark-on-light and status is text + icon, but contrast was NOT measured with a tool; automated axe checks are task 11.
+  - [x] 6.2 ScopeCheck Adapter (schemas, rules for quantity/spec/exclusion/omission) and minimal page on structured fixtures labelled "Sample (fictional)". (R2.4–2.7, R9) Done: `apps/scopecheck/src/adapter` (shared identity resolver, rules, matching), comparison view, two sample sets.
+  - [x] 6.3 PackCheck grant Adapter (rules in design §4) and minimal page on structured fixtures labelled "Sample (fictional)". (R3.2–3.7, R9) Done: `apps/packcheck/src/adapter`, attachment and field checks.
+  - [x] 6.4 Golden fixture tests: zero false critical findings. (R10.5) Done: golden tests per app; the known `quote-c` miss is asserted, not hidden.
+  - [x] 6.5 Review interface and exports: rejected or held critical fields appear as Needs review items; dependent comparisons show **Not evaluated** with reason and blocked input, in a separate section of the panel and of every export; never rendered as "no difference". Reuse the ScopeCheck identity resolver (`apps/scopecheck/src/adapter/identity.ts`) and the benchmark's comparison ledger shape. (R4.9, R7.6) Done in both apps and in the text/CSV exports.
 - [ ] 7. First deployments
   - [ ] 7.1 Two Pages projects and the Worker; origins and limits configured. Keep the endpoint closed to the public until 3.3 limits pass tests. (R11.5, R8.7)
   - [ ] 7.2 Optional hook: rerun golden fixtures on engine rule changes, only if supported; record honestly. (R12.3)

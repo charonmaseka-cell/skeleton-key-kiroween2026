@@ -1,12 +1,72 @@
-import { AppShell } from '@skeleton-key/ui';
-import { ENGINE_NAME, ENGINE_VERSION } from '@skeleton-key/engine';
+import { useState } from 'react';
+import { AppShell, LiveBanner, ReviewWorkspace, SampleBanner, UploadPanel, useSession, type Fixture, type UploadDeps, type UploadSlot } from '@skeleton-key/ui';
+import { ComparisonMatrix } from './ComparisonMatrix';
+import { scopeCheckAdapter } from './adapter';
+import { FIXTURES } from './fixtures';
 
-export function App() {
+const NAV = [
+  { href: '#upload', label: 'Analyse your documents' },
+  { href: '#matrix-h', label: 'Comparison' },
+  { href: '#confirmed-h', label: 'Review queue' },
+  { href: '#ne-h', label: 'Not evaluated' },
+  { href: '#docs-h', label: 'Documents and values' },
+  { href: '#exp-h', label: 'Export' },
+];
+
+/** Document slots for the upload path: one RFQ and up to two quotations (2 to 5 quotations is a later task). */
+export const SCOPECHECK_SLOTS: UploadSlot[] = [
+  { id: 'rfq', role: 'rfq', label: 'RFQ', schemaId: 'scopecheck.rfq.v1', required: true },
+  { id: 'quote-1', role: 'quote', label: 'Quotation 1', schemaId: 'scopecheck.quote.v1', required: true },
+  { id: 'quote-2', role: 'quote', label: 'Quotation 2', schemaId: 'scopecheck.quote.v1', required: false },
+];
+
+/** Base URL of the extraction Worker, set at build time. Unset means: no analysis service is connected. */
+const API_URL = (import.meta.env.VITE_EXTRACTION_API_URL as string | undefined) || undefined;
+
+export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: string } = {}) {
+  const [live, setLive] = useState<Fixture | null>(null);
+  const session = useSession(scopeCheckAdapter, live ? [...FIXTURES, live] : FIXTURES);
+  const { fixture, view } = session;
   return (
-    <AppShell title="ScopeCheck" tagline="Compare supplier quotations against an RFQ.">
-      <p>
-        Scaffold only. No document processing yet. Engine: {ENGINE_NAME} v{ENGINE_VERSION}.
-      </p>
+    <AppShell
+      title="ScopeCheck"
+      tagline="Compare supplier quotations against an RFQ. Differences are stated only when the values are validated; everything uncertain stays in Needs review."
+      banner={fixture.sample ? <SampleBanner note={fixture.extraction.note} /> : <LiveBanner note={fixture.extraction.note} />}
+      nav={NAV}
+      announcement={session.announcement}
+    >
+      <UploadPanel
+        idPrefix="scopecheck-upload"
+        slots={SCOPECHECK_SLOTS}
+        baseUrl={baseUrl}
+        deps={deps}
+        onResult={(f) => {
+          setLive(f);
+          session.setFixtureId(f.id);
+        }}
+      />
+      <section aria-labelledby="set-h" className="space-y-2">
+        <h2 id="set-h" className="text-xl font-semibold">
+          Sample set
+        </h2>
+        <label htmlFor="fixture" className="block text-sm font-medium">
+          Choose a sample set
+        </label>
+        <select id="fixture" value={fixture.id} onChange={(e) => session.setFixtureId(e.target.value)} className="rounded border border-slate-700 px-2 py-1">
+          {session.fixtures.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.title} ({f.sample ? 'sample' : 'live'})
+            </option>
+          ))}
+        </select>{' '}
+        <button type="button" onClick={session.reset} className="rounded border border-slate-800 px-3 py-1">
+          Reset corrections, decisions and coverage
+        </button>
+        <p>{fixture.description}</p>
+      </section>
+      <ReviewWorkspace key={fixture.id} session={session} baseName={fixture.id}>
+        <ComparisonMatrix view={view} />
+      </ReviewWorkspace>
     </AppShell>
   );
 }

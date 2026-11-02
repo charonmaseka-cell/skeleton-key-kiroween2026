@@ -49,6 +49,10 @@ export type MockDefects = {
   dropItemCodes?: boolean;
   /** drop the magnitude word from money values ("R1.6 million" -> amount "1.6"), as the live model did with packcheck.grant.v1 */
   dropMagnitude?: boolean;
+  /** a call whose chunk matches this predicate fails (a chunk that is never processed) */
+  failChunkWhen?: (blocks: { id: string; text: string }[]) => boolean;
+  /** a call whose chunk matches this predicate succeeds but returns no claims (a chunk the model missed) */
+  emptyChunkWhen?: (blocks: { id: string; text: string }[]) => boolean;
   /** make every call fail with this message */
   fail?: string;
 };
@@ -66,7 +70,9 @@ export function oracleAi(samples: Sample[], defects: MockDefects = {}): Ai & { c
       if (defects.badJsonFirst && calls === 1) return { response: 'not json', usage: { prompt_tokens: 100, completion_tokens: 3 } };
       const user = (input as { messages: { role: string; content: string }[] }).messages.find((m) => m.role === 'user')!.content;
       const sent = (JSON.parse(user.slice(user.indexOf('\n') + 1)) as { blocks: { id: string; text: string }[] }).blocks;
+      if (defects.failChunkWhen?.(sent)) throw new Error('upstream error on this chunk');
       const claims: Record<string, unknown>[] = [];
+      if (defects.emptyChunkWhen?.(sent)) return { response: { claims }, usage: { prompt_tokens: 100, completion_tokens: 5 } };
       for (const sample of samples) {
         for (const doc of sample.docs) {
           for (const f of doc.facts) {

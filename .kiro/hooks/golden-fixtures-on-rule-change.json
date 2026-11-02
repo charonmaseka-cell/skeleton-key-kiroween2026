@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Rerun golden fixtures when engine or rule code changes",
+      "trigger": "PostFileSave",
+      "description": "After the agent saves engine source, an app adapter or a fixture, rerun the golden and review-regression fixture tests for both apps. CI remains authoritative.",
+      "matcher": "(packages/engine/src/|apps/(scopecheck|packcheck)/src/adapter/|samples/fixtures/)",
+      "action": {
+        "type": "command",
+        "command": "npx vitest run apps/scopecheck/src/golden.test.ts apps/scopecheck/src/review-fixes.test.ts apps/packcheck/src/golden.test.ts apps/packcheck/src/review-fixes.test.ts",
+        "timeout": 120
+      }
+    }
+  ]
+}

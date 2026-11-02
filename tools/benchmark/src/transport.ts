@@ -35,7 +35,10 @@ export class LocalTransport implements Transport {
 
   async extract(schemaId: string, blocks: Pick<Block, 'id' | 'text'>[]): Promise<ExtractResult> {
     const now = this.opts.now ?? Date.now;
-    const before = this.opts.counter.usedToday?.(now()) ?? 0;
+    // Attempts are counted per request (every admission this request was granted), not as a difference of the shared daily
+    // counter, so requests running at the same time cannot be charged for each other's attempts.
+    let granted = 0;
+    const counter = { admit: async (ceiling: number, nowMs: number) => { const r = await this.opts.counter.admit(ceiling, nowMs); if (r.ok) granted++; return r; } };
     const started = performance.now();
     const res = await handle(
       new Request('https://worker.local/extract', {
@@ -44,12 +47,11 @@ export class LocalTransport implements Transport {
         body: JSON.stringify({ schemaId, blocks: blocks.map((b) => ({ id: b.id, text: b.text })) }),
       }),
       { ALLOWED_ORIGINS: ORIGIN, ...this.opts.env },
-      { now, counter: this.opts.counter, ai: this.opts.ai, log: () => undefined },
+      { now, counter, ai: this.opts.ai, log: () => undefined },
     );
     const ms = Math.round(performance.now() - started);
     const json = (await res.json()) as { claims?: unknown[]; meta?: ExtractMeta & { usage: ExtractMeta['usage'] }; error?: { code: string } };
-    const after = this.opts.counter.usedToday?.(now()) ?? before;
-    const charged = this.opts.counter.usedToday ? after - before : (json.meta?.attempts ?? 1);
+    const charged = granted;
     if (res.status === 200 && json.claims && json.meta) return { ok: true, claims: json.claims, meta: json.meta, ms, attemptsCharged: charged };
     return { ok: false, status: res.status, code: json.error?.code ?? 'unknown', ms, attemptsCharged: charged };
   }

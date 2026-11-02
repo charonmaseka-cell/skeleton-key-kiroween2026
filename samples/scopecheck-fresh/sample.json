@@ -1,0 +1,1271 @@
+{
+  "id": "scopecheck-fresh",
+  "family": "scopecheck",
+  "label": "Fresh-document validation: a new tender, a positioned-column quotation and a prose quotation (fictional)",
+  "preregistration": "Written and committed BEFORE any model extraction on these documents (SC-T12). Expected findings follow from the seeded differences in tools/benchmark/src/fresh-scopecheck.ts. Quotation A (positioned table): LB-3110 quantity 8 -> 6; LB-3115 specification \"1 mg\" for \"0.1 mg\"; FD-4202 specification IP65 for IP68; FD-4215 absent; CL-6401 described with a standard (ISO-17034) next to its own reference, so its identity is uncertain and the requirement stays unmatched; one exclusion. Quotation B (prose): LB-3101 quantity 6 -> 5; LB-3102 specification 0-100 NTU for 0-1000 NTU; SP-5302 absent; two exclusions on separate lines (VAT, carriage). NOT differences, so no finding is expected: quotation A LB-3101 specification is \"c/w 0.01 pH resolution\" (a leading connector); every other row agrees. Absences are Needs review while coverage is unverified; the two with stateIfCoverageConfirmed become confirmed only if coverage is confirmed. CL-6401 stays Needs review either way. Wrapped descriptions (LB-3115 and FD-4215 in the tender, LB-3115 in quotation A): the description continues on a second line, evidence cannot span two lines, so the labelled item value is the first line. Block ids are fixed by the layout (PAGE_ROWS rows per page). Labels are never read by extraction, chunking or matching.",
+  "docs": [
+    {
+      "id": "rfq",
+      "file": "rfq.pdf",
+      "role": "rfq",
+      "schemaId": "scopecheck.rfq.v1",
+      "lines": [
+        "Tender TN-7731: Supply of laboratory and field instruments (fictional sample)",
+        "Issued by the Ridgeback Catchment Authority, a fictional public body.",
+        "Tenders close on 12 January 2027. All amounts are in South African rand.",
+        "Tenderers must price each line separately and keep to the order of the table below.",
+        "Notes for tenderers",
+        "Read all parts of this tender before preparing an offer.",
+        "Site visits can be arranged through the procurement office on written request.",
+        "Goods are delivered to the authority store at Ridgeback and signed for on arrival.",
+        "Each package must carry a label showing the line reference and the tender number.",
+        "Instruments must be supplied calibrated, with a certificate where one applies.",
+        "Operating manuals in English must accompany each instrument.",
+        "Substitutes are accepted only when stated clearly and priced apart from the main offer.",
+        "The authority may ask for a working sample before it makes an award.",
+        "Questions about this tender are answered in writing to every tenderer together.",
+        "Nothing in this tender commits the authority to buy any item shown.",
+        "Required goods",
+        "Ref Description Qty Requirement",
+        "LB-3101 Digital pH meter 6 each 0.01 pH resolution",
+        "LB-3102 Turbidity meter 4 each 0-1000 NTU, battery powered",
+        "LB-3110 Magnetic stirrer 8 each hotplate, up to 300 C",
+        "LB-3115 Analytical balance with 2 each 220 g, 0.1 mg readability",
+        "draught shield",
+        "FD-4201 Water level logger 20 each 10 m range, vented cable",
+        "FD-4202 Flow velocity probe 5 each 0.1-5 m/s, IP68",
+        "FD-4210 Rain gauge 12 each tipping bucket, 0.2 mm",
+        "FD-4215 Soil moisture sensor with 30 each capacitance type, 3 m cable",
+        "datalogger interface",
+        "SP-5301 Sample bottle 500 ml 400 each HDPE, wide neck",
+        "SP-5302 Sample bottle 1 l 200 each amber glass",
+        "SP-5310 Cool box 45 l 10 each insulated, 48 hour hold",
+        "CL-6401 Calibration standard set 15 sets pH 4, 7 and 10, 250 ml",
+        "Conditions of tender",
+        "Offers stay open for ninety days after the closing date.",
+        "Prices are firm until delivery and are quoted without VAT.",
+        "A tenderer must say plainly what its price leaves out.",
+        "Delivery is expected within six weeks of a written order.",
+        "The authority may place its order with more than one tenderer.",
+        "Late offers are returned without being read.",
+        "Payment follows thirty days after a correct invoice is received.",
+        "The authority does not have to accept the lowest offer or any offer.",
+        "This document and everything in it is invented for software testing only.",
+        "No real company, product or price is meant by any figure shown here."
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3101 Digital pH meter",
+          "value": "LB-3101 Digital pH meter",
+          "line": 17
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "6 each",
+          "value": {
+            "value": "6",
+            "unit": "each"
+          },
+          "line": 17
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0.01 pH resolution",
+          "value": "0.01 pH resolution",
+          "line": 17
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3102 Turbidity meter",
+          "value": "LB-3102 Turbidity meter",
+          "line": 18
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "4 each",
+          "value": {
+            "value": "4",
+            "unit": "each"
+          },
+          "line": 18
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0-1000 NTU, battery powered",
+          "value": "0-1000 NTU, battery powered",
+          "line": 18
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3110 Magnetic stirrer",
+          "value": "LB-3110 Magnetic stirrer",
+          "line": 19
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "8 each",
+          "value": {
+            "value": "8",
+            "unit": "each"
+          },
+          "line": 19
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "hotplate, up to 300 C",
+          "value": "hotplate, up to 300 C",
+          "line": 19
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3115 Analytical balance with",
+          "value": "LB-3115 Analytical balance with",
+          "line": 20
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "2 each",
+          "value": {
+            "value": "2",
+            "unit": "each"
+          },
+          "line": 20
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "220 g, 0.1 mg readability",
+          "value": "220 g, 0.1 mg readability",
+          "line": 20
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4201 Water level logger",
+          "value": "FD-4201 Water level logger",
+          "line": 22
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "20 each",
+          "value": {
+            "value": "20",
+            "unit": "each"
+          },
+          "line": 22
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "10 m range, vented cable",
+          "value": "10 m range, vented cable",
+          "line": 22
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4202 Flow velocity probe",
+          "value": "FD-4202 Flow velocity probe",
+          "line": 23
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "5 each",
+          "value": {
+            "value": "5",
+            "unit": "each"
+          },
+          "line": 23
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0.1-5 m/s, IP68",
+          "value": "0.1-5 m/s, IP68",
+          "line": 23
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4210 Rain gauge",
+          "value": "FD-4210 Rain gauge",
+          "line": 24
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "12 each",
+          "value": {
+            "value": "12",
+            "unit": "each"
+          },
+          "line": 24
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "tipping bucket, 0.2 mm",
+          "value": "tipping bucket, 0.2 mm",
+          "line": 24
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4215 Soil moisture sensor with",
+          "value": "FD-4215 Soil moisture sensor with",
+          "line": 25
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "30 each",
+          "value": {
+            "value": "30",
+            "unit": "each"
+          },
+          "line": 25
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "capacitance type, 3 m cable",
+          "value": "capacitance type, 3 m cable",
+          "line": 25
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5301 Sample bottle 500 ml",
+          "value": "SP-5301 Sample bottle 500 ml",
+          "line": 27
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "400 each",
+          "value": {
+            "value": "400",
+            "unit": "each"
+          },
+          "line": 27
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "HDPE, wide neck",
+          "value": "HDPE, wide neck",
+          "line": 27
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5302 Sample bottle 1 l",
+          "value": "SP-5302 Sample bottle 1 l",
+          "line": 28
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "200 each",
+          "value": {
+            "value": "200",
+            "unit": "each"
+          },
+          "line": 28
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "amber glass",
+          "value": "amber glass",
+          "line": 28
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5310 Cool box 45 l",
+          "value": "SP-5310 Cool box 45 l",
+          "line": 29
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "10 each",
+          "value": {
+            "value": "10",
+            "unit": "each"
+          },
+          "line": 29
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "insulated, 48 hour hold",
+          "value": "insulated, 48 hour hold",
+          "line": 29
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "CL-6401 Calibration standard set",
+          "value": "CL-6401 Calibration standard set",
+          "line": 30
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "15 sets",
+          "value": {
+            "value": "15",
+            "unit": "sets"
+          },
+          "line": 30
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "pH 4, 7 and 10, 250 ml",
+          "value": "pH 4, 7 and 10, 250 ml",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "id": "quote-a",
+      "file": "quote-a.pdf",
+      "role": "quote",
+      "schemaId": "scopecheck.quote.v1",
+      "lines": [
+        "Quotation 2207-HL from Hydro-Lab Supplies, a fictional supplier.",
+        "Our reply to tender TN-7731. Prices are in rand and the offer stays open for ninety days.",
+        "Our prices",
+        "Ref Item offered Qty Unit price Notes",
+        "LB-3101 Digital pH meter 6 each R 3 450 c/w 0.01 pH resolution",
+        "LB-3102 Turbidity meter 4 each R 6 900 0-1000 NTU, battery powered",
+        "LB-3110 Magnetic stirrer 6 each R 2 150 hotplate, up to 300 C",
+        "LB-3115 Analytical balance with 2 each R 24 800 220 g, 1 mg readability",
+        "draught shield",
+        "FD-4201 Water level logger 20 each R 4 300 10 m range, vented cable",
+        "FD-4202 Flow velocity probe 5 each R 18 200 0.1-5 m/s, IP65",
+        "FD-4210 Rain gauge 12 each R 1 950 tipping bucket, 0.2 mm",
+        "SP-5301 Sample bottle 500 ml 400 each R 18 HDPE, wide neck",
+        "SP-5302 Sample bottle 1 l 200 each R 42 amber glass",
+        "SP-5310 Cool box 45 l 10 each R 890 insulated, 48 hour hold",
+        "CL-6401 Calibration set to ISO-17034 15 sets R 640 pH 4, 7 and 10, 250 ml",
+        "Not included in these prices: installation and training.",
+        "Our terms",
+        "Delivery takes about six weeks from a written order.",
+        "Payment is due thirty days after invoice.",
+        "Goods carry the maker guarantee.",
+        "Every instrument is supplied with an English manual.",
+        "Calibration certificates are included where they apply.",
+        "This quotation is invented for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3101 Digital pH meter",
+          "value": "LB-3101 Digital pH meter",
+          "line": 4
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "6 each",
+          "value": {
+            "value": "6",
+            "unit": "each"
+          },
+          "line": 4
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 3 450",
+          "value": {
+            "amount": "3450",
+            "currency": "ZAR"
+          },
+          "line": 4
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "c/w 0.01 pH resolution",
+          "value": "c/w 0.01 pH resolution",
+          "line": 4
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3102 Turbidity meter",
+          "value": "LB-3102 Turbidity meter",
+          "line": 5
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "4 each",
+          "value": {
+            "value": "4",
+            "unit": "each"
+          },
+          "line": 5
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 6 900",
+          "value": {
+            "amount": "6900",
+            "currency": "ZAR"
+          },
+          "line": 5
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0-1000 NTU, battery powered",
+          "value": "0-1000 NTU, battery powered",
+          "line": 5
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3110 Magnetic stirrer",
+          "value": "LB-3110 Magnetic stirrer",
+          "line": 6
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "6 each",
+          "value": {
+            "value": "6",
+            "unit": "each"
+          },
+          "line": 6
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 2 150",
+          "value": {
+            "amount": "2150",
+            "currency": "ZAR"
+          },
+          "line": 6
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "hotplate, up to 300 C",
+          "value": "hotplate, up to 300 C",
+          "line": 6
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3115 Analytical balance with",
+          "value": "LB-3115 Analytical balance with",
+          "line": 7
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "2 each",
+          "value": {
+            "value": "2",
+            "unit": "each"
+          },
+          "line": 7
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 24 800",
+          "value": {
+            "amount": "24800",
+            "currency": "ZAR"
+          },
+          "line": 7
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "220 g, 1 mg readability",
+          "value": "220 g, 1 mg readability",
+          "line": 7
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4201 Water level logger",
+          "value": "FD-4201 Water level logger",
+          "line": 9
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "20 each",
+          "value": {
+            "value": "20",
+            "unit": "each"
+          },
+          "line": 9
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 4 300",
+          "value": {
+            "amount": "4300",
+            "currency": "ZAR"
+          },
+          "line": 9
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "10 m range, vented cable",
+          "value": "10 m range, vented cable",
+          "line": 9
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4202 Flow velocity probe",
+          "value": "FD-4202 Flow velocity probe",
+          "line": 10
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "5 each",
+          "value": {
+            "value": "5",
+            "unit": "each"
+          },
+          "line": 10
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 18 200",
+          "value": {
+            "amount": "18200",
+            "currency": "ZAR"
+          },
+          "line": 10
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0.1-5 m/s, IP65",
+          "value": "0.1-5 m/s, IP65",
+          "line": 10
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4210 Rain gauge",
+          "value": "FD-4210 Rain gauge",
+          "line": 11
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "12 each",
+          "value": {
+            "value": "12",
+            "unit": "each"
+          },
+          "line": 11
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 1 950",
+          "value": {
+            "amount": "1950",
+            "currency": "ZAR"
+          },
+          "line": 11
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "tipping bucket, 0.2 mm",
+          "value": "tipping bucket, 0.2 mm",
+          "line": 11
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5301 Sample bottle 500 ml",
+          "value": "SP-5301 Sample bottle 500 ml",
+          "line": 12
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "400 each",
+          "value": {
+            "value": "400",
+            "unit": "each"
+          },
+          "line": 12
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 18",
+          "value": {
+            "amount": "18",
+            "currency": "ZAR"
+          },
+          "line": 12
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "HDPE, wide neck",
+          "value": "HDPE, wide neck",
+          "line": 12
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5302 Sample bottle 1 l",
+          "value": "SP-5302 Sample bottle 1 l",
+          "line": 13
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "200 each",
+          "value": {
+            "value": "200",
+            "unit": "each"
+          },
+          "line": 13
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 42",
+          "value": {
+            "amount": "42",
+            "currency": "ZAR"
+          },
+          "line": 13
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "amber glass",
+          "value": "amber glass",
+          "line": 13
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5310 Cool box 45 l",
+          "value": "SP-5310 Cool box 45 l",
+          "line": 14
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "10 each",
+          "value": {
+            "value": "10",
+            "unit": "each"
+          },
+          "line": 14
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 890",
+          "value": {
+            "amount": "890",
+            "currency": "ZAR"
+          },
+          "line": 14
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "insulated, 48 hour hold",
+          "value": "insulated, 48 hour hold",
+          "line": 14
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "CL-6401 Calibration set to ISO-17034",
+          "value": "CL-6401 Calibration set to ISO-17034",
+          "line": 15
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "15 sets",
+          "value": {
+            "value": "15",
+            "unit": "sets"
+          },
+          "line": 15
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 640",
+          "value": {
+            "amount": "640",
+            "currency": "ZAR"
+          },
+          "line": 15
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "pH 4, 7 and 10, 250 ml",
+          "value": "pH 4, 7 and 10, 250 ml",
+          "line": 15
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "excerpt": "installation and training",
+          "value": "installation and training",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "id": "quote-b",
+      "file": "quote-b.pdf",
+      "role": "quote",
+      "schemaId": "scopecheck.quote.v1",
+      "lines": [
+        "Offer DF/0098 from Delta Field Instruments, a fictional company.",
+        "We refer to tender TN-7731. All prices exclude VAT.",
+        "What we can supply",
+        "LB-3101 Digital pH meter: 5 each offered, 0.01 pH resolution, R 3 450 each.",
+        "Offered: 4 each LB-3102 Turbidity meter (0-100 NTU, battery powered) at R 6 900 each.",
+        "LB-3110 Magnetic stirrer: 8 each offered, hotplate, up to 300 C, R 2 150 each.",
+        "Offered: 2 each LB-3115 Analytical balance with draught shield (220 g, 0.1 mg readability) at R 24 800 each.",
+        "FD-4201 Water level logger: 20 each offered, 10 m range, vented cable, R 4 300 each.",
+        "Offered: 5 each FD-4202 Flow velocity probe (0.1-5 m/s, IP68) at R 18 200 each.",
+        "FD-4210 Rain gauge: 12 each offered, tipping bucket, 0.2 mm, R 1 950 each.",
+        "Offered: 30 each FD-4215 Soil moisture sensor with datalogger interface (capacitance type, 3 m cable) at R 1 250 each.",
+        "SP-5301 Sample bottle 500 ml: 400 each offered, HDPE, wide neck, R 18 each.",
+        "Offered: 10 each SP-5310 Cool box 45 l (insulated, 48 hour hold) at R 890 each.",
+        "CL-6401 Calibration standard set: 15 sets offered, pH 4, 7 and 10, 250 ml, R 640 each.",
+        "Carriage to site and installation are excluded from this offer.",
+        "Other terms",
+        "Delivery takes about six weeks from a written order.",
+        "Payment is due thirty days after invoice.",
+        "Goods carry the maker guarantee.",
+        "Every instrument is supplied with an English manual.",
+        "Calibration certificates are included where they apply.",
+        "This quotation is invented for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "excerpt": "All prices exclude VAT",
+          "value": "All prices exclude VAT",
+          "line": 1
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3101 Digital pH meter",
+          "value": "LB-3101 Digital pH meter",
+          "line": 3
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "5 each",
+          "value": {
+            "value": "5",
+            "unit": "each"
+          },
+          "line": 3
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0.01 pH resolution",
+          "value": "0.01 pH resolution",
+          "line": 3
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 3 450 each",
+          "value": {
+            "amount": "3450",
+            "currency": "ZAR"
+          },
+          "line": 3
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3102 Turbidity meter",
+          "value": "LB-3102 Turbidity meter",
+          "line": 4
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "4 each",
+          "value": {
+            "value": "4",
+            "unit": "each"
+          },
+          "line": 4
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0-100 NTU, battery powered",
+          "value": "0-100 NTU, battery powered",
+          "line": 4
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 6 900 each",
+          "value": {
+            "amount": "6900",
+            "currency": "ZAR"
+          },
+          "line": 4
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3110 Magnetic stirrer",
+          "value": "LB-3110 Magnetic stirrer",
+          "line": 5
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "8 each",
+          "value": {
+            "value": "8",
+            "unit": "each"
+          },
+          "line": 5
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "hotplate, up to 300 C",
+          "value": "hotplate, up to 300 C",
+          "line": 5
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 2 150 each",
+          "value": {
+            "amount": "2150",
+            "currency": "ZAR"
+          },
+          "line": 5
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "LB-3115 Analytical balance with draught shield",
+          "value": "LB-3115 Analytical balance with draught shield",
+          "line": 6
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "2 each",
+          "value": {
+            "value": "2",
+            "unit": "each"
+          },
+          "line": 6
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "220 g, 0.1 mg readability",
+          "value": "220 g, 0.1 mg readability",
+          "line": 6
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 24 800 each",
+          "value": {
+            "amount": "24800",
+            "currency": "ZAR"
+          },
+          "line": 6
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4201 Water level logger",
+          "value": "FD-4201 Water level logger",
+          "line": 7
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "20 each",
+          "value": {
+            "value": "20",
+            "unit": "each"
+          },
+          "line": 7
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "10 m range, vented cable",
+          "value": "10 m range, vented cable",
+          "line": 7
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 4 300 each",
+          "value": {
+            "amount": "4300",
+            "currency": "ZAR"
+          },
+          "line": 7
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4202 Flow velocity probe",
+          "value": "FD-4202 Flow velocity probe",
+          "line": 8
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "5 each",
+          "value": {
+            "value": "5",
+            "unit": "each"
+          },
+          "line": 8
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "0.1-5 m/s, IP68",
+          "value": "0.1-5 m/s, IP68",
+          "line": 8
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 18 200 each",
+          "value": {
+            "amount": "18200",
+            "currency": "ZAR"
+          },
+          "line": 8
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4210 Rain gauge",
+          "value": "FD-4210 Rain gauge",
+          "line": 9
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "12 each",
+          "value": {
+            "value": "12",
+            "unit": "each"
+          },
+          "line": 9
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "tipping bucket, 0.2 mm",
+          "value": "tipping bucket, 0.2 mm",
+          "line": 9
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 1 950 each",
+          "value": {
+            "amount": "1950",
+            "currency": "ZAR"
+          },
+          "line": 9
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "FD-4215 Soil moisture sensor with datalogger interface",
+          "value": "FD-4215 Soil moisture sensor with datalogger interface",
+          "line": 10
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "30 each",
+          "value": {
+            "value": "30",
+            "unit": "each"
+          },
+          "line": 10
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "capacitance type, 3 m cable",
+          "value": "capacitance type, 3 m cable",
+          "line": 10
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 1 250 each",
+          "value": {
+            "amount": "1250",
+            "currency": "ZAR"
+          },
+          "line": 10
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5301 Sample bottle 500 ml",
+          "value": "SP-5301 Sample bottle 500 ml",
+          "line": 11
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "400 each",
+          "value": {
+            "value": "400",
+            "unit": "each"
+          },
+          "line": 11
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "HDPE, wide neck",
+          "value": "HDPE, wide neck",
+          "line": 11
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 18 each",
+          "value": {
+            "amount": "18",
+            "currency": "ZAR"
+          },
+          "line": 11
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "SP-5310 Cool box 45 l",
+          "value": "SP-5310 Cool box 45 l",
+          "line": 12
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "10 each",
+          "value": {
+            "value": "10",
+            "unit": "each"
+          },
+          "line": 12
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "insulated, 48 hour hold",
+          "value": "insulated, 48 hour hold",
+          "line": 12
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 890 each",
+          "value": {
+            "amount": "890",
+            "currency": "ZAR"
+          },
+          "line": 12
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "excerpt": "CL-6401 Calibration standard set",
+          "value": "CL-6401 Calibration standard set",
+          "line": 13
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "excerpt": "15 sets",
+          "value": {
+            "value": "15",
+            "unit": "sets"
+          },
+          "line": 13
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "excerpt": "pH 4, 7 and 10, 250 ml",
+          "value": "pH 4, 7 and 10, 250 ml",
+          "line": 13
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "excerpt": "R 640 each",
+          "value": {
+            "amount": "640",
+            "currency": "ZAR"
+          },
+          "line": 13
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "excerpt": "Carriage to site and installation are excluded",
+          "value": "Carriage to site and installation are excluded",
+          "line": 14
+        }
+      ]
+    }
+  ],
+  "expectedFindings": [
+    {
+      "code": "quantity.differs",
+      "subject": "LB-3110:quantity",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "LB-3115:specification",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "FD-4202:specification",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "item.absent",
+      "subject": "FD-4215",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "item.identity_uncertain",
+      "subject": "quote-a:p1-l16:item",
+      "response": "quote-a",
+      "severity": "warning",
+      "state": "needs_review"
+    },
+    {
+      "code": "item.absent",
+      "subject": "CL-6401",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "needs_review"
+    },
+    {
+      "code": "exclusion.stated",
+      "subject": "quote-a:p1-l17:exclusion",
+      "response": "quote-a",
+      "severity": "info",
+      "state": "confirmed"
+    },
+    {
+      "code": "quantity.differs",
+      "subject": "LB-3101:quantity",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "LB-3102:specification",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "item.absent",
+      "subject": "SP-5302",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "exclusion.stated",
+      "subject": "quote-b:p1-l2:exclusion",
+      "response": "quote-b",
+      "severity": "info",
+      "state": "confirmed"
+    },
+    {
+      "code": "exclusion.stated",
+      "subject": "quote-b:p1-l15:exclusion",
+      "response": "quote-b",
+      "severity": "info",
+      "state": "confirmed"
+    }
+  ]
+}

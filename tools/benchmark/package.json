@@ -6,7 +6,8 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "samples": "tsx src/generate-samples.ts",
-    "bench": "tsx src/cli.ts"
+    "bench": "tsx src/cli.ts",
+    "fixtures": "tsx src/build-fixtures.ts"
   },
   "devDependencies": {
     "@skeleton-key/engine": "^0.0.0",

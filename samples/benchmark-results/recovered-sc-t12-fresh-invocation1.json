@@ -1,0 +1,118 @@
+{
+  "recoveredFromRawLog": true,
+  "note": "Rebuilt OFFLINE from the raw response log of an interrupted run. The listed chunks were answered live; their claims are the Worker's own parse of the logged output, verified by the SHA-256 of the exact request. Nothing here was sent again. Calls with no end line have no response and recover nothing.",
+  "rawLog": "samples/benchmark-results/raw-sc-t12-fresh-2026-11-01T22-55-52-075Z.jsonl",
+  "callsWithoutResponse": [
+    2
+  ],
+  "successfulCallsNotMatchedToAChunk": [],
+  "requests": [
+    {
+      "docId": "rfq",
+      "chunk": 1,
+      "blocks": 20,
+      "chars": 1262,
+      "ok": true,
+      "ms": 10254,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 9,
+      "dropped": 0,
+      "recoveredFromRawLog": true,
+      "rawCall": 1,
+      "promptSha256": "d01a401308300e171f253d55bac34b142dd13bc84e4ac9835db893e647456223",
+      "usage": {
+        "prompt_tokens": 770,
+        "completion_tokens": 347,
+        "total_tokens": 1117,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "neurons": 91.60155487060547
+      }
+    }
+  ],
+  "samples": [
+    {
+      "docs": [
+        {
+          "docId": "rfq",
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l18",
+              "excerpt": "Digital pH meter",
+              "value": "Digital pH meter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l18",
+              "excerpt": "6 each",
+              "value": {
+                "value": "6",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l18",
+              "excerpt": "0.01 pH resolution",
+              "value": "0.01 pH resolution"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l19",
+              "excerpt": "Turbidity meter",
+              "value": "Turbidity meter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l19",
+              "excerpt": "4 each",
+              "value": {
+                "value": "4",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l19",
+              "excerpt": "0-1000 NTU, battery powered",
+              "value": "0-1000 NTU, battery powered"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l20",
+              "excerpt": "Magnetic stirrer",
+              "value": "Magnetic stirrer"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l20",
+              "excerpt": "8 each",
+              "value": {
+                "value": "8",
+                "unit": "each"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l20",
+              "excerpt": "hotplate, up to 300 C",
+              "value": "hotplate, up to 300 C"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

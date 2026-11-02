@@ -1,0 +1,383 @@
+{
+  "id": "packcheck-realistic",
+  "family": "packcheck",
+  "label": "Realistic grant pack: four documents, two attachments missing, a legal-form name difference, a funding difference, a held ambiguous date and a genuine end-date difference (fictional)",
+  "preregistration": "Written and committed BEFORE any model extraction on these documents (PC-T1). Expected findings follow from the seeded differences in tools/benchmark/src/realistic-packcheck.ts. The requirements list nine attachments; the form lists seven. \"Tax clearance certificate\" and \"Bank confirmation letter\" are not listed (Needs review while coverage is unverified; Confirmed if coverage is confirmed). \"Letter of support\" is listed for the requirement \"Letters of support\": that is only a SUGGESTED match (match scores are suggestions), so the requirement stays Needs review, with or without coverage. CORRECTION made before any inference: the first draft of this note called the singular/plural pair \"not a difference\"; an offline rule check on ideal extraction showed the rules, correctly by the project's own principle, keep it as Needs review, so the expectation was corrected here. The budget names the applicant without its legal form (\"Riverbend Water Stewards\" for \"... NPC\"): Needs review, not a confirmed difference. The form asks R2.4 million (written with a magnitude word) and the budget R 2 450 000: a confirmed difference. The budget period 01/04/2027 to 30/09/2028: the start date is ambiguous (day and month both 12 or less) and must be held for review, the end date is unambiguous and differs from the form (31 March 2028): confirmed. Total project budget R 3 150 000 is not below the funding requested: no budget finding. The registration certificate agrees with the form on the name. Distractors that are NOT the fields: award range R500 000 to R3 000 000, a previous grant of R450 000, closing date 15 December 2027, households served, budget lines, own contribution, registration date 12 June 2019. Labels are never read by extraction, chunking or matching.",
+  "docs": [
+    {
+      "id": "requirements",
+      "file": "requirements.pdf",
+      "role": "requirements",
+      "schemaId": "packcheck.grant.v2",
+      "lines": [
+        "Grant call GC-2027: Community Water Resilience Fund (fictional sample)",
+        "This note sets out what an applicant must send together with its application form.",
+        "Applications close on 15 December 2027 and late applications are not read.",
+        "Awards range between R500 000 and R3 000 000 depending on the size of the project.",
+        "Who may apply",
+        "Registered non-profit organisations working on water supply in rural communities may apply.",
+        "An organisation may submit one application in each funding round.",
+        "Projects must be completed within eighteen months of the award.",
+        "What to attach",
+        "Every item below must be sent with the application. Documents are listed in the order they are read.",
+        "Required attachment: Application form",
+        "Required attachment: Project budget",
+        "Required attachment: Registration certificate",
+        "The registration certificate must show the legal name exactly as it appears on the application form.",
+        "Required attachment: Tax clearance certificate",
+        "Required attachment: Board resolution",
+        "Required attachment: Bank confirmation letter",
+        "Statements older than two years will not be accepted.",
+        "Required attachment: Annual financial statements",
+        "Required attachment: Project work plan",
+        "Required attachment: Letters of support",
+        "How applications are assessed",
+        "Each application is read by two assessors who score it against the published criteria.",
+        "Assessors look at need, value for money, community involvement and the strength of the plan.",
+        "The panel may ask an applicant to clarify any part of its application in writing.",
+        "Successful applicants are told by letter and the list of awards is published afterwards.",
+        "Funds are paid in three instalments linked to reports on progress.",
+        "The fund keeps the right to withdraw an award if information given turns out to be untrue.",
+        "Applicants should keep a copy of everything they send.",
+        "This note is invented for software testing only and describes no real grant."
+      ],
+      "facts": [
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Application form",
+          "value": "Application form",
+          "line": 10
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Project budget",
+          "value": "Project budget",
+          "line": 11
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Registration certificate",
+          "value": "Registration certificate",
+          "line": 12
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Tax clearance certificate",
+          "value": "Tax clearance certificate",
+          "line": 14
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Board resolution",
+          "value": "Board resolution",
+          "line": 15
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Bank confirmation letter",
+          "value": "Bank confirmation letter",
+          "line": 16
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Annual financial statements",
+          "value": "Annual financial statements",
+          "line": 18
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Project work plan",
+          "value": "Project work plan",
+          "line": 19
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Letters of support",
+          "value": "Letters of support",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "id": "application-form",
+      "file": "application-form.pdf",
+      "role": "form",
+      "schemaId": "packcheck.grant.v2",
+      "lines": [
+        "Application form for grant GC-2027 (fictional sample)",
+        "Please complete every section in plain language.",
+        "Applicant details",
+        "Organisation name: Riverbend Water Stewards NPC",
+        "Contact person: the programme manager, whose details are in the covering letter.",
+        "Number of households served: 1 200",
+        "Previous grant received: R450 000 in 2025 for a smaller borehole project.",
+        "The project",
+        "Funding requested: R2.4 million",
+        "Project start date: 1 April 2027",
+        "Project end date: 31 March 2028",
+        "The project repairs and extends the water supply to six villages along the Riverbend valley.",
+        "Work includes rehabilitating boreholes, installing storage tanks and training local caretakers.",
+        "Villagers will help to choose tank sites and will take part in the monitoring each month.",
+        "We expect the supply to reach every household within the project period.",
+        "Progress reports will be sent at the end of each quarter.",
+        "Attachments provided with this form",
+        "Attachment provided: Application form",
+        "Attachment provided: Project budget",
+        "Attachment provided: Registration certificate",
+        "Attachment provided: Board resolution",
+        "Attachment provided: Annual financial statements",
+        "Attachment provided: Project work plan",
+        "Attachment provided: Letter of support",
+        "Declaration",
+        "I confirm that the information in this form is correct to the best of my knowledge.",
+        "I understand that an award may be withdrawn if any information given is found to be untrue.",
+        "The organisation has not applied to any other fund for the same costs.",
+        "Signed for the organisation by its authorised officer.",
+        "This form is invented for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "excerpt": "Riverbend Water Stewards NPC",
+          "value": "Riverbend Water Stewards NPC",
+          "line": 3
+        },
+        {
+          "field": "funding_requested",
+          "kind": "money",
+          "excerpt": "R2.4 million",
+          "value": {
+            "amount": "2400000",
+            "currency": "ZAR"
+          },
+          "line": 8
+        },
+        {
+          "field": "project_start_date",
+          "kind": "date",
+          "excerpt": "1 April 2027",
+          "value": "2027-04-01",
+          "line": 9
+        },
+        {
+          "field": "project_end_date",
+          "kind": "date",
+          "excerpt": "31 March 2028",
+          "value": "2028-03-31",
+          "line": 10
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Application form",
+          "value": "Application form",
+          "line": 17
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Project budget",
+          "value": "Project budget",
+          "line": 18
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Registration certificate",
+          "value": "Registration certificate",
+          "line": 19
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Board resolution",
+          "value": "Board resolution",
+          "line": 20
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Annual financial statements",
+          "value": "Annual financial statements",
+          "line": 21
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Project work plan",
+          "value": "Project work plan",
+          "line": 22
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "excerpt": "Letter of support",
+          "value": "Letter of support",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "file": "budget.pdf",
+      "role": "supporting",
+      "schemaId": "packcheck.grant.v2",
+      "lines": [
+        "Project budget summary: Water Resilience Project (fictional sample)",
+        "Applicant: Riverbend Water Stewards",
+        "Project period: 01/04/2027 to 30/09/2028",
+        "All amounts are in South African rand and include VAT where it applies.",
+        "Budget lines",
+        "Borehole rehabilitation: R 1 150 000",
+        "Water tanks and stands: R 640 000",
+        "Community training: R 410 000",
+        "Monitoring equipment: R 380 000",
+        "Staff costs: R 420 000",
+        "Administration: R 150 000",
+        "Summary",
+        "Total project budget: R 3 150 000",
+        "Funding requested from this grant: R 2 450 000",
+        "Own contribution: R 700 000",
+        "Notes",
+        "The own contribution is made up of materials and labour given by the community.",
+        "Prices were checked against three supplier quotations in October 2027.",
+        "A contingency is included in each line and is not shown separately.",
+        "The budget was prepared by the finance officer and approved by the board.",
+        "This budget is invented for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "excerpt": "Riverbend Water Stewards",
+          "value": "Riverbend Water Stewards",
+          "line": 1
+        },
+        {
+          "field": "project_start_date",
+          "kind": "date",
+          "excerpt": "01/04/2027",
+          "value": null,
+          "expectStatus": "needs_review",
+          "line": 2
+        },
+        {
+          "field": "project_end_date",
+          "kind": "date",
+          "excerpt": "30/09/2028",
+          "value": "2028-09-30",
+          "line": 2
+        },
+        {
+          "field": "total_project_budget",
+          "kind": "money",
+          "excerpt": "R 3 150 000",
+          "value": {
+            "amount": "3150000",
+            "currency": "ZAR"
+          },
+          "line": 12
+        },
+        {
+          "field": "funding_requested",
+          "kind": "money",
+          "excerpt": "R 2 450 000",
+          "value": {
+            "amount": "2450000",
+            "currency": "ZAR"
+          },
+          "line": 13
+        }
+      ]
+    },
+    {
+      "id": "registration",
+      "file": "registration.pdf",
+      "role": "supporting",
+      "schemaId": "packcheck.grant.v2",
+      "lines": [
+        "Certificate of registration (fictional sample)",
+        "Issued under the Non-Profit Organisations Act as a fictional example.",
+        "Registered name: Riverbend Water Stewards NPC",
+        "Registration number: 2019/123456/08",
+        "Date of registration: 12 June 2019",
+        "Registered office: Riverbend Road, a fictional address.",
+        "The organisation is registered as a non-profit company.",
+        "This certificate remains valid until it is withdrawn or replaced.",
+        "This certificate is invented for software testing only."
+      ],
+      "facts": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "excerpt": "Riverbend Water Stewards NPC",
+          "value": "Riverbend Water Stewards NPC",
+          "line": 2
+        }
+      ]
+    }
+  ],
+  "expectedFindings": [
+    {
+      "code": "attachment.missing",
+      "subject": "tax clearance certificate",
+      "response": "application-form",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "attachment.missing",
+      "subject": "bank confirmation letter",
+      "response": "application-form",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "attachment.missing",
+      "subject": "letters of support",
+      "response": "application-form",
+      "severity": "critical",
+      "state": "needs_review"
+    },
+    {
+      "code": "org.name_differs",
+      "subject": "organisation_name",
+      "response": "budget",
+      "severity": "critical",
+      "state": "needs_review"
+    },
+    {
+      "code": "funding.differs",
+      "subject": "funding_requested",
+      "response": "budget",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "date.differs",
+      "subject": "project_end_date",
+      "response": "budget",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "value.needs_review",
+      "subject": "budget:project_start_date",
+      "response": "budget",
+      "severity": "warning",
+      "state": "needs_review"
+    }
+  ]
+}

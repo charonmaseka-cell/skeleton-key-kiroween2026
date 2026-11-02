@@ -51,12 +51,23 @@ export function validateClaim(rawClaim: unknown, ctx: ClaimContext): Fact {
   return { ...base, value: sup.resolved, evidence: [evidence], status: 'validated' };
 }
 
+const sameFact = (a: Fact, b: Fact) =>
+  JSON.stringify([a.field, a.kind, a.value, a.status, a.reason ?? null, a.evidence]) === JSON.stringify([b.field, b.kind, b.value, b.status, b.reason ?? null, b.evidence]);
+
+/**
+ * Validate every claim. An EXACT duplicate (same field, evidence span, value and outcome) is one fact:
+ * overlapping chunks legitimately extract the same text twice. A claim about the same text with a
+ * DIFFERENT value is kept as a separate fact (id suffix `~n`) so the conflict stays visible.
+ */
 export function validateClaims(claims: unknown[], ctx: ClaimContext): Fact[] {
-  const seen = new Map<string, number>();
-  return claims.map((c) => {
+  const seen = new Map<string, Fact[]>();
+  const out: Fact[] = [];
+  for (const c of claims) {
     const fact = validateClaim(c, ctx);
-    const n = seen.get(fact.id) ?? 0;
-    seen.set(fact.id, n + 1);
-    return n === 0 ? fact : { ...fact, id: `${fact.id}~${n}` };
-  });
+    const prior = seen.get(fact.id) ?? [];
+    if (prior.some((p) => sameFact(p, fact))) continue;
+    seen.set(fact.id, [...prior, fact]);
+    out.push(prior.length === 0 ? fact : { ...fact, id: `${fact.id}~${prior.length}` });
+  }
+  return out;
 }

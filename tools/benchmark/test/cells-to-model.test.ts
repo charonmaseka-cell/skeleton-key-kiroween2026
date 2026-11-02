@@ -78,7 +78,7 @@ describe('what a positioned line sends', () => {
 });
 
 describe('the Worker accepts only cells that are in the text, in order', () => {
-  const cfg = parseConfig({ DAILY_ADMISSION_CEILING: '0', ALLOWED_ORIGINS: 'https://x.example' })!;
+  const cfg = parseConfig({ DAILY_ADMISSION_CEILING: '0', DAILY_NEURON_BUDGET: '0', ALLOWED_ORIGINS: 'https://x.example' })!;
   const req = (blocks: unknown) => parseExtractRequest(JSON.stringify({ schemaId: 'scopecheck.rfq.v1', blocks }), cfg);
 
   it.each([
@@ -94,7 +94,7 @@ describe('the Worker accepts only cells that are in the text, in order', () => {
   });
 
   it('cells count toward the input bound (they repeat the text)', () => {
-    const small = parseConfig({ DAILY_ADMISSION_CEILING: '0', ALLOWED_ORIGINS: 'https://x.example', MAX_CHARS: '20' })!;
+    const small = parseConfig({ DAILY_ADMISSION_CEILING: '0', DAILY_NEURON_BUDGET: '0', ALLOWED_ORIGINS: 'https://x.example', MAX_CHARS: '20' })!;
     expect(parseExtractRequest(JSON.stringify({ schemaId: 'scopecheck.rfq.v1', blocks: [{ id: 'a', text: 'LB-1 Pump 6 each' }] }), small).ok).toBe(true);
     expect(parseExtractRequest(JSON.stringify({ schemaId: 'scopecheck.rfq.v1', blocks: [{ id: 'a', text: 'LB-1 Pump 6 each', cells: ['LB-1', 'Pump', '6 each'] }] }), small)).toEqual({ ok: false, reason: 'too_large' });
   });

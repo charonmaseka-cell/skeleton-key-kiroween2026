@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import type { AdmitResult } from '../src/admission';
+import type { ReserveRequest, ReserveResult, SettleResult } from '../src/admission';
 import type { EnvVars } from '../src/config';
 import { checkGate, gateConfig, MIN_GATE_TOKEN_LENGTH } from '../src/gate';
 import { handle, type Deps } from '../src/handler';
@@ -11,7 +11,7 @@ import { health } from '../src/health';
 
 const TOKEN = 'k'.repeat(43);
 const DUMMY_ORIGIN = 'https://gate-test-client.invalid';
-const base: EnvVars = { ALLOWED_ORIGINS: DUMMY_ORIGIN, DAILY_ADMISSION_CEILING: '4' };
+const base: EnvVars = { ALLOWED_ORIGINS: DUMMY_ORIGIN, DAILY_ADMISSION_CEILING: '4', DAILY_NEURON_BUDGET: '2000' };
 const gated: EnvVars = { ...base, ACCESS_GATE: 'token', TEST_GATE_TOKEN: TOKEN };
 
 function setup() {
@@ -19,11 +19,14 @@ function setup() {
   const deps: Deps = {
     now: () => 1_700_000_000_000,
     counter: {
-      async admit(c: number): Promise<AdmitResult> {
+      async reserve(req: ReserveRequest): Promise<ReserveResult> {
         state.admit++;
-        if (state.used >= c) return { ok: false, used: state.used, ceiling: c };
+        if (state.used >= req.ceiling) return { ok: false, reason: 'attempts', used: state.used, charged: 0 };
         state.used++;
-        return { ok: true, used: state.used, ceiling: c };
+        return { ok: true, id: state.used, used: state.used, charged: 0 };
+      },
+      async settle(): Promise<SettleResult> {
+        return { settled: true, charged: 0, reserved: 0, overrun: false };
       },
     },
     ai: {
@@ -119,7 +122,7 @@ describe('handler with the gate', () => {
 });
 
 describe('health reports the gate without revealing the secret', () => {
-  const counter = { admit: async (c: number) => ({ ok: false, used: 0, ceiling: c }), usedToday: async () => 0 };
+  const counter = { reserve: async () => ({ ok: false as const, reason: 'attempts' as const, used: 0, charged: 0 }), usedToday: async () => 0, budgetToday: async () => ({ attempts: 0, charged: 0, unsettled: 0, overruns: 0 }) };
   const ai = { run: async () => { throw new Error('not called'); } };
   it('token mode without the secret: 503 with the reason', async () => {
     const r = await health({ ...base, ACCESS_GATE: 'token' }, { now: () => 0, ai, counter });

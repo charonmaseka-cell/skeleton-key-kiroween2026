@@ -153,7 +153,7 @@ if (process.argv[1]?.endsWith('deploy.ts')) {
   buildApps();
   for (const app of APPS) if (!(await bundleHasNoAnalysisUrl(app))) { console.error(`${app}: the bundle carries an analysis service address; refusing to deploy`); process.exit(1); }
   console.log('public builds: analysis disabled in both bundles (VITE_EXTRACTION_API_URL="")');
-  console.log(redact(wrangler(['deploy', '--var', `ALLOWED_ORIGINS:${ORIGINS.join(',')}`, '--var', 'DAILY_ADMISSION_CEILING:0'], join(REPO, 'services', 'extraction-api'))));
+  console.log(redact(wrangler(['deploy', '--var', `ALLOWED_ORIGINS:${ORIGINS.join(',')}`, '--var', 'DAILY_ADMISSION_CEILING:0', '--var', 'DAILY_NEURON_BUDGET:0'], join(REPO, 'services', 'extraction-api'))));
   for (const [app, project] of Object.entries(PAGES)) {
     try { wrangler(['pages', 'project', 'create', project, '--production-branch', 'main']); } catch { /* exists already */ }
     console.log(redact(wrangler(['pages', 'deploy', join('apps', app, 'dist'), '--project-name', project, '--branch', 'main'])));

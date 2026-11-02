@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { admit, initSchema, utcDay, type AdmitResult, type SqlLike } from '../../../services/extraction-api/src/admission';
+import { admit, budgetOn, initLedger, reserve, settle, utcDay, type AdmitResult, type BudgetDay, type ReserveRequest, type ReserveResult, type SettleResult, type SqlLike } from '../../../services/extraction-api/src/admission';
 
 /**
  * Local persistent admission counter. It runs the SAME admit() code as the Durable Object,
@@ -22,19 +22,36 @@ export class SqliteAdmission {
         return { toArray: () => stmt.all(...(bindings as never[])) };
       },
     };
-    initSchema(this.sql);
+    initLedger(this.sql);
   }
 
-  async admit(ceiling: number, nowMs: number): Promise<AdmitResult> {
+  private tx<T>(f: () => T): T {
     this.db.exec('BEGIN IMMEDIATE');
     try {
-      const result = admit(this.sql, ceiling, nowMs);
+      const result = f();
       this.db.exec('COMMIT');
       return result;
     } catch (e) {
       this.db.exec('ROLLBACK');
       throw e;
     }
+  }
+
+  async admit(ceiling: number, nowMs: number): Promise<AdmitResult> {
+    return this.tx(() => admit(this.sql, ceiling, nowMs));
+  }
+
+  /** The Worker's reservation and settlement, the same code as the Durable Object. */
+  async reserve(req: ReserveRequest, nowMs: number): Promise<ReserveResult> {
+    return this.tx(() => reserve(this.sql, req, nowMs));
+  }
+
+  async settle(id: number, charged: number | null): Promise<SettleResult> {
+    return this.tx(() => settle(this.sql, id, charged));
+  }
+
+  budgetToday(nowMs: number): BudgetDay {
+    return budgetOn(this.sql, nowMs);
   }
 
   usedToday(nowMs: number): number {

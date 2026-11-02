@@ -1,6 +1,6 @@
 import { ModelClaimSchema } from '@skeleton-key/engine';
 import { describe, expect, it } from 'vitest';
-import type { AdmitResult } from '../src/admission';
+import type { ReserveRequest, ReserveResult, SettleResult } from '../src/admission';
 import type { EnvVars } from '../src/config';
 import { handle, type Deps } from '../src/handler';
 import { PROFILES } from '../src/profiles';
@@ -10,6 +10,7 @@ const env: EnvVars = {
   ALLOWED_ORIGINS: `${ORIGIN},http://localhost:5174`,
   ACCESS_GATE: 'public',
   DAILY_ADMISSION_CEILING: '100',
+  DAILY_NEURON_BUDGET: '10000',
   MAX_BODY_BYTES: '4096',
   MAX_CHARS: '500',
   MAX_BLOCKS: '5',
@@ -20,16 +21,22 @@ const GOOD = { claims: [{ field: 'organisation_name', blockId: 'b1', excerpt: 'A
 const body = (over: object = {}) => ({ schemaId: 'packcheck.grant.v1', blocks: [{ id: 'b1', text: 'Organisation: Acme Trust' }], ...over });
 
 function setup(opts: { ai?: (n: number, input: unknown) => Promise<unknown>; ceiling?: number; counterThrows?: boolean; limiter?: boolean } = {}) {
-  const state = { ai: 0, admit: 0, used: 0, inputs: [] as unknown[], logs: [] as unknown[], models: [] as string[] };
+  const state = { ai: 0, admit: 0, used: 0, inputs: [] as unknown[], logs: [] as unknown[], models: [] as string[], reserved: [] as number[], settled: [] as [number, number | null][] };
   const deps: Deps = {
     now: () => 1_700_000_000_000,
     counter: {
-      async admit(c: number): Promise<AdmitResult> {
+      async reserve(req: ReserveRequest): Promise<ReserveResult> {
         state.admit++;
         if (opts.counterThrows) throw new Error('counter down');
-        if (state.used >= c) return { ok: false, used: state.used, ceiling: c };
+        if (state.used >= req.ceiling) return { ok: false, reason: 'attempts', used: state.used, charged: 0 };
         state.used++;
-        return { ok: true, used: state.used, ceiling: c };
+        state.reserved.push(req.neurons);
+        return { ok: true, id: state.used, used: state.used, charged: 0 };
+      },
+      async settle(id: number, charged: number | null): Promise<SettleResult> {
+        state.settled.push([id, charged]);
+        const reserved = state.reserved[id - 1] ?? 0;
+        return { settled: true, charged: charged ?? reserved, reserved, overrun: charged !== null && charged > reserved };
       },
     },
     ai: {
@@ -257,8 +264,14 @@ describe('distinct errors, no refund, no leaks', () => {
     const logged = JSON.stringify(state.logs);
     expect(logged).not.toContain('PRIVATE-DOC-TEXT');
     expect(logged).not.toContain('my-secret-file');
+    const KEYS: Record<string, string[]> = {
+      extract: ['attempts', 'blocks', 'chars', 'code', 'evt', 'ms', 'status'],
+      settle: ['attempt', 'charged', 'evt', 'measured', 'overrun', 'reserved'],
+      admission: ['charged', 'evt', 'refused', 'used'],
+    };
     for (const e of state.logs as Record<string, unknown>[]) {
-      expect(Object.keys(e).sort()).toEqual(['attempts', 'blocks', 'chars', 'code', 'evt', 'ms', 'status']);
+      expect(Object.keys(e).sort()).toEqual(KEYS[e.evt as string]);
+      for (const [k, v] of Object.entries(e)) if (k !== 'evt' && k !== 'code' && k !== 'refused') expect(['number', 'boolean'].includes(typeof v) || v === null).toBe(true);
     }
   });
 });

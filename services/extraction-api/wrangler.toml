@@ -29,6 +29,9 @@ INFERENCE_TIMEOUT_MS = "25000"
 # Fail closed: 0 admits no inference. Set from benchmark measurements, not a guess
 # (see docs/build-log.md). Use .dev.vars for local benchmark runs.
 DAILY_ADMISSION_CEILING = "0"
+# Estimated neurons per UTC day, reserved (worst case) before every attempt and settled after it (src/cost.ts). Required.
+# Proposed public value 5000 (docs/task-5-5-plan.md); 0 until task 5.5 passes.
+DAILY_NEURON_BUDGET = "0"
 
 # Optional per-client abuse control (per-location, eventually consistent). The strict
 # global ceiling does NOT depend on it. Uncomment only after confirming availability.

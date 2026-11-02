@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync }
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { AdmitResult } from '../../services/extraction-api/src/admission';
+import type { ReserveRequest, ReserveResult, SettleResult } from '../../services/extraction-api/src/admission';
 import { handle } from '../../services/extraction-api/src/handler';
 import { health } from '../../services/extraction-api/src/health';
 import { SECRET_FILE, createSecret, destroySecret, readSecret } from './gate-secret';
@@ -14,7 +14,7 @@ import { buildPayloads, dailyBaseline, runGateTest, DAILY_NEURON_CAP, RUN_NEURON
 
 const TOKEN = 't'.repeat(43);
 const STAGING = {
-  ACCESS_GATE: 'token', TEST_GATE_TOKEN: TOKEN, ALLOWED_ORIGINS: TEST_ORIGIN, DAILY_ADMISSION_CEILING: '4',
+  ACCESS_GATE: 'token', TEST_GATE_TOKEN: TOKEN, ALLOWED_ORIGINS: TEST_ORIGIN, DAILY_ADMISSION_CEILING: '4', DAILY_NEURON_BUDGET: '2000',
   MAX_BODY_BYTES: '8192', MAX_CHARS: '6000', MAX_BLOCKS: '80', MAX_BLOCK_CHARS: '1000', MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '25000',
 };
 const DAY = Date.UTC(2026, 10, 3, 12, 0, 0);
@@ -23,8 +23,10 @@ type Reply = 'ok' | 'bad' | 'no_usage' | 'throw' | 'huge_usage' | 'unlocatable';
 function fakeWorker(replies: Reply[], opts: { startUsed?: number; ms?: number } = {}) {
   const state = { used: 0 + (opts.startUsed ?? 0), modelCalls: 0, extractRequests: 0 };
   const counter = {
-    admit: async (c: number): Promise<AdmitResult> => (state.used >= c ? { ok: false, used: state.used, ceiling: c } : { ok: true, used: ++state.used, ceiling: c }),
+    reserve: async (req: ReserveRequest): Promise<ReserveResult> => (state.used >= req.ceiling ? { ok: false, reason: 'attempts', used: state.used, charged: 0 } : { ok: true, id: ++state.used, used: state.used, charged: 0 }),
+    settle: async (): Promise<SettleResult> => ({ settled: true, charged: 0, reserved: 0, overrun: false }),
     usedToday: async () => state.used,
+    budgetToday: async () => ({ attempts: state.used, charged: 0, unsettled: 0, overruns: 0 }),
   };
   const ai = {
     run: async (_m: string, input: unknown) => {

@@ -1,0 +1,23 @@
+{
+  "id": "sc-t12-fresh-8b",
+  "createdAt": "2026-11-02T00:00:16.852Z",
+  "attemptCap": 16,
+  "neuronCap": 3000,
+  "attemptsUsed": 12,
+  "neuronsCharged": 746.897,
+  "resultFiles": [
+    "samples/benchmark-results/live-sc-t12-fresh-8b-2026-11-02T00-01-09-883Z.json"
+  ],
+  "invocations": [
+    {
+      "label": "sc-t12-fresh-8b",
+      "startedAt": "2026-11-02T00:00:16.854Z",
+      "attemptsAtStart": 0,
+      "neuronsAtStart": 0,
+      "attemptsEnd": 12,
+      "neuronsEnd": 746.897,
+      "resultFile": "samples/benchmark-results/live-sc-t12-fresh-8b-2026-11-02T00-01-09-883Z.json",
+      "stop": null
+    }
+  ]
+}

@@ -163,3 +163,23 @@ describe('raw responses are saved as they arrive', () => {
     expect(existsSync(f)).toBe(true);
   });
 });
+
+describe('the raw log names the model actually called', () => {
+  it('with an override, the recorder sits inside it and logs the overriding model', async () => {
+    const { withModel } = await import('../src/candidates');
+    const f = join(dir, 'model.jsonl');
+    const called: string[] = [];
+    const base = { run: async (m: string) => { called.push(m); return { response: { claims: [] } }; } };
+    const ai = withModel(recordingAi(base, f), '@cf/meta/llama-3.1-8b-instruct'); // the order the CLI now uses
+    await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {});
+    const start = JSON.parse(readFileSync(f, 'utf8').split('\n')[0]!);
+    expect(start.model).toBe('@cf/meta/llama-3.1-8b-instruct');
+    expect(called).toEqual(['@cf/meta/llama-3.1-8b-instruct']);
+  });
+
+  it('the CLI composes them in that order', () => {
+    const src = readFileSync(join(__dirname, '../src/cli.ts'), 'utf8');
+    expect(src).toMatch(/withModel\(recordingAi\(restAi\(/);
+    expect(src).not.toMatch(/recordingAi\(model === profileModel \? restAi/);
+  });
+});

@@ -156,7 +156,9 @@ if (mode === 'live') {
   // Raw model responses are appended to a file as they arrive (see recording.ts).
   mkdirSync(join(SAMPLES_DIR, 'benchmark-results'), { recursive: true });
   rawLogFile = join(SAMPLES_DIR, 'benchmark-results', `raw-${label}-${new Date(processStart).toISOString().replace(/[:.]/g, '-')}.jsonl`);
-  const raw = recordingAi(model === profileModel ? restAi(accountId, token) : withModel(restAi(accountId, token), model), rawLogFile);
+  // The override is applied OUTSIDE the recorder, so the raw log names the model that was actually called (before 2 Nov 2026 it
+  // named the profile's model, because the recorder sat inside the override).
+  const raw = model === profileModel ? recordingAi(restAi(accountId, token), rawLogFile) : withModel(recordingAi(restAi(accountId, token), rawLogFile), model);
   // Every attempt, repairs included, reserves its worst case BEFORE the call and is refused if it would pass a cap.
   if (batch) {
     batch.begin(label);

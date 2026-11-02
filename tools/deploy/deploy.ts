@@ -57,18 +57,49 @@ function wrangler(args: string[], cwd = REPO): string {
   return execFileSync('npx', ['wrangler', ...args], { cwd, encoding: 'utf8', env: { ...process.env, XDG_CONFIG_HOME: home, WRANGLER_LOG_PATH: join(home, 'logs'), WRANGLER_SEND_METRICS: 'false' } });
 }
 
-/** Build both apps for the public site: sample mode by default, no analysis URL, so live analysis is closed in the interface too. */
-export function buildApps(): void {
-  const env = { ...process.env };
-  delete env.VITE_EXTRACTION_API_URL;
-  for (const app of ['scopecheck', 'packcheck']) execFileSync('npm', ['run', 'build', '-w', `@skeleton-key/${app}`], { cwd: REPO, stdio: 'inherit', env });
+export type App = 'scopecheck' | 'packcheck';
+export const APPS: App[] = ['scopecheck', 'packcheck'];
+
+/**
+ * Build the apps for the public site: sample mode by default and analysis DISABLED. `VITE_EXTRACTION_API_URL` is set to the empty
+ * string explicitly, not deleted: Vite also reads `.env`, `.env.production` and `.env.*.local` files, and a variable already present
+ * in the environment takes priority over them, so an explicit "" is what stops an env-file value from being built in. The apps read
+ * "" as "no analysis service" (`|| undefined`).
+ */
+export function buildApps(apps: App[] = APPS): void {
+  const env = { ...process.env, VITE_EXTRACTION_API_URL: '' };
+  for (const app of apps) execFileSync('npm', ['run', 'build', '-w', `@skeleton-key/${app}`], { cwd: REPO, stdio: 'pipe', env });
 }
 
-/** The built bundle must not carry an analysis service address (the client's own path template "/extract" is expected and allowed). */
-export function bundleHasNoAnalysisUrl(app: 'scopecheck' | 'packcheck'): boolean {
+/** Every non-empty analysis URL that the app's env files would build in (process environment ignored), for the bundle check. */
+export async function envFileApiUrls(app: App): Promise<string[]> {
+  const { loadEnv } = await import('vite');
+  const saved = process.env.VITE_EXTRACTION_API_URL;
+  delete process.env.VITE_EXTRACTION_API_URL;
+  try {
+    const urls = new Set<string>();
+    for (const mode of ['production', 'development']) {
+      const v = loadEnv(mode, join(REPO, 'apps', app), 'VITE_').VITE_EXTRACTION_API_URL;
+      if (v) urls.add(v);
+    }
+    return [...urls];
+  } finally {
+    if (saved !== undefined) process.env.VITE_EXTRACTION_API_URL = saved;
+  }
+}
+
+/**
+ * The built bundle carries no analysis service address: no workers.dev host, no URL ending in /extract, and none of the URLs found in
+ * the app's env files (a custom API domain is only a base URL; "/extract" is appended at run time, so it must be looked for itself).
+ */
+export async function bundleHasNoAnalysisUrl(app: App): Promise<boolean> {
   const dir = join(REPO, 'apps', app, 'dist', 'assets');
   if (!existsSync(dir)) return false;
-  return readdirSync(dir).filter((f) => f.endsWith('.js')).every((f) => !/workers\.dev|https?:\/\/[^"'`\s]*\/extract/.test(readFileSync(join(dir, f), 'utf8')));
+  const known = await envFileApiUrls(app);
+  return readdirSync(dir).filter((f) => f.endsWith('.js')).every((f) => {
+    const js = readFileSync(join(dir, f), 'utf8');
+    return !/workers\.dev|https?:\/\/[^"'`\s]*\/extract/.test(js) && known.every((u) => !js.includes(u) && !js.includes(u.replace(/\/$/, '')));
+  });
 }
 
 export async function verify(workerUrl: string, fetchImpl: typeof fetch = fetch): Promise<Check[]> {
@@ -120,7 +151,8 @@ if (process.argv[1]?.endsWith('deploy.ts')) {
   }
   if (process.argv.includes('--check')) process.exit(0);
   buildApps();
-  for (const app of ['scopecheck', 'packcheck'] as const) if (!bundleHasNoAnalysisUrl(app)) { console.error(`${app}: the bundle carries an analysis URL; refusing to deploy`); process.exit(1); }
+  for (const app of APPS) if (!(await bundleHasNoAnalysisUrl(app))) { console.error(`${app}: the bundle carries an analysis service address; refusing to deploy`); process.exit(1); }
+  console.log('public builds: analysis disabled in both bundles (VITE_EXTRACTION_API_URL="")');
   console.log(redact(wrangler(['deploy', '--var', `ALLOWED_ORIGINS:${ORIGINS.join(',')}`, '--var', 'DAILY_ADMISSION_CEILING:0'], join(REPO, 'services', 'extraction-api'))));
   for (const [app, project] of Object.entries(PAGES)) {
     try { wrangler(['pages', 'project', 'create', project, '--production-branch', 'main']); } catch { /* exists already */ }

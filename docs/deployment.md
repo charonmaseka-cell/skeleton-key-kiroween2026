@@ -13,7 +13,7 @@ Changing the token's permissions is the account owner's decision; nothing here c
 
 ## What a deployment does (one command once the token allows it)
 `npx tsx tools/deploy/deploy.ts`: permission preflight (stops before changing anything if a permission is missing), then:
-1. Builds both apps **without** `VITE_EXTRACTION_API_URL`, and refuses to continue if a bundle carries an analysis service address. The sites open in **labelled sample mode**; the upload panel says analysis is not available. Public live extraction is closed in the interface.
+1. Builds both apps with **`VITE_EXTRACTION_API_URL=""` set explicitly** (not deleted: Vite also reads `.env*` files, and only a value already in the environment takes priority over them), and refuses to continue if a bundle carries an analysis service address: a workers.dev host, a URL ending in `/extract`, or any URL named in the app's env files. Control test (`tools/deploy/build-env.test.ts`): with a custom API domain in `.env.production.local`, a build that merely deletes the variable bakes the domain in; the public build does not. The sites open in **labelled sample mode**; the upload panel says analysis is not available. Public live extraction is closed in the interface.
 2. Deploys the Worker `skeleton-key-extraction` with `DAILY_ADMISSION_CEILING=0` (closed: every `/extract` is refused before any inference) and `ALLOWED_ORIGINS` set to the two Pages origins only.
 3. Creates (if missing) and deploys the Pages projects `skeleton-key-scopecheck` and `skeleton-key-packcheck`.
 Then `WORKER_URL=... npx tsx tools/deploy/deploy.ts --verify-only` checks, without inference:

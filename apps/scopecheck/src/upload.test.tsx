@@ -170,3 +170,15 @@ describe('Analyse', () => {
     expect(before).toBeGreaterThan(1);
   });
 });
+
+describe('an empty analysis URL (what the public build sets) disables analysis', () => {
+  it('baseUrl "" is read as "no analysis service": the panel says so and Analyse cannot be pressed', async () => {
+    const user = userEvent.setup();
+    setup({ baseUrl: '' });
+    expect(screen.getByRole('note').textContent).toMatch(/Analysis is not available on this site yet/);
+    await choose(user);
+    await waitFor(() => expect(screen.getAllByText(/Read on your device/).length).toBe(2));
+    expect(analyseBtn().disabled).toBe(true);
+    expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
+  });
+});

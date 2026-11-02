@@ -15,7 +15,11 @@ export type Profile = {
   fields: ProfileField[];
 };
 
-const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'; // candidate; benchmark decides
+const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'; // selected by the benchmark (docs/model-comparison.md); change only after a new comparison
+
+// Money magnitude wording shared by the v2 money fields. The excerpt must still be copied unchanged.
+const MAGNITUDE_RULE =
+  'The amount is the full value in whole currency units, including any magnitude word or suffix written in the text: "R1.6 million" means amount "1600000" with currency "ZAR". Do not shorten the amount to the number before the word. The excerpt must still be copied exactly as written.';
 
 const f = (name: string, kind: FieldKind, description: string): ProfileField => ({ name, kind, description });
 
@@ -53,6 +57,24 @@ export const PROFILES: Record<string, Profile> = {
       f('organisation_name', 'name', 'name of the applying organisation'),
       f('funding_requested', 'money', 'the amount of funding being requested, with its currency'),
       f('total_project_budget', 'money', 'the total project budget, with its currency'),
+      f('project_start_date', 'date', 'the project start date'),
+      f('project_end_date', 'date', 'the project end date'),
+      f('attachment_title', 'text', 'the title of a document the pack lists or attaches'),
+    ],
+  },
+  // v2 (2026-11-01): clarifies that money values carry their magnitude. Live benchmark: with v1 the model
+  // returned "R1.6 million" as amount "1.6"; validation held it as Needs review (value_not_in_excerpt).
+  // Only the two money field descriptions differ from v1. v1 above is frozen so earlier benchmark
+  // results stay reproducible. Evidence and value validation are unchanged.
+  'packcheck.grant.v2': {
+    id: 'packcheck.grant.v2',
+    model: MODEL,
+    maxOutputTokens: 1200,
+    purpose: 'a document in a grant application pack',
+    fields: [
+      f('organisation_name', 'name', 'name of the applying organisation'),
+      f('funding_requested', 'money', `the amount of funding being requested, with its currency. ${MAGNITUDE_RULE}`),
+      f('total_project_budget', 'money', `the total project budget, with its currency. ${MAGNITUDE_RULE}`),
       f('project_start_date', 'date', 'the project start date'),
       f('project_end_date', 'date', 'the project end date'),
       f('attachment_title', 'text', 'the title of a document the pack lists or attaches'),
@@ -132,7 +154,8 @@ const RawOutput = z.object({ claims: z.array(z.unknown()).max(200) });
 
 export type Claim = { field: string; kind: FieldKind; blockId: string; excerpt: string; value: unknown };
 
-export type ParsedOutput = { ok: true; claims: Claim[]; dropped: number } | { ok: false };
+export type DroppedReasons = { unknown_block: number; unknown_field: number; invalid_value: number };
+export type ParsedOutput = { ok: true; claims: Claim[]; dropped: number; droppedReasons: DroppedReasons } | { ok: false };
 
 export function parseModelOutput(profile: Profile, blockIds: Set<string>, raw: unknown): ParsedOutput {
   let data: unknown = raw;
@@ -147,21 +170,26 @@ export function parseModelOutput(profile: Profile, blockIds: Set<string>, raw: u
   if (!out.success) return { ok: false };
   const kinds = new Map(profile.fields.map((x) => [x.name, x.kind]));
   const claims: Claim[] = [];
-  let dropped = 0;
+  const droppedReasons: DroppedReasons = { unknown_block: 0, unknown_field: 0, invalid_value: 0 };
   for (const item of out.data.claims) {
     const c = RawClaim.safeParse(item);
     if (!c.success) return { ok: false }; // structurally broken output -> repair attempt
     const kind = kinds.get(c.data.field);
-    if (!kind || !blockIds.has(c.data.blockId)) {
-      dropped++; // field outside the profile or a block that was not sent
+    if (!kind) {
+      droppedReasons.unknown_field++; // field outside the profile
+      continue;
+    }
+    if (!blockIds.has(c.data.blockId)) {
+      droppedReasons.unknown_block++; // a block that was not sent
       continue;
     }
     const v = VALUE_BY_KIND[kind].safeParse(c.data.value);
     if (!v.success) {
-      dropped++;
+      droppedReasons.invalid_value++;
       continue;
     }
     claims.push({ field: c.data.field, kind, blockId: c.data.blockId, excerpt: c.data.excerpt, value: v.data });
   }
-  return { ok: true, claims, dropped };
+  const dropped = droppedReasons.unknown_block + droppedReasons.unknown_field + droppedReasons.invalid_value;
+  return { ok: true, claims, dropped, droppedReasons };
 }

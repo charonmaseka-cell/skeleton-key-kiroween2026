@@ -1,0 +1,223 @@
+{
+  "id": "packcheck",
+  "label": "FICTIONAL SAMPLE: invented organisation, amounts and dates",
+  "docs": [
+    {
+      "id": "requirements",
+      "file": "requirements.pdf",
+      "role": "requirements",
+      "schemaId": "packcheck.grant.v1",
+      "lines": [
+        "Grant call GC-2026 application requirements (fictional sample)",
+        "Required attachment: Application form",
+        "Required attachment: Project budget",
+        "Required attachment: Registration certificate",
+        "Required attachment: Tax clearance certificate"
+      ],
+      "facts": [
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "Application form",
+          "value": "Application form"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "Project budget",
+          "value": "Project budget"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "Registration certificate",
+          "value": "Registration certificate"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "line": 4,
+          "excerpt": "Tax clearance certificate",
+          "value": "Tax clearance certificate"
+        }
+      ]
+    },
+    {
+      "id": "application-form",
+      "file": "application-form.pdf",
+      "role": "form",
+      "schemaId": "packcheck.grant.v1",
+      "lines": [
+        "Application form for grant GC-2026 (fictional sample)",
+        "Organisation name: Green Valley Community Trust",
+        "Funding requested: R1.6 million",
+        "Project start date: 1 March 2026",
+        "Project end date: 28 February 2027",
+        "Attachment provided: Application form",
+        "Attachment provided: Project budget",
+        "Attachment provided: Registration certificate"
+      ],
+      "facts": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "line": 1,
+          "excerpt": "Green Valley Community Trust",
+          "value": "Green Valley Community Trust"
+        },
+        {
+          "field": "funding_requested",
+          "kind": "money",
+          "line": 2,
+          "excerpt": "R1.6 million",
+          "value": {
+            "amount": "1600000",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "project_start_date",
+          "kind": "date",
+          "line": 3,
+          "excerpt": "1 March 2026",
+          "value": "2026-03-01"
+        },
+        {
+          "field": "project_end_date",
+          "kind": "date",
+          "line": 4,
+          "excerpt": "28 February 2027",
+          "value": "2027-02-28"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "line": 5,
+          "excerpt": "Application form",
+          "value": "Application form"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "line": 6,
+          "excerpt": "Project budget",
+          "value": "Project budget"
+        },
+        {
+          "field": "attachment_title",
+          "kind": "text",
+          "line": 7,
+          "excerpt": "Registration certificate",
+          "value": "Registration certificate"
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "file": "budget.pdf",
+      "role": "supporting",
+      "schemaId": "packcheck.grant.v1",
+      "lines": [
+        "Project budget summary (fictional sample)",
+        "Applicant: Green Valley Community Foundation",
+        "Total project budget: R 2 000 000",
+        "Funding requested from this grant: R 1 600 000",
+        "Project period: 01/03/2026 to 28/02/2027"
+      ],
+      "facts": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "line": 1,
+          "excerpt": "Green Valley Community Foundation",
+          "value": "Green Valley Community Foundation"
+        },
+        {
+          "field": "total_project_budget",
+          "kind": "money",
+          "line": 2,
+          "excerpt": "R 2 000 000",
+          "value": {
+            "amount": "2000000",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "funding_requested",
+          "kind": "money",
+          "line": 3,
+          "excerpt": "R 1 600 000",
+          "value": {
+            "amount": "1600000",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "project_start_date",
+          "kind": "date",
+          "line": 4,
+          "excerpt": "01/03/2026",
+          "value": null,
+          "expectStatus": "needs_review"
+        },
+        {
+          "field": "project_end_date",
+          "kind": "date",
+          "line": 4,
+          "excerpt": "28/02/2027",
+          "value": "2027-02-28"
+        }
+      ]
+    },
+    {
+      "id": "registration",
+      "file": "registration.pdf",
+      "role": "supporting",
+      "schemaId": "packcheck.grant.v1",
+      "lines": [
+        "Certificate of registration (fictional sample)",
+        "Registered name: Green Valley Community Trust"
+      ],
+      "facts": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "line": 1,
+          "excerpt": "Green Valley Community Trust",
+          "value": "Green Valley Community Trust"
+        }
+      ]
+    }
+  ],
+  "expectedFindings": [
+    {
+      "code": "org.name_differs",
+      "subject": "organisation_name",
+      "response": "budget",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "attachment.missing",
+      "subject": "tax clearance certificate",
+      "response": "application-form",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "value.needs_review",
+      "subject": "budget:project_start_date",
+      "response": "budget",
+      "severity": "warning",
+      "state": "needs_review"
+    }
+  ],
+  "mustNotFlag": [
+    "funding.exceeds_budget",
+    "funding.differs"
+  ]
+}

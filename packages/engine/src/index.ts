@@ -18,3 +18,5 @@ export * from './findings';
 export * from './review';
 export * from './export';
 export * from './adapter';
+export * from './chunk';
+export * from './issues';

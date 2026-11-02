@@ -113,7 +113,7 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
           completionTokens: typeof u?.completion_tokens === 'number' ? u.completion_tokens : null,
         };
         deps.log({ evt: 'extract', status: 200, code: 'ok', blocks: stats.blocks, chars: stats.chars, attempts: attempt, ms: deps.now() - started });
-        return json(200, { claims: out.claims, meta: { attempts: attempt, repaired: attempt > 1, dropped: out.dropped, usage } }, cors);
+        return json(200, { claims: out.claims, meta: { attempts: attempt, repaired: attempt > 1, dropped: out.dropped, droppedReasons: out.droppedReasons, usage } }, cors);
       }
     }
     return fail('schema_invalid');

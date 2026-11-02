@@ -1,0 +1,328 @@
+{
+  "id": "scopecheck",
+  "label": "FICTIONAL SAMPLE: invented companies, items and prices",
+  "docs": [
+    {
+      "id": "rfq",
+      "file": "rfq.pdf",
+      "role": "requirements",
+      "schemaId": "scopecheck.rfq.v1",
+      "lines": [
+        "RFQ-0001 Request for Quotation (fictional sample)",
+        "Item CP-100 Centrifugal pump | qty 10 units | 316 stainless steel casing",
+        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure",
+        "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range"
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "Item CP-100 Centrifugal pump",
+          "value": "CP-100 Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 1,
+          "excerpt": "qty 10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "Item MS-20 Motor starter",
+          "value": "MS-20 Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 2,
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "Item PG-6 Pressure gauge",
+          "value": "PG-6 Pressure gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 3,
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "0-10 bar range",
+          "value": "0-10 bar range"
+        }
+      ]
+    },
+    {
+      "id": "quote-a",
+      "file": "quote-a.pdf",
+      "role": "response",
+      "schemaId": "scopecheck.quote.v1",
+      "lines": [
+        "Quotation QA-17 from Alder Pump Supplies (fictional sample)",
+        "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each",
+        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each",
+        "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each",
+        "Excluded: delivery and installation are not included in this price."
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "Item CP-100 Centrifugal pump",
+          "value": "CP-100 Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 1,
+          "excerpt": "qty 8 units",
+          "value": {
+            "value": "8",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 1,
+          "excerpt": "R 12 500 each",
+          "value": {
+            "amount": "12500",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "Item MS-20 Motor starter",
+          "value": "MS-20 Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 2,
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 2,
+          "excerpt": "R 3 200 each",
+          "value": {
+            "amount": "3200",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "Item PG-6 Pressure gauge",
+          "value": "PG-6 Pressure gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 3,
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 3,
+          "excerpt": "0-10 bar range",
+          "value": "0-10 bar range"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 3,
+          "excerpt": "R 450 each",
+          "value": {
+            "amount": "450",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "line": 4,
+          "excerpt": "delivery and installation are not included",
+          "value": "delivery and installation are not included"
+        }
+      ]
+    },
+    {
+      "id": "quote-b",
+      "file": "quote-b.pdf",
+      "role": "response",
+      "schemaId": "scopecheck.quote.v1",
+      "lines": [
+        "Quotation QB-04 from Birch Industrial Trading (fictional sample)",
+        "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each",
+        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each"
+      ],
+      "facts": [
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "Item CP-100 Centrifugal pump",
+          "value": "CP-100 Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 1,
+          "excerpt": "qty 10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 1,
+          "excerpt": "cast iron casing",
+          "value": "cast iron casing"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 1,
+          "excerpt": "R 11 900 each",
+          "value": {
+            "amount": "11900",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "Item MS-20 Motor starter",
+          "value": "MS-20 Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "line": 2,
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "line": 2,
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "line": 2,
+          "excerpt": "R 3 100 each",
+          "value": {
+            "amount": "3100",
+            "currency": "ZAR"
+          }
+        }
+      ]
+    }
+  ],
+  "expectedFindings": [
+    {
+      "code": "quantity.differs",
+      "subject": "CP-100:quantity",
+      "response": "quote-a",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "exclusion.stated",
+      "subject": "quote-a:exclusion",
+      "response": "quote-a",
+      "severity": "info",
+      "state": "confirmed"
+    },
+    {
+      "code": "spec.differs",
+      "subject": "CP-100:specification",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "confirmed"
+    },
+    {
+      "code": "item.absent",
+      "subject": "PG-6",
+      "response": "quote-b",
+      "severity": "critical",
+      "state": "needs_review",
+      "stateIfCoverageConfirmed": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.1-8b-instruct",
+  "startedAt": "2026-11-01T02:49:53.591Z",
+  "label": "m8b-packcheck-budget",
+  "attemptBudget": 2,
+  "attemptsCharged": 1,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "budget",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 204,
+      "ok": true,
+      "ms": 1482,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 3,
+      "dropped": 2
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "packcheck",
+      "docs": [
+        {
+          "docId": "budget",
+          "profile": {
+            "id": "packcheck.grant.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "organisation_name",
+              "kind": "name",
+              "blockId": "p1-l2",
+              "excerpt": "Applicant: Green Valley Community Foundation",
+              "value": "Green Valley Community Foundation"
+            },
+            {
+              "field": "project_start_date",
+              "kind": "date",
+              "blockId": "p1-l5",
+              "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+              "value": "2026-03-01"
+            },
+            {
+              "field": "project_end_date",
+              "kind": "date",
+              "blockId": "p1-l5",
+              "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+              "value": "2027-02-28"
+            }
+          ],
+          "facts": [
+            {
+              "id": "budget:040cffcc413c0e",
+              "field": "organisation_name",
+              "kind": "name",
+              "status": "validated",
+              "value": "Green Valley Community Foundation",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 0,
+                  "end": 44,
+                  "text": "Applicant: Green Valley Community Foundation"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "budget:04d8879d918e6f",
+              "field": "project_start_date",
+              "kind": "date",
+              "status": "needs_review",
+              "reason": "date_format_ambiguous",
+              "value": null,
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 40,
+                  "text": "Project period: 01/03/2026 to 28/02/2027"
+                }
+              ],
+              "label": "labelled",
+              "audit": null
+            },
+            {
+              "id": "budget:16f3a46976f298",
+              "field": "project_end_date",
+              "kind": "date",
+              "status": "validated",
+              "value": "2027-02-28",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 40,
+                  "text": "Project period: 01/03/2026 to 28/02/2027"
+                }
+              ],
+              "label": "labelled",
+              "audit": "manual"
+            }
+          ],
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "budget",
+            "expected": 5,
+            "validatable": 4,
+            "outcomes": {
+              "correct": 2,
+              "correct_conservative": 1,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 2
+            },
+            "details": [
+              {
+                "field": "organisation_name",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "total_project_budget",
+                "line": 2,
+                "outcome": "missed"
+              },
+              {
+                "field": "funding_requested",
+                "line": 3,
+                "outcome": "missed"
+              },
+              {
+                "field": "project_start_date",
+                "line": 4,
+                "outcome": "correct_conservative",
+                "reason": "date_format_ambiguous"
+              },
+              {
+                "field": "project_end_date",
+                "line": 4,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "unlabelledFactIds": [],
+            "rejectedByReason": {},
+            "ambiguousByReason": {
+              "date_format_ambiguous": 1
+            },
+            "recall": 0.5,
+            "validatedPrecision": 1
+          },
+          "issues": [
+            {
+              "docId": "budget",
+              "kind": "claim_ambiguous",
+              "reason": "date_format_ambiguous",
+              "count": 1,
+              "factId": "budget:04d8879d918e6f"
+            },
+            {
+              "docId": "budget",
+              "kind": "server_dropped",
+              "reason": "invalid_value",
+              "count": 2
+            }
+          ],
+          "rates": {
+            "claims": 3,
+            "evidenceLocated": 3,
+            "valueSupported": 2
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 1,
+    "requestsOk": 1,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 1482,
+      "mean": 1482,
+      "max": 1482
+    },
+    "claimsReceived": 3,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 0.6666666666666666,
+    "serverDropped": 2,
+    "recall": 0.5,
+    "validatedPrecision": 1,
+    "missedFacts": 2,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 1,
+    "requestsReportingTokens": 1,
+    "promptTokens": 453,
+    "completionTokens": 307,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 35,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. UNVERIFIED: approximately $0.28 input and $0.83 output per million tokens converted at $0.011 per 1,000 neurons. Cloudflare's pricing page could not be fetched from the sandbox (HTTP 403), so these rates come from secondary sources and must be checked against the dashboard."
+    }
+  }
+}

@@ -1,0 +1,574 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "startedAt": "2026-11-01T02:37:35.943Z",
+  "label": "layout-quote-c",
+  "attemptBudget": 2,
+  "attemptsCharged": 1,
+  "simulatedCoverageConfirmation": false,
+  "identityRecovery": true,
+  "requests": [
+    {
+      "docId": "quote-c",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 357,
+      "ok": true,
+      "ms": 14343,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 13,
+      "dropped": 0
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "scopecheck-layout",
+      "docs": [
+        {
+          "docId": "quote-c",
+          "profile": {
+            "id": "scopecheck.quote.v1",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Centrifugal pump CP-100",
+              "value": "Centrifugal pump CP-100"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "10 units",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l2",
+              "excerpt": "R 11 500 each",
+              "value": {
+                "amount": "11500",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Motor starter MS-20",
+              "value": "Motor starter MS-20"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "6 units",
+              "value": {
+                "value": "6",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "R 3 150 each",
+              "value": {
+                "amount": "3150",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "IP55 enclosure",
+              "value": "IP55 enclosure"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "Pressure gauge PG-6",
+              "value": "Pressure gauge PG-6"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l4",
+              "excerpt": "20 units",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l4",
+              "excerpt": "R 450 each",
+              "value": {
+                "amount": "450",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "0-10 bar range",
+              "value": "0-10 bar range"
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "certified to SANS-1200",
+              "value": "certified to SANS-1200"
+            },
+            {
+              "field": "exclusion",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "Installation and commissioning are excluded from this offer",
+              "value": "Installation and commissioning"
+            }
+          ],
+          "facts": [
+            {
+              "id": "quote-c:0c675b3248f8bd",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Centrifugal pump CP-100",
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 21,
+                  "end": 44,
+                  "text": "Centrifugal pump CP-100"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:132cd000b64534",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 9,
+                  "end": 17,
+                  "text": "10 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:0c9415da756473",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "11500",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l2",
+                  "start": 72,
+                  "end": 85,
+                  "text": "R 11 500 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:065e27e33ca3b2",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Motor starter MS-20",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 0,
+                  "end": 19,
+                  "text": "Motor starter MS-20"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:11532fac243985",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "6",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 30,
+                  "end": 37,
+                  "text": "6 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:13f5ba29d257b9",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "3150",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 55,
+                  "end": 67,
+                  "text": "R 3 150 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:07646f173378ae",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "IP55 enclosure",
+              "evidence": [
+                {
+                  "blockId": "p1-l3",
+                  "start": 39,
+                  "end": 53,
+                  "text": "IP55 enclosure"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:18f2f3fc1459ec",
+              "field": "item",
+              "kind": "text",
+              "status": "validated",
+              "value": "Pressure gauge PG-6",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 0,
+                  "end": 19,
+                  "text": "Pressure gauge PG-6"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:047bdb21dccec1",
+              "field": "quantity",
+              "kind": "quantity",
+              "status": "validated",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 21,
+                  "end": 29,
+                  "text": "20 units"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:01ed0f4e0fa11c",
+              "field": "unit_price",
+              "kind": "money",
+              "status": "validated",
+              "value": {
+                "amount": "450",
+                "currency": "ZAR"
+              },
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 71,
+                  "end": 81,
+                  "text": "R 450 each"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:17130615f3efb8",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "0-10 bar range",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 31,
+                  "end": 45,
+                  "text": "0-10 bar range"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:02e7d888bb0d18",
+              "field": "specification",
+              "kind": "text",
+              "status": "validated",
+              "value": "certified to SANS-1200",
+              "evidence": [
+                {
+                  "blockId": "p1-l4",
+                  "start": 47,
+                  "end": 69,
+                  "text": "certified to SANS-1200"
+                }
+              ],
+              "label": "unlabelled",
+              "audit": "consistent"
+            },
+            {
+              "id": "quote-c:165652182bd13a",
+              "field": "exclusion",
+              "kind": "text",
+              "status": "validated",
+              "value": "Installation and commissioning",
+              "evidence": [
+                {
+                  "blockId": "p1-l5",
+                  "start": 0,
+                  "end": 59,
+                  "text": "Installation and commissioning are excluded from this offer"
+                }
+              ],
+              "label": "labelled",
+              "audit": "consistent"
+            }
+          ],
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-c",
+            "expected": 13,
+            "validatable": 13,
+            "outcomes": {
+              "correct": 11,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 1,
+              "wrongly_validated": 0,
+              "missed": 1
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 1,
+                "outcome": "missed"
+              },
+              {
+                "field": "unit_price",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "exclusion",
+                "line": 4,
+                "outcome": "wrong_value"
+              }
+            ],
+            "unlabelledValidated": 1,
+            "unlabelledFactIds": [
+              "quote-c:02e7d888bb0d18"
+            ],
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 0.8461538461538461,
+            "validatedPrecision": 0.8461538461538461
+          },
+          "issues": [],
+          "rates": {
+            "claims": 13,
+            "evidenceLocated": 13,
+            "valueSupported": 13
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "findingsBefore": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      },
+      "identity": {
+        "recovered": [],
+        "uncertain": [
+          {
+            "factId": "quote-c:18f2f3fc1459ec",
+            "docId": "quote-c",
+            "reason": "multiple_codes",
+            "candidates": [
+              "PG-6",
+              "SANS-1200"
+            ],
+            "description": "Pressure gauge PG-6"
+          }
+        ],
+        "counts": {
+          "codeFromModel": 2,
+          "recovered": 0,
+          "descriptionOnly": 0,
+          "uncertain": 1
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 1,
+    "requestsOk": 1,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 14343,
+      "mean": 14343,
+      "max": 14343
+    },
+    "claimsReceived": 13,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 0,
+    "recall": 0.8461538461538461,
+    "validatedPrecision": 0.8461538461538461,
+    "missedFacts": 1,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 1,
+    "requestsReportingTokens": 1,
+    "promptTokens": 481,
+    "completionTokens": 522,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 120,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. Approximate: published USD per million tokens ($0.293 input, $2.253 output) divided by $0.011 per 1,000 neurons. Check the Cloudflare pricing page for exact figures."
+    }
+  }
+}

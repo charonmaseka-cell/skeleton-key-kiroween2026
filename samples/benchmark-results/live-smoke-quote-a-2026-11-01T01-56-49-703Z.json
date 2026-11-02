@@ -1,0 +1,179 @@
+{
+  "mode": "live",
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "startedAt": "2026-11-01T01:56:49.703Z",
+  "label": "smoke-quote-a",
+  "attemptBudget": 2,
+  "attemptsCharged": 1,
+  "simulatedCoverageConfirmation": false,
+  "requests": [
+    {
+      "docId": "quote-a",
+      "chunk": 1,
+      "blocks": 5,
+      "chars": 352,
+      "ok": true,
+      "ms": 16758,
+      "attemptsCharged": 1,
+      "repaired": false,
+      "claims": 13,
+      "dropped": 0
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "scopecheck",
+      "docs": [
+        {
+          "docId": "quote-a",
+          "blocks": 5,
+          "chunks": 1,
+          "processingComplete": true,
+          "coverage": {
+            "state": "unverified"
+          },
+          "extraction": {
+            "docId": "quote-a",
+            "expected": 13,
+            "validatable": 13,
+            "outcomes": {
+              "correct": 13,
+              "correct_conservative": 0,
+              "held_for_review": 0,
+              "wrong_value": 0,
+              "wrongly_validated": 0,
+              "missed": 0
+            },
+            "details": [
+              {
+                "field": "item",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 1,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 2,
+                "outcome": "correct"
+              },
+              {
+                "field": "item",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "quantity",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "specification",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "unit_price",
+                "line": 3,
+                "outcome": "correct"
+              },
+              {
+                "field": "exclusion",
+                "line": 4,
+                "outcome": "correct"
+              }
+            ],
+            "unlabelledValidated": 0,
+            "rejectedByReason": {},
+            "ambiguousByReason": {},
+            "recall": 1,
+            "validatedPrecision": 1
+          },
+          "issues": [],
+          "rates": {
+            "claims": 13,
+            "evidenceLocated": 13,
+            "valueSupported": 13
+          }
+        }
+      ],
+      "findings": {
+        "produced": [],
+        "score": {
+          "expected": 0,
+          "produced": 0,
+          "matchedExactState": 0,
+          "conservative": [],
+          "missed": [],
+          "falseCritical": [],
+          "overConfident": [],
+          "unexpectedOther": [],
+          "mustNotFlagViolations": []
+        }
+      }
+    }
+  ],
+  "summary": {
+    "requests": 1,
+    "requestsOk": 1,
+    "schemaValidRate": 1,
+    "repairedRequests": 0,
+    "latencyMs": {
+      "total": 16758,
+      "mean": 16758,
+      "max": 16758
+    },
+    "claimsReceived": 13,
+    "evidenceValidRate": 1,
+    "valueSupportedRate": 1,
+    "serverDropped": 0,
+    "recall": 1,
+    "validatedPrecision": 1,
+    "missedFacts": 0,
+    "unsupportedFacts": 0,
+    "falseCriticalFindings": 0,
+    "overConfidentFindings": 0,
+    "missedFindings": 0,
+    "mustNotFlagViolations": 0
+  },
+  "usage": {
+    "requests": 1,
+    "requestsReportingTokens": 1,
+    "promptTokens": 478,
+    "completionTokens": 529,
+    "tokenSource": "measured",
+    "neurons": {
+      "value": 121,
+      "basis": "estimated_from_tokens",
+      "note": "ESTIMATE from measured tokens. Approximate: published USD per million tokens ($0.293 input, $2.253 output) divided by $0.011 per 1,000 neurons. Check the Cloudflare pricing page for exact figures."
+    }
+  }
+}

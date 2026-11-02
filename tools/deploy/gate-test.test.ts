@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -7,7 +7,7 @@ import type { AdmitResult } from '../../services/extraction-api/src/admission';
 import { handle } from '../../services/extraction-api/src/handler';
 import { health } from '../../services/extraction-api/src/health';
 import { SECRET_FILE, createSecret, destroySecret, readSecret } from './gate-secret';
-import { buildPayloads, runGateTest, TEST_ORIGIN, type Http, type Payload, type StepId } from './gate-test';
+import { buildPayloads, dailyBaseline, runGateTest, DAILY_NEURON_CAP, RUN_NEURON_CAP, TEST_ORIGIN, type GateTestResult, type Http, type Payload, type StepId } from './gate-test';
 
 // The gate test runner, offline: driven against the REAL handler and health check with the staging configuration and a mocked
 // model, so the sequence, the stop conditions and the attempt budget are exercised exactly as they will run.
@@ -19,9 +19,9 @@ const STAGING = {
 };
 const DAY = Date.UTC(2026, 10, 3, 12, 0, 0);
 
-type Reply = 'ok' | 'bad' | 'no_usage' | 'throw';
+type Reply = 'ok' | 'bad' | 'no_usage' | 'throw' | 'huge_usage' | 'unlocatable';
 function fakeWorker(replies: Reply[], opts: { startUsed?: number; ms?: number } = {}) {
-  const state = { used: opts.startUsed ?? 0, modelCalls: 0, extractRequests: 0 };
+  const state = { used: 0 + (opts.startUsed ?? 0), modelCalls: 0, extractRequests: 0 };
   const counter = {
     admit: async (c: number): Promise<AdmitResult> => (state.used >= c ? { ok: false, used: state.used, ceiling: c } : { ok: true, used: ++state.used, ceiling: c }),
     usedToday: async () => state.used,
@@ -31,9 +31,13 @@ function fakeWorker(replies: Reply[], opts: { startUsed?: number; ms?: number } 
       const kind = replies[state.modelCalls++] ?? 'ok';
       if (kind === 'throw') throw new Error('capacity temporarily exceeded');
       if (kind === 'bad') return { response: 'not json' };
-      const blockId = (JSON.parse(((input as { messages: { content: string }[] }).messages[1]!.content).split('\n').slice(1).join('\n')) as { blocks: { id: string; text: string }[] }).blocks[0]!;
-      const claims = [{ field: 'item', blockId: blockId.id, excerpt: blockId.text.slice(0, 5), value: blockId.text.slice(0, 5) }];
-      return kind === 'no_usage' ? { response: { claims } } : { response: { claims }, usage: { prompt_tokens: 600, completion_tokens: 400 } };
+      const msgs = (input as { messages: { content: string }[] }).messages;
+      const field = /- (\w+) \(/.exec(msgs[0]!.content)![1]!; // the profile's first field
+      const b = (JSON.parse(msgs[1]!.content.split('\n').slice(1).join('\n')) as { blocks: { id: string; text: string }[] }).blocks[0]!;
+      const excerpt = kind === 'unlocatable' ? `${b.text.slice(0, 5)} not in the block` : b.text.slice(0, 5);
+      const claims = [{ field, blockId: b.id, excerpt, value: excerpt }];
+      if (kind === 'no_usage') return { response: { claims } };
+      return { response: { claims }, usage: kind === 'huge_usage' ? { prompt_tokens: 3000, completion_tokens: 2500 } : { prompt_tokens: 600, completion_tokens: 400 } };
     },
   };
   const http: Http = async (path, init) => {
@@ -63,7 +67,7 @@ describe('exact test payloads (built offline from the sample PDFs and frozen pla
 });
 
 describe('runGateTest sequence', () => {
-  const run = (w: ReturnType<typeof fakeWorker>, now = () => DAY) => runGateTest({ http: w.http, token: TOKEN, payloads, now });
+  const run = (w: ReturnType<typeof fakeWorker>, now = () => DAY, extra: Partial<Parameters<typeof runGateTest>[0]> = {}) => runGateTest({ http: w.http, token: TOKEN, payloads, now, ...extra });
 
   it('no repair: T1..T4 use the 4 attempts, then R is refused with daily_limit; 4 model calls in total', async () => {
     const w = fakeWorker([]);
@@ -139,6 +143,170 @@ describe('runGateTest sequence', () => {
   it('the token never appears in the result', async () => {
     const r = await run(fakeWorker([]));
     expect(JSON.stringify(r)).not.toContain(TOKEN);
+  });
+});
+
+describe('runner gap 1: claims are validated and audited before the next step', () => {
+  const run = (w: ReturnType<typeof fakeWorker>, extra: Partial<Parameters<typeof runGateTest>[0]> = {}) => runGateTest({ http: w.http, token: TOKEN, payloads, now: () => DAY, ...extra });
+
+  it('a value accepted as validated that its evidence does not support stops the run at once; nothing more is sent', async () => {
+    const w = fakeWorker([]);
+    const r = await run(w, { audit: (f) => (f.status === 'validated' ? 'suspect' : null) });
+    expect(r.verdict).toBe('fail');
+    expect(r.stop?.at).toBe('T1');
+    expect(r.stop?.reason).toMatch(/^unsupported_value_validated/);
+    expect(r.steps).toHaveLength(1);
+    expect(r.steps[0]!.observations!.suspect.length).toBeGreaterThan(0);
+    expect(w.state.modelCalls).toBe(1);
+    expect(w.state.extractRequests).toBe(3 + 1);
+    expect(r.refusal).toBeNull();
+  });
+
+  it('values held for review are observations, not stops: the run continues and passes', async () => {
+    const w = fakeWorker(['unlocatable', 'unlocatable', 'ok', 'ok']);
+    const r = await run(w);
+    expect(r.verdict).toBe('pass');
+    // an excerpt that is not in its block is held for review by the client's validation: recorded, not a stop
+    for (const s of r.steps.slice(0, 2)) {
+      const o = s.observations!;
+      expect(o.validated).toBe(0);
+      expect(Object.values(o.heldForReview).reduce((n, x) => n + x, 0)).toBe(1);
+      expect(o.suspect).toEqual([]);
+    }
+    expect(r.steps).toHaveLength(4);
+  });
+
+  it('a step with no claims at all (an extraction miss) is an observation, not a stop', async () => {
+    const w = fakeWorker([]);
+    const r = await run(w, { audit: () => null });
+    expect(r.verdict).toBe('pass');
+    expect(r.steps.every((s) => s.observations && s.observations.suspect.length === 0)).toBe(true);
+  });
+
+  it('the real audit passes the well-formed claims of every frozen payload', async () => {
+    const r = await run(fakeWorker([]));
+    expect(r.verdict).toBe('pass');
+    expect(r.steps.map((s) => s.observations!.validated)).toEqual([1, 1, 1, 1]);
+  });
+});
+
+describe('runner gap 2: neuron reservations against the run cap (2,000) and the daily cap (8,000)', () => {
+  const run = (w: ReturnType<typeof fakeWorker>, extra: Partial<Parameters<typeof runGateTest>[0]> = {}) => runGateTest({ http: w.http, token: TOKEN, payloads, now: () => DAY, ...extra });
+
+  it('caps are the authorised ones', () => {
+    expect(RUN_NEURON_CAP).toBe(2000);
+    expect(DAILY_NEURON_CAP).toBe(8000);
+  });
+
+  it('reservations are the guaranteed (1 byte per token) worst case of the exact payloads, and the worst 4-attempt path fits 2,000', () => {
+    expect(Math.round(payloads.T1.reserve.first * 10) / 10).toBe(384.6);
+    expect(Math.round(payloads.T1.reserve.repair * 10) / 10).toBe(387.8);
+    expect(Math.round(payloads.T2.reserve.first * 10) / 10).toBe(512.9);
+    expect(Math.round(payloads.T2.reserve.repair * 10) / 10).toBe(516);
+    const worst = payloads.T1.reserve.first + payloads.T2.reserve.first + payloads.T2.reserve.repair + payloads.T3.reserve.first;
+    expect(worst).toBeLessThan(2000);
+    expect(worst).toBeGreaterThan(1893);
+  });
+
+  it('measured attempts are charged from reported tokens; unused repair reservations are released', async () => {
+    const r = await run(fakeWorker([]));
+    expect(r.budget.attempts.map((a) => [a.step, a.basis])).toEqual([['T1', 'measured'], ['T2', 'measured'], ['T3', 'measured'], ['T4', 'measured']]);
+    const one = Math.ceil(((600 * 26_636 + 400 * 204_818) / 1e6) * 1.1 * 1000) / 1000;
+    expect(r.budget.runCharged).toBeCloseTo(4 * one, 2);
+  });
+
+  it('a repaired request: the first attempt (usage unknown) keeps its reservation, the second is measured', async () => {
+    const r = await run(fakeWorker(['ok', 'bad', 'ok', 'ok']));
+    const t2 = r.budget.attempts.filter((a) => a.step === 'T2');
+    expect(t2.map((a) => a.basis)).toEqual(['kept_unknown', 'measured']);
+    expect(t2[0]!.charged).toBe(t2[0]!.reserved);
+  });
+
+  it('an overrun is charged in full, recorded, and not clipped to the reservation', async () => {
+    const r = await run(fakeWorker(['huge_usage']));
+    const a = r.budget.attempts[0]!;
+    expect(a.overrun).toBe(true);
+    expect(a.charged).toBeGreaterThan(a.reserved);
+    expect(a.charged).toBeCloseTo(((3000 * 26_636 + 2500 * 204_818) / 1e6) * 1.1, 1);
+    expect(r.budget.overruns).toBeGreaterThanOrEqual(1);
+  });
+
+  it('a failed request keeps every attempt it used at its reservation', async () => {
+    const r = await run(fakeWorker(['throw']));
+    expect(r.stop?.at).toBe('T1');
+    expect(r.budget.attempts).toHaveLength(1);
+    expect(r.budget.attempts[0]).toMatchObject({ basis: 'kept_unknown' });
+    expect(r.budget.runCharged).toBeCloseTo(payloads.T1.reserve.first, 2);
+  });
+
+  it('missing usage keeps the reservation and stops', async () => {
+    const r = await run(fakeWorker(['no_usage']));
+    expect(r.stop?.reason).toBe('token usage not reported');
+    expect(r.budget.attempts[0]).toMatchObject({ basis: 'kept_unknown' });
+  });
+
+  it('daily cap: a step whose reservation would pass 8,000 is not sent', async () => {
+    const w = fakeWorker([]);
+    const r = await run(w, { dailyBaseline: { neurons: 7_500, sources: ['test'] } });
+    expect(r.stop?.at).toBe('T1');
+    expect(r.stop?.reason).toMatch(/^daily cap 8000/);
+    expect(w.state.modelCalls).toBe(0);
+    expect(r.budget.attempts).toEqual([]);
+  });
+
+  it('daily cap already reached: nothing is sent, not even the prechecks', async () => {
+    const w = fakeWorker([]);
+    const r = await run(w, { dailyBaseline: { neurons: 8_000, sources: ['test'] } });
+    expect(r.stop?.at).toBe('P0 daily budget headroom');
+    expect(w.state.extractRequests).toBe(0);
+  });
+
+  it('run cap: with unknown usage piling up, a step that could pass 2,000 is not sent', async () => {
+    // every reply is a repair-then-success, so each first attempt stays at its reservation
+    const w = fakeWorker(['bad', 'huge_usage', 'bad', 'huge_usage']);
+    const r = await run(w);
+    expect(r.stop?.reason).toMatch(/run cap 2000|neuron cap reached/);
+    expect(r.budget.runCharged).toBeLessThanOrEqual(2000 + 700); // at most one measured overrun beyond a reservation
+    expect(w.state.modelCalls).toBeLessThanOrEqual(4);
+  });
+});
+
+describe('partial results survive a failure', () => {
+  it('persist is called after every step, and the last write holds everything up to the stop', async () => {
+    const writes: GateTestResult[] = [];
+    const w = fakeWorker(['ok', 'throw']);
+    const r = await runGateTest({ http: w.http, token: TOKEN, payloads, now: () => DAY, persist: (x) => writes.push(JSON.parse(JSON.stringify(x))) });
+    expect(writes.length).toBeGreaterThan(5);
+    const last = writes[writes.length - 1]!;
+    expect(last.complete).toBe(true);
+    expect(last.steps.map((s) => s.step)).toEqual(['T1', 'T2']);
+    expect(last.stop?.at).toBe('T2');
+    expect(last.budget.runCharged).toBe(r.budget.runCharged);
+    // a write made while T2 was in flight already records its reservation
+    expect(writes.some((x) => !x.complete && x.budget.attempts.some((a) => a.step === 'T2' && a.basis === 'reserved'))).toBe(true);
+    expect(JSON.stringify(writes)).not.toContain(TOKEN);
+  });
+});
+
+describe('daily baseline', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'gate-baseline-'));
+  afterAll(() => rmSync(dir, { recursive: true, force: true }));
+  it('is the larger of the local ledger and the committed records for the UTC day', () => {
+    const results = join(dir, 'results');
+    mkdirSync(results);
+    writeFileSync(join(results, 'batch-a.json'), JSON.stringify({ neuronsCharged: 746.897, invocations: [{ startedAt: '2026-11-02T00:00:16Z' }] }));
+    writeFileSync(join(results, 'batch-b.json'), JSON.stringify({ neuronsCharged: 2000, invocations: [{ startedAt: '2026-11-01T10:00:00Z' }] }));
+    const ledger = join(dir, 'ledger.json');
+    const gate = join(dir, 'gate.json');
+    expect(dailyBaseline('2026-11-02', { ledgerFile: ledger, resultsDir: results, gateFile: gate }).neurons).toBe(746.897);
+    writeFileSync(ledger, JSON.stringify({ day: '2026-11-02', neuronsEstimated: 900 }));
+    expect(dailyBaseline('2026-11-02', { ledgerFile: ledger, resultsDir: results, gateFile: gate }).neurons).toBe(900);
+    writeFileSync(gate, JSON.stringify({ startedAt: '2026-11-02T08:00:00Z', budget: { runCharged: 500 } }));
+    expect(dailyBaseline('2026-11-02', { ledgerFile: ledger, resultsDir: results, gateFile: gate }).neurons).toBeCloseTo(1246.897, 3);
+    expect(dailyBaseline('2026-11-03', { ledgerFile: ledger, resultsDir: results, gateFile: gate }).neurons).toBe(0);
+  });
+  it('the committed records for 2026-11-02 already hold the second-model batch', () => {
+    expect(dailyBaseline('2026-11-02', { ledgerFile: join(dir, 'none.json'), gateFile: join(dir, 'none2.json') }).neurons).toBeCloseTo(746.897, 3);
   });
 });
 

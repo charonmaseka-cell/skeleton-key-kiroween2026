@@ -165,3 +165,54 @@ describe('Durable Object admission counter (real SQLite DO, mocked model)', () =
     for (const f of files) expect(readFileSync(f).includes('UNIQUE-MARKER-TEXT-98765')).toBe(false);
   }, 60_000);
 });
+
+describe('GET /health: deployment check with the real Durable Object, no inference', () => {
+  const get = async (mf: Mf, headers: Record<string, string> = {}) => {
+    const res = await mf.dispatchFetch('http://worker.test/health', { headers });
+    return { status: res.status, body: (await res.json()) as { ok: boolean; checks: { configuration: string; workersAiBinding: string; durableObject: { reachable: boolean; usedToday: number; zeroCeilingRefused: boolean; unchangedAfterCheck: boolean }; admission: { dailyCeiling: number; open: boolean } }; inference: string } };
+  };
+
+  it('closed deployment (ceiling 0): all checks pass, admission reported closed, the model is never called, and nothing is admitted', async () => {
+    const mf = start(freshPersist(), 0);
+    try {
+      const h = { 'x-test-now': String(DAY1) };
+      const r = await get(mf, h);
+      expect(r.status).toBe(200);
+      expect(r.body).toMatchObject({ ok: true, inference: 'not called by this check', checks: { configuration: 'valid', workersAiBinding: 'present (not called)', durableObject: { reachable: true, usedToday: 0, zeroCeilingRefused: true, unchangedAfterCheck: true }, admission: { dailyCeiling: 0, open: false } } });
+      for (let i = 0; i < 5; i++) await get(mf, h); // repeated checks consume nothing
+      expect((await get(mf, h)).body.checks.durableObject.usedToday).toBe(0);
+      expect(await modelCalls(mf)).toBe(0);
+      expect((await call(mf, h)).code).toBe('daily_limit'); // and /extract stays closed
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+
+  it('reads the real count after real admissions, and still admits nothing itself', async () => {
+    const mf = start(freshPersist(), 3);
+    try {
+      const h = { 'x-test-now': String(DAY1) };
+      expect((await call(mf, h)).code).toBe('ok');
+      expect((await call(mf, h)).code).toBe('ok');
+      const r = await get(mf, h);
+      expect(r.body.checks.durableObject).toMatchObject({ usedToday: 2, unchangedAfterCheck: true });
+      expect(r.body.checks.admission).toEqual({ dailyCeiling: 3, open: true });
+      expect((await call(mf, h)).code).toBe('ok'); // the third admission is still available: the check used none
+      expect((await call(mf, h)).code).toBe('daily_limit');
+      expect(await modelCalls(mf)).toBe(3); // the model ran for the 3 extractions only
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+
+  it('a missing Workers AI binding fails the check (503)', async () => {
+    const mf = start(freshPersist(), 0);
+    try {
+      const r = await get(mf, { 'x-no-ai': '1' });
+      expect(r.status).toBe(503);
+      expect(r.body).toMatchObject({ ok: false, checks: { workersAiBinding: 'missing' } });
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+});

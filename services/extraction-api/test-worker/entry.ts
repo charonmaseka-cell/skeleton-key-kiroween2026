@@ -2,6 +2,7 @@
 // Behaviour is selected per request with the x-mock header; x-test-now fakes the clock.
 import { handle } from '../src/handler';
 import { AdmissionCounter } from '../src/counter-do';
+import { health } from '../src/health';
 
 export { AdmissionCounter };
 
@@ -16,6 +17,11 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === '/__calls') return new Response(String(modelCalls));
+    if (url.pathname === '/health') {
+      const counted = { run: async () => { modelCalls++; return {}; } }; // counted so a test can prove the check never calls it
+      const nowHeader2 = request.headers.get('x-test-now');
+      return health(env as never, { now: () => (nowHeader2 ? Number(nowHeader2) : Date.now()), ai: request.headers.get('x-no-ai') ? undefined : counted, counter: env.ADMISSION.get(env.ADMISSION.idFromName('global')) });
+    }
     const mode = request.headers.get('x-mock') ?? 'ok';
     const nowHeader = request.headers.get('x-test-now');
     const ai = {

@@ -36,3 +36,9 @@ export function admit(sql: SqlLike, ceiling: number, nowMs: number): AdmitResult
   sql.exec('DELETE FROM usage WHERE day < ?', utcDay(nowMs - 7 * 86_400_000));
   return { ok: true, used: used + 1, ceiling };
 }
+
+/** Today's admitted count, read only (no row is written). */
+export function usedOn(sql: SqlLike, nowMs: number): number {
+  const rows = sql.exec('SELECT admitted FROM usage WHERE day = ?', utcDay(nowMs)).toArray() as { admitted: number }[];
+  return rows[0]?.admitted ?? 0;
+}

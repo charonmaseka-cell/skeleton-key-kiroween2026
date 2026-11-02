@@ -1,17 +1,20 @@
 # Deployment (Task 7.1)
 
-**Status (2 November 2026, from `main` at `722b4fd`): PARTIAL.**
+**Status (2 November 2026): Worker deployed with admission closed (ceiling 0); Worker verification NOT yet done (sandbox cannot reach it); Pages apps deployed and externally verified.**
 | Part | State | Evidence |
 |---|---|---|
-| ScopeCheck Pages app | **deployed**: https://skeleton-key-scopecheck.pages.dev (deployment `d0d2f51b`) | Cloudflare API: production, branch `main`, commit `722b4fd`, stage deploy = success, canonical deployment of the project |
-| PackCheck Pages app | **deployed**: https://skeleton-key-packcheck.pages.dev (deployment `b07d1873`) | same |
-| Extraction Worker (`/extract`, `/health`, Durable Object) | **NOT deployed** | `wrangler deploy` refused ("No access to the specified resource"); the account has no Worker script |
-| Browser and HTTP check of the two sites | **NOT done** | this environment's egress proxy refuses connections to `*.pages.dev` (curl `CONNECT 403`; Playwright and agent-browser `ERR_TUNNEL_CONNECTION_FAILED`; the fetch tool HTTP 403); even `example.com` is refused |
-| Worker health and API checks | **NOT possible** | there is no Worker URL |
+| ScopeCheck Pages app | **deployed**: https://skeleton-key-scopecheck.pages.dev | Redeployed 2 November (`0343bb09`, same build, `VITE_EXTRACTION_API_URL=""`). **External check** (owner-reported, not run from this sandbox): loads in labelled sample mode |
+| PackCheck Pages app | **deployed**: https://skeleton-key-packcheck.pages.dev | Redeployed 2 November (`75f39831`). Same external check |
+| CI | `main` at `424d3f6` passed CI | **External check** (GitHub, owner-reported) |
+| workers.dev subdomain | **`teddykgroup`** created via the Cloudflare API (PUT `/workers/subdomain`) after the account was found to have none (error 10007) | API returned success |
+| Extraction Worker | **deployed**: `skeleton-key-extraction`, https://skeleton-key-extraction.teddykgroup.workers.dev | Cloudflare API: script exists (modified 2026-11-02T04:16:16Z), workers.dev route enabled. Deployed with `DAILY_ADMISSION_CEILING=0` and `ALLOWED_ORIGINS` = the two Pages origins only |
+| Worker `/health`, `/extract` refusal checks | **NOT done** | this sandbox's egress proxy refuses all external hosts (TLS reset on the Worker URL, three bounded probes; `example.com` also fails). Run externally: `WORKER_URL=https://skeleton-key-extraction.teddykgroup.workers.dev npx tsx tools/deploy/deploy.ts --verify-only` |
+
+No inference was made; admission is closed (0). Free plan unchanged. Task 5.5 (limits from measurement against the deployed Worker) stays **open**; admission opens only after it passes.
 
 Both apps were built by `buildApps()` with `VITE_EXTRACTION_API_URL=""` and passed the bundle check (no workers.dev host, no `/extract` URL, no env-file URL). So they open in labelled sample mode with analysis disabled and need no Worker. Production admission is 0 (the Worker does not exist); no live inference was made; no plan was changed. When the Worker is deployed, its `ALLOWED_ORIGINS` are exactly the two URLs above.
 
-**Still to do:** grant the token Workers Scripts: Edit and Account Settings: Read; then `npx tsx tools/deploy/deploy.ts` (it redeploys both apps the same way) and `WORKER_URL=... npx tsx tools/deploy/deploy.ts --verify-only`, and open both sites in a browser from a network that can reach them.
+**Still to do:** run the verify-only command above from a network that can reach the Worker; then task 5.5.
 
 ## What the token needs (account level)
 | Permission | Why | Now |

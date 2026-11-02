@@ -1,20 +1,25 @@
 # Deployment (Task 7.1)
 
-**Status (2 November 2026): Worker deployed with admission closed (ceiling 0); Worker verification NOT yet done (sandbox cannot reach it); Pages apps deployed and externally verified.**
+**Status (2 November 2026): CLOSED DEPLOYMENT VERIFIED (externally). Worker deployed with admission closed at 0; Pages apps deployed in sample mode. Inference through the AI binding is NOT validated; task 5.5 is open.**
+
+Provenance of checks: **sandbox** = run from this build environment; **external** = run by the owner from a network that can reach the sites (reported, not reproducible from the sandbox, whose egress proxy refuses all external hosts including `example.com`).
+
 | Part | State | Evidence |
 |---|---|---|
-| ScopeCheck Pages app | **deployed**: https://skeleton-key-scopecheck.pages.dev | Redeployed 2 November (`0343bb09`, same build, `VITE_EXTRACTION_API_URL=""`). **External check** (owner-reported, not run from this sandbox): loads in labelled sample mode |
-| PackCheck Pages app | **deployed**: https://skeleton-key-packcheck.pages.dev | Redeployed 2 November (`75f39831`). Same external check |
-| CI | `main` at `424d3f6` passed CI | **External check** (GitHub, owner-reported) |
-| workers.dev subdomain | **`teddykgroup`** created via the Cloudflare API (PUT `/workers/subdomain`) after the account was found to have none (error 10007) | API returned success |
-| Extraction Worker | **deployed**: `skeleton-key-extraction`, https://skeleton-key-extraction.teddykgroup.workers.dev | Cloudflare API: script exists (modified 2026-11-02T04:16:16Z), workers.dev route enabled. Deployed with `DAILY_ADMISSION_CEILING=0` and `ALLOWED_ORIGINS` = the two Pages origins only |
-| Worker `/health`, `/extract` refusal checks | **NOT done** | this sandbox's egress proxy refuses all external hosts (TLS reset on the Worker URL, three bounded probes; `example.com` also fails). Run externally: `WORKER_URL=https://skeleton-key-extraction.teddykgroup.workers.dev npx tsx tools/deploy/deploy.ts --verify-only` |
+| ScopeCheck Pages app | https://skeleton-key-scopecheck.pages.dev | sandbox: Cloudflare API deployment record. **external**: HTTP 200, loads in labelled sample mode |
+| PackCheck Pages app | https://skeleton-key-packcheck.pages.dev | same |
+| CI | `main` at `424d3f6` green | **external** (GitHub) |
+| workers.dev subdomain | `teddykgroup` | sandbox: created via Cloudflare API (account had none, error 10007) |
+| Extraction Worker | https://skeleton-key-extraction.teddykgroup.workers.dev, deployed with `DAILY_ADMISSION_CEILING=0`, `ALLOWED_ORIGINS` = the two Pages origins | sandbox: Cloudflare API shows script and workers.dev route enabled; preflight all PASS |
+| Worker `/health` | **external**: HTTP 200; AI binding present, **not called**; Durable Object reachable; admission closed at 0 | sandbox: not possible (TLS reset, 3 bounded probes) |
+| `/extract` from each Pages origin | **external**: 429 `daily_limit` (both) | |
+| `/extract` from an unlisted origin | **external**: 403 `origin_denied` | |
+| Counter after the checks | **external**: still 0 | |
 
-No inference was made; admission is closed (0). Free plan unchanged. Task 5.5 (limits from measurement against the deployed Worker) stays **open**; admission opens only after it passes.
+No inference was made and the plan is unchanged. **Still open:** (1) task 5.5, limits from measurement against the deployed Worker; (2) validation of real inference through the AI binding (needs one admitted request, so a non-zero ceiling); admission stays 0 until both pass. The deployed bundle's provenance is recorded below once redeployed from clean `main`.
 
 Both apps were built by `buildApps()` with `VITE_EXTRACTION_API_URL=""` and passed the bundle check (no workers.dev host, no `/extract` URL, no env-file URL). So they open in labelled sample mode with analysis disabled and need no Worker. Production admission is 0 (the Worker does not exist); no live inference was made; no plan was changed. When the Worker is deployed, its `ALLOWED_ORIGINS` are exactly the two URLs above.
 
-**Still to do:** run the verify-only command above from a network that can reach the Worker; then task 5.5.
 
 ## What the token needs (account level)
 | Permission | Why | Now |

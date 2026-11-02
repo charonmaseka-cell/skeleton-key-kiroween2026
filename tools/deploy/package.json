@@ -1,0 +1,10 @@
+{
+  "name": "@skeleton-key/deploy",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "check": "tsx deploy.ts --check"
+  }
+}

@@ -85,7 +85,11 @@ export const PROFILES: Record<string, Profile> = {
 export const getProfile = (id: string): Profile | undefined =>
   Object.prototype.hasOwnProperty.call(PROFILES, id) ? PROFILES[id] : undefined;
 
-export function buildMessages(profile: Profile, blocks: { id: string; text: string }[], repair: boolean) {
+/** Prompt rule for blocks that carry table cells (parser 'ingest/2-cells'). */
+export const CELLS_RULE =
+  'Some blocks also list "cells": the text of each table column of that line, in order, each copied from the block text. Each value belongs to one cell: never join two cells into one value, and do not take a value from a different column. The excerpt must still be copied exactly from the block text.';
+
+export function buildMessages(profile: Profile, blocks: { id: string; text: string; cells?: string[] }[], repair: boolean) {
   const fieldList = profile.fields.map((x) => `- ${x.name} (${x.kind}): ${x.description}`).join('\n');
   const system = [
     `You extract structured values from ${profile.purpose}.`,
@@ -95,6 +99,8 @@ export function buildMessages(profile: Profile, blocks: { id: string; text: stri
     'For each value you find, return: field (one of the names below), blockId (the id of the block it came from), excerpt (text copied exactly from that block, as short as possible but including the value and the label next to it), and value.',
     'Value formats: money = {"amount": "decimal string", "currency": "ISO code or null"}; quantity = {"value": "decimal string", "unit": "unit word written next to the number, else null"}; date = "YYYY-MM-DD"; name and text = string.',
     'Do not guess. Omit anything you cannot find in the text. Return {"claims": []} if nothing is found.',
+    // Added only when a block carries table cells, so every request without cells is exactly what it was before.
+    ...(blocks.some((b) => b.cells) ? [CELLS_RULE] : []),
     'Fields:',
     fieldList,
   ].join('\n');

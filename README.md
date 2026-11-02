@@ -24,7 +24,7 @@ Models extract and suggest; deterministic rules produce findings backed by valid
 | `.kiro/` | Steering and specs (requirements, design, tasks) |
 | `docs/build-log.md` | Factual build record |
 | `docs/model-comparison.md`, `docs/handoff-task-6.md` | Model decision; Task 6 handoff |
-| `docs/reference/ScopeCheck_Build_Brief.md` | The original build brief (historical; approved amendments in `.kiro/steering/brief.md` take precedence) |
+| `docs/reference/scopecheck-build-brief.md` | The original build brief (historical; approved amendments in `.kiro/steering/brief.md` take precedence) |
 | `docs/hooks.md`, `docs/reviews/` | Hooks (configured vs actually run); source review and its resolution |
 | `.kiro/specs/` | Foundation spec plus focused specs for ScopeCheck, PackCheck and the haunted interface; `README.md` there is the index with introduction dates |
 

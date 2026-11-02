@@ -65,6 +65,21 @@ export function frozenFileList(): string[] {
   return [...DIRS.flatMap(walk), ...FILES].map((p) => relative('', p)).sort();
 }
 
+/** SHA-256 of each file as it was at `commit` (from git history), or null where the file did not exist there. */
+export function hashesAtCommit(commit: string, files: string[]): Record<string, string | null> {
+  return Object.fromEntries(files.map((f) => {
+    try {
+      const bytes = execFileSync('git', ['show', `${commit}:${f}`], { cwd: REPO, maxBuffer: 64 * 1024 * 1024 });
+      return [f, createHash('sha256').update(bytes).digest('hex')];
+    } catch {
+      return [f, null];
+    }
+  }));
+}
+
+/** The evaluation set itself (documents, labels, chunk plan and their generator): it must never change, at any commit. */
+export const EVALUATION_SET = (f: string) => (f.startsWith('samples/scopecheck-fresh/') && !/freeze/.test(f)) || f === 'tools/benchmark/src/fresh-scopecheck.ts';
+
 export function computeHashes(): Record<string, string> {
   return Object.fromEntries(frozenFileList().map((p) => [p, sha(p)]));
 }

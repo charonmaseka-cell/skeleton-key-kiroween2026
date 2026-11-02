@@ -509,7 +509,7 @@ export function formatSummary(r: BenchmarkResult): string {
   for (const sm of r.samples) {
     if (sm.comparisons) {
       const c = sm.comparisons;
-      if (sm.comparisonCompleteness) lines.push(`  ${sm.sampleId} comparison completeness (label diagnostic): ${sm.comparisonCompleteness.labelledRequirementRows} rows x ${sm.comparisonCompleteness.quotations} quotations x ${sm.comparisonCompleteness.aspects} aspects = ${sm.comparisonCompleteness.expected} expected, ${sm.comparisonCompleteness.planned} planned: ${sm.comparisonCompleteness.complete ? 'complete' : 'INCOMPLETE (a comparison is missing from the ledger)'}`);
+      if (sm.comparisonCompleteness) lines.push(`  ${sm.sampleId} comparison completeness (label diagnostic): ${sm.comparisonCompleteness.labelledRequirementRows} rows x ${sm.comparisonCompleteness.quotations} quotations x ${sm.comparisonCompleteness.aspects} aspects = ${sm.comparisonCompleteness.expected} expected, ${sm.comparisonCompleteness.planned} planned: ${sm.comparisonCompleteness.complete ? 'complete' : sm.comparisonCompleteness.planned < sm.comparisonCompleteness.expected ? 'INCOMPLETE (fewer planned than labelled: a requirement row is missing from the ledger)' : 'MORE planned than labelled (the extraction produced requirement rows the labels do not have, for example a wrapped line read as its own item)'}`);
       lines.push(`  ${sm.sampleId} comparisons: ${c.length} planned, agree=${c.filter((x) => x.status === 'agree').length} flagged=${c.filter((x) => x.status === 'flagged').length} NOT EVALUATED=${c.filter((x) => x.status === 'not_evaluated').length}`);
       for (const x of c.filter((y) => y.status === 'not_evaluated')) lines.push(`    not evaluated: ${x.id} (${x.reason})`);
     }

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Block } from '@skeleton-key/engine';
+import { toRequestBlock, type Block } from '@skeleton-key/engine';
 import { buildMessages, getProfile, parseModelOutput, responseFormat } from '../../../services/extraction-api/src/profiles';
 import { Batch } from './batch';
 import { frozenChunker, type FrozenPlan } from './chunking';
@@ -49,7 +49,7 @@ export async function recoverFromRaw(o: { rawFile: string; sampleId: string; pla
     const { chunks } = frozenChunker(o.plan)(doc.id, blocks, doc.schemaId);
     const claims: unknown[] = [];
     for (const [i, chunk] of chunks.entries()) {
-      const sent = chunk.map((b) => ({ id: b.id, text: b.text }));
+      const sent = chunk.map(toRequestBlock); // exactly what the Worker sent for this chunk
       const sha = promptSha(buildMessages(profile, sent, false), profile.maxOutputTokens, responseFormat(profile));
       const call = calls.find((c) => c.start.promptSha256 === sha && c.end?.ok && c.end.output && !matchedCalls.has(c));
       const start = call?.start;

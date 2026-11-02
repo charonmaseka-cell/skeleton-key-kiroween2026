@@ -11,4 +11,4 @@ When each spec was actually introduced, from git history. A spec is a plan, not 
 
 The focused specs reference foundation requirements by ID (R2, R4.9, R5, R7.6, R8, R10 and so on) and do not copy them.
 
-Steering: `.kiro/steering/brief.md` is reference material (manual inclusion): it points to the imported original brief (`docs/reference/ScopeCheck_Build_Brief.md`, historical) and holds the approved amendments, which take precedence.
+Steering: `.kiro/steering/brief.md` is reference material (manual inclusion): it points to the imported original brief (`docs/reference/scopecheck-build-brief.md`, historical) and holds the approved amendments, which take precedence.

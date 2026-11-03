@@ -384,7 +384,7 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
 
 // ---------- export ----------
 
-function download(name: string, mime: string, content: string) {
+export function download(name: string, mime: string, content: string) {
   const url = URL.createObjectURL(new Blob([content], { type: mime }));
   const a = document.createElement('a');
   a.href = url;

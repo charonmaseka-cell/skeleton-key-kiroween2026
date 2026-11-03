@@ -4,7 +4,7 @@ import type { ExportEntry, ExportModel } from './export';
 // findings, unresolved Needs-review items, Not-evaluated comparisons (own section), decisions,
 // corrections and notes. Sample runs carry an unmissable marker. No network, no files.
 
-const SAMPLE_MARK = 'SAMPLE (fictional): invented documents, not a real review';
+export const SAMPLE_MARK = 'SAMPLE (fictional): invented documents, not a real review';
 
 import { formatValue } from './format';
 

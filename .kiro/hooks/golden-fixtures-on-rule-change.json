@@ -2,14 +2,14 @@
   "version": "v1",
   "hooks": [
     {
-      "name": "Rerun golden fixtures when engine or rule code changes",
+      "name": "Rerun golden fixtures and report changed outcomes when a rule or adapter file is saved",
       "trigger": "PostFileSave",
-      "description": "After the agent saves engine source, an app adapter or a fixture, rerun the golden and review-regression fixture tests for both apps. CI remains authoritative.",
-      "matcher": "(packages/engine/src/|apps/(scopecheck|packcheck)/src/adapter/|samples/fixtures/)",
+      "description": "After the agent saves a rule, adapter or matching file, compute every rule outcome on every sample fixture, print each one that was added, removed or changed since tools/hooks/golden-outcomes.json, then run the golden and review-regression tests of both apps. Exit 1 on any change or failure. CI remains authoritative.",
+      "matcher": "(apps/(scopecheck|packcheck)/src/adapter/[^/]+\\.ts$|packages/engine/src/(findings|compare|comparisons|matcher|coverage|evidence|support|facts|review)\\.ts$)",
       "action": {
         "type": "command",
-        "command": "npx vitest run apps/scopecheck/src/golden.test.ts apps/scopecheck/src/review-fixes.test.ts apps/packcheck/src/golden.test.ts apps/packcheck/src/review-fixes.test.ts",
-        "timeout": 120
+        "command": "npx tsx tools/hooks/golden-report.ts",
+        "timeout": 180
       }
     }
   ]

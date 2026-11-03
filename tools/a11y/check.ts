@@ -46,7 +46,13 @@ function serve(dir: string, port: number): Promise<Server> {
 
 type Failure = string;
 
+/** Measure the page at rest: wait for every finite animation (the one-time ghost flicker, the fog fade-in) to finish first. */
+async function atRest(page: Page): Promise<void> {
+  await page.evaluate(() => Promise.race([Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))), new Promise((r) => setTimeout(r, 6000))]));
+}
+
 async function axeViolations(page: Page): Promise<string[]> {
+  await atRest(page);
   await page.addScriptTag({ path: AXE });
   const res = await page.evaluate(async () => {
     // @ts-expect-error injected by the script tag
@@ -82,6 +88,7 @@ async function focusRingWalk(page: Page, limit = 80): Promise<string[]> {
 
 /** Decorative rectangles must not overlap any text line or control. */
 async function motifOverlaps(page: Page): Promise<string[]> {
+  await atRest(page);
   return page.evaluate(() => {
     const motifs = [...document.querySelectorAll('[data-motif]')].map((m) => ({ kind: m.getAttribute('data-motif'), r: m.getBoundingClientRect() })).filter((m) => m.r.width > 0);
     const hit = (a: DOMRect, b: DOMRect) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;

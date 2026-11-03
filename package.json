@@ -21,7 +21,8 @@
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
-    "a11y": "npx tsx tools/a11y/check.ts"
+    "a11y": "npx tsx tools/a11y/check.ts",
+    "docs:sync": "tsx tools/docs/sync-from-specs.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

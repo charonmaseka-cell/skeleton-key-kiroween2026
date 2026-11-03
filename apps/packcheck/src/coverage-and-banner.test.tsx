@@ -29,7 +29,7 @@ describe('coverage hint', () => {
     for (const d of after.slice(1)) expect(d.querySelector('[data-coverage-hint]')).not.toBeNull();
     // and the withdraw control brings it back
     after[0]!.open = true;
-    await user.click(within(after[0]!).getByRole('button', { name: /withdraw coverage confirmation/i }));
+    await user.click(within(after[0]!).getByRole('button', { name: /withdraw my coverage confirmation/i }));
     expect(sections()[0]!.querySelector('[data-coverage-hint]')).not.toBeNull();
   });
 });

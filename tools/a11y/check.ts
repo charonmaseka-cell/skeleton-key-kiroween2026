@@ -151,7 +151,10 @@ async function main() {
             await confirmCoverage(page, app);
             await check('after confirming coverage: axe-core, no violations (ghost row drawn)', await axeViolations(page));
             await check('after confirming coverage: decoration overlaps no text or control', await motifOverlaps(page));
-            if (width === 1280) await (await page.$('[data-ghost]'))!.scrollIntoViewIfNeeded(), await page.screenshot({ path: join(SHOTS, `${app.name}-ghost-lights-${mode}.png`) });
+            if (width === 1280) {
+              await (await page.$('[data-ghost]'))!.scrollIntoViewIfNeeded();
+              await page.screenshot({ path: join(SHOTS, `${app.name}-ghost-lights-${mode}.png`) });
+            }
           }
           await ctx.close();
         }

@@ -18,7 +18,13 @@ export type Palette = {
   ok: string;
   info: string;
   link: string;
-  /** keyboard focus ring (non-text, needs 3:1) */
+  /**
+   * Ectoplasm: the brand accent. Used ONLY for the brand mark, the mode toggle, decoration (glow, motif edges) and the
+   * keyboard focus ring. Never for a status, a finding or a comparison: those keep accent, danger and ok, so certainty is
+   * never read from the brand colour (haunted-ui HU-16).
+   */
+  ecto: string;
+  /** keyboard focus ring (non-text, needs 3:1); the ectoplasm colour */
   focus: string;
   /** cited-evidence highlight; also drawn with an outline so it never depends on colour alone */
   markBg: string;
@@ -37,7 +43,8 @@ export const PALETTES: Record<Mode, Palette> = {
     ok: '#7bd88f',
     info: '#8ab4ff',
     link: '#9cc2ff',
-    focus: '#ffd166',
+    ecto: '#38e8c6',
+    focus: '#38e8c6',
     markBg: '#ffe08a',
     markText: '#1a1300',
   },
@@ -52,7 +59,8 @@ export const PALETTES: Record<Mode, Palette> = {
     ok: '#0b5d1e',
     info: '#0b3d91',
     link: '#0b3d91',
-    focus: '#1d4ed8',
+    ecto: '#00695c',
+    focus: '#00695c',
     markBg: '#fff1a8',
     markText: '#1a1300',
   },
@@ -75,7 +83,7 @@ export function contrastRatio(a: string, b: string): number {
 
 /** Pairs that must meet AA: text 4.5:1, non-text (boundaries, focus) 3:1. */
 export const REQUIRED_PAIRS: { fg: keyof Palette; bg: keyof Palette; min: number; what: string }[] = [
-  ...(['text', 'muted', 'accent', 'danger', 'ok', 'info', 'link'] as const).flatMap((fg) =>
+  ...(['text', 'muted', 'accent', 'danger', 'ok', 'info', 'link', 'ecto'] as const).flatMap((fg) =>
     (['bg', 'surface'] as const).map((bg) => ({ fg, bg, min: 4.5, what: `${fg} text on ${bg}` })),
   ),
   { fg: 'markText', bg: 'markBg', min: 4.5, what: 'highlighted evidence text' },

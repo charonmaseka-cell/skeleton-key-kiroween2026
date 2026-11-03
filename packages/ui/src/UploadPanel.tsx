@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Block } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
-import { ERROR_TEXT, MAX_CALLS_PER_SESSION, MAX_CHUNKS_PER_DOC, analyseAll, newClientSession, type ClientConfig, type DocumentResult, type ErrorKind } from './extraction-client';
+import { ProgressView, initialStages, setStage, type Stage } from './ProgressView';
+import { ERROR_TEXT, MAX_CALLS_PER_SESSION, MAX_CHUNKS_PER_DOC, analyseAll, newClientSession, refusalText, type ClientConfig, type DocumentResult, type ErrorKind, type RunRefusal } from './extraction-client';
 import { buildLiveFixture, type Fixture } from './session-core';
 
 // Upload and Analyse (foundation tasks 8 and 9; spec SC-1, SC-2, SC-5).
@@ -68,6 +69,8 @@ export function UploadPanel({
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
   const [stopped, setStopped] = useState<ErrorKind | null>(null);
+  const [refusal, setRefusal] = useState<RunRefusal | null>(null);
+  const [stages, setStages] = useState<Stage[] | null>(null);
   const session = useRef(newClientSession());
   const analyses = useRef(0);
   const parse = deps.parse ?? defaultParse;
@@ -95,33 +98,75 @@ export function UploadPanel({
     }
   }
 
+  const tick = () => new Promise<void>((r) => setTimeout(r, 0));
+
   async function analyse(retry: boolean) {
     if (!configured) return;
     setBusy(true);
     setStopped(null);
+    setRefusal(null);
     const cfg: ClientConfig = { baseUrl: baseUrl!, fetchImpl: deps.fetchImpl };
     const used = slots.filter((s) => 'blocks' in (parsed[s.id] ?? { error: '' }));
     if (!retry) session.current = newClientSession();
     const label = (id: string) => slots.find((s) => s.id === id)?.label ?? id;
-    const { results, stoppedBy } = await analyseAll(
+    // 1. Reading: the files were read on this device when they were chosen; this stage says what is about to be sent.
+    const lines = used.reduce((n, s) => n + (parsed[s.id] as { blocks: Block[] }).blocks.length, 0);
+    let st = setStage(initialStages(), 'reading', 'done', `${used.length} document(s), ${lines} text lines, read on your device`);
+    st = setStage(st, 'extracting', 'active', 'Reserving the allowance for the whole run before anything is sent');
+    setStages(st);
+    await tick();
+    const { results, stoppedBy, refusal: refused } = await analyseAll(
       cfg,
       session.current,
       used.map((slot) => ({ docId: slot.id, schemaId: slot.schemaId, blocks: (parsed[slot.id] as { blocks: Block[] }).blocks })),
       {
         previous: retry ? Object.fromEntries(runs.map((r) => [r.slot.id, r.result])) : undefined,
-        onProgress: (id, done, total) => setProgress(`${label(id)}: part ${Math.min(done + 1, total)} of ${total}`),
+        onAdmitted: ({ chunks }) => {
+          st = setStage(st, 'extracting', 'active', `Allowance reserved for all ${chunks} part(s). Sending…`);
+          setStages(st);
+        },
+        onProgress: (id, done, total) => {
+          setProgress(`${label(id)}: part ${Math.min(done + 1, total)} of ${total}`);
+          st = setStage(st, 'extracting', 'active', `${label(id)}: ${done} of ${total} part(s) done`);
+          setStages(st);
+        },
       },
     );
-    const next: Run[] = results.map((result) => ({ slot: used.find((u) => u.id === result.docId)!, result }));
-    const stop = stoppedBy;
-    setRuns(next);
-    setStopped(stop);
-    setProgress('');
-    setBusy(false);
     analyses.current += 1;
+    if (refused) {
+      // Refused up front: nothing was sent, nothing was cut off. The page stays as it was.
+      setRefusal(refused);
+      setStopped(null);
+      if (!retry) setRuns([]);
+      setProgress('');
+      setStages(setStage(setStage(setStage(st, 'extracting', 'stopped', 'Not started: nothing was sent'), 'matching', 'not_run', 'Nothing to match'), 'checking', 'not_run', 'Nothing to check'));
+      setBusy(false);
+      return;
+    }
+    const next: Run[] = results.map((result) => ({ slot: used.find((u) => u.id === result.docId)!, result }));
+    const sentSomething = next.some((r) => r.result.chunks.some((c) => c.status === 'ok'));
+    const partsOk = next.reduce((n, r) => n + r.result.chunks.filter((c) => c.status === 'ok').length, 0);
+    const partsAll = next.reduce((n, r) => n + r.result.chunks.length, 0);
+    setRuns(next);
+    setStopped(stoppedBy);
+    setProgress('');
     // Nothing processed at all: keep showing what was shown (the sample set); the message explains why.
-    if (!next.some((r) => r.result.chunks.some((c) => c.status === 'ok'))) return;
+    if (!sentSomething) {
+      setStages(setStage(setStage(setStage(st, 'extracting', 'stopped', `0 of ${partsAll} part(s) processed`), 'matching', 'not_run', 'Nothing to match'), 'checking', 'not_run', 'Nothing to check'));
+      setBusy(false);
+      return;
+    }
+    st = setStage(st, 'extracting', partsOk === partsAll ? 'done' : 'stopped', `${partsOk} of ${partsAll} part(s) processed`);
+    // 3 and 4. Matching and checking run on this device, with the results below; shown in order as they happen.
+    setStages(setStage(st, 'matching', 'active'));
+    await tick();
+    st = setStage(st, 'matching', 'done');
+    setStages(setStage(st, 'checking', 'active'));
+    await tick();
     onResult(buildLiveFixture(next.map((r) => ({ id: r.slot.id, role: r.slot.role, title: (parsed[r.slot.id] as Parsed).file.name, profile: r.slot.schemaId, result: r.result })), `live-upload-${analyses.current}`));
+    await tick();
+    setStages(setStage(st, 'checking', 'done'));
+    setBusy(false);
   }
 
   const failed = runs.flatMap((r) => r.result.chunks.filter((c) => c.status !== 'ok').map((c) => ({ label: r.slot.label, c })));
@@ -174,6 +219,12 @@ export function UploadPanel({
           </span>
         )}
       </div>
+      {refusal && (
+        <p role="alert" data-run-refused="" className="rounded border-2 border-sk-danger bg-sk-surface p-2 font-medium">
+          {refusalText(refusal)}
+        </p>
+      )}
+      {stages && <ProgressView stages={stages} />}
       {runs.length > 0 && (
         <div aria-live="polite" className="space-y-2">
           <h3 className="font-medium">Result of the last analysis</h3>

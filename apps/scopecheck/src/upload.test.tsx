@@ -24,6 +24,7 @@ function setup(opts: { fail?: (n: number) => { status: number; code: string } | 
     return standard.docs.find((d) => d.id === SOURCE[f.name])!.blocks.map((b) => ({ ...b, docId: id }));
   });
   const fetchImpl = (async (_u: string, init: RequestInit) => {
+    if (/\/run(\/close)?$/.test(String(_u))) return new Response(JSON.stringify({ runId: 1, token: 't'.repeat(32), holdNeurons: 1, attempts: 1, budget: 4000, remaining: 3999, closed: true }), { status: 200 });
     requests++;
     const f = opts.fail?.(requests);
     if (f) return new Response(JSON.stringify({ error: { code: f.code } }), { status: f.status });

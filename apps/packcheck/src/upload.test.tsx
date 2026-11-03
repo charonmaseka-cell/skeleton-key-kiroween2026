@@ -20,6 +20,7 @@ function setup(opts: { fail?: (n: number) => { status: number; code: string } | 
   const bodies: { schemaId: string; blocks: { id: string; text: string }[] }[] = [];
   const parse = async (f: File, id: string): Promise<Block[]> => pack.docs.find((d) => d.id === SOURCE[f.name])!.blocks.map((b) => ({ ...b, docId: id }));
   const fetchImpl = (async (_u: string, init: RequestInit) => {
+    if (/\/run(\/close)?$/.test(String(_u))) return new Response(JSON.stringify({ runId: 1, token: 't'.repeat(32), holdNeurons: 1, attempts: 1, budget: 4000, remaining: 3999, closed: true }), { status: 200 });
     requests++;
     const body = JSON.parse(String(init.body)) as (typeof bodies)[number];
     bodies.push(body);
@@ -91,8 +92,8 @@ describe('PackCheck upload', () => {
     expect(screen.queryByRole('region', { name: 'Sample mode' })).toBeNull();
     expect(s.requests).toBeGreaterThan(0);
     expect(s.bodies.every((b) => b.schemaId === 'packcheck.grant.v2')).toBe(true);
-    // the request body is exactly {schemaId, blocks}: no file name, role or model
-    expect(s.bodies.every((b) => Object.keys(b).sort().join() === 'blocks,schemaId')).toBe(true);
+    // the request body is exactly {schemaId, blocks, run}: no file name, role or model
+    expect(s.bodies.every((b) => Object.keys(b).sort().join() === 'blocks,run,schemaId')).toBe(true); // plus the run reference (id, token, chunk)
     expect(screen.getByRole('heading', { name: 'Your pack' })).toBeTruthy();
     expect(document.querySelector('pre')!.textContent).not.toMatch(/SAMPLE/);
   });

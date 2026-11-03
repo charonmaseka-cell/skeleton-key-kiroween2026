@@ -1,6 +1,6 @@
 # Opening public live analysis (proposal, not applied)
 
-**Status: prepared for approval. Production is closed** (ceiling 0, budget 0). Nothing here has been deployed.
+**Status: prepared for approval, on hold. Production is closed** (ceiling 0, budget 0). Nothing here has been deployed. Whole-run admission is included in this change: it is Worker and browser code, deployed together with the opening, not before.
 
 ## What changes when it is applied
 | Setting | Now (production) | Proposed |
@@ -15,21 +15,42 @@
 
 `wrangler.toml` stays closed (0 and 0) so a plain `wrangler deploy` can never open analysis; only `deploy.ts --open-live` with `CONFIRM_OPEN_LIVE=4000` does. Running `deploy.ts` without flags closes it again (ceiling 0, budget 0, sample-mode apps).
 
-## Expected full runs per day (at 4,000)
-Simulated with the Worker's own ledger code (`services/extraction-api/src/admission.ts`: reserve the worst case before each attempt, settle from reported tokens after it), the published neuron rates and the recorded token usage of real 70B runs, one run after another, concurrency 1, no repairs.
+## Whole-run admission (added; a run is never cut off by the budget)
+Before **Analyse** sends any text, the browser sends the run's *plan* to the Worker (`POST /run`): for each part, the schema, the exact size of the request and the number of values expected. No document text. The Worker prices the whole run at its worst case (the exact input bound plus an **enforced output cap**: `max_tokens` = 972 for every part, which covers the chunker's own 14-value design maximum 1.5 times over and the largest recorded answer, 565 tokens, 1.7 times; one attempt per part) and **holds the sum in one transaction**, together with one admission per part. If the day cannot cover it, nothing is held and **nothing is sent**; the person sees, in plain words, how much of today's allowance the run needs and how much is left (for example "about 88% ... about 30% is left ... it was not started and nothing was sent, so it can never stop halfway"). Once held:
+- each part's request carries the run reference and draws from its own part of the hold; it can never be refused for budget, only if it is larger than planned or the run has ended (expired after 20 minutes, or closed);
+- there is **no automatic repair inside a run** (a repair would need a second, unheld reservation). An unusable answer makes that part "not processed", exactly as a failed part always has; the person's retry is a new run, priced and admitted on its own and covering only the failed parts;
+- when the run ends (all parts settled, the browser closes it, or it expires) the hold falls to what was actually charged and the unused attempts return to the day;
+- while a run is held, single requests cannot take its budget; at most 3 runs are held at once (a fourth is told to try again in a few minutes);
+- a recorded overrun locks the day for *new* runs and single requests, not for a run already held.
+Tested: `services/extraction-api/test/run-admission.test.ts` (the planned worst case is a true bound for random real messages including table cells and multi-byte text; a randomised mix of runs and single requests never passes the budget and never refuses an attempt inside a held run; release; expiry; the HTTP routes), `durable-object.test.ts` (the real Durable Object: concurrent runs cannot hold more than the budget; an admitted run survives a restart), `packages/ui/src/whole-run.test.ts` and `apps/scopecheck/src/whole-run.test.tsx` (the plan is first and carries no text; a refusal sends nothing; the progress stages).
 
-| Run | Requests | Estimated charge per run (x1.1 margin) | Largest reservation | Full runs per day | Then |
-|---|---|---|---|---|---|
-| ScopeCheck full-length set (tender + 2 quotations, SC-T12) | 12 | 1,382 | 446 | **2** | a third run gets 8 of 12 requests, then `daily_limit` (its documents show "not fully processed") |
-| ScopeCheck small set (RFQ + 2 quotations) | 3 | 305 | 406 | **12** | refused at the 37th request (budget) |
-| PackCheck pack (4 documents) | 4 | 230 | 358 | **10** with ceiling 40 (16 without) | the attempt ceiling stops it first |
+**What this costs.** The hold is a worst case, so it is 2.5 to 5 times what the run then uses (the difference is released at the end, and is available to the next run). At 4,000 a day the full-length ScopeCheck set can be admitted **once**, where the previous scheme admitted it twice and cut a third run off partway.
 
-Real documents of other sizes will differ; these are **estimates from one recorded run of each**, not guarantees. A repair adds an attempt (and its reservation); a call that times out keeps its whole reservation. With the ceiling at 40, small PackCheck packs are limited by attempts, not neurons; raising the ceiling to 64 would let the budget decide in every case above.
+## Expected full runs per day
+Simulated with the Worker's own ledger code and pricing, the browser client's own chunker on the sample PDFs, and the token usage of real recorded 70B runs (`npx tsx tools/deploy/simulate-runs.ts 4000 6000`; full output and method in `docs/results/run-admission-simulation.md`). Runs one after another; estimates from one recorded run of each kind, not guarantees. Attempt ceiling 40, as proposed.
 
-The worst case of one attempt is about 651 estimated neurons at the proposed limits (it would be about 2,333 at the current 65,536-byte limit, so the limits matter for the bound).
+### Daily budget 4,000 estimated neurons
+
+| Run | Parts | Held at admission | Actual per run (est.) | **Full runs per day** | Then | If the attempt ceiling were 80 | Previous scheme: full runs, then |
+|---|---|---|---|---|---|---|---|
+| ScopeCheck full-length set (tender + 2 quotations) | 12 | 3520.33 | 1382.25 | **1** | refused up front: needs 3520, 2618 left | 1 | 2, then a run is cut off after 8 of 12 requests |
+| ScopeCheck small set (RFQ + 2 quotations) | 3 | 838.25 | 304.93 | **11** | refused up front: needs 838, 646 left | 11 | 12, then none (refused at the first request) |
+| PackCheck pack (4 documents) | 4 | 1194.37 | 230.2 | **10** | refused up front: attempts | 13 | 10, then none (refused at the first request) |
+
+### Daily budget 6,000 estimated neurons
+
+| Run | Parts | Held at admission | Actual per run (est.) | **Full runs per day** | Then | If the attempt ceiling were 80 | Previous scheme: full runs, then |
+|---|---|---|---|---|---|---|---|
+| ScopeCheck full-length set (tender + 2 quotations) | 12 | 3520.33 | 1382.25 | **2** | refused up front: needs 3520, 3235 left | 2 | 3, then a run is cut off after 4 of 12 requests |
+| ScopeCheck small set (RFQ + 2 quotations) | 3 | 838.25 | 304.93 | **13** | refused up front: attempts | 17 | 13, then a run is cut off after 1 of 3 requests |
+| PackCheck pack (4 documents) | 4 | 1194.37 | 230.2 | **10** | refused up front: attempts | 20 | 10, then none (refused at the first request) |
+
+
+Reading the tables: "Held at admission" is what a run needs available to start; "Actual per run" is what it then costs. At 6,000 the attempt ceiling of 40 (not the budget) ends the day for the small set and PackCheck; the "ceiling 80" column shows what raising it would allow. The cap check passed on all three kinds: no recorded answer is longer than the cap that would have been enforced.
 
 ## Risks and what holds them
 - **Budget and attempts** are enforced in one Durable Object transaction before every attempt; a refusal writes nothing. A recorded overrun locks the day.
+- **Held budget.** A held run counts its whole hold against the day until it ends, so an abandoned run (the tab closed) keeps its hold for up to 20 minutes; at most 3 runs are held at once, and each browser asks for one run per Analyse. Anyone can still start runs from the allowed origins, so the daily budget is what bounds cost, as before.
 - **The estimate is not consumption.** Two dashboard comparisons agree with the published rates (462.81 vs 462.76; 321.65 vs 321.655). 4,000 of the free 10,000 leaves room for error and other use.
 - **Per-client limit** is per location and eventually consistent; it slows one client, it is not a quota. The global controls do not depend on it.
 - **No authentication.** The origin allowlist is not authentication; anyone can call the Worker from those origins. The daily budget is what bounds cost.

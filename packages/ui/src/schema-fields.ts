@@ -27,6 +27,14 @@ export const REQUEST_LIMITS = { maxChars: 4_500, maxBlocks: 80 };
 export const MAX_BLOCK_CHARS = 1_000;
 export const MAX_BODY_BYTES = 8_192;
 
+/** Values the model is expected to return for one chunk (the same estimate the chunker sizes requests by). Sent in the run plan, never the text. */
+export function expectedValues(schemaId: string, chunk: Block[]): number {
+  const fields = SCHEMA_FIELDS[schemaId];
+  if (!fields) return Math.ceil(chunk.length / 2);
+  const est = schemaEstimator(fields);
+  return chunk.reduce((n, b) => n + est(b.text), 0);
+}
+
 /** Output-aware chunking for a schema; if limits are given explicitly they are used with the size-only chunker. */
 export function chunkForSchema(schemaId: string, blocks: Block[], limits?: ChunkLimits): { chunks: Block[][]; oversized: Block[] } {
   if (limits) return chunkBlocks(blocks, limits);

@@ -37,8 +37,8 @@ describe('Total as quoted under the matrix', () => {
     expect(within(totals).getAllByRole('columnheader').map((h) => h.textContent)).toEqual(['Quotation', 'Total as quoted', 'Lines counted', 'Lines excluded']);
     const rows = within(totals).getAllByRole('row').slice(1);
     expect(rows).toHaveLength(2);
-    const a = rows.find((r) => /Quotation A/.test(r.textContent ?? ''))!;
-    const b = rows.find((r) => /Quotation B/.test(r.textContent ?? ''))!;
+    const a = rows.find((r) => /Hydro-Lab Supplies/.test(r.textContent ?? ''))!;
+    const b = rows.find((r) => /Delta Field Instruments/.test(r.textContent ?? ''))!;
     expect(b.textContent).toMatch(/ZAR 375 250\.00/);
     expect(b.textContent).not.toMatch(/Incomplete/);
     expect(a.textContent).toMatch(/Incomplete: 5 lines excluded/);
@@ -67,3 +67,17 @@ describe('Total as quoted under the matrix', () => {
     expect(totals.textContent).toMatch(/ZAR 134 500\.00/);
   });
 });
+
+describe('fictional supplier names (full-length sample)', () => {
+  it('names the quotations by supplier everywhere, and keeps the layout as a secondary note only', () => {
+    const { container } = render(<App />);
+    const totals = screen.getByRole('table', { name: /Total as quoted for each quotation/ });
+    expect(totals.textContent).toMatch(/Quotation 2207-HL, Hydro-Lab Supplies/);
+    expect(totals.textContent).toMatch(/Offer DF\/0098, Delta Field Instruments/);
+    expect(container.textContent).not.toMatch(/Quotation A|Quotation B/);
+    expect(totals.textContent).not.toMatch(/positioned table|prose/i);
+    const notes = [...container.querySelectorAll('[data-doc-note]')].map((n) => n.textContent);
+    expect(notes).toEqual(['Layout: positioned table', 'Layout: prose']);
+  });
+});
+

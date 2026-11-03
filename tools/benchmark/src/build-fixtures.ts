@@ -18,7 +18,7 @@ const find = (prefix: string) => {
   return hits[0]!;
 };
 
-type Spec = { sample: string; doc: string; role: string; title: string; file: string };
+type Spec = { sample: string; doc: string; role: string; title: string; file: string; /** secondary note shown under the title (for example the layout) */ note?: string };
 type FixtureSpec = { id: string; out: string; title: string; description: string; note?: string; docs: Spec[] };
 
 const SCOPE_STANDARD: Spec[] = [
@@ -29,8 +29,8 @@ const SCOPE_STANDARD: Spec[] = [
 const FRESH_RUN = find('live-sc-t12-fresh-resume2-2026');
 const SCOPE_FULL: Spec[] = [
   { sample: 'scopecheck-fresh', doc: 'rfq', role: 'rfq', title: 'Tender TN-7731, supply of laboratory and field instruments', file: FRESH_RUN },
-  { sample: 'scopecheck-fresh', doc: 'quote-a', role: 'quote', title: 'Quotation A (positioned table)', file: FRESH_RUN },
-  { sample: 'scopecheck-fresh', doc: 'quote-b', role: 'quote', title: 'Quotation B (prose)', file: FRESH_RUN },
+  { sample: 'scopecheck-fresh', doc: 'quote-a', role: 'quote', title: 'Quotation 2207-HL, Hydro-Lab Supplies', note: 'Layout: positioned table', file: FRESH_RUN },
+  { sample: 'scopecheck-fresh', doc: 'quote-b', role: 'quote', title: 'Offer DF/0098, Delta Field Instruments', note: 'Layout: prose', file: FRESH_RUN },
 ];
 const SCOPE_LAYOUT: Spec[] = [
   { sample: 'scopecheck-layout', doc: 'rfq', role: 'rfq', title: 'RFQ-0001 Request for Quotation', file: find('live-repeat-rfq-2026') },
@@ -71,6 +71,7 @@ if (process.argv[1]?.endsWith('build-fixtures.ts')) for (const f of FIXTURES) {
       id: s.doc,
       role: s.role,
       title: s.title,
+      ...(s.note ? { note: s.note } : {}),
       profile: d.profile?.id ?? doc.schemaId,
       recordedIn: `samples/benchmark-results/${s.file}`,
       blocks,

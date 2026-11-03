@@ -1,8 +1,10 @@
 import { runRules } from '@skeleton-key/engine';
 import type { DomainAdapter, EvaluateInput } from '@skeleton-key/ui';
 import { evaluatePack, packMatches, packRule, type PackData } from './rules';
+import { PACK_FIELD_LABELS, PACK_REASONS, PACK_ROLE_LABELS } from './labels';
 
 export * from './rules';
+export * from './labels';
 
 /** Field-label hints for the value validators (adapter data, never from the model). */
 export const PACKCHECK_HINTS: Record<string, string[]> = {
@@ -16,12 +18,13 @@ export const PACKCHECK_HINTS: Record<string, string[]> = {
 export const packCheckAdapter: DomainAdapter = {
   id: 'packcheck',
   hints: PACKCHECK_HINTS,
-  evaluate({ facts, documents, roles }: EvaluateInput) {
+  labels: { fields: PACK_FIELD_LABELS, roles: PACK_ROLE_LABELS, reasons: PACK_REASONS },
+  evaluate({ facts, documents, roles, titles }: EvaluateInput) {
     const byRole = (r: string) => Object.keys(roles).find((d) => roles[d] === r);
     const requirementsDocId = byRole('requirements');
     const formDocId = byRole('application-form');
     if (!requirementsDocId || !formDocId) return { findings: [], comparisons: [] };
-    const data: PackData = { requirementsDocId, formDocId, otherDocIds: Object.keys(roles).filter((d) => roles[d] === 'budget' || roles[d] === 'registration'), roles };
+    const data: PackData = { requirementsDocId, formDocId, otherDocIds: Object.keys(roles).filter((d) => roles[d] === 'budget' || roles[d] === 'registration'), roles, titles };
     const ctx = { facts, documents, matches: packMatches(facts, data), data };
     return { findings: runRules([packRule], ctx), comparisons: evaluatePack(ctx).comparisons, context: { data } };
   },

@@ -77,7 +77,7 @@ describe('review #6, #9, #17: exports and views keep what supports a result', ()
     const v = run(standard, confirmDocumentCoverage(emptySession(), 'quote-b', 2), 2);
     expect(v.exportModel.coverage.find((c) => c.docId === 'quote-b')).toMatchObject({ confirmedByUser: true, state: 'user_confirmed' });
     expect(v.exportModel.coverage.find((c) => c.docId === 'quote-a')).toMatchObject({ confirmedByUser: false, state: 'unverified' });
-    expect(renderTextOf(v)).toMatch(/quote-b: user_confirmed \(asserted by the reviewer, not checked by the tool\)/);
+    expect(renderTextOf(v)).toMatch(/Quotation QB-04, Birch Industrial Trading: confirmed by the reviewer \(asserted by the reviewer, not checked by the tool\)/);
     expect(renderCsvOf(v)).toMatch(/\ncoverage,/);
   });
 

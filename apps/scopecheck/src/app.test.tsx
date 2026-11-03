@@ -46,12 +46,12 @@ describe('ScopeCheck interface', () => {
     render(<App />);
     const before = screen.getByRole('heading', { name: /Confirmed findings \(3\)/ });
     expect(before).toBeTruthy();
-    const card = screen.getByRole('heading', { name: /Quantity differs for CP-100 in quote-a/ }).closest('article')! as HTMLElement;
+    const card = screen.getByRole('heading', { name: /Quantity differs for CP-100 in Quotation QA-17, Alder Pump Supplies/ }).closest('article')! as HTMLElement;
     // buttons are named with the field and document, so the right value can be picked without a pointer
-    const correct = within(card).getByRole('button', { name: /^Correct this value: quantity \(8 units\) in Quotation QA-17/ });
+    const correct = within(card).getByRole('button', { name: /^Correct this value: Quantity \(8 units\) in Quotation QA-17/ });
     correct.focus();
     await user.keyboard('{Enter}');
-    const form = within(card).getByRole('form', { name: /Correct quantity/ });
+    const form = within(card).getByRole('form', { name: /Correct Quantity/ });
     await user.type(within(form).getByLabelText('Quantity'), '10');
     await user.type(within(form).getByLabelText('Unit (optional)'), 'units');
     await user.keyboard('{Enter}');
@@ -64,7 +64,7 @@ describe('ScopeCheck interface', () => {
     render(<App />);
     await user.selectOptions(screen.getByLabelText('Choose a sample set'), 'scopecheck-layout');
     const ne = screen.getByRole('heading', { name: /Not evaluated \(3\)/ }).closest('section')!;
-    expect(ne.textContent).toMatch(/no specification fact in quote-c/);
+    expect(ne.textContent).toMatch(/No specification was extracted from Quotation QC-31/);
     expect(screen.getByRole('heading', { name: /Item identity is uncertain/ })).toBeTruthy();
   });
 
@@ -81,8 +81,8 @@ describe('ScopeCheck interface', () => {
     render(<App />);
     const docs = screen.getByRole('heading', { name: /Documents, extracted values and coverage/ }).closest('section')! as HTMLElement;
     (docs.querySelector('details') as HTMLDetailsElement).open = true;
-    await user.click(within(docs).getAllByRole('button', { name: /^Correct this value: item \(Centrifugal pump\) in RFQ/ })[0]!);
-    expect(within(docs).getByRole('form', { name: /Correct item/ })).toBeTruthy();
+    await user.click(within(docs).getAllByRole('button', { name: /^Correct this value: Item \(Centrifugal pump\) in RFQ/ })[0]!);
+    expect(within(docs).getByRole('form', { name: /Correct Item/ })).toBeTruthy();
     await user.selectOptions(screen.getByLabelText('Choose a sample set'), 'scopecheck-layout');
     expect(screen.queryByRole('form')).toBeNull();
   });
@@ -90,8 +90,8 @@ describe('ScopeCheck interface', () => {
   it('review #14: after saving a correction, focus returns to a stable control (not the document)', async () => {
     const user = userEvent.setup();
     render(<App />);
-    const card = screen.getByRole('heading', { name: /Quantity differs for CP-100 in quote-a/ }).closest('article')! as HTMLElement;
-    const open = within(card).getByRole('button', { name: /^Correct this value: quantity \(8 units\) in Quotation QA-17/ });
+    const card = screen.getByRole('heading', { name: /Quantity differs for CP-100 in Quotation QA-17, Alder Pump Supplies/ }).closest('article')! as HTMLElement;
+    const open = within(card).getByRole('button', { name: /^Correct this value: Quantity \(8 units\) in Quotation QA-17/ });
     await user.click(open);
     await user.keyboard('10');
     await user.keyboard('{Enter}');

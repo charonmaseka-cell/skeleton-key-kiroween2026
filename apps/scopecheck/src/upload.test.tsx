@@ -60,7 +60,7 @@ describe('live uploads are visibly limited, and the sample sets are the default'
 describe('before Analyse: nothing leaves the device', () => {
   it('states plainly that extracted text is sent, and that not all processing is local', () => {
     setup();
-    const panel = screen.getByRole('heading', { name: 'Analyse your own documents' }).closest('section')!;
+    const panel = screen.getByRole('heading', { name: 'Analyse your own documents' }).closest('details')!;
     expect(panel.textContent).toMatch(/text extracted from them is sent to an AI service/);
     expect(panel.textContent).toMatch(/Not all processing is local/);
     expect(panel.textContent).toMatch(/original files are never uploaded/);
@@ -134,8 +134,9 @@ describe('Analyse', () => {
     await user.click(analyseBtn());
     await waitFor(() => expect(screen.getByRole('region', { name: 'Live mode' })).toBeTruthy());
     const pre = document.querySelector('pre')!.textContent!;
-    expect(pre).toMatch(/PG-6 not found in quote-2/);
-    expect(pre).toMatch(/\[NEEDS REVIEW\] PG-6 not found in quote-2/);
+    // documents are named by the file the user chose, never by the slot ID
+    expect(pre).toMatch(/\[NEEDS REVIEW\] PG-6 not found in quote-b\.pdf/);
+    expect(pre).not.toMatch(/quote-2/);
   });
 
   it('a daily-allowance error is a recoverable alert; nothing is invented; sample mode still works', async () => {
@@ -152,6 +153,27 @@ describe('Analyse', () => {
     await user.selectOptions(screen.getByLabelText('Choose a sample set'), 'scopecheck-standard');
     expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
   });
+
+  for (const code of ['daily_limit', 'limiter_unavailable'] as const) {
+    it(`${code} on the first request: a plain message and the sample set stays shown, unchanged`, async () => {
+      const user = userEvent.setup();
+      setup({ fail: () => ({ status: code === 'daily_limit' ? 429 : 503, code }) });
+      const before = screen.getByRole('heading', { name: /Confirmed findings/ }).textContent;
+      await choose(user, 'rfq.pdf', 'quote-a.pdf');
+      await waitFor(() => expect(analyseBtn().disabled).toBe(false));
+      await user.click(analyseBtn());
+      const alert = (await screen.findByRole('alert')).textContent ?? '';
+      expect(alert).toMatch(code === 'daily_limit' ? /today's allowance has been used/ : /Live analysis is paused/);
+      expect(alert).toMatch(/The sample sets on this page still work\./);
+      expect(alert).not.toMatch(/_|\b(?:429|503)\b/);
+      expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
+      expect((screen.getByLabelText('Choose a sample set') as HTMLSelectElement).value).toBe('scopecheck-standard');
+      expect(screen.getByRole('heading', { name: /Confirmed findings/ }).textContent).toBe(before);
+      // the other sample set is still one choice away
+      await user.selectOptions(screen.getByLabelText('Choose a sample set'), 'scopecheck-layout');
+      expect(screen.getByRole('heading', { name: /Not evaluated \(3\)/ })).toBeTruthy();
+    });
+  }
 
   it('a manual retry resends only what failed, and the result then completes', async () => {
     const user = userEvent.setup();

@@ -24,7 +24,7 @@ export function AppShell({ title, tagline, banner, nav, announcement, children }
         Skip to main content
       </a>
       {banner}
-      <header className="border-b border-slate-300 px-6 py-4">
+      <header className="border-b border-slate-300 px-4 py-4 sm:px-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
         <p className="text-slate-800">{tagline}</p>
         {nav && (
@@ -41,7 +41,7 @@ export function AppShell({ title, tagline, banner, nav, announcement, children }
           </nav>
         )}
       </header>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl space-y-8 px-6 py-6">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6">
         {children}
       </main>
       <div role="status" aria-live="polite" className="sr-only">

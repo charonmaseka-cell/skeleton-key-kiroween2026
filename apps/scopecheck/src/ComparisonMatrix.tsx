@@ -1,5 +1,5 @@
 import type { PlannedComparison, ReviewItem } from '@skeleton-key/engine';
-import { StatusBadge, explainReason, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
+import { ScrollTable, StatusBadge, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
 import { requirementsOf, type ScopeContext } from './adapter';
 import type { Line } from './adapter/rules';
 
@@ -91,7 +91,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
         Comparison: RFQ items against each quotation
       </h3>
       <p className="text-sm text-slate-800">Computed now from the validated values by the ScopeCheck rules. Items are matched by item code, recovered from the source text when the extraction left it out.</p>
-      <div className="overflow-x-auto">
+      <ScrollTable label="Comparison: RFQ items against each quotation">
         <table className="w-full border-collapse text-left">
           <caption className="sr-only">Each requested item compared with each quotation: quantity and specification, with the status of every comparison</caption>
           <thead>
@@ -101,7 +101,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
               </th>
               {quotes.map((q) => (
                 <th key={q} scope="col" className="border border-slate-400 p-2">
-                  {view.titles[q] ?? q}
+                  {view.docName(q)}
                 </th>
               ))}
             </tr>
@@ -111,7 +111,10 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
               <tr key={r.rowId} className="align-top">
                 <th scope="row" className="border border-slate-400 p-2 font-normal">
                   <strong>{r.held ? 'Held item' : (r.key ?? 'Identity uncertain')}</strong>
-                  {r.key && r.rowId !== r.key && <span className="text-sm"> (requirement line {r.rowId.split('@')[1]})</span>}
+                  {r.key && r.rowId !== r.key && (() => {
+                    const n = view.lineNumber(view.evaluation.context ? (view.evaluation.context as ScopeContext).data.rfqDocId : '', r.rowId.split('@')[1] ?? '');
+                    return <span className="text-sm"> ({n ? `requirement on line ${n}` : 'one of several requirement lines'})</span>;
+                  })()}
                   <br />
                   {r.description}
                   <br />
@@ -139,7 +142,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                       <p>
                         <StatusBadge kind="needs_review" label="Allocation unclear: Needs review" />
                         <br />
-                        <span className="text-sm">{explainReason('ambiguous_allocation')}</span>{' '}
+                        <span className="text-sm">{view.reasonText('ambiguous_allocation')}</span>{' '}
                         <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${c.ambiguous.finding.message}`} href={`#finding-${c.ambiguous.finding.id}`}>
                           Open the item
                         </a>
@@ -149,7 +152,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                       <p>
                         <StatusBadge kind={c.absent.finding.state === 'confirmed' ? 'confirmed' : 'needs_review'} label={c.absent.finding.state === 'confirmed' ? 'Not in this quotation' : 'Not found: Needs review'} />
                         <br />
-                        <span className="text-sm">{explainReason(c.absent.finding.reason)}</span>{' '}
+                        <span className="text-sm">{view.reasonText(c.absent.finding.reason)}</span>{' '}
                         <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${c.absent.finding.message}`} href={`#finding-${c.absent.finding.id}`}>
                           Open the item
                         </a>
@@ -168,7 +171,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                                 <StatusBadge kind="user_supplied" label="uses a value you supplied" />
                               </span>
                             )}
-                            {a.comparison?.status === 'not_evaluated' && <span className="block text-sm">{a.comparison.reason}</span>}
+                            {a.comparison?.status === 'not_evaluated' && <span className="block text-sm">{view.reasonText(a.comparison.reason)}</span>}
                             {a.finding && (
                               <>
                                 {' '}
@@ -187,14 +190,14 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollTable>
       {uncertainQuoteLines.length > 0 && (
         <div>
           <h4 className="font-medium">Quotation lines whose item identity is uncertain or that carry several items</h4>
           <ul className="list-disc pl-5">
             {uncertainQuoteLines.map((i) => (
               <li key={i.finding.id}>
-                {view.titles[i.finding.responseDocId ?? ''] ?? i.finding.responseDocId}: {explainReason(i.finding.reason)}{' '}
+                {view.docName(i.finding.responseDocId ?? '')}: {view.reasonText(i.finding.reason) || 'Needs review.'}{' '}
                 <a className="text-blue-900 underline" href={`#finding-${i.finding.id}`}>
                   Open the item
                 </a>
@@ -209,7 +212,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
           <ul className="list-disc pl-5">
             {exclusions.map((e) => (
               <li key={e.item.finding.id}>
-                {view.titles[e.quote] ?? e.quote}: {e.text}
+                {view.docName(e.quote)}: {e.text}
               </li>
             ))}
           </ul>

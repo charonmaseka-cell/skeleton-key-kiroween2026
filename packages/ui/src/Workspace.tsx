@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { formatValue, processingComplete, type EffectiveFact, type Evidence, type Finding, type PlannedComparison, type ReviewItem, type ValueKind } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
-import { exportCsv, exportText, explainReason, parseCorrection, type CorrectionInput, type SessionView } from './session-core';
+import { exportCsv, exportText, parseCorrection, type CorrectionInput, type SessionView } from './session-core';
 import type { Session } from './useSession';
 
 // Shared review workspace pieces used by both apps. Keyboard operable: native buttons, links, inputs
@@ -28,9 +28,15 @@ export function EvidenceView({ evidence, role, view }: { evidence: Evidence; rol
   return (
     <figure className="rounded border border-slate-300 bg-slate-50 p-2">
       <figcaption className="text-sm text-slate-800">
-        {view.titles[evidence.docId] ?? evidence.docId}, block {evidence.blockId}
+        {view.docName(evidence.docId)}
+        {(() => {
+          const n = view.lineNumber(evidence.docId, evidence.blockId);
+          return n ? `, line ${n}` : '';
+        })()}
         {block?.page ? `, page ${block.page}` : ''}
         {role === 'superseded_original' ? ' (original value, replaced by your correction)' : ''}
+        {/* Evidence detail: the block reference is shown here and nowhere else. */}
+        <span data-evidence-ref="" className="ml-1 text-xs text-slate-700">(source reference {evidence.blockId})</span>
       </figcaption>
       {block && intact ? <Highlighted text={block.text} start={evidence.start} end={evidence.end} /> : <p className="text-sm text-red-900">Source text not available or changed: this evidence cannot be shown.</p>}
     </figure>
@@ -39,7 +45,7 @@ export function EvidenceView({ evidence, role, view }: { evidence: Evidence; rol
 
 // ---------- correction editor ----------
 
-export function ValueEditor({ fact, onSave, onCancel }: { fact: EffectiveFact; onSave: (value: unknown, note?: string) => void; onCancel: () => void }) {
+export function ValueEditor({ fact, label, onSave, onCancel }: { fact: EffectiveFact; /** the field's plain label */ label: string; onSave: (value: unknown, note?: string) => void; onCancel: () => void }) {
   const id = useId();
   const kind = fact.fact.kind as ValueKind;
   // The currency is taken from the original value; it is never assumed.
@@ -65,9 +71,9 @@ export function ValueEditor({ fact, onSave, onCancel }: { fact: EffectiveFact; o
     </div>
   );
   return (
-    <form onSubmit={submit} className="mt-2 space-y-2 rounded border-2 border-blue-800 bg-blue-50 p-3" aria-label={`Correct ${fact.fact.field}`}>
+    <form onSubmit={submit} className="mt-2 space-y-2 rounded border-2 border-blue-800 bg-blue-50 p-3" aria-label={`Correct ${label}`}>
       <p className="text-sm">
-        Supply the correct value for <strong>{fact.fact.field}</strong>. The document value ({showValue(fact.fact.value)}) is kept and the new value is labelled user-supplied.
+        Supply the correct value for <strong>{label}</strong>. The document value ({showValue(fact.fact.value)}) is kept and the new value is labelled user-supplied.
       </p>
       {kind === 'money' && (
         <div className="grid grid-cols-2 gap-2">
@@ -115,7 +121,8 @@ export function FactLine({ fact, session, view, context }: { fact: EffectiveFact
   const [editing, setEditing] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
   const user = fact.provenance === 'user_supplied';
-  const where = view.titles[fact.fact.docId] ?? fact.fact.docId;
+  const where = view.docName(fact.fact.docId);
+  const label = view.fieldLabel(fact.fact.field);
   // The control that had focus is replaced by the result of the action; put focus back on a stable button.
   // If the whole item disappears (the correction resolved it), focus goes to the main region, never to the document body.
   const refocus = () =>
@@ -126,16 +133,17 @@ export function FactLine({ fact, session, view, context }: { fact: EffectiveFact
   const tail = context ? ` (${context})` : '';
   return (
     <li className="py-1">
-      <span className="font-medium">{fact.fact.field}</span>: <span>{showValue(fact.value)}</span>{' '}
-      {user ? <StatusBadge kind="user_supplied" /> : fact.status === 'validated' ? <StatusBadge kind="validated" /> : <StatusBadge kind="needs_review" label={`Held: ${explainReason(fact.fact.reason)}`} />}
+      <span className="font-medium">{label}</span>: <span className="break-words">{showValue(fact.value)}</span>{' '}
+      {user ? <StatusBadge kind="user_supplied" /> : fact.status === 'validated' ? <StatusBadge kind="validated" /> : <StatusBadge kind="needs_review" label="Held" />}
+      {!user && fact.status !== 'validated' && <span className="ml-1 text-sm">{view.reasonText(fact.fact.reason)}</span>}
       {user && <span className="ml-1 text-sm">(document said {showValue(fact.fact.value)})</span>}{' '}
-      <button ref={toggle} type="button" onClick={() => setEditing((e) => !e)} aria-expanded={editing} aria-label={`${editing ? 'Close' : user ? 'Change correction' : 'Correct this value'}: ${fact.fact.field} (${formatValue(fact.value)}) in ${where}${tail}`} className="text-sm underline">
+      <button ref={toggle} type="button" onClick={() => setEditing((e) => !e)} aria-expanded={editing} aria-label={`${editing ? 'Close' : user ? 'Change correction' : 'Correct this value'}: ${label} (${formatValue(fact.value)}) in ${where}${tail}`} className="text-sm underline">
         {editing ? 'Close' : user ? 'Change correction' : 'Correct this value'}
       </button>
       {user && (
         <>
           {' '}
-          <button type="button" aria-label={`Revert to document value: ${fact.fact.field} (${formatValue(fact.value)}) in ${where}${tail}`} onClick={() => { session.revert(fact.fact.id); refocus(); }} className="text-sm underline">
+          <button type="button" aria-label={`Revert to document value: ${label} (${formatValue(fact.value)}) in ${where}${tail}`} onClick={() => { session.revert(fact.fact.id); refocus(); }} className="text-sm underline">
             Revert to document value
           </button>
         </>
@@ -143,6 +151,7 @@ export function FactLine({ fact, session, view, context }: { fact: EffectiveFact
       {editing && (
         <ValueEditor
           fact={fact}
+          label={label}
           onCancel={() => { setEditing(false); refocus(); }}
           onSave={(v, n) => {
             session.correct(fact.fact.id, v, n);
@@ -164,7 +173,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
   const inputs = finding.inputs.map((i) => view.effective.get(i.factId)).filter((x): x is EffectiveFact => !!x);
   return (
     <article id={`finding-${finding.id}`} tabIndex={-1} aria-labelledby={`h-${finding.id}`} className="space-y-2 rounded border border-slate-400 bg-white p-4">
-      <h4 id={`h-${finding.id}`} className="text-lg font-semibold">
+      <h4 id={`h-${finding.id}`} className="break-words text-lg font-semibold">
         {finding.message}
       </h4>
       <p className="flex flex-wrap items-center gap-2">
@@ -173,7 +182,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
         <StatusBadge kind={review.status} />
         {review.reopened && <StatusBadge kind="needs_review" label="Reopened: inputs changed since your earlier decision" />}
       </p>
-      {finding.reason && <p className="text-sm">Why this is not a confirmed finding: {explainReason(finding.reason)}</p>}
+      {finding.reason && <p className="text-sm">{finding.state === 'confirmed' ? 'Note' : 'Why this is not a confirmed finding'}: {view.reasonText(finding.reason)}</p>}
       {inputs.length > 0 && (
         <section aria-label="Values used">
           <h5 className="font-medium">Values used</h5>
@@ -266,15 +275,15 @@ export function NotEvaluatedList({ comparisons, session, view }: { comparisons: 
               <li key={c.id} className="rounded border border-dashed border-slate-700 bg-slate-50 p-3">
                 <p className="flex flex-wrap items-center gap-2">
                   <StatusBadge kind="not_evaluated" />
-                  <strong>{c.field.replace(/_/g, ' ')}</strong> <span>({c.docs.map((d) => view.titles[d] ?? d).join(' vs ')})</span>
+                  <strong>{view.fieldLabel(c.field)}</strong> <span>({c.docs.map(view.docName).join(' vs ')})</span>
                 </p>
-                <p className="text-sm">Reason: {c.reason}</p>
+                <p className="text-sm">Reason: {view.reasonText(c.reason)}</p>
                 {c.blocked && (
                   <p className="text-sm">
-                    Blocked input: <strong>{c.blocked.field.replace(/_/g, ' ')}</strong> in {view.titles[c.blocked.docId] ?? c.blocked.docId}. {explainReason(c.blocked.reason)}
+                    Blocked input: <strong>{view.fieldLabel(c.blocked.field)}</strong> in {view.docName(c.blocked.docId)}. {view.reasonText(c.blocked.reason)}
                   </p>
                 )}
-                {fact && <ul className="mt-1"><FactLine fact={fact} session={session} view={view} context={`blocking: ${c.field.replace(/_/g, ' ')}`} /></ul>}
+                {fact && <ul className="mt-1"><FactLine fact={fact} session={session} view={view} context={`blocking: ${view.fieldLabel(c.field)}`} /></ul>}
               </li>
             );
           })}
@@ -295,10 +304,10 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
       {session.fixture.docs.map((d) => {
         const ext = view.documents.get(d.id)!;
         const facts = [...view.effective.values()].filter((f) => f.fact.docId === d.id);
-        const unciting = view.uncovered[d.id] ?? [];
+        const unciting = new Set(view.uncovered[d.id] ?? []);
         const confirmed = ext.coverage.state !== 'unverified';
         const complete = processingComplete(ext);
-        const failedBlocks = (d.chunks ?? []).filter((c) => c.status === 'failed').flatMap((c) => c.blockIds);
+        const failedBlocks = new Set((d.chunks ?? []).filter((c) => c.status === 'failed').flatMap((c) => c.blockIds));
         const focusSummary = () => setTimeout(() => document.getElementById(`doc-sum-${d.id}`)?.focus(), 0);
         return (
           <details key={d.id} className="rounded border border-slate-400 p-3">
@@ -306,14 +315,19 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
               {d.title} <StatusBadge kind={confirmed ? 'verified' : 'unverified'} label={!complete ? 'Part of the document was not processed' : undefined} />
             </summary>
             <p className="mt-2 text-sm">
-              Profile {d.profile}. {d.claims.length} recorded claims, {facts.filter((f) => f.usable).length} usable values.
+              {d.claims.length} extracted values recorded, {facts.filter((f) => f.usable).length} usable.
             </p>
+            {(d.claimEdits ?? []).map((e, i) => (
+              <p key={i} role="note" className="mt-1 text-sm">
+                Edited sample: this document's text was changed after its extraction was recorded ("{e.from}" is now "{e.to}"), and the recorded excerpts were updated to match. The extracted values are unchanged. {e.reason}
+              </p>
+            ))}
             <h4 className="mt-2 font-medium">Source text</h4>
-            <ol className="font-mono text-sm">
+            <ol className="list-decimal pl-8 font-mono text-sm">
               {d.blocks.map((b) => (
-                <li key={b.id} className="border-b border-slate-200 py-0.5">
-                  <span className="mr-2 text-slate-700">{b.id}</span>
+                <li key={b.id} className="break-words border-b border-slate-200 py-0.5">
                   {b.text}
+                  {failedBlocks.has(b.id) ? <span className="ml-2 font-sans text-xs font-medium">(not processed)</span> : unciting.has(b.id) ? <span className="ml-2 font-sans text-xs">(no extracted value cites this line)</span> : null}
                 </li>
               ))}
             </ol>
@@ -326,11 +340,11 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
             <div className="mt-2 rounded border border-amber-800 bg-amber-50 p-2">
               <p className="text-sm">
                 A successful extraction does not prove every item was found. {confirmed ? 'You confirmed this document.' : 'Until you confirm coverage, anything not found stays Needs review.'}
-                {unciting.length > 0 && ` Text no extracted value cites: ${unciting.join(', ')}.`}
+                {unciting.size > 0 && ` ${unciting.size} line${unciting.size === 1 ? '' : 's'} of source text ${unciting.size === 1 ? 'is' : 'are'} not cited by any extracted value (marked in the source text).`}
               </p>
               {!complete && (
                 <p role="note" className="mt-1 text-sm font-medium">
-                  Extraction of this document is incomplete{failedBlocks.length ? ` (blocks not processed: ${failedBlocks.join(', ')})` : ''}. Coverage cannot be confirmed, so nothing absent from it can be stated as fact.
+                  Extraction of this document is incomplete{failedBlocks.size ? ` (${failedBlocks.size} line${failedBlocks.size === 1 ? '' : 's'} not processed, marked in the source text)` : ''}. Coverage cannot be confirmed, so nothing absent from it can be stated as fact.
                 </p>
               )}
               {complete && !confirmed && (

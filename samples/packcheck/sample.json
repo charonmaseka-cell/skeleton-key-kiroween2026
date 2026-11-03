@@ -125,7 +125,7 @@
         "Applicant: Green Valley Community Foundation",
         "Total project budget: R 2 000 000",
         "Funding requested from this grant: R 1 600 000",
-        "Project period: 01/03/2026 to 28/02/2027"
+        "Project period: 01/03/2026 to 28 February 2027"
       ],
       "facts": [
         {
@@ -167,7 +167,7 @@
           "field": "project_end_date",
           "kind": "date",
           "line": 4,
-          "excerpt": "28/02/2027",
+          "excerpt": "28 February 2027",
           "value": "2027-02-28"
         }
       ]

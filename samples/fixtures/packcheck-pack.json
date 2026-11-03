@@ -343,12 +343,12 @@
           "id": "p1-l5",
           "docId": "budget",
           "kind": "pdf-run",
-          "text": "Project period: 01/03/2026 to 28/02/2027",
+          "text": "Project period: 01/03/2026 to 28 February 2027",
           "page": 1,
           "bbox": [
             50,
             692,
-            181.23000000000005,
+            210.12000000000012,
             10
           ]
         }
@@ -385,15 +385,22 @@
           "field": "project_start_date",
           "kind": "date",
           "blockId": "p1-l5",
-          "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+          "excerpt": "Project period: 01/03/2026 to 28 February 2027",
           "value": "2026-03-01"
         },
         {
           "field": "project_end_date",
           "kind": "date",
           "blockId": "p1-l5",
-          "excerpt": "Project period: 01/03/2026 to 28/02/2027",
+          "excerpt": "Project period: 01/03/2026 to 28 February 2027",
           "value": "2027-02-28"
+        }
+      ],
+      "claimEdits": [
+        {
+          "from": "28/02/2027",
+          "to": "28 February 2027",
+          "reason": "The budget end date is written with a month name since 2026-11-02 so that the planted ambiguity (01/03/2026) stays ambiguous under the date-order rule: a date that can only be read one way (28/02/2027) would otherwise prove day-first order. The recorded claims quoted the old line; their excerpts are updated to the new text, their values are unchanged."
         }
       ]
     },

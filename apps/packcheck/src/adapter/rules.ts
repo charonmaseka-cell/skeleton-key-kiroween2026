@@ -17,6 +17,7 @@ import {
   type Rule,
   type RuleContext,
 } from '@skeleton-key/engine';
+import { packDoc, packField } from './labels';
 
 // PackCheck adapter rules: grant-application completeness and consistency. Used by the PackCheck
 // app and by the benchmark (tools/benchmark). Grant logic stays here, never in the engine.
@@ -31,6 +32,8 @@ export type PackData = {
   otherDocIds: string[];
   /** document role by ID, used to plan the comparisons each supporting document is expected to support */
   roles?: Record<string, string>;
+  /** document titles by ID: messages name documents by title, never by ID */
+  titles?: Record<string, string>;
 };
 
 /** Which supporting-document roles are expected to carry each cross-checked field. */
@@ -74,8 +77,10 @@ export function packMatches(facts: Map<string, EffectiveFact>, data: PackData) {
 
 const CRITICAL_FIELDS = new Set(['organisation_name', 'funding_requested', 'total_project_budget', 'project_start_date', 'project_end_date']);
 
-const why = (e: EffectiveFact | undefined, doc: string, field: string) =>
-  !e ? `no ${field} fact in ${doc}` : `${field} in ${doc} not validated (${e.fact.reason ?? e.fact.status})`;
+// Messages and reasons are written for a person: field labels and document titles, never keys or IDs. The reason CODE stays
+// in `blocked.reason` (and `finding.reason`), which the interface explains in plain words.
+const why = (data: PackData, e: EffectiveFact | undefined, doc: string, field: string) =>
+  !e ? `No ${packField(field).toLowerCase()} was extracted from ${packDoc(data.titles, data.roles, doc)}.` : `${packField(field)} in ${packDoc(data.titles, data.roles, doc)} was not validated.`;
 const blockedBy = (e: EffectiveFact | undefined, doc: string, field: string) => ({ docId: doc, field, reason: e ? (e.fact.reason ?? e.fact.status) : 'no_fact', ...(e ? { factId: e.fact.id } : {}) });
 
 /** Human-readable value for ledger details (shared formatter from the engine). */
@@ -85,14 +90,15 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
   const out: FindingDraft[] = [];
   const comparisons: PlannedComparison[] = [];
   const { formDocId, requirementsDocId, otherDocIds } = ctx.data;
+  const doc = (id: string) => packDoc(ctx.data.titles, ctx.data.roles, id);
   const formDoc = ctx.documents.get(formDocId) as DocumentExtraction;
 
   // Required attachments vs those the form lists (absence needs verified coverage of the form).
   for (const req of factsOf(ctx.facts, requirementsDocId, 'attachment_title')) {
     const key = norm(req.value);
-    const base = { check: 'attachment_listed' as const, field: `attachment: ${showValue(req.value)}`, docs: [requirementsDocId, formDocId] };
+    const base = { check: 'attachment_listed' as const, field: `Attachment: ${showValue(req.value)}`, docs: [requirementsDocId, formDocId] };
     if (!req.usable) {
-      comparisons.push({ ...base, id: `attachment_listed:${req.fact.id}`, status: 'not_evaluated', reason: why(req, requirementsDocId, 'attachment_title'), blocked: blockedBy(req, requirementsDocId, 'attachment_title') });
+      comparisons.push({ ...base, id: `attachment_listed:${req.fact.id}`, status: 'not_evaluated', reason: why(ctx.data, req, requirementsDocId, 'attachment_title'), blocked: blockedBy(req, requirementsDocId, 'attachment_title') });
       continue;
     }
     const m = ctx.matches.find((x) => x.subjectId === key && x.responseDocId === formDocId);
@@ -104,9 +110,9 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
       const heldCandidate = factsOf(ctx.facts, formDocId, 'attachment_title').some((e) => !e.usable);
       const state = verdict.state === 'confirmed' && heldCandidate ? 'needs_review' : verdict.state;
       const reason = verdict.state === 'confirmed' && heldCandidate ? 'held_candidate_in_response' : verdict.reason;
-      out.push(makeDraft({ contextId: 'required-vs-listed', responseDocId: formDocId, code: 'attachment.missing', severity: 'critical', state, basis: 'absence', subjectId: key, message: `Required attachment not listed in form: ${key}`, reason, matchStatus: m.status, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(formDoc)] }));
+      out.push(makeDraft({ contextId: 'required-vs-listed', responseDocId: formDocId, code: 'attachment.missing', severity: 'critical', state, basis: 'absence', subjectId: key, message: `Required attachment not listed in ${doc(formDocId)}: ${showValue(req.value)}`, reason, matchStatus: m.status, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(formDoc)] }));
     }
-    comparisons.push({ ...base, id: `attachment_listed:${key}`, status: verdict.kind === 'absent' ? 'flagged' : 'agree', reason: verdict.kind === 'absent' ? verdict.reason : undefined, detail: `${showValue(req.value)} ${verdict.kind === 'absent' ? 'not listed in' : 'listed in'} ${formDocId}` });
+    comparisons.push({ ...base, id: `attachment_listed:${key}`, status: verdict.kind === 'absent' ? 'flagged' : 'agree', reason: verdict.kind === 'absent' ? verdict.reason : undefined, detail: `${showValue(req.value)} ${verdict.kind === 'absent' ? 'not listed in' : 'listed in'} ${doc(formDocId)}` });
   }
 
   // Equivalent fields compared across documents, anchored on the application form.
@@ -117,18 +123,18 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
       const others = factsOf(ctx.facts, docId, field);
       if (anchors.length > 1) {
         // Two values for the same field in the form: never compare "the first one".
-        comparisons.push({ check: 'field_equivalence', field, docs: [formDocId, docId], id: `${field}:${formDocId}~${docId}`, status: 'not_evaluated', reason: `more than one ${field} in ${formDocId}; it is not clear which to compare`, blocked: { docId: formDocId, field, reason: 'multiple_candidates' } });
+        comparisons.push({ check: 'field_equivalence', field, docs: [formDocId, docId], id: `${field}:${formDocId}~${docId}`, status: 'not_evaluated', reason: `${doc(formDocId)} has more than one ${packField(field).toLowerCase()}; it is not clear which to compare.`, blocked: { docId: formDocId, field, reason: 'multiple_candidates' } });
         continue;
       }
       if (others.length === 0 && isExpected(ctx.data, docId, field)) {
-        comparisons.push({ check: 'field_equivalence', field, docs: [formDocId, docId], id: `${field}:${formDocId}~${docId}`, status: 'not_evaluated', reason: `no ${field} fact in ${docId}`, blocked: { docId, field, reason: 'no_fact' } });
+        comparisons.push({ check: 'field_equivalence', field, docs: [formDocId, docId], id: `${field}:${formDocId}~${docId}`, status: 'not_evaluated', reason: `No ${packField(field).toLowerCase()} was extracted from ${doc(docId)}.`, blocked: { docId, field, reason: 'no_fact' } });
         continue;
       }
       for (const other of others) {
         const cmp = { check: 'field_equivalence' as const, field, docs: [formDocId, docId], id: others.length > 1 ? `${field}:${formDocId}~${docId}#${other.fact.id}` : `${field}:${formDocId}~${docId}` };
         if (!anchor?.usable || !other.usable) {
           // surfaced in the Needs-review pass below; the comparison itself did not run
-          comparisons.push({ ...cmp, status: 'not_evaluated', reason: !anchor?.usable ? why(anchor, formDocId, field) : why(other, docId, field), blocked: !anchor?.usable ? blockedBy(anchor, formDocId, field) : blockedBy(other, docId, field) });
+          comparisons.push({ ...cmp, status: 'not_evaluated', reason: !anchor?.usable ? why(ctx.data, anchor, formDocId, field) : why(ctx.data, other, docId, field), blocked: !anchor?.usable ? blockedBy(anchor, formDocId, field) : blockedBy(other, docId, field) });
           continue;
         }
         let state: 'confirmed' | 'needs_review' | null = null;
@@ -151,7 +157,7 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
         comparisons.push({ ...cmp, status: state ? 'flagged' : 'agree', reason, userSupplied: [anchor, other].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(anchor.value)} <-> ${showValue(other.value)}` });
         if (!state) continue;
         const d = describeInputs([anchor, other]);
-        out.push(makeDraft({ contextId: 'form-vs-supporting', responseDocId: docId, code, severity: 'critical', state, subjectId: field, message: `${field} differs between ${formDocId} and ${docId}`, reason, inputs: d.inputs, evidence: d.evidence }));
+        out.push(makeDraft({ contextId: 'form-vs-supporting', responseDocId: docId, code, severity: 'critical', state, subjectId: field, message: `${packField(field)} differs between ${doc(formDocId)} and ${doc(docId)}`, reason, inputs: d.inputs, evidence: d.evidence }));
       }
     }
   };
@@ -165,7 +171,7 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
   for (const e of ctx.facts.values()) {
     if (e.fact.status === 'needs_review' && e.provenance === 'document' && CRITICAL_FIELDS.has(e.fact.field)) {
       const d = describeInputs([e]);
-      out.push(makeDraft({ contextId: 'values', responseDocId: e.fact.docId, code: 'value.needs_review', severity: 'warning', state: 'needs_review', subjectId: `${e.fact.docId}:${e.fact.field}`, message: `${e.fact.field} needs review`, reason: e.fact.reason, inputs: d.inputs, evidence: d.evidence }));
+      out.push(makeDraft({ contextId: 'values', responseDocId: e.fact.docId, code: 'value.needs_review', severity: 'warning', state: 'needs_review', subjectId: `${e.fact.docId}:${e.fact.field}`, message: `${packField(e.fact.field)} in ${doc(e.fact.docId)} needs review`, reason: e.fact.reason, inputs: d.inputs, evidence: d.evidence }));
     }
   }
 
@@ -178,16 +184,16 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
     const cmp = { check: 'funding_within_budget' as const, field: 'funding_requested<=total_project_budget', docs: [formDocId, docId], id: `funding_within_budget:${formDocId}~${docId}` };
     if (budgets.length === 0 && !isExpected(ctx.data, docId, 'total_project_budget')) continue;
     if (budgets.length === 0) {
-      comparisons.push({ ...cmp, status: 'not_evaluated', reason: `no total_project_budget fact in ${docId}`, blocked: { docId, field: 'total_project_budget', reason: 'no_fact' } });
+      comparisons.push({ ...cmp, status: 'not_evaluated', reason: `No total project budget was extracted from ${doc(docId)}.`, blocked: { docId, field: 'total_project_budget', reason: 'no_fact' } });
       continue;
     }
     if (fundings.length > 1 || budgets.length > 1) {
       const doc2 = fundings.length > 1 ? formDocId : docId;
-      comparisons.push({ ...cmp, status: 'not_evaluated', reason: `more than one value in ${doc2}; it is not clear which to compare`, blocked: { docId: doc2, field: fundings.length > 1 ? 'funding_requested' : 'total_project_budget', reason: 'multiple_candidates' } });
+      comparisons.push({ ...cmp, status: 'not_evaluated', reason: `${doc(doc2)} has more than one value; it is not clear which to compare.`, blocked: { docId: doc2, field: fundings.length > 1 ? 'funding_requested' : 'total_project_budget', reason: 'multiple_candidates' } });
       continue;
     }
     if (!funding?.usable || !budget?.usable) {
-      comparisons.push({ ...cmp, status: 'not_evaluated', reason: !funding?.usable ? why(funding, formDocId, 'funding_requested') : why(budget, docId, 'total_project_budget'), blocked: !funding?.usable ? blockedBy(funding, formDocId, 'funding_requested') : blockedBy(budget, docId, 'total_project_budget') });
+      comparisons.push({ ...cmp, status: 'not_evaluated', reason: !funding?.usable ? why(ctx.data, funding, formDocId, 'funding_requested') : why(ctx.data, budget, docId, 'total_project_budget'), blocked: !funding?.usable ? blockedBy(funding, formDocId, 'funding_requested') : blockedBy(budget, docId, 'total_project_budget') });
       continue;
     }
     const f = funding.value as { amount: string; currency: string | null };
@@ -197,7 +203,7 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
       continue;
     }
     const exceeds = Number(f.amount) > Number(b.amount);
-    comparisons.push({ ...cmp, status: exceeds ? 'flagged' : 'agree', userSupplied: [funding, budget].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `requested ${showValue(f)} <= budget ${showValue(b)}` });
+    comparisons.push({ ...cmp, status: exceeds ? 'flagged' : 'agree', userSupplied: [funding, budget].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `requested ${showValue(f)}, budget ${showValue(b)}` });
     if (exceeds) {
       const d = describeInputs([funding, budget]);
       out.push(makeDraft({ contextId: 'budget', responseDocId: docId, code: 'funding.exceeds_budget', severity: 'critical', state: 'confirmed', subjectId: 'funding_vs_budget', message: 'Funding requested exceeds the total project budget', inputs: d.inputs, evidence: d.evidence }));

@@ -88,7 +88,7 @@ const MONTHS: Record<string, number> = {
 };
 const MONTH_RE = Object.keys(MONTHS).sort((a, b) => b.length - a.length).join('|');
 
-export type DateCandidate = Span & { text: string; iso: string | null; ambiguous: boolean };
+export type DateCandidate = Span & { text: string; iso: string | null; ambiguous: boolean; /** set when an ambiguous date was read in the order another date proved */ orderFrom?: 'excerpt' | 'document' };
 
 function iso(y: number, m: number, d: number): string | null {
   const dt = new Date(Date.UTC(y, m - 1, d));
@@ -96,10 +96,39 @@ function iso(y: number, m: number, d: number): string | null {
   return `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
-export function dateCandidates(text: string): DateCandidate[] {
+/** The order of a numeric date: 25/03/2026 can only be day first; 03/25/2026 only month first. */
+export type DateOrder = 'day_first' | 'month_first';
+
+const NUMERIC_DATE = /\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b/g;
+
+/**
+ * The order the unambiguous numeric dates in `text` prove. `order` is set only when at least one numeric date can be read
+ * one way only and every such date agrees; `conflict` is true when they disagree (then nothing is inferred). Dates written
+ * with a month name or in ISO form say nothing about the order and are ignored.
+ */
+export function numericDateOrder(text: string): { order: DateOrder | null; conflict: boolean } {
+  const seen = new Set<DateOrder>();
+  for (const m of text.matchAll(NUMERIC_DATE)) {
+    const a = +m[1]!, b = +m[2]!, y = +m[3]!;
+    if (a > 12 && b <= 12 && iso(y, b, a)) seen.add('day_first');
+    else if (b > 12 && a <= 12 && iso(y, a, b)) seen.add('month_first');
+  }
+  if (seen.size > 1) return { order: null, conflict: true };
+  return { order: [...seen][0] ?? null, conflict: false };
+}
+
+/**
+ * Date candidates in `text`. A numeric date such as 01/03/2026 can be day first or month first: it is AMBIGUOUS unless
+ * another date proves the order. The excerpt is consulted first: if it holds a date that can only be read one way (for
+ * example 28/02/2027), its order is used. If the excerpt proves nothing, `documentOrder` (the order the whole document
+ * proves, from numericDateOrder over its blocks) is used. Conflicting evidence in the excerpt, or none anywhere, leaves the
+ * date ambiguous; the excerpt's own conflict is never overridden by the document. A resolved date records where its order
+ * came from (`orderFrom`).
+ */
+export function dateCandidates(text: string, documentOrder: DateOrder | null = null): DateCandidate[] {
   const found: DateCandidate[] = [];
-  const add = (m: RegExpMatchArray, value: string | null, ambiguous: boolean) =>
-    found.push({ start: m.index!, end: m.index! + m[0].length, text: m[0], iso: ambiguous ? null : value, ambiguous });
+  const add = (m: RegExpMatchArray, value: string | null, ambiguous: boolean, orderFrom?: 'excerpt' | 'document') =>
+    found.push({ start: m.index!, end: m.index! + m[0].length, text: m[0], iso: ambiguous ? null : value, ambiguous, ...(orderFrom ? { orderFrom } : {}) });
   for (const m of text.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)) {
     add(m, iso(+m[1]!, +m[2]!, +m[3]!), false);
   }
@@ -109,12 +138,17 @@ export function dateCandidates(text: string): DateCandidate[] {
   for (const m of text.matchAll(new RegExp(`\\b(${MONTH_RE})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?,?\\s+(\\d{4})\\b`, 'gi'))) {
     add(m, iso(+m[3]!, MONTHS[m[1]!.toLowerCase()]!, +m[2]!), false);
   }
-  for (const m of text.matchAll(/\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b/g)) {
+  const local = numericDateOrder(text);
+  const order = local.conflict ? null : (local.order ?? documentOrder);
+  const from: 'excerpt' | 'document' = local.order ? 'excerpt' : 'document';
+  for (const m of text.matchAll(NUMERIC_DATE)) {
     const a = +m[1]!, b = +m[2]!, y = +m[3]!;
     if (a > 12 && b <= 12) add(m, iso(y, b, a), false);
     else if (b > 12 && a <= 12) add(m, iso(y, a, b), false);
     else if (a === b) add(m, iso(y, a, b), false);
-    else add(m, null, true); // 01/02/2026: day-first or month-first?
+    else if (order === 'day_first') add(m, iso(y, b, a), false, from);
+    else if (order === 'month_first') add(m, iso(y, a, b), false, from);
+    else add(m, null, true); // 01/02/2026 with nothing to say which order: day-first or month-first?
   }
   return dropOverlaps(found);
 }

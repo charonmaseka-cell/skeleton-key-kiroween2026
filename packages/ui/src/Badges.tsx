@@ -33,7 +33,7 @@ const STYLE: Record<BadgeKind, { icon: string; label: string; cls: string }> = {
 export function StatusBadge({ kind, label, children }: { kind: BadgeKind; label?: string; children?: ReactNode }) {
   const s = STYLE[kind];
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded border px-2 py-0.5 text-sm font-medium ${s.cls}`}>
+    <span className={`inline-flex max-w-full items-center gap-1 rounded border px-2 py-0.5 text-sm font-medium ${s.cls}`}>
       <span aria-hidden="true" className="font-bold">
         {s.icon}
       </span>
@@ -46,7 +46,7 @@ export function StatusBadge({ kind, label, children }: { kind: BadgeKind; label?
 /** Always-visible notice that this is sample mode. Not dismissible. */
 export function SampleBanner({ note }: { note: string }) {
   return (
-    <div role="region" aria-label="Sample mode" className="sticky top-0 z-10 border-b-4 border-amber-700 bg-amber-100 px-6 py-2 text-amber-950">
+    <div role="region" aria-label="Sample mode" className="sticky top-0 z-10 border-b-4 border-amber-700 bg-amber-100 px-4 py-2 sm:px-6 text-amber-950">
       <p className="font-semibold">
         SAMPLE MODE: fictional documents. Not a real review.
       </p>
@@ -58,9 +58,21 @@ export function SampleBanner({ note }: { note: string }) {
 /** Always-visible notice that documents are being analysed live. Not dismissible. */
 export function LiveBanner({ note }: { note: string }) {
   return (
-    <div role="region" aria-label="Live mode" className="sticky top-0 z-10 border-b-4 border-blue-800 bg-blue-100 px-6 py-2 text-blue-950">
+    <div role="region" aria-label="Live mode" className="sticky top-0 z-10 border-b-4 border-blue-800 bg-blue-100 px-4 py-2 sm:px-6 text-blue-950">
       <p className="font-semibold">LIVE: your documents. Extracted text was sent to an AI service for analysis; not all processing is local.</p>
       <p className="text-sm">{note}</p>
+    </div>
+  );
+}
+
+/**
+ * Every table sits in its own horizontal scroll container, so a wide table scrolls inside the page and the page itself never
+ * scrolls sideways (checked at 375 px). The container is focusable so keyboard users can scroll it, and it is named.
+ */
+export function ScrollTable({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div role="region" aria-label={`${label} (scroll sideways to see every column)`} tabIndex={0} data-scroll-table="" className="scroll-table max-w-full overflow-x-auto">
+      {children}
     </div>
   );
 }

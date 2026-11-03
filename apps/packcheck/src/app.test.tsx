@@ -14,7 +14,7 @@ describe('PackCheck interface', () => {
     expect(within(attach).getAllByRole('row').length).toBe(5); // header + 4 required attachments
     expect(attach.textContent).toMatch(/Tax clearance certificate/);
     const fields = screen.getByRole('heading', { name: /Field checks/ }).closest('section')!;
-    expect(fields.textContent).toMatch(/funding requested/);
+    expect(fields.textContent).toMatch(/Funding requested/);
     expect(screen.getByRole('heading', { name: /Confirmed findings \(1\)/ })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /Needs review \(2\)/ })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /Not evaluated \(1\)/ })).toBeTruthy();
@@ -23,8 +23,8 @@ describe('PackCheck interface', () => {
   it('funding requested (R1.6 million) against the budget (R2 million) is checked, agrees, and has no finding', () => {
     render(<App />);
     const fields = screen.getByRole('heading', { name: /Field checks/ }).closest('section')!;
-    const row = within(fields).getAllByRole('row').find((r) => /funding requested<=total project budget/.test(r.textContent ?? '') || /funding_requested<=/.test(r.textContent ?? '') || /requested ZAR 1 600 000/.test(r.textContent ?? ''))!;
-    expect(row.textContent).toMatch(/requested ZAR 1 600 000 <= budget ZAR 2 000 000/);
+    const row = within(fields).getAllByRole('row').find((r) => /Funding requested within the total budget/.test(r.textContent ?? ''))!;
+    expect(row.textContent).toMatch(/requested ZAR 1 600 000, budget ZAR 2 000 000/);
     expect(row.textContent).toMatch(/Agrees/);
     expect(document.body.textContent).not.toMatch(/exceeds the total project budget/);
   });
@@ -32,9 +32,9 @@ describe('PackCheck interface', () => {
   it('the ambiguous date is Needs review and its comparison is Not evaluated with the reason and blocked input', () => {
     render(<App />);
     const ne = screen.getByRole('heading', { name: /Not evaluated \(1\)/ }).closest('section')!;
-    expect(ne.textContent).toMatch(/project start date/);
-    expect(ne.textContent).toMatch(/date_format_ambiguous/);
-    expect(ne.textContent).toMatch(/Blocked input: project start date in Project budget summary/);
+    expect(ne.textContent).toMatch(/Project start date/);
+    expect(ne.textContent).not.toMatch(/date_format_ambiguous|project_start_date/);
+    expect(ne.textContent).toMatch(/Blocked input: Project start date in Project budget summary/);
     expect(ne.textContent).toMatch(/could be read more than one way/);
   });
 

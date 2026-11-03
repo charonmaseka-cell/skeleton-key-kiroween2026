@@ -17,6 +17,7 @@ import {
   type RuleContext,
 } from '@skeleton-key/engine';
 import { descriptionOverlap, type ItemIdentity } from './identity';
+import { scopeDoc, scopeField } from './labels';
 
 // ScopeCheck adapter rules: RFQ-to-quotation comparison. Used by the ScopeCheck app and by the
 // benchmark (tools/benchmark), so what is measured is what ships. Procurement logic stays here,
@@ -106,6 +107,9 @@ export type ScopeData = {
    * uncertain), keyed by fact ID. When absent, the original behaviour applies (key from the value).
    */
   identities?: Map<string, ItemIdentity>;
+  /** document titles and roles by ID: messages name documents by title, never by ID */
+  titles?: Record<string, string>;
+  roles?: Record<string, string>;
 };
 
 /** The key an item is matched on, or null when its identity is uncertain. */
@@ -204,6 +208,10 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
   const out: FindingDraft[] = [];
   const comparisons: PlannedComparison[] = [];
   const { data } = ctx;
+  // Messages and reasons are written for a person: field labels and document titles, never keys or IDs. Reason CODES stay in
+  // `blocked.reason` and `finding.reason`, which the interface explains in plain words.
+  const docName = (id: string) => scopeDoc(data.titles, data.roles, id);
+  const rfq = docName(data.rfqDocId);
   const ASPECTS = ['quantity', 'specification'] as const;
   const { reqs, multi: rfqMulti, held: rfqHeld, noItem: rfqNoItem } = requirementsOf(ctx.facts, data);
 
@@ -215,7 +223,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
     out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: data.rfqDocId, code, severity: 'warning', state: 'needs_review', subjectId: `${data.rfqDocId}:${line.blockId}:${code === 'item.multiple_items' ? 'items' : 'item'}`, message, reason, inputs: d.inputs, evidence: d.evidence }));
     for (const q of data.quoteDocIds) {
       for (const field of ASPECTS) {
-        comparisons.push({ id: `${field}:${tag}~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `requested item in ${data.rfqDocId} ${code === 'item.multiple_items' ? 'has several item values in one place' : 'not validated'} (${reason})`, blocked: { docId: data.rfqDocId, field: 'item', reason, ...(facts[0] ? { factId: facts[0].fact.id } : {}) } });
+        comparisons.push({ id: `${field}:${tag}~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `The requested item in ${rfq} ${code === 'item.multiple_items' ? 'has several item values in one place' : 'was not validated'}, so it cannot be compared with ${docName(q)}.`, blocked: { docId: data.rfqDocId, field: 'item', reason, ...(facts[0] ? { factId: facts[0].fact.id } : {}) } });
       }
     }
   };
@@ -227,7 +235,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
     out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: data.rfqDocId, code: 'item.missing', severity: 'warning', state: 'needs_review', subjectId: `${data.rfqDocId}:${l.blockId}:item`, message: 'A requirement line has no item value', reason: 'no_item_fact', inputs: d.inputs, evidence: d.evidence }));
     for (const q of data.quoteDocIds) {
       for (const field of ASPECTS) {
-        comparisons.push({ id: `${field}:${data.rfqDocId}:${l.blockId}:item~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `no item value was extracted for this requirement line in ${data.rfqDocId}; it cannot be matched to ${q}`, blocked: { docId: data.rfqDocId, field: 'item', reason: 'no_fact' } });
+        comparisons.push({ id: `${field}:${data.rfqDocId}:${l.blockId}:item~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `No item was extracted for this requirement line in ${rfq}, so it cannot be matched to ${docName(q)}.`, blocked: { docId: data.rfqDocId, field: 'item', reason: 'no_fact' } });
       }
     }
   }
@@ -242,7 +250,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
     // Not evaluated against every quotation, with the input that blocks it (the requirement's own identity).
     for (const q of data.quoteDocIds) {
       for (const field of ASPECTS) {
-        comparisons.push({ id: `${field}:${r.reqId}~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `requested item in ${data.rfqDocId} has an uncertain identity (${why}); it cannot be matched to ${q}`, blocked: { docId: data.rfqDocId, field: 'item', reason: why, factId: r.line.f.item!.fact.id } });
+        comparisons.push({ id: `${field}:${r.reqId}~${q}`, check: 'quote_aspect', field, docs: [data.rfqDocId, q], status: 'not_evaluated', reason: `The requested item in ${rfq} could not be identified with certainty, so it cannot be matched to ${docName(q)}.`, blocked: { docId: data.rfqDocId, field: 'item', reason: why, factId: r.line.f.item!.fact.id } });
       }
     }
   }
@@ -260,16 +268,16 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
       };
 
       if (allocationAmbiguous(r, sameKey.length)) {
-        notEvaluated('ambiguous_allocation', `${r.sharedBy} requirement line(s) for ${r.key} and ${sameKey.length} line(s) in ${q}: it is not clear which answers which`);
+        notEvaluated('ambiguous_allocation', `${r.sharedBy} requirement line${r.sharedBy === 1 ? '' : 's'} for ${r.key} and ${sameKey.length} line${sameKey.length === 1 ? '' : 's'} in ${docName(q)}: it is not clear which answers which.`);
         const d = describeInputs([r.line.f.item!, ...sameKey.map((l) => l.f.item!)]);
-        out.push(makeDraft({ ...base, code: 'item.allocation_ambiguous', severity: 'warning', state: 'needs_review', subjectId: r.reqId, message: `Cannot tell which ${r.key} line in ${q} answers this requirement`, reason: 'ambiguous_allocation', inputs: d.inputs, evidence: d.evidence }));
+        out.push(makeDraft({ ...base, code: 'item.allocation_ambiguous', severity: 'warning', state: 'needs_review', subjectId: r.reqId, message: `Cannot tell which ${r.key} line in ${docName(q)} answers this requirement`, reason: 'ambiguous_allocation', inputs: d.inputs, evidence: d.evidence }));
         continue;
       }
 
       const m = ctx.matches.find((x) => x.subjectId === r.reqId && x.responseDocId === q)!;
       const verdict = concludeAbsence(m, doc);
       if (verdict.kind === 'absent') {
-        notEvaluated(verdict.reason, `item not matched in ${q} (${verdict.reason})`);
+        notEvaluated(verdict.reason, `The item was not matched in ${docName(q)}.`);
         const d = describeInputs([r.line.f.item!]);
         // A line in this quotation that is held, has no evidence, carries several items or has an uncertain identity
         // could be this item: the omission stays Needs review and the reason says why.
@@ -277,7 +285,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         const candidate = offers.unresolved.length > 0;
         const state = verdict.state === 'confirmed' && candidate ? 'needs_review' : verdict.state;
         const reason = verdict.state === 'confirmed' && candidate ? (hidden ? 'multiple_items_in_block' : 'held_candidate_in_response') : verdict.reason;
-        out.push(makeDraft({ ...base, code: 'item.absent', severity: 'critical', state, basis: 'absence', subjectId: r.reqId, message: `${r.key} not found in ${q}`, reason, matchStatus: m.status, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(doc)] }));
+        out.push(makeDraft({ ...base, code: 'item.absent', severity: 'critical', state, basis: 'absence', subjectId: r.reqId, message: `${r.key} not found in ${docName(q)}`, reason, matchStatus: m.status, inputs: d.inputs, evidence: d.evidence, coverage: [coverageSnapshot(doc)] }));
         continue;
       }
       const offer = qLines.find((l) => l.blockId === m.verifiedTargetId)!;
@@ -289,28 +297,28 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         const many = (r.line.all[field]?.length ?? 0) > 1 ? r.line : (offer.all[field]?.length ?? 0) > 1 ? offer : undefined;
         if (many) {
           const doc2 = many === r.line ? data.rfqDocId : q;
-          comparisons.push({ ...cmp, status: 'not_evaluated', reason: `more than one ${field} in the same line of ${doc2}; it is not clear which to compare`, blocked: { docId: doc2, field, reason: 'multiple_candidates' } });
+          comparisons.push({ ...cmp, status: 'not_evaluated', reason: `The same line of ${docName(doc2)} has more than one ${scopeField(field).toLowerCase()}; it is not clear which to compare.`, blocked: { docId: doc2, field, reason: 'multiple_candidates' } });
           return;
         }
         if (!a || !b) {
           // not silently skipped: the comparison could not run because a side was never extracted
-          comparisons.push({ ...cmp, status: 'not_evaluated', reason: `no ${field} fact in ${!a ? data.rfqDocId : q}`, blocked: { docId: !a ? data.rfqDocId : q, field, reason: 'no_fact' } });
+          comparisons.push({ ...cmp, status: 'not_evaluated', reason: `No ${scopeField(field).toLowerCase()} was extracted from ${docName(!a ? data.rfqDocId : q)}.`, blocked: { docId: !a ? data.rfqDocId : q, field, reason: 'no_fact' } });
           return;
         }
         if (!usable(a) || !usable(b)) {
           const held = !usable(a) ? a : b;
-          comparisons.push({ ...cmp, status: 'not_evaluated', reason: `${field} in ${held.fact.docId} not validated (${held.fact.reason ?? 'needs_review'})`, blocked: { docId: held.fact.docId, field, reason: held.fact.reason ?? 'needs_review', factId: held.fact.id } });
+          comparisons.push({ ...cmp, status: 'not_evaluated', reason: `${scopeField(field)} in ${docName(held.fact.docId)} was not validated.`, blocked: { docId: held.fact.docId, field, reason: held.fact.reason ?? 'needs_review', factId: held.fact.id } });
           const d = describeInputs([a, b]);
-          out.push(makeDraft({ ...base, matchStatus: m.status, code: `${field}.unverified`, severity: 'warning', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: `${field === 'quantity' ? 'Quantity' : 'Specification'} for ${r.key} in ${q} needs review`, reason: 'unvalidated_input', inputs: d.inputs, evidence: d.evidence }));
+          out.push(makeDraft({ ...base, matchStatus: m.status, code: `${field}.unverified`, severity: 'warning', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: `${scopeField(field)} for ${r.key} in ${docName(q)} needs review`, reason: 'unvalidated_input', inputs: d.inputs, evidence: d.evidence }));
           return;
         }
         if (field === 'specification') {
           // Contaminated specification fields never produce a difference or an agreement: Needs review, Not evaluated.
           const bad = specContamination(a, r.line.f.item, data.identities) ? { e: a, line: r.line, doc: data.rfqDocId } : specContamination(b, offer.f.item, data.identities) ? { e: b, line: offer, doc: q } : null;
           if (bad) {
-            comparisons.push({ ...cmp, status: 'not_evaluated', reason: `specification in ${bad.doc} contains the item's own code, so it is not a clean specification to compare`, blocked: { docId: bad.doc, field, reason: 'contaminated_value', factId: bad.e.fact.id } });
+            comparisons.push({ ...cmp, status: 'not_evaluated', reason: `The specification in ${docName(bad.doc)} contains the item's own code, so it is not a clean specification to compare.`, blocked: { docId: bad.doc, field, reason: 'contaminated_value', factId: bad.e.fact.id } });
             const d = describeInputs([a, b]);
-            out.push(makeDraft({ ...base, matchStatus: m.status, code: 'specification.contaminated', severity: 'warning', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: `Specification for ${r.key} in ${bad.doc} includes the item's own code; check it against the source`, reason: 'item_code_in_specification', inputs: d.inputs, evidence: d.evidence }));
+            out.push(makeDraft({ ...base, matchStatus: m.status, code: 'specification.contaminated', severity: 'warning', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: `Specification for ${r.key} in ${docName(bad.doc)} includes the item's own code; check it against the source`, reason: 'item_code_in_specification', inputs: d.inputs, evidence: d.evidence }));
             return;
           }
         }
@@ -318,7 +326,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} <-> ${showValue(b.value)}${note?.(a, b) ?? ''}` });
         if (verdict2 === 'equal') return;
         const d = describeInputs([a, b]);
-        out.push(makeDraft({ ...base, matchStatus: m.status, code, severity: 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${r.reqId}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${r.key} in ${q}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
+        out.push(makeDraft({ ...base, matchStatus: m.status, code, severity: 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${r.reqId}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${r.key} in ${docName(q)}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
       };
       aspect('quantity', 'quantity.differs', (a, b) => compareQuantities(a.value as never, b.value as never).result);
       aspect('specification', 'spec.differs', (a, b) => (sameSpec(a.value, b.value).same ? 'equal' : 'different'), undefined, (a, b) => {
@@ -331,7 +339,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
     for (const l of qLines) {
       (l.all.exclusion ?? []).filter(usable).forEach((ex, i) => {
         const d = describeInputs([ex]);
-        out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'exclusion.stated', severity: 'info', state: 'confirmed', subjectId: `${q}:${l.blockId}:exclusion${i > 0 ? `#${i + 1}` : ''}`, message: `Exclusion stated in ${q} (unpriced): ${showValue(ex.value)}`, inputs: d.inputs, evidence: d.evidence }));
+        out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'exclusion.stated', severity: 'info', state: 'confirmed', subjectId: `${q}:${l.blockId}:exclusion${i > 0 ? `#${i + 1}` : ''}`, message: `Exclusion stated in ${docName(q)} (unpriced): ${showValue(ex.value)}`, inputs: d.inputs, evidence: d.evidence }));
       });
     }
     // Several item facts in one quotation block: which one a quantity or specification belongs to is not known.

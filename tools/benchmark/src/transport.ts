@@ -1,5 +1,5 @@
 import { toRequestBlock, type Block } from '@skeleton-key/engine';
-import type { AdmitResult } from '../../../services/extraction-api/src/admission';
+import type { ReserveRequest, ReserveResult, SettleResult } from '../../../services/extraction-api/src/admission';
 import type { EnvVars } from '../../../services/extraction-api/src/config';
 import { handle } from '../../../services/extraction-api/src/handler';
 import type { Ai } from './ai';
@@ -20,7 +20,7 @@ export interface Transport {
   extract(schemaId: string, blocks: Pick<Block, 'id' | 'text' | 'layout' | 'cells'>[]): Promise<ExtractResult>;
 }
 
-export type Counter = { admit(ceiling: number, nowMs: number): Promise<AdmitResult>; usedToday?(nowMs: number): number };
+export type Counter = { reserve(req: ReserveRequest, nowMs: number): Promise<ReserveResult>; settle(id: number, charged: number | null): Promise<SettleResult>; usedToday?(nowMs: number): number };
 
 const ORIGIN = 'http://localhost:5173';
 
@@ -38,7 +38,10 @@ export class LocalTransport implements Transport {
     // Attempts are counted per request (every admission this request was granted), not as a difference of the shared daily
     // counter, so requests running at the same time cannot be charged for each other's attempts.
     let granted = 0;
-    const counter = { admit: async (ceiling: number, nowMs: number) => { const r = await this.opts.counter.admit(ceiling, nowMs); if (r.ok) granted++; return r; } };
+    const counter = {
+      reserve: async (req: ReserveRequest, nowMs: number) => { const r = await this.opts.counter.reserve(req, nowMs); if (r.ok) granted++; return r; },
+      settle: (id: number, charged: number | null) => this.opts.counter.settle(id, charged),
+    };
     const started = performance.now();
     const res = await handle(
       new Request('https://worker.local/extract', {
@@ -46,7 +49,7 @@ export class LocalTransport implements Transport {
         headers: { origin: ORIGIN, 'content-type': 'application/json' },
         body: JSON.stringify({ schemaId, blocks: blocks.map((b) => toRequestBlock(b as Block)) }),
       }),
-      { ALLOWED_ORIGINS: ORIGIN, ACCESS_GATE: 'public', ...this.opts.env },
+      { ALLOWED_ORIGINS: ORIGIN, ACCESS_GATE: 'public', DAILY_NEURON_BUDGET: '10000', ...this.opts.env },
       { now, counter, ai: this.opts.ai, log: () => undefined },
     );
     const ms = Math.round(performance.now() - started);

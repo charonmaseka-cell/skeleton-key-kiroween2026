@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync }
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { AdmitResult } from '../../services/extraction-api/src/admission';
+import type { ReserveRequest, ReserveResult, SettleResult } from '../../services/extraction-api/src/admission';
 import { handle } from '../../services/extraction-api/src/handler';
 import { health } from '../../services/extraction-api/src/health';
 import { SECRET_FILE, createSecret, destroySecret, readSecret } from './gate-secret';
@@ -14,7 +14,7 @@ import { buildPayloads, dailyBaseline, runGateTest, DAILY_NEURON_CAP, RUN_NEURON
 
 const TOKEN = 't'.repeat(43);
 const STAGING = {
-  ACCESS_GATE: 'token', TEST_GATE_TOKEN: TOKEN, ALLOWED_ORIGINS: TEST_ORIGIN, DAILY_ADMISSION_CEILING: '4',
+  ACCESS_GATE: 'token', TEST_GATE_TOKEN: TOKEN, ALLOWED_ORIGINS: TEST_ORIGIN, DAILY_ADMISSION_CEILING: '4', DAILY_NEURON_BUDGET: '2000',
   MAX_BODY_BYTES: '8192', MAX_CHARS: '6000', MAX_BLOCKS: '80', MAX_BLOCK_CHARS: '1000', MAX_REPAIR_ATTEMPTS: '1', INFERENCE_TIMEOUT_MS: '25000',
 };
 const DAY = Date.UTC(2026, 10, 3, 12, 0, 0);
@@ -23,8 +23,10 @@ type Reply = 'ok' | 'bad' | 'no_usage' | 'throw' | 'huge_usage' | 'unlocatable';
 function fakeWorker(replies: Reply[], opts: { startUsed?: number; ms?: number } = {}) {
   const state = { used: 0 + (opts.startUsed ?? 0), modelCalls: 0, extractRequests: 0 };
   const counter = {
-    admit: async (c: number): Promise<AdmitResult> => (state.used >= c ? { ok: false, used: state.used, ceiling: c } : { ok: true, used: ++state.used, ceiling: c }),
+    reserve: async (req: ReserveRequest): Promise<ReserveResult> => (state.used >= req.ceiling ? { ok: false, reason: 'attempts', used: state.used, charged: 0 } : { ok: true, id: ++state.used, used: state.used, charged: 0 }),
+    settle: async (): Promise<SettleResult> => ({ settled: true, charged: 0, reserved: 0, overrun: false }),
     usedToday: async () => state.used,
+    budgetToday: async () => ({ attempts: state.used, charged: 0, unsettled: 0, overruns: 0 }),
   };
   const ai = {
     run: async (_m: string, input: unknown) => {
@@ -199,10 +201,12 @@ describe('runner gap 2: neuron reservations against the run cap (2,000) and the 
   });
 
   it('reservations are the guaranteed (1 byte per token) worst case of the exact payloads, and the worst 4-attempt path fits 2,000', () => {
-    expect(Math.round(payloads.T1.reserve.first * 10) / 10).toBe(384.6);
+    // Published neuron rates (26,668 / 204,805 per million). The run of 2 Nov 2026 used the earlier rates (384.6, 387.8, 512.9,
+    // 516.0 here); its record keeps those figures.
+    expect(Math.round(payloads.T1.reserve.first * 10) / 10).toBe(384.7);
     expect(Math.round(payloads.T1.reserve.repair * 10) / 10).toBe(387.8);
-    expect(Math.round(payloads.T2.reserve.first * 10) / 10).toBe(512.9);
-    expect(Math.round(payloads.T2.reserve.repair * 10) / 10).toBe(516);
+    expect(Math.round(payloads.T2.reserve.first * 10) / 10).toBe(513.1);
+    expect(Math.round(payloads.T2.reserve.repair * 10) / 10).toBe(516.2);
     const worst = payloads.T1.reserve.first + payloads.T2.reserve.first + payloads.T2.reserve.repair + payloads.T3.reserve.first;
     expect(worst).toBeLessThan(2000);
     expect(worst).toBeGreaterThan(1893);
@@ -211,7 +215,7 @@ describe('runner gap 2: neuron reservations against the run cap (2,000) and the 
   it('measured attempts are charged from reported tokens; unused repair reservations are released', async () => {
     const r = await run(fakeWorker([]));
     expect(r.budget.attempts.map((a) => [a.step, a.basis])).toEqual([['T1', 'measured'], ['T2', 'measured'], ['T3', 'measured'], ['T4', 'measured']]);
-    const one = Math.ceil(((600 * 26_636 + 400 * 204_818) / 1e6) * 1.1 * 1000) / 1000;
+    const one = Math.ceil(((600 * 26_668 + 400 * 204_805) / 1e6) * 1.1 * 1000) / 1000;
     expect(r.budget.runCharged).toBeCloseTo(4 * one, 2);
   });
 
@@ -227,7 +231,7 @@ describe('runner gap 2: neuron reservations against the run cap (2,000) and the 
     const a = r.budget.attempts[0]!;
     expect(a.overrun).toBe(true);
     expect(a.charged).toBeGreaterThan(a.reserved);
-    expect(a.charged).toBeCloseTo(((3000 * 26_636 + 2500 * 204_818) / 1e6) * 1.1, 1);
+    expect(a.charged).toBeCloseTo(((3000 * 26_668 + 2500 * 204_805) / 1e6) * 1.1, 1);
     expect(r.budget.overruns).toBeGreaterThanOrEqual(1);
   });
 

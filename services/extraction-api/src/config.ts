@@ -10,6 +10,7 @@ export type EnvVars = Partial<Record<
   | 'MAX_REPAIR_ATTEMPTS'
   | 'INFERENCE_TIMEOUT_MS'
   | 'DAILY_ADMISSION_CEILING'
+  | 'DAILY_NEURON_BUDGET' // required: estimated neurons per UTC day, reserved before each attempt and settled after (cost.ts)
   | 'ACCESS_GATE' // required: "public" or "token" (see gate.ts)
   | 'TEST_GATE_TOKEN', // secret; only with ACCESS_GATE=token
   string
@@ -23,6 +24,7 @@ export type Config = {
   maxRepairAttempts: number;
   timeoutMs: number;
   dailyCeiling: number;
+  dailyNeuronBudget: number;
 };
 
 // Hard caps: even a misconfigured var cannot exceed these.
@@ -56,6 +58,8 @@ export function parseConfig(env: EnvVars): Config | null {
     timeoutMs: int(env.INFERENCE_TIMEOUT_MS, SPEC.INFERENCE_TIMEOUT_MS.def, SPEC.INFERENCE_TIMEOUT_MS.min, SPEC.INFERENCE_TIMEOUT_MS.max),
     // Required: no default. Derived from benchmark measurements.
     dailyCeiling: int(env.DAILY_ADMISSION_CEILING, null, 0, 100_000),
+    // Required: no default. 0 admits nothing. Hard cap 10,000: the free daily allocation.
+    dailyNeuronBudget: int(env.DAILY_NEURON_BUDGET, null, 0, 10_000),
   };
   return Object.values(v).some((x) => x === null) ? null : (v as Config);
 }

@@ -31,6 +31,9 @@ export default {
         if (mode === 'down') throw new Error('capacity temporarily exceeded');
         if (mode === 'slow') await new Promise((r) => setTimeout(r, 400));
         if (mode === 'bad_json') return { response: 'not json' };
+        // Usage far above any reservation: an overrun (test of the day lock). 'overrun_bad' is also unusable, so it would repair.
+        if (mode === 'overrun_bad') return { response: 'not json', usage: { prompt_tokens: 50_000, completion_tokens: 5_000 } };
+        if (mode === 'overrun') return { response: { claims: [{ field: 'organisation_name', blockId: 'b1', excerpt: 'Acme Trust', value: 'Acme Trust' }] }, usage: { prompt_tokens: 50_000, completion_tokens: 5_000 } };
         return {
           response: { claims: [{ field: 'organisation_name', blockId: 'b1', excerpt: 'Acme Trust', value: 'Acme Trust' }] },
           usage: { prompt_tokens: 10, completion_tokens: 5 },

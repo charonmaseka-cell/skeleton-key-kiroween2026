@@ -3,12 +3,13 @@ import { health } from '../src/health';
 
 // The deployment check, with fakes: what makes it fail, and that the response carries nothing sensitive.
 
-const env = { ALLOWED_ORIGINS: 'https://scopecheck.example', DAILY_ADMISSION_CEILING: '0', ACCESS_GATE: 'public' };
+const env = { ALLOWED_ORIGINS: 'https://scopecheck.example', DAILY_ADMISSION_CEILING: '0', DAILY_NEURON_BUDGET: '0', ACCESS_GATE: 'public' };
 const counter = (used = 0, opts: { writes?: boolean; throws?: boolean } = {}) => {
   let n = used;
   return {
-    admit: async (ceiling: number) => { if (opts.throws) throw new Error('down'); if (opts.writes) n++; return { ok: n < ceiling, used: n, ceiling }; },
+    reserve: async (req: { ceiling: number }) => { if (opts.throws) throw new Error('down'); if (opts.writes) n++; return n < req.ceiling ? { ok: true as const, id: n, used: n, charged: 0 } : { ok: false as const, reason: 'attempts' as const, used: n, charged: 0 }; },
     usedToday: async () => { if (opts.throws) throw new Error('down'); return n; },
+    budgetToday: async () => { if (opts.throws) throw new Error('down'); return { attempts: n, charged: 0, unsettled: 0, overruns: 0 }; },
   };
 };
 const ai = { run: async () => { throw new Error('the deployment check must not call the model'); } };

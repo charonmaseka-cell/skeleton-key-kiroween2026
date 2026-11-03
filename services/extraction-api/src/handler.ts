@@ -1,7 +1,8 @@
-import type { AdmitResult } from './admission';
+import type { ReserveRequest, ReserveResult, SettleResult } from './admission';
 import { secondsUntilUtcMidnight } from './admission';
 import { parseConfig, parseOrigins, type EnvVars } from './config';
 import { ERRORS, type ErrorCode } from './errors';
+import { reservation, settlementCharge } from './cost';
 import { checkGate } from './gate';
 import { classifyUpstream, withTimeout } from './inference';
 import { buildMessages, getProfile, parseModelOutput, responseFormat } from './profiles';
@@ -9,8 +10,11 @@ import { parseExtractRequest, readBounded } from './request';
 
 export interface Deps {
   now(): number;
-  /** Strict global admission counter (Durable Object). Failure must never be bypassed. */
-  counter: { admit(ceiling: number, nowMs: number): Promise<AdmitResult> };
+  /**
+   * Strict global admission ledger (Durable Object): attempt ceiling and neuron budget, reserved before every attempt and settled
+   * after it. A reservation failure must never be bypassed; a settlement failure leaves the reservation standing (conservative).
+   */
+  counter: { reserve(req: ReserveRequest, nowMs: number): Promise<ReserveResult>; settle(id: number, charged: number | null): Promise<SettleResult> };
   ai: { run(model: string, input: unknown): Promise<unknown> };
   /** Optional per-client limiter; the strict global ceiling does not depend on it. */
   clientLimiter?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
@@ -84,34 +88,61 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
 
     const blockIds = new Set(blocks.map((b) => b.id));
     for (let attempt = 1; attempt <= 1 + cfg.maxRepairAttempts; attempt++) {
-      // Every inference attempt, repairs included, is admitted before the model is called.
-      let admission: AdmitResult;
+      const messages = buildMessages(profile, blocks, attempt > 1);
+      const neurons = reservation(profile.model, messages, profile.maxOutputTokens);
+      if (neurons === null) return fail('not_configured'); // no rate for this model: never call it unbudgeted
+      // Every inference attempt, repairs included, is reserved (attempt + worst-case neurons) before the model is called.
+      let admission: ReserveResult;
       try {
-        admission = await deps.counter.admit(cfg.dailyCeiling, deps.now());
+        admission = await deps.counter.reserve({ ceiling: cfg.dailyCeiling, budget: cfg.dailyNeuronBudget, neurons }, deps.now());
       } catch {
         return fail('limiter_unavailable'); // fail closed
       }
-      if (!admission.ok) return fail('daily_limit', { 'retry-after': String(secondsUntilUtcMidnight(deps.now())) });
+      if (!admission.ok) {
+        deps.log({ evt: 'admission', refused: admission.reason, used: admission.used, charged: admission.charged });
+        return fail('daily_limit', { 'retry-after': String(secondsUntilUtcMidnight(deps.now())) });
+      }
+      const reservationId = admission.id;
       stats.attempts = attempt;
+      // Settlement: the full estimate from reported tokens (an overrun is logged, never clipped), or null (the reservation stands).
+      // Returns false when the ledger could not record it (after one retry; settle is once-only, so a retry cannot double-charge).
+      // The caller then STOPS the request: no repair, no further attempt, no claims returned. A known overrun that could not be
+      // recorded must not leave the smaller reservation standing while the request carries on; it is logged with the estimate.
+      const settleWith = async (charged: number | null): Promise<boolean> => {
+        for (let tries = 1; tries <= 2; tries++) {
+          try {
+            const r = await deps.counter.settle(reservationId, charged);
+            if (!r.settled && r.reserved <= 0) continue; // the ledger has no such reservation: not recorded
+            deps.log({ evt: 'settle', attempt, reserved: r.reserved, charged: r.charged, measured: charged !== null, overrun: r.overrun });
+            return true;
+          } catch {
+            /* retry once */
+          }
+        }
+        deps.log({ evt: 'settle', attempt, reserved: neurons, charged: null, measured: false, overrun: charged !== null && charged > neurons, knownOverrun: charged !== null && charged > neurons, estimate: charged, error: 'ledger_unavailable' });
+        return false;
+      };
 
       let raw: unknown;
       try {
         raw = await withTimeout(
           deps.ai.run(profile.model, {
-            messages: buildMessages(profile, blocks, attempt > 1),
+            messages,
             response_format: responseFormat(profile),
             max_tokens: profile.maxOutputTokens,
           }),
           cfg.timeoutMs,
         );
       } catch (err) {
-        return fail(classifyUpstream(err)); // allowance is not refunded
+        const recorded = await settleWith(null); // consumption unknown: the reservation stands (and is not refunded)
+        return recorded ? fail(classifyUpstream(err)) : fail('limiter_unavailable');
       }
+      const u = (raw as { usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } } | null)?.usage;
+      if (!(await settleWith(settlementCharge(profile.model, u)))) return fail('limiter_unavailable'); // ledger not updated: stop before any repair
 
       const payload = (raw as { response?: unknown } | null)?.response ?? raw;
       const out = parseModelOutput(profile, blockIds, payload);
       if (out.ok) {
-        const u = (raw as { usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } } | null)?.usage;
         const usage = {
           promptTokens: typeof u?.prompt_tokens === 'number' ? u.prompt_tokens : null,
           completionTokens: typeof u?.completion_tokens === 'number' ? u.completion_tokens : null,

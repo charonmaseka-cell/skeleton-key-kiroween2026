@@ -91,7 +91,10 @@ export function oracleAi(samples: Sample[], defects: MockDefects = {}): Ai & { c
       if (defects.unknownBlock) claims.push({ field: 'item', blockId: 'zz-not-sent', excerpt: 'invented', value: 'invented' });
       if (defects.outOfProfile) claims.push({ field: 'secret', blockId: first, excerpt: 'x', value: 'x' });
       const response = { claims };
-      return { response, usage: { prompt_tokens: Math.ceil(JSON.stringify(input).length / 4), completion_tokens: Math.ceil(JSON.stringify(response).length / 4) } };
+      // Synthetic usage. Completion is capped at max_tokens, as the provider enforces it (cost.ts A4): a mock that reported more
+      // would be a fake overrun, which now locks the day's admissions.
+      const maxTokens = (input as { max_tokens?: number }).max_tokens ?? Infinity;
+      return { response, usage: { prompt_tokens: Math.ceil(JSON.stringify(input).length / 4), completion_tokens: Math.min(maxTokens, Math.ceil(JSON.stringify(response).length / 4)) } };
     },
   };
   return self;

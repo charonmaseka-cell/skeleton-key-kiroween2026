@@ -34,3 +34,5 @@ MAX_REPAIR_ATTEMPTS = "1"
 INFERENCE_TIMEOUT_MS = "25000"
 # Total inference attempts for the whole test, repairs included. Hard stop in the Durable Object.
 DAILY_ADMISSION_CEILING = "4"
+# Server-side neuron budget for the staging Worker (the authorised run cap for the test).
+DAILY_NEURON_BUDGET = "2000"

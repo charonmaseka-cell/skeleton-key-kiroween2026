@@ -31,7 +31,7 @@ describe('worst-case reservation', () => {
     const w = worstCaseNeurons(input(3000, 1500), M);
     expect(w.promptTokens).toBe(1500 + 64);
     expect(w.completionTokens).toBe(1500);
-    expect(w.neurons).toBeCloseTo(((1564 * 26_636 + 1500 * 204_818) / 1e6) * SAFETY_MARGIN, 5);
+    expect(w.neurons).toBeCloseTo(((1564 * 26_668 + 1500 * 204_805) / 1e6) * SAFETY_MARGIN, 5);
     expect(w.neurons).toBeCloseTo(charge(1564, 1500, M), 5);
   });
   it('counts UTF-8 bytes, not characters', () => {
@@ -68,7 +68,7 @@ describe('settlement records the FULL estimate (regression: the old Math.min dis
     const b2 = mkBudget({ runCap: 400 }); // one reservation (~384) fits under it
     expect(b2.capReached).toBe(false);
     const ai = budgetedAi(inner, b2);
-    await ai.run(M, input()); // reserved ~384 < 400; charged ~ 1.1*(9000*26636+1500*204818)/1e6 = ~600
+    await ai.run(M, input()); // reserved ~384 < 400; charged ~ 1.1*(9000*26668+1500*204805)/1e6 = ~600
     expect(b2.capReached).toBe(true);
     await expect(ai.run(M, input())).rejects.toBeInstanceOf(BudgetExceeded);
     expect(inner.calls).toBe(1);
@@ -134,7 +134,7 @@ describe('what stays charged afterwards', () => {
     await ai.run(M, input());
     const a = b.attempts[0]!;
     expect(a.basis).toBe('measured');
-    expect(a.charged).toBeCloseTo(((500 * 26_636 + 400 * 204_818) / 1e6) * 1.1, 5);
+    expect(a.charged).toBeCloseTo(((500 * 26_668 + 400 * 204_805) / 1e6) * 1.1, 5);
     expect(a.charged).toBeLessThan(a.reserved);
   });
 

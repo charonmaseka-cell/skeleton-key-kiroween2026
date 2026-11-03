@@ -43,26 +43,38 @@ export function StatusBadge({ kind, label, children }: { kind: BadgeKind; label?
   );
 }
 
-/** Always-visible notice that this is sample mode. Not dismissible. */
-export function SampleBanner({ note }: { note: string }) {
+/**
+ * A mode banner: always visible, never dismissible, never replaced by decoration (haunted-ui HU-7). On wide screens the label and
+ * the explanation are both shown. On narrow screens the label is ONE line (the mode, and for live mode that text leaves the
+ * device) with the explanation folded behind a toggle that is always visible on that line, so only the explanatory text is folded.
+ */
+function Banner({ label, tone, short, full, note }: { label: string; tone: string; short: string; full: string; note: string }) {
   return (
-    <div role="region" aria-label="Sample mode" className="sticky top-0 z-10 border-b-4 border-amber-700 bg-amber-100 px-4 py-2 sm:px-6 text-amber-950">
-      <p className="font-semibold">
-        SAMPLE MODE: fictional documents. Not a real review.
-      </p>
-      <p className="text-sm">{note}</p>
+    <div role="region" aria-label={label} className={`sticky top-0 z-10 border-b-4 px-4 py-2 sm:px-6 ${tone}`}>
+      <div className="hidden sm:block">
+        <p className="font-semibold">{full}</p>
+        <p className="text-sm">{note}</p>
+      </div>
+      <details className="sm:hidden" data-banner-compact="">
+        <summary className="flex cursor-pointer list-none items-baseline justify-between gap-2 text-sm">
+          <span className="min-w-0 truncate font-semibold">{short}</span>
+          <span className="shrink-0 underline">Details</span>
+        </summary>
+        <p className="mt-1 text-sm font-semibold">{full}</p>
+        <p className="text-sm">{note}</p>
+      </details>
     </div>
   );
 }
 
+/** Always-visible notice that this is sample mode. Not dismissible. */
+export function SampleBanner({ note }: { note: string }) {
+  return <Banner label="Sample mode" tone="border-amber-700 bg-amber-100 text-amber-950" short="SAMPLE MODE: fictional documents" full="SAMPLE MODE: fictional documents. Not a real review." note={note} />;
+}
+
 /** Always-visible notice that documents are being analysed live. Not dismissible. */
 export function LiveBanner({ note }: { note: string }) {
-  return (
-    <div role="region" aria-label="Live mode" className="sticky top-0 z-10 border-b-4 border-blue-800 bg-blue-100 px-4 py-2 sm:px-6 text-blue-950">
-      <p className="font-semibold">LIVE: your documents. Extracted text was sent to an AI service for analysis; not all processing is local.</p>
-      <p className="text-sm">{note}</p>
-    </div>
-  );
+  return <Banner label="Live mode" tone="border-blue-800 bg-blue-100 text-blue-950" short="LIVE: text sent to an AI service" full="LIVE: your documents. Extracted text was sent to an AI service for analysis; not all processing is local." note={note} />;
 }
 
 /**

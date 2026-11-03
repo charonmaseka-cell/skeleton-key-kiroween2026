@@ -45,8 +45,6 @@ export type FixtureDoc = {
    * the document can be confirmed, whatever the reviewer says.
    */
   chunks?: { blockIds: string[]; status: 'ok' | 'failed' }[];
-  /** documented edits to the recorded claims' excerpts after the sample text changed (shown to the user) */
-  claimEdits?: { from: string; to: string; reason: string }[];
 };
 
 export type Fixture = {

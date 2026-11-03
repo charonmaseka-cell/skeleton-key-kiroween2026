@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Block } from '@skeleton-key/engine';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -174,6 +174,27 @@ describe('Analyse', () => {
       expect(screen.getByRole('heading', { name: /Not evaluated \(3\)/ })).toBeTruthy();
     });
   }
+
+  it('safeguard: a document with a part that was not processed shows no coverage hint and no confirm button, and no absence is confirmed against it', async () => {
+    const user = userEvent.setup();
+    setup({ fail: (n) => (n === 2 ? { status: 504, code: 'timeout' } : null) });
+    await choose(user, 'rfq.pdf', 'quote-a.pdf');
+    await waitFor(() => expect(analyseBtn().disabled).toBe(false));
+    await user.click(analyseBtn());
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Live mode' })).toBeTruthy());
+    const docs = [...document.querySelectorAll('#docs-h ~ details')] as HTMLDetailsElement[];
+    const failed = docs.find((d) => /quote-a\.pdf/.test(d.querySelector('summary')!.textContent ?? ''))!;
+    const ok = docs.find((d) => /rfq\.pdf/.test(d.querySelector('summary')!.textContent ?? ''))!;
+    expect(failed.querySelector('summary')!.textContent).toMatch(/Part of the document was not processed/);
+    expect(failed.querySelector('[data-coverage-hint]')).toBeNull();
+    expect(within(failed).queryByRole('button', { name: /confirm coverage/i })).toBeNull();
+    expect(failed.textContent).toMatch(/Coverage cannot be confirmed/);
+    // the fully processed document still offers it
+    expect(ok.querySelector('[data-coverage-hint]')).not.toBeNull();
+    // and no confirmed finding says something is missing from the document that was not fully processed
+    const confirmedSection = screen.getByRole('heading', { name: /Confirmed findings/ }).closest('section')!;
+    expect(confirmedSection.textContent).not.toMatch(/not found in/);
+  });
 
   it('a manual retry resends only what failed, and the result then completes', async () => {
     const user = userEvent.setup();

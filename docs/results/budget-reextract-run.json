@@ -1,0 +1,149 @@
+{
+  "gateUrl": "https://skeleton-key-extraction-gate.teddykgroup.workers.dev",
+  "startedAt": "2026-11-03T01:10:14.904Z",
+  "endedAt": "2026-11-03T01:10:23.563Z",
+  "verdict": "pass",
+  "stop": null,
+  "attemptsSent": 1,
+  "maxAttempts": 1,
+  "request": {
+    "sha256": "cfee0d5141419f24caee8d285c3c545f01ada10e98024a8206e360e93af6319e",
+    "bodyBytes": 379,
+    "blocksSent": 5,
+    "schemaId": "packcheck.grant.v2",
+    "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "guaranteedWorstCaseNeurons": 339.888
+  },
+  "healthBefore": {
+    "ok": true,
+    "checks": {
+      "configuration": "valid",
+      "workersAiBinding": "present (not called)",
+      "durableObject": {
+        "reachable": true,
+        "usedToday": 0,
+        "zeroCeilingRefused": true,
+        "unchangedAfterCheck": true,
+        "budgetToday": {
+          "attempts": 0,
+          "charged": 0,
+          "unsettled": 0,
+          "overruns": 0
+        }
+      },
+      "admission": {
+        "dailyCeiling": 1,
+        "dailyNeuronBudget": 360,
+        "open": true
+      },
+      "accessGate": {
+        "mode": "token",
+        "valid": true,
+        "credentialBound": true
+      }
+    },
+    "inference": "not called by this check"
+  },
+  "healthAfter": {
+    "ok": true,
+    "checks": {
+      "configuration": "valid",
+      "workersAiBinding": "present (not called)",
+      "durableObject": {
+        "reachable": true,
+        "usedToday": 1,
+        "zeroCeilingRefused": true,
+        "unchangedAfterCheck": true,
+        "budgetToday": {
+          "attempts": 1,
+          "charged": 74.237,
+          "unsettled": 0,
+          "overruns": 0
+        }
+      },
+      "admission": {
+        "dailyCeiling": 1,
+        "dailyNeuronBudget": 360,
+        "open": true
+      },
+      "accessGate": {
+        "mode": "token",
+        "valid": true,
+        "credentialBound": true
+      }
+    },
+    "inference": "not called by this check"
+  },
+  "response": {
+    "status": 200,
+    "ms": 8292,
+    "code": "ok",
+    "claims": [
+      {
+        "field": "organisation_name",
+        "kind": "name",
+        "blockId": "p1-l2",
+        "excerpt": "Applicant: Green Valley Community Foundation",
+        "value": "Green Valley Community Foundation"
+      },
+      {
+        "field": "total_project_budget",
+        "kind": "money",
+        "blockId": "p1-l3",
+        "excerpt": "Total project budget: R 2 000 000",
+        "value": {
+          "amount": "2000000",
+          "currency": "ZAR"
+        }
+      },
+      {
+        "field": "funding_requested",
+        "kind": "money",
+        "blockId": "p1-l4",
+        "excerpt": "Funding requested from this grant: R 1 600 000",
+        "value": {
+          "amount": "1600000",
+          "currency": "ZAR"
+        }
+      },
+      {
+        "field": "project_start_date",
+        "kind": "date",
+        "blockId": "p1-l5",
+        "excerpt": "Project period: 01/03/2026 to 28 February 2027",
+        "value": "2026-03-01"
+      },
+      {
+        "field": "project_end_date",
+        "kind": "date",
+        "blockId": "p1-l5",
+        "excerpt": "Project period: 01/03/2026 to 28 February 2027",
+        "value": "2027-02-28"
+      }
+    ],
+    "meta": {
+      "attempts": 1,
+      "repaired": false,
+      "dropped": 0,
+      "droppedReasons": {
+        "unknown_block": 0,
+        "unknown_field": 0,
+        "invalid_value": 0
+      },
+      "usage": {
+        "promptTokens": 580,
+        "completionTokens": 254
+      }
+    }
+  },
+  "usage": {
+    "promptTokens": 580,
+    "completionTokens": 254
+  },
+  "counterEnd": 1,
+  "neurons": {
+    "estimateBeforeMargin": 67.472652,
+    "chargeWithMargin": 74.2199172,
+    "basis": "ESTIMATE from the reported tokens at the repo rates; not dashboard-confirmed"
+  }
+}

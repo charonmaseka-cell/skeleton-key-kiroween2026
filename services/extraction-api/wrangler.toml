@@ -29,7 +29,7 @@ MAX_BLOCK_CHARS = "1000"
 MAX_REPAIR_ATTEMPTS = "1"
 INFERENCE_TIMEOUT_MS = "25000"
 # CLOSED in this file, always: a plain `wrangler deploy` can never open public analysis. Opening is only
-# `tools/deploy/deploy.ts --open-live` (docs/live-opening.md), which passes the approved values (40 attempts, 4,000 estimated
+# `tools/deploy/deploy.ts --open-live` (docs/live-opening.md), which passes the approved values (80 attempts, 6,000 estimated
 # neurons per UTC day) on the command line.
 DAILY_ADMISSION_CEILING = "0"
 # Estimated neurons per UTC day, reserved (worst case) before every attempt and settled after it (src/cost.ts); a recorded

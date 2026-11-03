@@ -221,8 +221,10 @@ describe('handler: POST /run and runs of extract requests', () => {
     const logs: Record<string, unknown>[] = [];
     const aiInputs: { max_tokens: number }[] = [];
     let calls = 0;
+    const limiter = { allow: true, calls: 0 };
     const deps: Deps = {
       now: () => DAY,
+      clientLimiter: { limit: async () => { limiter.calls++; return { success: limiter.allow }; } },
       counter: {
         reserve: async (r, n) => s.tx(() => reserve(s, r, n)),
         settle: async (id, c) => s.tx(() => settle(s, id, c)),
@@ -236,7 +238,7 @@ describe('handler: POST /run and runs of extract requests', () => {
       log: (x) => logs.push(x),
     };
     const post = (path: string, payload: unknown, origin = ORIGIN) => handle(new Request(`https://w.test${path}`, { method: 'POST', headers: { origin, 'content-type': 'application/json' }, body: typeof payload === 'string' ? payload : JSON.stringify(payload) }), env(budget, ceiling), deps);
-    return { s, logs, aiInputs, calls: () => calls, post };
+    return { s, logs, aiInputs, limiter, calls: () => calls, post };
   }
   const plan = (n: number, values = 5) => ({ plan: Array.from({ length: n }, () => ({ schemaId: 'packcheck.grant.v1', bodyBytes: bytes, values })) });
 
@@ -314,6 +316,18 @@ describe('handler: POST /run and runs of extract requests', () => {
     // take everything the day has left with single reservations
     for (let i = 0; i < 100; i++) if (!t.s.tx(() => reserve(t.s, { ceiling: 40, budget: 1500, neurons: Math.max(0.001, Math.min(one, run.remaining)) }, DAY)).ok) break;
     for (let c = 0; c < 3; c++) expect((await t.post('/extract', { schemaId: 'packcheck.grant.v1', blocks, run: { id: run.runId, token: run.token, chunk: c } })).status).toBe(200);
+    expect(t.calls()).toBe(3);
+  });
+
+  it('the per-client limit guards opening a run and single requests, but never a part of a run already admitted', async () => {
+    const t = setup('2000', Array.from({ length: 3 }, () => async () => ({ response: GOOD, usage: { prompt_tokens: 300, completion_tokens: 50 } })));
+    const run = (await (await t.post('/run', plan(3))).json()) as { runId: number; token: string };
+    t.limiter.allow = false; // the client is now over its limit
+    for (let c = 0; c < 3; c++) expect((await t.post('/extract', { schemaId: 'packcheck.grant.v1', blocks, run: { id: run.runId, token: run.token, chunk: c } })).status).toBe(200);
+    const again = await t.post('/run', plan(1));
+    expect(again.status).toBe(429);
+    expect(((await again.json()) as { error: { code: string } }).error.code).toBe('rate_limited');
+    expect((await t.post('/extract', { schemaId: 'packcheck.grant.v1', blocks })).status).toBe(429); // a single request is limited as before
     expect(t.calls()).toBe(3);
   });
 

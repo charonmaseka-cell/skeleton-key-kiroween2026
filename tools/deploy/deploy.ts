@@ -6,8 +6,8 @@
 //   npx tsx tools/deploy/deploy.ts --verify-only  verify an existing deployment
 //
 // PUBLIC LIVE ANALYSIS (docs/live-opening.md). Never part of the commands above; needs an explicit confirmation value:
-//   WORKER_URL=... CONFIRM_OPEN_LIVE=4000 npx tsx tools/deploy/deploy.ts --open-live --dry-run   show exactly what would deploy
-//   WORKER_URL=... CONFIRM_OPEN_LIVE=4000 npx tsx tools/deploy/deploy.ts --open-live             open (after approval only)
+//   WORKER_URL=... CONFIRM_OPEN_LIVE=6000 npx tsx tools/deploy/deploy.ts --open-live --dry-run   show exactly what would deploy
+//   WORKER_URL=... CONFIRM_OPEN_LIVE=6000 npx tsx tools/deploy/deploy.ts --open-live             open (after approval only)
 //   WORKER_URL=... npx tsx tools/deploy/deploy.ts --verify-open                                  verify an open deployment
 //
 // Needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (never printed). The token needs, at account level: Workers Scripts: Edit,
@@ -22,7 +22,7 @@ export const pagesOrigin = (project: string) => `https://${project}.pages.dev`;
 export const ORIGINS = Object.values(PAGES).map(pagesOrigin);
 
 /** The approved opening values. Only `--open-live` passes them; wrangler.toml stays closed (0 and 0). */
-export const OPEN = { dailyAdmissionCeiling: 40, dailyNeuronBudget: 4000 } as const;
+export const OPEN = { dailyAdmissionCeiling: 80, dailyNeuronBudget: 6000 } as const;
 
 /** The `wrangler deploy` arguments for each mode. Closed is the default; open needs the confirmation value to equal the budget. */
 export function workerDeployArgs(mode: 'closed' | 'open', opts: { confirm?: string; dryRun?: boolean } = {}): string[] {
@@ -162,6 +162,12 @@ export async function verifyOpen(workerUrl: string, fetchImpl: typeof fetch = fe
   add('/extract from a Pages origin reaches the Worker and is refused before admission (invalid_input, no inference)', allowed.status === 400 && ab.error?.code === 'invalid_input', `HTTP ${allowed.status} ${ab.error?.code}`);
   const other = await fetch(`${workerUrl}/extract`, { method: 'POST', headers: { origin: 'https://elsewhere.example', 'content-type': 'application/json' }, body });
   add('/extract from another origin is refused (origin_denied)', other.status === 403, `HTTP ${other.status}`);
+  // Whole-run admission route: a wrong content type is refused before anything is read or held, so it proves the route and holds nothing.
+  const run = await fetch(`${workerUrl}/run`, { method: 'POST', headers: { origin: ORIGINS[0]!, 'content-type': 'text/plain' }, body: '{}' });
+  const rb = (await run.json().catch(() => ({}))) as { error?: { code?: string } };
+  add('/run from a Pages origin reaches the Worker and is refused before anything is held (invalid_input)', run.status === 400 && rb.error?.code === 'invalid_input', `HTTP ${run.status} ${rb.error?.code}`);
+  const runOther = await fetch(`${workerUrl}/run`, { method: 'POST', headers: { origin: 'https://elsewhere.example', 'content-type': 'application/json' }, body: '{}' });
+  add('/run from another origin is refused (origin_denied)', runOther.status === 403, `HTTP ${runOther.status}`);
   for (const [app, project] of Object.entries(PAGES)) {
     const page = await fetch(`${pagesOrigin(project)}/`);
     const html = await page.text();

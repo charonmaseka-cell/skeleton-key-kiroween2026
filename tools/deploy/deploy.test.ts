@@ -53,22 +53,22 @@ describe('opening public analysis is explicit and separate', () => {
     expect(a).not.toContain('--dry-run');
   });
   it('opening needs the confirmation value to equal the approved budget, and passes the approved values', () => {
-    expect(() => workerDeployArgs('open')).toThrow(/CONFIRM_OPEN_LIVE=4000/);
+    expect(() => workerDeployArgs('open')).toThrow(/CONFIRM_OPEN_LIVE=6000/);
     expect(() => workerDeployArgs('open', { confirm: '5000' })).toThrow(/refusing to open/);
-    const a = workerDeployArgs('open', { confirm: '4000', dryRun: true });
-    expect(OPEN).toEqual({ dailyAdmissionCeiling: 40, dailyNeuronBudget: 4000 });
-    expect(a).toEqual(['deploy', '--dry-run', '--var', `ALLOWED_ORIGINS:${ORIGINS.join(',')}`, '--var', 'DAILY_ADMISSION_CEILING:40', '--var', 'DAILY_NEURON_BUDGET:4000']);
+    const a = workerDeployArgs('open', { confirm: '6000', dryRun: true });
+    expect(OPEN).toEqual({ dailyAdmissionCeiling: 80, dailyNeuronBudget: 6000 });
+    expect(a).toEqual(['deploy', '--dry-run', '--var', `ALLOWED_ORIGINS:${ORIGINS.join(',')}`, '--var', 'DAILY_ADMISSION_CEILING:80', '--var', 'DAILY_NEURON_BUDGET:6000']);
   });
   it('the apps are only ever built with the production Worker URL', () => {
     expect(() => buildApps([], 'https://evil.example')).toThrow(/production Worker/);
     expect(() => buildApps([], 'https://skeleton-key-extraction-gate.x.workers.dev')).toThrow(/production Worker/);
   });
   it('verifyOpen passes an open deployment with the approved values and fails a closed or differently sized one, sending nothing that reaches the model', async () => {
-    const open = { ok: true, checks: { workersAiBinding: 'present (not called)', durableObject: { reachable: true, zeroCeilingRefused: true, unchangedAfterCheck: true }, admission: { open: true, dailyCeiling: 40, dailyNeuronBudget: 4000 }, accessGate: { mode: 'public' } } };
+    const open = { ok: true, checks: { workersAiBinding: 'present (not called)', durableObject: { reachable: true, zeroCeilingRefused: true, unchangedAfterCheck: true }, admission: { open: true, dailyCeiling: 80, dailyNeuronBudget: 6000 }, accessGate: { mode: 'public' } } };
     const mk = (health: unknown) => (async (url: string, init?: RequestInit) => {
       const j = (status: number, body: unknown) => new Response(JSON.stringify(body), { status });
       if (url.endsWith('/health')) return j(200, health);
-      if (url.endsWith('/extract')) {
+      if (url.endsWith('/extract') || url.endsWith('/run')) {
         const h = init?.headers as Record<string, string>;
         if (!ORIGINS.includes(h.origin ?? '')) return j(403, { error: { code: 'origin_denied' } });
         expect(h['content-type']).toBe('text/plain'); // never a well-formed request from an allowed origin

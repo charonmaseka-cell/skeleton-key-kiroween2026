@@ -59,6 +59,19 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
     return json(e.status, { error: { code, message: e.message, retryable: e.retryable } }, { ...cors, ...extra });
   };
 
+  // Per-client abuse control (optional; the strict global controls do not depend on it). It guards the OPENING of runs and single
+  // requests. A request inside an admitted run is not limited again: the run's hold already bounds it to its planned parts, and a
+  // limit of a few requests a minute would cut a fast run off partway.
+  const clientLimited = async (): Promise<boolean> => {
+    if (!deps.clientLimiter) return false;
+    const key = request.headers.get('cf-connecting-ip') ?? 'unknown';
+    try {
+      return !(await deps.clientLimiter.limit({ key })).success;
+    } catch {
+      return false; // optional control: its failure must not decide the strict global ceiling either way
+    }
+  };
+
   const runs = deps.counter as Partial<RunCounter>;
 
   // POST /run: the whole run's plan (schema, request size, expected values per chunk; no text) is priced at its worst case and held
@@ -66,6 +79,7 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
   const openRunRoute = async (text: string): Promise<Response> => {
     const cfg = parseConfig(env);
     if (!cfg || !runs.openRun) return fail('not_configured');
+    if (await clientLimited()) return fail('rate_limited', { 'retry-after': '60' });
     let raw: unknown;
     try { raw = JSON.parse(text); } catch { return fail('invalid_input'); }
     const p = RunBody.safeParse(raw);
@@ -156,16 +170,7 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
     const profile = getProfile(schemaId);
     if (!profile) return fail('invalid_input');
 
-    if (deps.clientLimiter) {
-      const key = request.headers.get('cf-connecting-ip') ?? 'unknown';
-      let ok = true;
-      try {
-        ok = (await deps.clientLimiter.limit({ key })).success;
-      } catch {
-        ok = true; // optional control: its failure must not decide the strict global ceiling either way
-      }
-      if (!ok) return fail('rate_limited', { 'retry-after': '60' });
-    }
+    if (!parsed.value.run && (await clientLimited())) return fail('rate_limited', { 'retry-after': '60' });
 
     // A request that belongs to a run admitted as a whole: ONE attempt, at the output cap that was planned and held. It is never
     // refused for budget (the hold already covers it); it is refused only if the run is gone or the request is larger than planned.

@@ -19,24 +19,26 @@ ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174"
 # Required, explicit (src/gate.ts). The public Worker binds no TEST_GATE_TOKEN; binding one here closes the service.
 # The gated staging Worker uses wrangler.gate.toml (ACCESS_GATE = "token").
 ACCESS_GATE = "public"
-# Provisional input limits; tune from benchmark results.
-MAX_BODY_BYTES = "65536"
-MAX_CHARS = "24000"
-MAX_BLOCKS = "400"
-MAX_BLOCK_CHARS = "4000"
+# Input limits from task 5.5 (tested on the gated staging Worker). The largest request the browser client builds for any sample is
+# 4,753 bytes, 3,471 characters, 48 blocks; the client chunks under these limits (packages/ui/src/schema-fields.ts). They bound
+# the worst case of one attempt to about 651 estimated neurons (at 65,536 bytes it would be about 2,333).
+MAX_BODY_BYTES = "8192"
+MAX_CHARS = "6000"
+MAX_BLOCKS = "80"
+MAX_BLOCK_CHARS = "1000"
 MAX_REPAIR_ATTEMPTS = "1"
 INFERENCE_TIMEOUT_MS = "25000"
-# Fail closed: 0 admits no inference. Set from benchmark measurements, not a guess
-# (see docs/build-log.md). Use .dev.vars for local benchmark runs.
+# CLOSED in this file, always: a plain `wrangler deploy` can never open public analysis. Opening is only
+# `tools/deploy/deploy.ts --open-live` (docs/live-opening.md), which passes the approved values (80 attempts, 6,000 estimated
+# neurons per UTC day) on the command line.
 DAILY_ADMISSION_CEILING = "0"
-# Estimated neurons per UTC day, reserved (worst case) before every attempt and settled after it (src/cost.ts). Required.
-# Proposed public value 5000 (docs/task-5-5-plan.md); 0 until task 5.5 passes.
+# Estimated neurons per UTC day, reserved (worst case) before every attempt and settled after it (src/cost.ts); a recorded
+# overrun locks the day. Required.
 DAILY_NEURON_BUDGET = "0"
 
-# Optional per-client abuse control (per-location, eventually consistent). The strict
-# global ceiling does NOT depend on it. Uncomment only after confirming availability.
-# [[unsafe.bindings]]
-# name = "CLIENT_LIMITER"
-# type = "ratelimit"
-# namespace_id = "1001"
-# simple = { limit = 6, period = 60 }
+# Per-client abuse control: 6 requests per 60 s per client IP (per location, eventually consistent). The strict global ceiling and
+# budget do NOT depend on it; if the binding errors, the handler lets the request through to the global controls.
+[[ratelimits]]
+name = "CLIENT_LIMITER"
+namespace_id = "1001"
+simple = { limit = 6, period = 60 }

@@ -5,6 +5,11 @@
 //   npx tsx tools/deploy/deploy.ts                preflight, build, deploy, verify
 //   npx tsx tools/deploy/deploy.ts --verify-only  verify an existing deployment
 //
+// PUBLIC LIVE ANALYSIS (docs/live-opening.md). Never part of the commands above; needs an explicit confirmation value:
+//   WORKER_URL=... CONFIRM_OPEN_LIVE=6000 npx tsx tools/deploy/deploy.ts --open-live --dry-run   show exactly what would deploy
+//   WORKER_URL=... CONFIRM_OPEN_LIVE=6000 npx tsx tools/deploy/deploy.ts --open-live             open (after approval only)
+//   WORKER_URL=... npx tsx tools/deploy/deploy.ts --verify-open                                  verify an open deployment
+//
 // Needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (never printed). The token needs, at account level: Workers Scripts: Edit,
 // Account Settings: Read, Cloudflare Pages: Edit, and Workers AI: Read (the binding). No paid-plan feature is used.
 import { execFileSync } from 'node:child_process';
@@ -15,6 +20,16 @@ export const WORKER = 'skeleton-key-extraction';
 export const PAGES = { scopecheck: 'skeleton-key-scopecheck', packcheck: 'skeleton-key-packcheck' } as const;
 export const pagesOrigin = (project: string) => `https://${project}.pages.dev`;
 export const ORIGINS = Object.values(PAGES).map(pagesOrigin);
+
+/** The approved opening values. Only `--open-live` passes them; wrangler.toml stays closed (0 and 0). */
+export const OPEN = { dailyAdmissionCeiling: 80, dailyNeuronBudget: 6000 } as const;
+
+/** The `wrangler deploy` arguments for each mode. Closed is the default; open needs the confirmation value to equal the budget. */
+export function workerDeployArgs(mode: 'closed' | 'open', opts: { confirm?: string; dryRun?: boolean } = {}): string[] {
+  if (mode === 'open' && opts.confirm !== String(OPEN.dailyNeuronBudget)) throw new Error(`refusing to open: set CONFIRM_OPEN_LIVE=${OPEN.dailyNeuronBudget} to confirm the approved daily budget`);
+  const [ceiling, budget] = mode === 'open' ? [OPEN.dailyAdmissionCeiling, OPEN.dailyNeuronBudget] : [0, 0];
+  return ['deploy', ...(opts.dryRun ? ['--dry-run'] : []), '--var', `ALLOWED_ORIGINS:${ORIGINS.join(',')}`, '--var', `DAILY_ADMISSION_CEILING:${ceiling}`, '--var', `DAILY_NEURON_BUDGET:${budget}`];
+}
 
 const REPO = new URL('../../', import.meta.url).pathname;
 const API = 'https://api.cloudflare.com/client/v4';
@@ -66,8 +81,10 @@ export const APPS: App[] = ['scopecheck', 'packcheck'];
  * in the environment takes priority over them, so an explicit "" is what stops an env-file value from being built in. The apps read
  * "" as "no analysis service" (`|| undefined`).
  */
-export function buildApps(apps: App[] = APPS): void {
-  const env = { ...process.env, VITE_EXTRACTION_API_URL: '' };
+export function buildApps(apps: App[] = APPS, analysisUrl = ''): void {
+  // '' (the default) builds sample mode with analysis disabled; the live opening passes the Worker URL.
+  if (analysisUrl && !/^https:\/\/skeleton-key-extraction\.[a-z0-9-]+\.workers\.dev$/.test(analysisUrl)) throw new Error('the analysis URL must be the production Worker on workers.dev');
+  const env = { ...process.env, VITE_EXTRACTION_API_URL: analysisUrl };
   for (const app of apps) execFileSync('npm', ['run', 'build', '-w', `@skeleton-key/${app}`], { cwd: REPO, stdio: 'pipe', env });
 }
 
@@ -126,6 +143,39 @@ export async function verify(workerUrl: string, fetchImpl: typeof fetch = fetch)
   return out;
 }
 
+/** Verification of an OPEN deployment, without inference: a refused or invalid request never reaches the model. */
+export async function verifyOpen(workerUrl: string, fetchImpl: typeof fetch = fetch): Promise<Check[]> {
+  const fetch = fetchImpl;
+  const out: Check[] = [];
+  const add = (name: string, ok: boolean, detail: string) => out.push({ name, ok, detail, needs: '' });
+  const h = await fetch(`${workerUrl}/health`);
+  const hb = (await h.json().catch(() => ({}))) as { ok?: boolean; checks?: { workersAiBinding?: string; durableObject?: { reachable?: boolean; zeroCeilingRefused?: boolean; unchangedAfterCheck?: boolean; budgetToday?: { overruns?: number } }; admission?: { open?: boolean; dailyCeiling?: number; dailyNeuronBudget?: number }; accessGate?: { mode?: string } } };
+  add('Worker /health ok', h.status === 200 && hb.ok === true, `HTTP ${h.status}`);
+  add('Workers AI binding present (not called)', hb.checks?.workersAiBinding === 'present (not called)', String(hb.checks?.workersAiBinding));
+  add('Durable Object reachable; its zero probe refuses and writes nothing', hb.checks?.durableObject?.reachable === true && hb.checks.durableObject.zeroCeilingRefused === true && hb.checks.durableObject.unchangedAfterCheck === true, JSON.stringify(hb.checks?.durableObject));
+  add(`admission OPEN with the approved values (ceiling ${OPEN.dailyAdmissionCeiling}, budget ${OPEN.dailyNeuronBudget})`, hb.checks?.admission?.open === true && hb.checks.admission.dailyCeiling === OPEN.dailyAdmissionCeiling && hb.checks.admission.dailyNeuronBudget === OPEN.dailyNeuronBudget, JSON.stringify(hb.checks?.admission));
+  add('access gate public, no token', hb.checks?.accessGate?.mode === 'public', JSON.stringify(hb.checks?.accessGate));
+  const body = JSON.stringify({ schemaId: 'scopecheck.rfq.v1', blocks: [{ id: 'b1', text: 'x' }] });
+  // Wrong content type: refused as invalid_input before admission, so it proves the route without consuming anything.
+  const allowed = await fetch(`${workerUrl}/extract`, { method: 'POST', headers: { origin: ORIGINS[0]!, 'content-type': 'text/plain' }, body });
+  const ab = (await allowed.json().catch(() => ({}))) as { error?: { code?: string } };
+  add('/extract from a Pages origin reaches the Worker and is refused before admission (invalid_input, no inference)', allowed.status === 400 && ab.error?.code === 'invalid_input', `HTTP ${allowed.status} ${ab.error?.code}`);
+  const other = await fetch(`${workerUrl}/extract`, { method: 'POST', headers: { origin: 'https://elsewhere.example', 'content-type': 'application/json' }, body });
+  add('/extract from another origin is refused (origin_denied)', other.status === 403, `HTTP ${other.status}`);
+  // Whole-run admission route: a wrong content type is refused before anything is read or held, so it proves the route and holds nothing.
+  const run = await fetch(`${workerUrl}/run`, { method: 'POST', headers: { origin: ORIGINS[0]!, 'content-type': 'text/plain' }, body: '{}' });
+  const rb = (await run.json().catch(() => ({}))) as { error?: { code?: string } };
+  add('/run from a Pages origin reaches the Worker and is refused before anything is held (invalid_input)', run.status === 400 && rb.error?.code === 'invalid_input', `HTTP ${run.status} ${rb.error?.code}`);
+  const runOther = await fetch(`${workerUrl}/run`, { method: 'POST', headers: { origin: 'https://elsewhere.example', 'content-type': 'application/json' }, body: '{}' });
+  add('/run from another origin is refused (origin_denied)', runOther.status === 403, `HTTP ${runOther.status}`);
+  for (const [app, project] of Object.entries(PAGES)) {
+    const page = await fetch(`${pagesOrigin(project)}/`);
+    const html = await page.text();
+    add(`${app} Pages site serves the app`, page.status === 200 && /<div id="root">/.test(html), `HTTP ${page.status}`);
+  }
+  return out;
+}
+
 const print = (title: string, checks: Check[]) => {
   console.log(`\n${title}`);
   for (const c of checks) console.log(`  ${c.ok ? 'PASS' : 'FAIL'}  ${c.name}: ${redact(c.detail)}${!c.ok && c.needs ? `  (needs ${c.needs})` : ''}`);
@@ -137,6 +187,38 @@ if (process.argv[1]?.endsWith('deploy.ts')) {
     process.exit(1);
   }
   const workerUrl = process.env.WORKER_URL;
+  if (process.argv.includes('--verify-open')) {
+    if (!workerUrl) { console.error('set WORKER_URL to the deployed Worker URL'); process.exit(1); }
+    const v = await verifyOpen(workerUrl);
+    print('Open-deployment verification (no inference)', v);
+    process.exit(v.every((c) => c.ok) ? 0 : 3);
+  }
+  if (process.argv.includes('--open-live')) {
+    // Opening is its own path: it never runs as part of a normal deploy, and it refuses without the confirmation value.
+    if (!workerUrl) { console.error('set WORKER_URL to the production Worker URL (it is built into the apps)'); process.exit(1); }
+    const dryRun = process.argv.includes('--dry-run');
+    let args: string[];
+    try {
+      args = workerDeployArgs('open', { confirm: process.env.CONFIRM_OPEN_LIVE, dryRun });
+    } catch (e) {
+      console.error((e as Error).message);
+      process.exit(2);
+    }
+    if (dryRun) {
+      console.log(`wrangler ${args.join(' ')}`);
+      console.log(redact(wrangler(args, join(REPO, 'services', 'extraction-api'))));
+      console.log(`\nDRY RUN: nothing deployed. The Pages apps would be rebuilt with VITE_EXTRACTION_API_URL=${workerUrl} and deployed.`);
+      process.exit(0);
+    }
+    const p = await preflight();
+    print('Permission preflight (read-only; nothing is changed)', p);
+    if (!p.every((c) => c.ok)) process.exit(2);
+    console.log(redact(wrangler(args, join(REPO, 'services', 'extraction-api'))));
+    buildApps(APPS, workerUrl);
+    for (const [app, project] of Object.entries(PAGES)) console.log(redact(wrangler(['pages', 'deploy', join('apps', app, 'dist'), '--project-name', project, '--branch', 'main'])));
+    console.log('\nOpened. Verify with --verify-open. To close again: run this script without flags (deploys ceiling 0, budget 0, sample-mode apps).');
+    process.exit(0);
+  }
   if (process.argv.includes('--verify-only')) {
     if (!workerUrl) { console.error('set WORKER_URL to the deployed Worker URL'); process.exit(1); }
     const v = await verify(workerUrl);
@@ -153,7 +235,7 @@ if (process.argv[1]?.endsWith('deploy.ts')) {
   buildApps();
   for (const app of APPS) if (!(await bundleHasNoAnalysisUrl(app))) { console.error(`${app}: the bundle carries an analysis service address; refusing to deploy`); process.exit(1); }
   console.log('public builds: analysis disabled in both bundles (VITE_EXTRACTION_API_URL="")');
-  console.log(redact(wrangler(['deploy', '--var', `ALLOWED_ORIGINS:${ORIGINS.join(',')}`, '--var', 'DAILY_ADMISSION_CEILING:0', '--var', 'DAILY_NEURON_BUDGET:0'], join(REPO, 'services', 'extraction-api'))));
+  console.log(redact(wrangler(workerDeployArgs('closed'), join(REPO, 'services', 'extraction-api'))));
   for (const [app, project] of Object.entries(PAGES)) {
     try { wrangler(['pages', 'project', 'create', project, '--production-branch', 'main']); } catch { /* exists already */ }
     console.log(redact(wrangler(['pages', 'deploy', join('apps', app, 'dist'), '--project-name', project, '--branch', 'main'])));

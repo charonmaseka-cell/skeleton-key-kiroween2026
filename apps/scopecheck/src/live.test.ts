@@ -24,6 +24,7 @@ function fakeWorker(fail: (n: number, texts: string[]) => { status: number; code
   let n = 0;
   const bodies: { schemaId: string; blocks: { id: string; text: string }[] }[] = [];
   const fetchImpl = (async (_url: string, init: RequestInit) => {
+    if (/\/run(\/close)?$/.test(String(_url))) return new Response(JSON.stringify({ runId: 1, token: 't'.repeat(32), holdNeurons: 1, attempts: 1, budget: 4000, remaining: 3999, closed: true }), { status: 200 });
     const body = JSON.parse(String(init.body)) as (typeof bodies)[number];
     bodies.push(body);
     n++;
@@ -59,7 +60,8 @@ describe('uploaded PDFs, in chunks, through a fake Worker, to findings', () => {
     const { results } = await analyse(w);
     expect(w.requests).toBeGreaterThan(3);
     expect(Object.values(results).every((r) => r.chunks.length > 1 && r.chunks.every((c) => c.status === 'ok'))).toBe(true);
-    for (const b of w.bodies) expect(Object.keys(b).sort()).toEqual(['blocks', 'schemaId']);
+    for (const b of w.bodies) expect(Object.keys(b).sort()).toEqual(['blocks', 'run', 'schemaId']);
+    for (const b of w.bodies) expect(Object.keys((b as unknown as { run: object }).run).sort()).toEqual(['chunk', 'id', 'token']);
     expect(JSON.stringify(w.bodies)).not.toMatch(/\.pdf/); // no file names leave the device
   });
 

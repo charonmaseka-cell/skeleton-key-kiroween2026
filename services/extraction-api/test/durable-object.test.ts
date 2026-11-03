@@ -304,3 +304,50 @@ describe('neuron budget in the real Durable Object', () => {
     }
   }, 60_000);
 });
+
+describe('whole-run admission in the real Durable Object', () => {
+  const plan = (n: number, values = 5) => JSON.stringify({ plan: Array.from({ length: n }, () => ({ schemaId: 'packcheck.grant.v1', bodyBytes: 60, values })) });
+  const post = (mf: Mf, path: string, payload: string, headers: Record<string, string> = {}) =>
+    mf.dispatchFetch(`http://worker.test${path}`, { method: 'POST', headers: { origin: ORIGIN, 'content-type': 'application/json', 'x-test-now': String(DAY1), ...headers }, body: payload });
+
+  it('concurrent runs cannot hold more than the budget; a held run is served in full while single requests are refused', async () => {
+    const mf = start(freshPersist(), 100, { DAILY_NEURON_BUDGET: '1000', MAX_BODY_BYTES: '8192' });
+    try {
+      const results = await Promise.all(Array.from({ length: 12 }, () => post(mf, '/run', plan(1))));
+      const held = [];
+      let refused = 0;
+      for (const r of results) {
+        if (r.status === 200) held.push((await r.json()) as { runId: number; token: string; holdNeurons: number });
+        else refused++;
+      }
+      expect(held.length).toBeGreaterThan(0);
+      expect(refused).toBeGreaterThan(0); // 3 may be open at once, and the budget is finite
+      expect(held.reduce((n, h) => n + h.holdNeurons, 0)).toBeLessThanOrEqual(1000);
+      for (const h of held) {
+        const res = await post(mf, '/extract', JSON.stringify({ schemaId: 'packcheck.grant.v1', blocks: [{ id: 'b1', text: 'Organisation: Acme Trust' }], run: { id: h.runId, token: h.token, chunk: 0 } }));
+        expect(res.status).toBe(200);
+      }
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+
+  it('an admitted run survives a restart and a run that does not fit is refused with the numbers', async () => {
+    const persist = freshPersist();
+    let mf = start(persist, 100, { DAILY_NEURON_BUDGET: '700' });
+    const r = await post(mf, '/run', plan(2));
+    expect(r.status).toBe(200);
+    const h = (await r.json()) as { runId: number; token: string };
+    await mf.dispose();
+    mf = start(persist, 100, { DAILY_NEURON_BUDGET: '700' });
+    try {
+      const again = await post(mf, '/run', plan(2));
+      expect(again.status).toBe(429);
+      expect(((await again.json()) as { error: { code: string; need: number; remaining: number } }).error).toMatchObject({ code: 'run_exceeds_allowance' });
+      const ok = await post(mf, '/extract', JSON.stringify({ schemaId: 'packcheck.grant.v1', blocks: [{ id: 'b1', text: 'Organisation: Acme Trust' }], run: { id: h.runId, token: h.token, chunk: 1 } }));
+      expect(ok.status).toBe(200);
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+});

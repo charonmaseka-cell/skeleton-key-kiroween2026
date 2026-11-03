@@ -147,12 +147,15 @@ describe('Worker configuration files', () => {
     return { text, v };
   };
 
-  it('production: explicit public mode, admission closed, no gate token', () => {
+  it('production file: public mode, no gate token, CLOSED (0 and 0: only deploy.ts --open-live opens it), task 5.5 limits, per-client limiter bound', () => {
     const { text, v } = vars('wrangler.toml');
     expect(text).toMatch(/^name = "skeleton-key-extraction"$/m);
     expect(v.ACCESS_GATE).toBe('public');
-    expect(v.DAILY_ADMISSION_CEILING).toBe('0');
     expect(v.TEST_GATE_TOKEN).toBeUndefined();
+    expect(v.DAILY_NEURON_BUDGET).toBe('0');
+    expect(v.DAILY_ADMISSION_CEILING).toBe('0');
+    expect([v.MAX_BODY_BYTES, v.MAX_CHARS, v.MAX_BLOCKS, v.MAX_BLOCK_CHARS, v.MAX_REPAIR_ATTEMPTS]).toEqual(['8192', '6000', '80', '1000', '1']);
+    expect(text).toMatch(/\[\[ratelimits\]\]\nname = "CLIENT_LIMITER"\nnamespace_id = "1001"\nsimple = \{ limit = 6, period = 60 \}/);
   });
 
   it('staging gate: separate Worker, token mode, dummy .invalid origin only, ceiling 4, limits fit the largest test payload', () => {

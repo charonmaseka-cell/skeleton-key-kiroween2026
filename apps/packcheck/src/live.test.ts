@@ -16,6 +16,7 @@ function fakeWorker(fail: (n: number) => { status: number; code: string } | null
   let n = 0;
   const bodies: { schemaId: string; blocks: { id: string; text: string }[] }[] = [];
   const fetchImpl = (async (_u: string, init: RequestInit) => {
+    if (/\/run(\/close)?$/.test(String(_u))) return new Response(JSON.stringify({ runId: 1, token: 't'.repeat(32), holdNeurons: 1, attempts: 1, budget: 4000, remaining: 3999, closed: true }), { status: 200 });
     const body = JSON.parse(String(init.body)) as (typeof bodies)[number];
     bodies.push(body);
     n++;
@@ -48,7 +49,8 @@ describe('PackCheck live path with a fake Worker', () => {
     expect(fixture.sample).toBe(false);
     expect(live.exportModel.sample).toBe(false);
     for (const d of live.documents.values()) expect(d.coverage.state).toBe('unverified');
-    for (const b of w.bodies) expect(Object.keys(b).sort()).toEqual(['blocks', 'schemaId']);
+    for (const b of w.bodies) expect(Object.keys(b).sort()).toEqual(['blocks', 'run', 'schemaId']);
+    for (const b of w.bodies) expect(Object.keys((b as unknown as { run: object }).run).sort()).toEqual(['chunk', 'id', 'token']);
   });
 
   it('a failed chunk in the application form leaves it incomplete, and even with coverage asserted nothing is confirmed missing from it', async () => {

@@ -57,6 +57,8 @@ const BodySchema = z
     // `cells` (optional): the text of each table column of the line, in order, each an exact substring of `text`. The parser sets it
     // only for lines it found genuinely positioned in columns; it is checked here, and `text` stays the evidence source.
     blocks: z.array(z.object({ id: z.string().min(1).max(64), text: z.string(), cells: z.array(z.string().min(1).max(2000)).min(2).max(16).optional() }).strict()).min(1),
+    // Present when the request belongs to a run that was admitted as a whole (POST /run): which run, and which planned chunk.
+    run: z.object({ id: z.number().int().min(1), token: z.string().min(16).max(64), chunk: z.number().int().min(0).max(47) }).strict().optional(),
   })
   .strict();
 

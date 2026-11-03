@@ -1,3 +1,4 @@
+import { ClarificationPanel } from './Clarification';
 import { useState } from 'react';
 import { AppShell, LiveBanner, ReviewWorkspace, SampleBanner, UploadPanel, useSession, type Fixture, type UploadDeps, type UploadSlot } from '@skeleton-key/ui';
 import { ComparisonMatrix } from './ComparisonMatrix';
@@ -65,6 +66,7 @@ export function App({ deps, baseUrl = API_URL, fixtures = FIXTURES }: { deps?: U
       <ReviewWorkspace key={fixture.id} session={session} baseName={fixture.id}>
         <ComparisonMatrix view={view} />
       </ReviewWorkspace>
+      <ClarificationPanel view={view} baseName={fixture.id} />
       <UploadPanel
         idPrefix="scopecheck-upload"
         slots={SCOPECHECK_SLOTS}

@@ -10,6 +10,11 @@
   outline: 2px dashed var(--sk-danger);
   outline-offset: -3px;
 }
+/* Links inside a ghost keep the text colour (the link colour is not measured on the ghost fill); they stay underlined. */
+[data-ghost] a {
+  color: var(--sk-text);
+  text-decoration: underline;
+}
 tr[data-ghost] {
   background: none;
   outline: none;
@@ -47,11 +52,11 @@ tr[data-ghost] {
   outline-offset: -4px;
 }
 
-/* HU-9 fog: one drift when the page opens (4 s), then still. Lights off only (the element does not exist in Lights on); static under
+/* HU-9 fog: one fade-in when the page opens (4 s), then still; opacity only, so its box never moves. Lights off only (the element does not exist in Lights on); static under
    reduced motion by the global rule in each app's stylesheet. */
 @keyframes fog-drift {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 [data-motif='fog'] {
   animation: fog-drift 4s ease-out 1 both;

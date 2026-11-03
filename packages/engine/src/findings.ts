@@ -3,7 +3,7 @@ import { hashOf } from './hash';
 import type { MatchResolution, MatchStatus } from './matcher';
 import type { EffectiveFact, Evidence, FactStatus } from './types';
 
-export type Severity = 'critical' | 'warning' | 'info';
+export type Severity = 'critical' | 'high' | 'warning' | 'info';
 export type FindingState = 'confirmed' | 'needs_review';
 
 export type FindingInput = {

@@ -81,3 +81,16 @@ describe('fictional supplier names (full-length sample)', () => {
   });
 });
 
+
+describe('evidence pair for a difference (HU-2)', () => {
+  it('shows the tender line and the quotation line side by side, each with the cited words marked', () => {
+    const { container } = render(<App />);
+    const pair = container.querySelector('[data-evidence-pair]');
+    expect(pair).toBeTruthy();
+    const figures = pair!.querySelectorAll('figure');
+    expect(figures.length).toBeGreaterThanOrEqual(2);
+    const docs = new Set([...figures].map((f) => f.querySelector('figcaption')!.textContent!.split(',')[0]));
+    expect(docs.size).toBeGreaterThanOrEqual(2);
+    for (const f of figures) expect(f.querySelector('mark')!.textContent!.length).toBeGreaterThan(0);
+  });
+});

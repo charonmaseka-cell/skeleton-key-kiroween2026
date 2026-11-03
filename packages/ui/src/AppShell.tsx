@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { LightsToggle, ThemeProvider, useLights } from './ThemeProvider';
 
 type AppShellProps = {
   title: string;
@@ -14,7 +15,23 @@ type AppShellProps = {
 
 // Shared page frame used by both apps: skip link, landmarks, in-page navigation and a polite live
 // region, so keyboard and screen-reader access exists from the first interface work (R13.1).
-export function AppShell({ title, tagline, banner, nav, announcement, children }: AppShellProps) {
+export function AppShell(props: AppShellProps) {
+  return (
+    <ThemeProvider>
+      <Frame {...props} />
+    </ThemeProvider>
+  );
+}
+
+function Frame({ title, tagline, banner, nav, announcement, children }: AppShellProps) {
+  const lights = useLights();
+  // The toggle's message shares the polite live region; a later announcement from the page replaces it.
+  const [fromToggle, setFromToggle] = useState(true);
+  useEffect(() => setFromToggle(false), [announcement]);
+  useEffect(() => {
+    if (lights.announcement) setFromToggle(true);
+  }, [lights.announcement]);
+  const live = fromToggle && lights.announcement ? lights.announcement : announcement;
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <a
@@ -25,6 +42,7 @@ export function AppShell({ title, tagline, banner, nav, announcement, children }
       </a>
       {banner}
       <header className="border-b border-slate-300 px-4 py-4 sm:px-6">
+        <LightsToggle />
         <h1 className="text-2xl font-semibold">{title}</h1>
         <p className="text-slate-800">{tagline}</p>
         {nav && (
@@ -45,7 +63,7 @@ export function AppShell({ title, tagline, banner, nav, announcement, children }
         {children}
       </main>
       <div role="status" aria-live="polite" className="sr-only">
-        {announcement}
+        {live}
       </div>
     </div>
   );

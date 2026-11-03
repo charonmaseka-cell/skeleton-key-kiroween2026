@@ -35,6 +35,8 @@ export type FixtureDoc = {
   id: string;
   role: string;
   title: string;
+  /** optional secondary note under the title (for example the layout of a sample document); never part of the name */
+  note?: string;
   profile: string;
   recordedIn: string;
   blocks: Block[];

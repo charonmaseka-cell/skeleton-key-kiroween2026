@@ -860,7 +860,8 @@
     {
       "id": "quote-a",
       "role": "quote",
-      "title": "Quotation A (positioned table)",
+      "title": "Quotation 2207-HL, Hydro-Lab Supplies",
+      "note": "Layout: positioned table",
       "profile": "scopecheck.quote.v1",
       "recordedIn": "samples/benchmark-results/live-sc-t12-fresh-resume2-2026-11-01T23-11-42-955Z.json",
       "blocks": [
@@ -1534,7 +1535,8 @@
     {
       "id": "quote-b",
       "role": "quote",
-      "title": "Quotation B (prose)",
+      "title": "Offer DF/0098, Delta Field Instruments",
+      "note": "Layout: prose",
       "profile": "scopecheck.quote.v1",
       "recordedIn": "samples/benchmark-results/live-sc-t12-fresh-resume2-2026-11-01T23-11-42-955Z.json",
       "blocks": [

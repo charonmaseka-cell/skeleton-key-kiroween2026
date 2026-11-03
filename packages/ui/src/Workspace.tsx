@@ -316,6 +316,11 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
           <details key={d.id} className="rounded border border-slate-400 p-3">
             <summary id={`doc-sum-${d.id}`} className="cursor-pointer text-lg font-medium">
               {d.title} <StatusBadge kind={confirmed ? 'verified' : 'unverified'} label={!complete ? 'Part of the document was not processed' : undefined} />
+              {d.note && (
+                <span data-doc-note="" className="mt-1 block text-sm font-normal">
+                  {d.note}
+                </span>
+              )}
               {/* Shown only where confirming is possible: a document with a part that was not processed cannot be confirmed (its own note below says so). */}
               {complete && !confirmed && (
                 <span data-coverage-hint="" className="mt-1 block text-sm font-normal">

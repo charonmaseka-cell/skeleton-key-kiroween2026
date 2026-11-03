@@ -23,9 +23,10 @@ export const SCOPECHECK_SLOTS: UploadSlot[] = [
 /** Base URL of the extraction Worker, set at build time. Unset means: no analysis service is connected. */
 const API_URL = (import.meta.env.VITE_EXTRACTION_API_URL as string | undefined) || undefined;
 
-export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: string } = {}) {
+/** `initialFixtureId` chooses the sample set shown first (the full-length set by default). */
+export function App({ deps, baseUrl = API_URL, initialFixtureId }: { deps?: UploadDeps; baseUrl?: string; initialFixtureId?: string } = {}) {
   const [live, setLive] = useState<Fixture | null>(null);
-  const session = useSession(scopeCheckAdapter, live ? [...FIXTURES, live] : FIXTURES);
+  const session = useSession(scopeCheckAdapter, live ? [...FIXTURES, live] : FIXTURES, initialFixtureId);
   const { fixture, view } = session;
   return (
     <AppShell

@@ -38,7 +38,7 @@ function setup(opts: { fail?: (n: number) => { status: number; code: string } | 
 async function choose(user: ReturnType<typeof userEvent.setup>, rfq = 'rfq.pdf', q1 = 'quote-a.pdf', q2?: string) {
   await user.upload(screen.getByLabelText('RFQ'), file(rfq));
   await user.upload(screen.getByLabelText('Quotation 1'), file(q1));
-  if (q2) await user.upload(screen.getByLabelText(/Quotation 2/), file(q2));
+  if (q2) await user.upload(screen.getByLabelText(/^Quotation 2( \(optional\))?$/), file(q2));
 }
 const analyseBtn = () => screen.getByRole('button', { name: /^Analyse \(sends extracted text\)/ }) as HTMLButtonElement;
 
@@ -167,7 +167,7 @@ describe('Analyse', () => {
       expect(alert).toMatch(/The sample sets on this page still work\./);
       expect(alert).not.toMatch(/_|\b(?:429|503)\b/);
       expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
-      expect((screen.getByLabelText('Choose a sample set') as HTMLSelectElement).value).toBe('scopecheck-standard');
+      expect((screen.getByLabelText('Choose a sample set') as HTMLSelectElement).value).toBe('scopecheck-full'); // the default set, unchanged
       expect(screen.getByRole('heading', { name: /Confirmed findings/ }).textContent).toBe(before);
       // the other sample set is still one choice away
       await user.selectOptions(screen.getByLabelText('Choose a sample set'), 'scopecheck-layout');

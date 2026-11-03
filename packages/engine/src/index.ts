@@ -13,6 +13,7 @@ export * from './facts';
 export * from './coverage';
 export * from './matcher';
 export * from './compare';
+export * from './totals';
 export * from './hash';
 export * from './findings';
 export * from './review';

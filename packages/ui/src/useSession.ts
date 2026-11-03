@@ -15,8 +15,9 @@ import {
 } from './session-core';
 
 /** In-memory session for one fixture at a time. State per fixture is kept until reset; nothing is stored or sent anywhere. */
-export function useSession(adapter: DomainAdapter, fixtures: Fixture[]) {
-  const [fixtureId, setFixtureId] = useState(fixtures[0]!.id);
+/** `initialId` selects the set shown first (default: the first fixture). */
+export function useSession(adapter: DomainAdapter, fixtures: Fixture[], initialId?: string) {
+  const [fixtureId, setFixtureId] = useState(initialId && fixtures.some((f) => f.id === initialId) ? initialId : fixtures[0]!.id);
   const [states, setStates] = useState<Record<string, SessionState>>({});
   const [stamp, setStamp] = useState(0);
   const [announcement, setAnnouncement] = useState('');

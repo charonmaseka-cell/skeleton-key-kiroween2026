@@ -25,7 +25,7 @@ describe('ScopeCheck shows plain labels only', () => {
 
   it('with a correction editor open and after a correction', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<App initialFixtureId="scopecheck-standard" />);
     const card = screen.getByRole('heading', { name: /Quantity differs for CP-100/ }).closest('article')! as HTMLElement;
     await user.click(within(card).getAllByRole('button', { name: /^Correct this value: Quantity/ })[0]!);
     expect(findLeaks(document.body, names, blockIds)).toEqual([]);

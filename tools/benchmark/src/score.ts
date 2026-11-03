@@ -131,7 +131,10 @@ export type FindingsScore = {
   conservative: string[];
   /** expected but not produced at all */
   missed: string[];
-  /** confirmed critical findings the labels do not expect: the number that must be zero */
+  /**
+   * confirmed findings at Critical OR High severity that the labels do not expect: the number that must be zero. High was split
+   * from Critical on 2026-11-03 (quantity differences); counting both keeps the gate exactly as strict as before.
+   */
   falseCritical: string[];
   /** produced as confirmed although the label says Needs review */
   overConfident: string[];
@@ -165,7 +168,7 @@ export function scoreFindings(produced: Finding[], expected: ExpectedFinding[], 
   }
   for (const [k, f] of got) {
     if (want.has(k)) continue;
-    if (f.state === 'confirmed' && f.severity === 'critical') score.falseCritical.push(k);
+    if (f.state === 'confirmed' && (f.severity === 'critical' || f.severity === 'high')) score.falseCritical.push(k);
     else score.unexpectedOther.push(`${k}(${f.state})`);
   }
   for (const f of produced) if (opts.mustNotFlag?.includes(f.code)) score.mustNotFlagViolations.push(key(f.code, f.subjectId, f.responseDocId));

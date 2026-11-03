@@ -85,6 +85,7 @@ const aspectBadge = (a: Aspect): { kind: BadgeKind; text: string } => {
 
 export function ComparisonMatrix({ view }: { view: SessionView }) {
   const { rows, uncertainQuoteLines, exclusions, quotes } = buildMatrix(view);
+  const totals = (view.evaluation.context as ScopeContext | undefined)?.totals;
   return (
     <section aria-labelledby="matrix-h" className="space-y-3">
       <h3 id="matrix-h" className="text-xl font-semibold">
@@ -189,6 +190,50 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
               </tr>
             ))}
           </tbody>
+          {totals && (
+            <tfoot>
+              <tr className="align-top bg-slate-50" data-total-row="">
+                <th scope="row" className="border border-slate-400 p-2 font-normal">
+                  <strong>Total as quoted</strong>
+                  <br />
+                  <span className="text-sm">Quantity × unit price for each line, added up from validated values. Not a ranking or a recommendation.</span>
+                </th>
+                {quotes.map((q) => {
+                  const t = totals[q];
+                  if (!t) return <td key={q} className="border border-slate-400 p-2" />;
+                  const excluded = t.excluded;
+                  return (
+                    <td key={q} className="border border-slate-400 p-2" data-total-for={q}>
+                      {t.complete && t.total ? (
+                        <>
+                          <span className="font-semibold">{showValue(t.total)}</span>
+                          <span className="block text-sm">All {t.lines} line{t.lines === 1 ? '' : 's'} included.</span>
+                        </>
+                      ) : (
+                        <>
+                          <StatusBadge kind="needs_review" label="Incomplete" />
+                          {t.total && (
+                            <span className="block">
+                              <span className="font-semibold">{showValue(t.total)}</span> <span className="text-sm">from {t.included} of {t.lines} lines</span>
+                            </span>
+                          )}
+                          <span className="block text-sm">
+                            {t.reason === 'currency_differs'
+                              ? 'The lines are in different currencies, so they are not added up.'
+                              : t.reason === 'unknown_currency'
+                                ? 'A line has no known currency, so the lines are not added up.'
+                                : t.reason === 'no_lines'
+                                  ? 'No priced lines were extracted.'
+                                  : `${excluded} line${excluded === 1 ? '' : 's'} excluded: a price or quantity is held or missing${t.excludedLines.some((x) => x.why === 'several_items') ? ', or one line carries several items' : ''}. The total covers only the lines included.`}
+                          </span>
+                        </>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            </tfoot>
+          )}
         </table>
       </ScrollTable>
       {uncertainQuoteLines.length > 0 && (

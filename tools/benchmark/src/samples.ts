@@ -19,7 +19,8 @@ export type ExpectedFinding = {
   code: string;
   subject: string;
   response: string;
-  severity: 'critical' | 'warning' | 'info';
+  /** pre-registered severity; scoring matches on code, subject and response, not on this field */
+  severity: 'critical' | 'high' | 'warning' | 'info';
   state: 'confirmed' | 'needs_review';
   stateIfCoverageConfirmed?: 'confirmed';
 };

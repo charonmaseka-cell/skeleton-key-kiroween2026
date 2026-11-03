@@ -8,9 +8,12 @@ import {
   makeDraft,
   nameTokens,
   resolveMatches,
+  totalAsQuoted,
   type DocumentExtraction,
   type EffectiveFact,
   type FindingDraft,
+  type PricedLine,
+  type TotalAsQuoted,
   type MatchCandidate,
   type PlannedComparison,
   type Rule,
@@ -289,7 +292,8 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         continue;
       }
       const offer = qLines.find((l) => l.blockId === m.verifiedTargetId)!;
-      const aspect = (field: string, code: string, equal: (a: EffectiveFact, b: EffectiveFact) => 'equal' | 'different' | 'incomparable', why?: string, note?: (a: EffectiveFact, b: EffectiveFact) => string) => {
+      // Severity (2026-11-03): a quantity difference is High; a confirmed missing item and a specification mismatch stay Critical.
+      const aspect = (field: string, code: string, severity: 'critical' | 'high', equal: (a: EffectiveFact, b: EffectiveFact) => 'equal' | 'different' | 'incomparable', why?: string, note?: (a: EffectiveFact, b: EffectiveFact) => string) => {
         const a = r.line.f[field];
         const b = offer.f[field];
         const cmp = { id: `${field}:${r.reqId}~${q}`, check: 'quote_aspect' as const, field, docs: [data.rfqDocId, q] };
@@ -326,10 +330,10 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} <-> ${showValue(b.value)}${note?.(a, b) ?? ''}` });
         if (verdict2 === 'equal') return;
         const d = describeInputs([a, b]);
-        out.push(makeDraft({ ...base, matchStatus: m.status, code, severity: 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${r.reqId}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${r.key} in ${docName(q)}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
+        out.push(makeDraft({ ...base, matchStatus: m.status, code, severity, state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${r.reqId}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${r.key} in ${docName(q)}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
       };
-      aspect('quantity', 'quantity.differs', (a, b) => compareQuantities(a.value as never, b.value as never).result);
-      aspect('specification', 'spec.differs', (a, b) => (sameSpec(a.value, b.value).same ? 'equal' : 'different'), undefined, (a, b) => {
+      aspect('quantity', 'quantity.differs', 'high', (a, b) => compareQuantities(a.value as never, b.value as never).result);
+      aspect('specification', 'spec.differs', 'critical', (a, b) => (sameSpec(a.value, b.value).same ? 'equal' : 'different'), undefined, (a, b) => {
         const r = sameSpec(a.value, b.value);
         return r.removed.length ? ` (leading ${r.removed.map((x) => `"${x}"`).join(', ')} not counted as a difference)` : '';
       });
@@ -367,12 +371,38 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
   return { drafts: dedupeDrafts(out), comparisons };
 }
 
+/**
+ * "Total as quoted" for one quotation: quantity x unit price over each of its item lines, added up exactly (engine
+ * totalAsQuoted). Only validated or user-supplied values are used. A line whose quantity or unit price is missing or held, or
+ * whose item cannot be tied to one price (several items in one line), is excluded and counted, and the total is then
+ * incomplete. Lines without an item and without a price (an exclusion, a note) are not item lines. No ranking, no comparison
+ * between quotations: each total stands alone.
+ */
+export function quoteTotal(facts: Map<string, EffectiveFact>, q: string): TotalAsQuoted & { excludedLines: { blockId: string; why: 'price' | 'quantity' | 'several_items' }[] } {
+  const lines = linesOf(facts, q).filter((l) => !l.unplaced && (l.f.item || l.f.unit_price));
+  const priced: PricedLine[] = [];
+  const excludedLines: { blockId: string; why: 'price' | 'quantity' | 'several_items' }[] = [];
+  for (const l of lines) {
+    const many = isMulti(l) || (l.all.unit_price?.length ?? 0) > 1 || (l.all.quantity?.length ?? 0) > 1;
+    const p = l.f.unit_price;
+    const qty = l.f.quantity;
+    const price = !many && usable(p) ? (p.value as { amount: string; currency: string | null }) : null;
+    const quantity = !many && usable(qty) ? String((qty.value as { value: string }).value) : null;
+    if (many) excludedLines.push({ blockId: l.blockId, why: 'several_items' });
+    else if (!price) excludedLines.push({ blockId: l.blockId, why: 'price' });
+    else if (!quantity) excludedLines.push({ blockId: l.blockId, why: 'quantity' });
+    priced.push({ quantity, unitPrice: price });
+  }
+  return { ...totalAsQuoted(priced), excludedLines };
+}
+
 export const scopeRule: Rule<ScopeData> = {
   id: 'bench.scope',
+  // 5 (2026-11-03): quantity differences are High, not Critical (confirmed missing items and specification mismatches stay Critical).
   // 4 (2026-11-02): a specification that carries the row's own item code is contaminated: Needs review, comparison Not evaluated.
   // 3 (2026-11-02): leading connectors are not a specification difference; unresolved requirement lines list their
   // comparisons as Not evaluated; each stated exclusion is its own finding (identified by its source line).
-  version: '4',
+  version: '5',
   run(ctx: RuleContext<ScopeData>) {
     return evaluateScope(ctx).drafts;
   },

@@ -47,10 +47,10 @@ describe('sample banner', () => {
     expect(compact.className).toMatch(/sm:hidden/);
     // the fold holds the explanation, including "Not a real review" and the recorded-output note
     expect(compact.textContent).toMatch(/Not a real review/);
-    expect(compact.textContent).toMatch(/recorded model output/);
+    expect(compact.textContent).toMatch(/recorded (model )?output/);
     // wide: the complete text is shown without a toggle
     const wide = banner.querySelector('div.hidden.sm\\:block')!;
     expect(wide.textContent).toMatch(/SAMPLE MODE: fictional documents\. Not a real review\./);
-    expect(wide.textContent).toMatch(/recorded model output/);
+    expect(wide.textContent).toMatch(/recorded (model )?output/);
   });
 });

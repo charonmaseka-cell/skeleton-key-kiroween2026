@@ -1,5 +1,5 @@
 import type { PlannedComparison, ReviewItem } from '@skeleton-key/engine';
-import { GhostButton, ScrollTable, StatusBadge, useGhosts, type BadgeKind, type SessionView } from '@skeleton-key/ui';
+import { GhostButton, ScrollTable, StatusBadge, useGhosts, useHaunt, type BadgeKind, type SessionView } from '@skeleton-key/ui';
 
 // PackCheck check tables, built from the comparison ledger the rules produce on every run.
 // Attachment checks: what the call requires against what the application form lists.
@@ -23,6 +23,7 @@ function findingFor(view: SessionView, c: PlannedComparison): ReviewItem | undef
 
 function Table({ title, id, rows, view, cols }: { title: string; id: string; rows: PlannedComparison[]; view: SessionView; cols: [string, string] }) {
   const ghosts = useGhosts();
+  const haunt = useHaunt();
   return (
     <section aria-labelledby={id} className="space-y-2">
       <h3 id={id} className="text-xl font-semibold">
@@ -49,7 +50,7 @@ function Table({ title, id, rows, view, cols }: { title: string; id: string; row
               const f = findingFor(view, c);
               const b = badge(c, f);
               return (
-                <tr key={c.id} data-ghost={f?.finding.code === 'attachment.missing' && ghosts.isGhost(f) ? '' : undefined} data-possessed={f?.finding.state === 'confirmed' && f.finding.code.endsWith('differs') ? '' : undefined} className="align-top">
+                <tr key={c.id} data-ghost={f?.finding.code === 'attachment.missing' && ghosts.isGhost(f) ? '' : undefined} data-possessed={f?.finding.state === 'confirmed' && f.finding.code.endsWith('differs') ? 'spec' : undefined} {...(f?.finding.state === 'confirmed' && f.finding.code.endsWith('differs') ? haunt.cellProps(f.finding.id) : {})} className="align-top">
                   <th scope="row" className="border border-sk-border p-2 font-normal">
                     {view.fieldLabel(c.field)}
                     <br />

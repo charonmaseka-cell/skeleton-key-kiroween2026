@@ -61,3 +61,112 @@ tr[data-ghost] {
 [data-motif='fog'] {
   animation: fog-drift 4s ease-out 1 both;
 }
+
+/* =====================================================================================================================
+   The signature pass (haunted-ui HU-17 to HU-27). Everything below exists only when effects are on (Lights off AND no reduced-motion
+   request): either the element is not rendered at all, or the rule is under :root[data-effects='on']. Decoration is behind text, in
+   gaps, or on borders; colours come from the tokens; no red; ecto only in the margins, header and behind the page (never in a
+   finding card or a comparison cell: HU-16).
+   ===================================================================================================================== */
+
+@media print {
+  [data-motif] { display: none !important; }
+}
+
+/* HU-17 candles: still flames (one soft ignition when they appear), snuffed once with a wisp of smoke. */
+[data-candle] { position: relative; display: inline-block; width: 12px; height: 38px; }
+[data-candle] [data-wax] { position: absolute; bottom: 0; left: 0; width: 12px; height: 22px; border-radius: 2px 2px 3px 3px; background: linear-gradient(90deg, #b8ad92, #f1e8cf 45%, #b8ad92); }
+[data-candle] [data-wick] { position: absolute; bottom: 22px; left: 5.5px; width: 1px; height: 4px; background: #3a3a3a; }
+[data-candle] [data-flame] {
+  position: absolute; bottom: 26px; left: 3px; width: 6px; height: 10px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: radial-gradient(ellipse at 50% 72%, #fff3c4 0%, var(--sk-accent) 72%);
+  box-shadow: 0 0 9px 2px color-mix(in srgb, var(--sk-accent) 50%, transparent);
+  animation: flame-in 0.9s ease-out 1 both;
+}
+[data-candle][data-lit='false'] [data-flame] { animation: flame-out 0.35s ease-in 1 forwards; }
+[data-candle] [data-smoke] {
+  position: absolute; bottom: 30px; left: 2.5px; width: 7px; height: 7px; border-radius: 50%;
+  background: color-mix(in srgb, var(--sk-text) 60%, transparent); filter: blur(2px);
+  animation: smoke-rise 1.2s ease-out 0.15s 1 both;
+}
+@keyframes flame-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
+@keyframes flame-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.2); } }
+@keyframes smoke-rise { 0% { opacity: 0; transform: translate(0, 0) scale(0.6); } 25% { opacity: 0.85; } 100% { opacity: 0; transform: translate(8px, -34px) scale(3.2); } }
+
+/* HU-18 planchette: glides to the top border of the next item, then fades. */
+[data-planchette] { opacity: 0; transition: transform 700ms cubic-bezier(0.25, 0.8, 0.25, 1), opacity 500ms ease; }
+[data-planchette][data-show] { opacity: 1; }
+
+/* HU-20 possessed: the border of a spec-mismatch cell glitches once when hovered or focused (inset shadows only; the text does not
+   move, blur or change), and both evidence lines of its finding glow while it is hovered or focused. Blue and amber, never red or ecto. */
+:root[data-effects='on'] [data-possessed='spec']:is(:hover, :focus-within) { animation: glitch-border 0.6s steps(1, end) 1; }
+@keyframes glitch-border {
+  0% { box-shadow: inset 3px 0 0 var(--sk-info), inset -3px 0 0 var(--sk-accent); }
+  20% { box-shadow: inset -3px 0 0 var(--sk-info), inset 3px 0 0 var(--sk-accent); }
+  40% { box-shadow: inset 0 3px 0 var(--sk-accent), inset 0 -3px 0 var(--sk-info); }
+  60% { box-shadow: inset 4px 0 0 var(--sk-text), inset -4px 0 0 var(--sk-text); }
+  80% { box-shadow: inset 0 -3px 0 var(--sk-info); }
+  100% { box-shadow: none; }
+}
+:root[data-effects='on'] [data-evidence][data-glow] figure,
+:root[data-effects='on'] [data-evidence]:is(:hover, :focus-within) figure {
+  box-shadow: 0 0 0 2px var(--sk-accent), 0 0 14px 3px color-mix(in srgb, var(--sk-mark-bg) 50%, transparent);
+  transition: box-shadow 0.25s ease;
+}
+
+/* HU-21 ghost drift: a translucent figure drifts once through a confirmed-missing-item cell, behind its content. */
+:root[data-effects='on'] td[data-ghost],
+:root[data-effects='on'] tr[data-ghost] > td:last-child { position: relative; }
+:root[data-effects='on'] td[data-ghost] > *,
+:root[data-effects='on'] tr[data-ghost] > td:last-child > * { position: relative; z-index: 1; }
+:root[data-effects='on'] td[data-ghost]::before,
+:root[data-effects='on'] tr[data-ghost] > td:last-child::before {
+  content: ''; position: absolute; top: 50%; left: -60px; width: 44px; height: 44px; margin-top: -22px; z-index: 0; pointer-events: none; opacity: 0;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2C7.6 2 5 5.4 5 9.5V21l2.6-2 2.2 2 2.2-2 2.2 2 2.2-2L19 21V9.5C19 5.4 16.4 2 12 2z' fill='%23e8e6e3'/><circle cx='9.5' cy='9.5' r='1.3' fill='%23181b24'/><circle cx='14.5' cy='9.5' r='1.3' fill='%23181b24'/></svg>") center / contain no-repeat;
+}
+:root[data-effects='on'] td[data-ghost]:is(:hover, :focus-within)::before,
+:root[data-effects='on'] tr[data-ghost]:is(:hover, :focus-within) > td:last-child::before { animation: ghost-drift 2.4s ease-in-out 1; }
+@keyframes ghost-drift { 0% { left: -60px; opacity: 0; } 20% { opacity: 0.12; } 80% { opacity: 0.12; } 100% { left: 100%; opacity: 0; } }
+
+/* HU-22 wax seal (violet) stamped once on Accept; a ghost fades once out of a dismissed card, which stays and can be reopened. */
+[data-seal][data-stamp] { animation: seal-stamp 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) 1 both; }
+@keyframes seal-stamp { from { opacity: 0; transform: scale(1.9) rotate(-12deg); } to { opacity: 1; transform: none; } }
+[data-fade-ghost] { animation: ghost-fade 1.5s ease-out 1 forwards; }
+@keyframes ghost-fade { from { opacity: 0.85; transform: translateY(0); } to { opacity: 0; transform: translateY(-18px); } }
+article[data-dismissed] { border-style: dashed; }
+
+/* HU-23 ink drip: one drop of ectoplasm-dark ink down the right margin, once, then gone. */
+[data-ink-line], [data-ink-drop] { background: linear-gradient(180deg, color-mix(in srgb, var(--sk-ecto) 35%, var(--sk-bg)), color-mix(in srgb, var(--sk-ecto) 85%, var(--sk-bg))); }
+[data-ink-line] { position: absolute; top: 0; left: 3px; width: 4px; height: 0; border-radius: 0 0 3px 3px; animation: ink-run 2.6s cubic-bezier(0.5, 0, 0.8, 0.6) 1 forwards; }
+[data-ink-drop] { position: absolute; top: 0; left: 1px; width: 8px; height: 10px; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; animation: ink-drop 2.6s cubic-bezier(0.5, 0, 0.8, 0.6) 1 forwards; }
+@keyframes ink-run { 0% { height: 0; opacity: 1; } 85% { height: 118px; opacity: 1; } 100% { height: 118px; opacity: 0; } }
+@keyframes ink-drop { 0% { transform: translateY(0); opacity: 1; } 85% { transform: translateY(114px); opacity: 1; } 100% { transform: translateY(124px); opacity: 0; } }
+
+/* HU-24 fog behind the header text and a faint mist trail behind the page. Both are behind everything (negative z-index over <body>). */
+[data-fog] {
+  background:
+    radial-gradient(ellipse 60% 130% at 12% 0%, color-mix(in srgb, var(--sk-ecto) 13%, transparent), transparent 70%),
+    radial-gradient(ellipse 50% 110% at 90% 100%, color-mix(in srgb, var(--sk-ecto) 9%, transparent), transparent 70%);
+  animation: fog-fade 4s ease-out 1 both;
+}
+@keyframes fog-fade { from { opacity: 0; } to { opacity: 1; } }
+[data-motif='mist'] span {
+  position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--sk-ecto) 15%, transparent), transparent 70%);
+  animation: mist-fade 0.9s ease-out 1 forwards;
+}
+@keyframes mist-fade { from { opacity: 0.9; transform: scale(0.6); } to { opacity: 0; transform: scale(1.7); } }
+
+/* HU-25 Lights flicker: the page flickers twice (two soft dips of light over 0.8 s), then Lights on applies. */
+[data-lights-flicker] { background: #fff; opacity: 0; animation: lights-flicker 0.8s steps(1, end) 1 forwards; }
+@keyframes lights-flicker { 0% { opacity: 0; } 10% { opacity: 0.22; } 26% { opacity: 0; } 52% { opacity: 0.26; } 70% { opacity: 0; } 100% { opacity: 0; } }
+
+/* HU-26 "boo": ghosts drift up behind the page, in fixed places, for about two seconds. */
+[data-boo] svg { position: absolute; color: color-mix(in srgb, var(--sk-text) 15%, transparent); animation: boo-float 2.4s ease-in-out 1 both; }
+@keyframes boo-float { 0% { opacity: 0; transform: translateY(40px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-70px); } }
+
+/* The wax is violet. The colours live here, not in the component. */
+[data-seal] .wax-body { fill: #4b3278; stroke: #8a6cc4; }
+[data-seal] .wax-ring { stroke: #a58ce0; }
+[data-seal] .wax-mark { stroke: #d9ccff; }

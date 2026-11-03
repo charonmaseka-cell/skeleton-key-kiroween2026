@@ -11,6 +11,8 @@ Introduced 2026-11-01; **revised 2026-11-02** for requirements revision 2 (HU-1 
 - [x] HU-T5 (done 2026-11-03; hook enabling is in the hooks PR) Accessibility and visual checks in both modes for both apps (HU-4). `tools/a11y/check.ts` (Playwright + axe-core, 1280 px and 375 px, both modes, emulated reduced motion, focus-ring walk, no sideways scroll, motif overlap check), screenshots of both modes, a CI job; then enable the accessibility hook and record "actually run" only with evidence (`docs/hooks.md`). Depends on foundation task 11. Proposed 2026-11-27.
 - [x] HU-T6 (done 2026-11-03) Theme complete and reviewed; build-log entry; screenshots in the README. **Before 30 November.**
 
+- [x] HU-T7 The signature pass (HU-17 to HU-27, revision 3): candles, planchette, idle whisper, possessed glitch and evidence glow, ghost drift, wax seal and ghostly fade, ink drip, fog and mist, Lights flicker, "boo". Both apps; `labels.voice` for the wording. Tests: counts and snuffing, planchette focus, whisper timing and blocking, glow link, seal and fade, one ink drip per confirmed critical, flicker order, easter egg, effects off in Lights on and under reduced motion, composited contrast, and the browser checks in every triggered state. Done 2026-11-03.
+
 ## Dependencies and order
 
 HU-T1 before HU-T2 (the toggle and variables must exist before components use them). HU-T3 needs HU-T2 (the semantic utilities and state icons) and the existing adapters; its theme names use rules that exist today, and names for rules built later (foundation task 17) are added with those rules. HU-T4 is decorative and last of the features. HU-T5 needs HU-T1 to HU-T3 to be testable and runs after HU-T4 so it checks the motifs too.

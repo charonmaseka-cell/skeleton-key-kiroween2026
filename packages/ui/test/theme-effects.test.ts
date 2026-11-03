@@ -43,3 +43,32 @@ describe('effects are guarded (HU-5)', () => {
     expect(block).not.toMatch(/color:|font|text-/);
   });
 });
+
+// HU-24, HU-26, HU-21: decoration that sits BEHIND text. It is faint on purpose; what matters is the rendered colour the text then sits
+// on. Effects run only in Lights off, so that is the palette measured (and Lights on is checked too, for the figures that exist there).
+describe('decoration behind text keeps the text readable (HU-27)', () => {
+  const p = PALETTES.off;
+  const under = (name: string, tint: string, alpha: number, over: string) => {
+    it(`${name}: text, muted text and links stay at least 4.5:1`, () => {
+      const bg = mix(tint, alpha, over);
+      for (const fg of [p.text, p.muted, p.link, p.accent, p.danger, p.ok]) expect(contrastRatio(fg, bg), `${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
+    });
+  };
+  under('header fog (13 percent ecto on the page)', p.ecto, 0.13, p.surface);
+  under('header fog, second layer (9 percent)', p.ecto, 0.09, p.surface);
+  under('mist puff (15 percent ecto, at its strongest 90 percent of that)', p.ecto, 0.15 * 0.9, p.surface);
+  under('boo ghost (15 percent of the text colour)', p.text, 0.15, p.surface);
+  it('the ghost that drifts through a missing-item cell keeps the cell text readable at its strongest (read from the stylesheet)', () => {
+    const css = readFileSync(new URL('../src/effects.css', import.meta.url), 'utf8');
+    const peak = Math.max(...[...css.match(/@keyframes ghost-drift \{([^\n]*)\}/)![1]!.matchAll(/opacity: ([0-9.]+)/g)].map((m) => Number(m[1])));
+    expect(peak).toBeGreaterThan(0);
+    const ghostFill = mix(p.danger, 0.35, p.bg);
+    expect(contrastRatio(p.text, mix(p.text, peak, ghostFill))).toBeGreaterThanOrEqual(4.5);
+  });
+  it('the effects that run in Lights off are written against Lights off tokens only', () => {
+    const css = readFileSync(new URL('../src/effects.css', import.meta.url), 'utf8');
+    const sig = css.slice(css.indexOf('The signature pass'));
+    expect(sig).toMatch(/data-effects='on'/);
+    expect(sig).not.toMatch(/data-lights='on'/);
+  });
+});

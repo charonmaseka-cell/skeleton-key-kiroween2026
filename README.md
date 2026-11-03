@@ -19,6 +19,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - **Evidence side by side**: a difference between two documents shows both source lines with the exact cited words marked (background and outline, not colour alone).
 - **Ghost rows**: a missing item stays *Needs review* until you confirm the document's coverage; then it becomes a confirmed finding and its cell turns into a ghost with a one-time flicker (none in Lights on or under reduced motion). "Show the evidence" solidifies it and jumps to the finding.
 - **Theme names** are a second name next to the plain wording, in Lights off only and never in exports: ScopeCheck ghost, miscount, curse; PackCheck Lost page, Doppelgänger, Changeling, Bottomless purse.
+- **The signature pass** (Lights off only; off under Lights on and reduced motion, and the page then shows the same information): one candle per item that needs review (snuffed with a wisp of smoke when it is resolved), a **Next finding** button with a gliding planchette, an idle whisper after 45 s, glitching borders and glowing evidence on spec mismatches, a ghost that drifts through missing-item cells, a wax seal on Accept and a ghostly fade on Dismiss, one drop of ink when a critical finding is confirmed, fog behind the header and a faint mist trail, the lights flickering twice before Lights on, and a small easter egg. Each effect, caught at its most visible moment: `docs/screenshots/haunted/effects/` (and `haunted-pass.webm`).
 - Checked in a real browser in both modes at 1280 px and 375 px (`npm run a11y`: axe-core, focus rings, no sideways scroll, no decoration over text, reduced motion). No sound, no third-party code, no image over 20 kB.
 
 | Lights off | Lights on |
@@ -32,7 +33,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 <!-- features:start -->
 | Spec | Delivered | Open |
 |---|---|---|
-| `haunted-ui` | 8 | 0 |
+| `haunted-ui` | 9 | 0 |
 | `packcheck-real-documents` | 3 | 3 |
 | `scopecheck-real-documents` | 11 | 6 |
 | `skeleton-key-foundation` | 35 | 19 |
@@ -46,6 +47,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - HU-T4: Motifs and effects behind the reduced-motion guard
 - HU-T5: Accessibility and visual checks in both modes for both apps
 - HU-T6: Theme complete and reviewed; build-log entry; screenshots in the README. Before 30 November.
+- HU-T7: The signature pass
 
 **packcheck-real-documents** (delivered):
 - PC-T1: Pre-registered realistic pack, done 2026-11-01, offline

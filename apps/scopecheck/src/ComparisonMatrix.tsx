@@ -1,5 +1,5 @@
 import type { PlannedComparison, ReviewItem } from '@skeleton-key/engine';
-import { GhostButton, ScrollTable, StatusBadge, useGhosts, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
+import { GhostButton, ScrollTable, StatusBadge, useGhosts, useHaunt, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
 import { requirementsOf, type ScopeContext } from './adapter';
 import type { Line } from './adapter/rules';
 import { EXCLUDED_TEXT, formatAmount, totalsFor, type QuoteTotal } from './totals';
@@ -168,6 +168,7 @@ export function TotalsTable({ view }: { view: SessionView }) {
 
 export function ComparisonMatrix({ view }: { view: SessionView }) {
   const ghosts = useGhosts();
+  const haunt = useHaunt();
   const { rows, uncertainQuoteLines, exclusions, quotes } = buildMatrix(view);
   return (
     <section aria-labelledby="matrix-h" className="space-y-3">
@@ -224,7 +225,11 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                   <td
                     key={c.quote}
                     data-ghost={ghosts.isGhost(c.absent) ? '' : undefined}
-                    data-possessed={c.aspects.some((a) => a.finding?.finding.state === 'confirmed' && a.finding.finding.code.endsWith('.differs')) ? '' : undefined}
+                    data-possessed={(() => {
+                      const diffs = c.aspects.filter((a) => a.finding?.finding.state === 'confirmed' && a.finding.finding.code.endsWith('.differs'));
+                      return diffs.length ? (diffs.some((a) => a.finding!.finding.code === 'spec.differs') ? 'spec' : '') : undefined;
+                    })()}
+                    {...haunt.cellProps((c.aspects.find((a) => a.finding?.finding.state === 'confirmed' && a.finding.finding.code === 'spec.differs') ?? c.aspects.find((a) => a.finding?.finding.state === 'confirmed' && a.finding.finding.code.endsWith('.differs')))?.finding?.finding.id)}
                     className="border border-sk-border p-2"
                   >
                     {c.ambiguous && (

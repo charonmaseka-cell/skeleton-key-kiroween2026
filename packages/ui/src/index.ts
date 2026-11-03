@@ -14,3 +14,4 @@ export { Seance } from './Seance';
 export * from './Ghost';
 export * from './Motifs';
 export * from './ProgressView';
+export * from './Haunt';

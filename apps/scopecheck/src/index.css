@@ -11,7 +11,7 @@
 }
 /* Page colours come from the mode (theme.css); before the mode is known the Lights-on variables apply. */
 body {
-  background: var(--sk-bg);
+  background: var(--sk-surface);
   color: var(--sk-text);
 }
 a {

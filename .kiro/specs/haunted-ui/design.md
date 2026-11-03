@@ -1,6 +1,6 @@
 # Haunted interface: visual system and Lights-on behaviour
 
-Introduced 2026-11-01 (see `requirements.md`). The numbers below are enforced by `packages/ui/src/theme-tokens.test.ts`.
+Introduced 2026-11-01 (see `requirements.md`). **Pending revision** for requirements revision 2 (HU-10 to HU-15: theme names, ghost rows, possessed cells, séance summary, PackCheck vocabulary, `theme.md`); unchanged until those requirements are accepted. The numbers below are enforced by `packages/ui/src/theme-tokens.test.ts`.
 
 ## Palettes (contrast measured, WCAG 2.x)
 

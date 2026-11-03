@@ -232,7 +232,10 @@ describe('PackCheck comparisons: the checks actually run, or are marked Not eval
     expect(cmp(r, 'funding_within_budget:application-form~budget')).toMatchObject({ status: 'agree' });
     expect(cmp(r, 'organisation_name:application-form~budget')).toMatchObject({ status: 'flagged' });
     // the only comparison that cannot run is the one that depends on the ambiguous (01/03/2026) start date
-    expect(pack(r).comparisons!.filter((c) => c.status === 'not_evaluated').map((c) => [c.id, c.reason])).toEqual([['project_start_date:application-form~budget', 'project_start_date in budget not validated (date_format_ambiguous)']]);
+    // The reason is written for a person; the code is kept in blocked.reason.
+    const ne = pack(r).comparisons!.filter((c) => c.status === 'not_evaluated');
+    expect(ne.map((c) => [c.id, c.blocked?.reason])).toEqual([['project_start_date:application-form~budget', 'date_format_ambiguous']]);
+    expect(ne[0]!.reason).toMatch(/^Project start date in .+ was not validated\.$/);
     expect(findings(r, 'packcheck').some((f) => f.code.startsWith('funding.'))).toBe(false);
   });
 
@@ -243,7 +246,7 @@ describe('PackCheck comparisons: the checks actually run, or are marked Not eval
     expect(findings(r, 'packcheck').find((f) => f.code === 'value.needs_review' && f.subject === 'application-form:funding_requested')).toMatchObject({ state: 'needs_review', reason: 'value_not_in_excerpt' });
     expect(cmp(r, 'funding_requested:application-form~budget')).toMatchObject({ status: 'not_evaluated' });
     expect(cmp(r, 'funding_within_budget:application-form~budget')).toMatchObject({ status: 'not_evaluated' });
-    expect(cmp(r, 'funding_within_budget:application-form~budget').reason).toMatch(/funding_requested in application-form not validated/);
+    expect(cmp(r, 'funding_within_budget:application-form~budget').reason).toMatch(/^Funding requested in .+ was not validated\.$/);
     expect(findings(r, 'packcheck').some((f) => f.code.startsWith('funding.'))).toBe(false);
     expect(r.summary.falseCriticalFindings).toBe(0);
   });
@@ -286,7 +289,7 @@ describe('ScopeCheck comparisons: an aspect that could not be compared is Not ev
     const sc = r.samples[0]!;
     expect(sc.findings.score.missed).toEqual(['spec.differs|CP-100:specification|quote-c']);
     expect(sc.findings.score.falseCritical).toEqual([]);
-    expect(sc.comparisons!.find((c) => c.id === 'specification:CP-100~quote-c')).toMatchObject({ status: 'not_evaluated', reason: 'no specification fact in quote-c' });
+    expect(sc.comparisons!.find((c) => c.id === 'specification:CP-100~quote-c')).toMatchObject({ status: 'not_evaluated', reason: expect.stringMatching(/^No specification was extracted from .+\.$/), blocked: { field: 'specification', reason: 'no_fact' } });
     expect(sc.comparisons!.find((c) => c.id === 'quantity:CP-100~quote-c')).toMatchObject({ status: 'agree' });
     expect(sc.comparisons!.find((c) => c.id === 'quantity:MS-20~quote-c')).toMatchObject({ status: 'flagged' });
   });
@@ -295,7 +298,8 @@ describe('ScopeCheck comparisons: an aspect that could not be compared is Not ev
     const r = await run({ samples: ['scopecheck-layout'], oracle: ['scopecheck-layout'] });
     const c = r.samples[0]!.comparisons!.filter((x) => x.id.endsWith('PG-6~quote-c'));
     expect(c.map((x) => x.status)).toEqual(['not_evaluated', 'not_evaluated']);
-    expect(c[0]!.reason).toMatch(/item not matched in quote-c \(match_unresolved\)/);
+    expect(c[0]!.reason).toMatch(/^The item was not matched in .+\.$/);
+    expect(c[0]!.blocked?.reason).toBe('match_unresolved');
   });
 });
 

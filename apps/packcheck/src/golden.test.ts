@@ -43,7 +43,7 @@ describe('grant pack', () => {
   it('exactly one comparison could not run: the start date, because the budget date is ambiguous', () => {
     const ne = v.evaluation.comparisons.filter((c) => c.status === 'not_evaluated');
     expect(ne.map((c) => c.id)).toEqual(['project_start_date:application-form~budget']);
-    expect(ne[0]).toMatchObject({ reason: 'project_start_date in budget not validated (date_format_ambiguous)', blocked: { docId: 'budget', field: 'project_start_date', reason: 'date_format_ambiguous' } });
+    expect(ne[0]).toMatchObject({ reason: 'Project start date in Project budget summary was not validated.', blocked: { docId: 'budget', field: 'project_start_date', reason: 'date_format_ambiguous' } });
     expect(v.exportModel.notEvaluated).toHaveLength(1);
   });
 

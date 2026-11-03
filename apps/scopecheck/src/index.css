@@ -31,3 +31,19 @@
 [id] {
   scroll-margin-top: 7rem;
 }
+
+/* Narrow screens (375 px): the page never scrolls sideways. Long words and references wrap; tables keep readable columns
+   and scroll inside their own container (ScrollTable) instead of widening the page. */
+html,
+body {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.scroll-table table {
+  min-width: 100%;
+}
+.scroll-table th,
+.scroll-table td {
+  min-width: 10rem;
+  overflow-wrap: break-word;
+}

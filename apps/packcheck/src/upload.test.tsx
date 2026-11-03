@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Block } from '@skeleton-key/engine';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -61,7 +61,7 @@ describe('PackCheck upload', () => {
   it('shows the plain statement, reads files on the device, and sends nothing before Analyse', async () => {
     const user = userEvent.setup();
     const s = setup();
-    const panel = screen.getByRole('heading', { name: 'Analyse your own documents' }).closest('section')!;
+    const panel = screen.getByRole('heading', { name: 'Analyse your own documents' }).closest('details')!;
     expect(panel.textContent).toMatch(/text extracted from them is sent to an AI service/);
     expect(analyseBtn().disabled).toBe(true);
     await user.upload(screen.getByLabelText('Application requirements'), file('requirements.pdf'));
@@ -74,7 +74,7 @@ describe('PackCheck upload', () => {
   it('with no analysis service connected, Analyse cannot be pressed and the sample pack still works', async () => {
     const user = userEvent.setup();
     setup({ baseUrl: null });
-    expect(screen.getByRole('note').textContent).toMatch(/Analysis is not available on this site yet/);
+    expect(screen.getAllByRole('note').some((n) => /Analysis is not available on this site yet/.test(n.textContent ?? ''))).toBe(true);
     await choose(user, false);
     await waitFor(() => expect(screen.getAllByText(/Read on your device/).length).toBe(2));
     expect(analyseBtn().disabled).toBe(true);
@@ -107,5 +107,44 @@ describe('PackCheck upload', () => {
     expect(s.requests).toBe(1);
     expect(screen.getAllByText(/Not fully processed: nothing can be called missing from it/).length).toBe(2);
     expect(screen.getByRole('button', { name: /Try the failed parts again/ })).toBeTruthy();
+  });
+
+  for (const code of ['daily_limit', 'limiter_unavailable'] as const) {
+    it(`${code} on the first request: a plain message, nothing invented, and the sample pack stays shown and usable`, async () => {
+      const user = userEvent.setup();
+      const s = setup({ fail: () => ({ status: code === 'daily_limit' ? 429 : 503, code }) });
+      await choose(user, false);
+      await waitFor(() => expect(analyseBtn().disabled).toBe(false));
+      await user.click(analyseBtn());
+      const alert = (await screen.findByRole('alert')).textContent ?? '';
+      expect(alert).toMatch(code === 'daily_limit' ? /Live analysis is not available right now: today's allowance has been used/ : /Live analysis is paused/);
+      expect(alert).toMatch(/The sample sets on this page still work\./);
+      expect(alert).not.toMatch(/_|\b(?:429|503)\b/); // no code, no status number
+      expect(s.requests).toBe(1); // the run stopped at once
+      // Nothing was processed, so the page is not replaced: still the sample pack, with its findings, in sample mode.
+      expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: 'Sample pack' })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: /Confirmed findings \(1\)/ })).toBeTruthy();
+      expect(screen.queryByRole('button', { name: /Back to the sample pack/ })).toBeNull();
+      // and the sample is still usable: a correction works
+      const ne = screen.getByRole('heading', { name: /Not evaluated \(1\)/ }).closest('section')! as HTMLElement;
+      await user.click(within(ne).getByRole('button', { name: /Correct this value/ }));
+      await user.type(within(ne).getByLabelText('Date'), '2026-03-01');
+      await user.keyboard('{Enter}');
+      expect(screen.getByRole('heading', { name: /Not evaluated \(0\)/ })).toBeTruthy();
+    });
+  }
+
+  it('a stop after part of the pack was processed shows the partial live result, and "Back to the sample pack" returns to it', async () => {
+    const user = userEvent.setup();
+    setup({ fail: (n) => (n >= 2 ? { status: 503, code: 'limiter_unavailable' } : null) });
+    await choose(user, false);
+    await waitFor(() => expect(analyseBtn().disabled).toBe(false));
+    await user.click(analyseBtn());
+    expect((await screen.findByRole('alert')).textContent).toMatch(/Live analysis is paused/);
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Live mode' })).toBeTruthy());
+    await user.click(screen.getByRole('button', { name: 'Back to the sample pack' }));
+    expect(screen.getByRole('region', { name: 'Sample mode' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Sample pack' })).toBeTruthy();
   });
 });

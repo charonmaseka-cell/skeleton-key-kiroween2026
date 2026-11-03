@@ -49,7 +49,7 @@ export type ExportModel = {
   comparisons: ComparisonSummary;
   decisions: { findingId: string; status: string; at: number; note?: string }[];
   notes: { findingId: string; note: string }[];
-  corrections: { factId: string; field: string; originalValue: unknown; correctedValue: unknown; note?: string; at: number; reverted?: boolean }[];
+  corrections: { factId: string; field: string; docId?: string; originalValue: unknown; correctedValue: unknown; note?: string; at: number; reverted?: boolean }[];
 };
 
 export function buildExport(args: {
@@ -107,7 +107,7 @@ export function buildExport(args: {
       ...(args.reverted ?? []).map((c) => ({ c, reverted: true })),
     ].map(({ c, reverted }) => {
       const eff = args.facts.get(c.factId);
-      return { factId: c.factId, field: eff?.fact.field ?? 'unknown', originalValue: eff?.fact.value ?? null, correctedValue: c.correctedValue, note: c.note, at: c.at, ...(reverted ? { reverted: true } : {}) };
+      return { factId: c.factId, field: eff?.fact.field ?? 'unknown', ...(eff ? { docId: eff.fact.docId } : {}), originalValue: eff?.fact.value ?? null, correctedValue: c.correctedValue, note: c.note, at: c.at, ...(reverted ? { reverted: true } : {}) };
     }),
   };
 }

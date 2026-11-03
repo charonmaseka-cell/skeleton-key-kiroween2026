@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js';
 import { z } from 'zod';
 import { containsTokenRun, nameTokens } from './names';
-import { dateCandidates, moneyCandidates, quantityCandidates, type Span } from './parse';
+import { dateCandidates, moneyCandidates, quantityCandidates, type DateOrder, type Span } from './parse';
 import type { ValueKind } from './types';
 
 // "Is the claimed value actually supported by its cited excerpt?" (R4.3)
@@ -13,6 +13,8 @@ export type SupportInput = {
   excerpt: string;
   /** Field labels that precede the intended value, supplied by the caller's adapter. */
   hints?: string[];
+  /** The numeric date order the whole document proves (numericDateOrder over its blocks), used when the excerpt proves none. */
+  documentDateOrder?: DateOrder | null;
 };
 
 export type SupportResult =
@@ -43,7 +45,7 @@ function pick<T extends Span>(excerpt: string, cands: T[], hints: string[] | und
 }
 
 export function checkSupport(input: SupportInput): SupportResult {
-  const { kind, claimed, excerpt, hints } = input;
+  const { kind, claimed, excerpt, hints, documentDateOrder } = input;
   switch (kind) {
     case 'money': {
       const c = MoneyClaim.safeParse(claimed);
@@ -62,7 +64,7 @@ export function checkSupport(input: SupportInput): SupportResult {
     case 'date': {
       const c = DateClaim.safeParse(claimed);
       if (!c.success) return { status: 'unsupported', reason: 'claim_shape_invalid' };
-      const sel = pick(excerpt, dateCandidates(excerpt), hints);
+      const sel = pick(excerpt, dateCandidates(excerpt, documentDateOrder ?? null), hints);
       if ('reason' in sel) return sel.reason === 'no_candidate' ? { status: 'unsupported', reason: 'value_not_in_excerpt' } : { status: 'needs_review', reason: sel.reason, resolved: null };
       const k = sel.cand;
       if (k.ambiguous) return { status: 'needs_review', reason: 'date_format_ambiguous', resolved: null };

@@ -1,5 +1,6 @@
 import { validateEvidence } from './evidence';
 import { hashOf } from './hash';
+import { numericDateOrder, type DateOrder } from './parse';
 import { checkSupport } from './support';
 import { ModelClaimSchema, type Block, type Fact, type ModelClaim } from './types';
 
@@ -8,7 +9,21 @@ export type ClaimContext = {
   blocks: Block[];
   /** Field labels per field name, supplied by the app adapter (never by the model). */
   hintsByField?: Record<string, string[]>;
+  /** The numeric date order the document proves; computed from `blocks` when not given. */
+  dateOrder?: DateOrder | null;
 };
+
+/** The order every unambiguous numeric date in the document agrees on, or null (none, or conflicting). */
+export function documentDateOrder(docId: string, blocks: Block[]): DateOrder | null {
+  const seen = new Set<DateOrder>();
+  for (const b of blocks) {
+    if (b.docId !== docId) continue;
+    const r = numericDateOrder(b.text);
+    if (r.conflict) return null;
+    if (r.order) seen.add(r.order);
+  }
+  return seen.size === 1 ? [...seen][0]! : null;
+}
 
 const review = (base: Omit<Fact, 'status' | 'value' | 'evidence'>, reason: string, value: unknown = null, evidence: Fact['evidence'] = []): Fact => ({
   ...base,
@@ -44,7 +59,8 @@ export function validateClaim(rawClaim: unknown, ctx: ClaimContext): Fact {
     field: claim.field,
     kind: claim.kind,
   };
-  const sup = checkSupport({ kind: claim.kind, claimed: claim.value, excerpt: evidence.text, hints: ctx.hintsByField?.[claim.field] });
+  const dateOrder = ctx.dateOrder !== undefined ? ctx.dateOrder : documentDateOrder(ctx.docId, ctx.blocks);
+  const sup = checkSupport({ kind: claim.kind, claimed: claim.value, excerpt: evidence.text, hints: ctx.hintsByField?.[claim.field], documentDateOrder: dateOrder });
   if (sup.status === 'unsupported') return review(base, sup.reason, null, [evidence]);
   if (sup.status === 'needs_review') return review(base, sup.reason, sup.resolved, [evidence]);
   if (ev.occurrences > 1) return review(base, 'excerpt_ambiguous_location', sup.resolved, [evidence]);
@@ -59,7 +75,8 @@ const sameFact = (a: Fact, b: Fact) =>
  * overlapping chunks legitimately extract the same text twice. A claim about the same text with a
  * DIFFERENT value is kept as a separate fact (id suffix `~n`) so the conflict stays visible.
  */
-export function validateClaims(claims: unknown[], ctx: ClaimContext): Fact[] {
+export function validateClaims(claims: unknown[], ctxIn: ClaimContext): Fact[] {
+  const ctx = { ...ctxIn, dateOrder: ctxIn.dateOrder !== undefined ? ctxIn.dateOrder : documentDateOrder(ctxIn.docId, ctxIn.blocks) };
   const seen = new Map<string, Fact[]>();
   const out: Fact[] = [];
   for (const c of claims) {

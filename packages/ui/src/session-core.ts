@@ -22,6 +22,7 @@ import {
   type ReviewStatus,
   type ReviewStore,
   type ValueKind,
+  type ExportLabels,
 } from '@skeleton-key/engine';
 import type { DocumentResult } from './extraction-client';
 
@@ -44,6 +45,8 @@ export type FixtureDoc = {
    * the document can be confirmed, whatever the reviewer says.
    */
   chunks?: { blockIds: string[]; status: 'ok' | 'failed' }[];
+  /** documented edits to the recorded claims' excerpts after the sample text changed (shown to the user) */
+  claimEdits?: { from: string; to: string; reason: string }[];
 };
 
 export type Fixture = {
@@ -72,14 +75,36 @@ export type EvaluateInput = {
   documents: Map<string, DocumentExtraction>;
   blocks: Block[];
   roles: Record<string, string>;
+  /** document titles by ID, so rules can name documents in plain words (never by their internal ID) */
+  titles?: Record<string, string>;
+};
+
+/**
+ * Plain labels for everything an adapter shows a person. Internal names (field keys, document IDs, reason codes) never reach
+ * the screen or an export: each is shown through these labels.
+ */
+export type AdapterLabels = {
+  /** field key -> label, for example organisation_name -> "Organisation name" */
+  fields: Record<string, string>;
+  /** document role -> label, used when a document has no title */
+  roles: Record<string, string>;
+  /** adapter-specific reason codes -> explanation (shared engine reasons are in REASONS below) */
+  reasons?: Record<string, string>;
 };
 
 export interface DomainAdapter {
   id: string;
   /** field-label hints used by the value validators (adapter data) */
   hints: Record<string, string[]>;
+  labels: AdapterLabels;
   evaluate(input: EvaluateInput): Evaluation;
 }
+
+/** Turns an internal key into words when no label exists: never shows underscores. */
+export const humanise = (key: string): string => {
+  const t = key.replace(/[_-]+/g, ' ').trim();
+  return t ? t[0]!.toUpperCase() + t.slice(1) : t;
+};
 
 export type SessionState = {
   corrections: Correction[];
@@ -104,7 +129,26 @@ export type SessionView = {
   store: ReviewStore;
   uncovered: Record<string, string[]>;
   exportModel: ExportModel;
+  /** plain label of a field key */
+  fieldLabel(field: string): string;
+  /** plain name of a document (its title; else its role's label) */
+  docName(docId: string): string;
+  /** plain explanation of a reason code (adapter reasons first, then the shared ones); free text is returned as it is */
+  reasonText(code?: string): string;
+  /** 1-based position of a block in its document, for "line N" instead of a block ID */
+  lineNumber(docId: string, blockId: string): number | null;
 };
+
+/** Label helpers for a fixture, shared by the view and the export. */
+export function labelling(adapter: Pick<DomainAdapter, 'labels'>, fixture: Fixture) {
+  const titles = Object.fromEntries(fixture.docs.map((d) => [d.id, d.title]));
+  const roles = Object.fromEntries(fixture.docs.map((d) => [d.id, d.role]));
+  // A key without a label is turned into words; text that is not a key (for example "Attachment: Letters of support") is kept.
+  const fieldLabel = (f: string) => adapter.labels.fields[f] ?? (/^[a-z0-9]+(_[a-z0-9]+)*$/.test(f) ? humanise(f) : f);
+  const docName = (id: string) => titles[id] || adapter.labels.roles[roles[id] ?? ''] || humanise(id);
+  const reasonText = (code?: string) => (code ? (adapter.labels.reasons?.[code] ?? explainReason(code)) : '');
+  return { titles, fieldLabel, docName, reasonText };
+}
 
 export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state: SessionState, at: number): SessionView {
   const blocksByDoc = new Map(fixture.docs.map((d) => [d.id, d.blocks]));
@@ -120,12 +164,14 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
     if (state.confirmed[d.id] !== undefined && processingComplete(ext)) ext = confirmCoverage(ext, 'user', 'Confirmed by the reviewer in this session');
     documents.set(d.id, ext);
   }
+  const L = labelling(adapter, fixture);
   const evaluation = adapter.evaluate({
     facts: effective,
     originalFacts: facts,
     documents,
     blocks: fixture.docs.flatMap((d) => d.blocks),
     roles: Object.fromEntries(fixture.docs.map((d) => [d.id, d.role])),
+    titles: L.titles,
   });
   const { items, store } = reconcileReview(evaluation.findings, state.store, at);
   const coverage = fixture.docs.map((d) => {
@@ -140,12 +186,19 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
     effective,
     documents,
     blocksByDoc,
-    titles: Object.fromEntries(fixture.docs.map((d) => [d.id, d.title])),
+    titles: L.titles,
     evaluation,
     items,
     store,
     uncovered,
     exportModel,
+    fieldLabel: L.fieldLabel,
+    docName: L.docName,
+    reasonText: L.reasonText,
+    lineNumber: (docId, blockId) => {
+      const i = (blocksByDoc.get(docId) ?? []).findIndex((b) => b.id === blockId);
+      return i < 0 ? null : i + 1;
+    },
   };
 }
 
@@ -218,8 +271,18 @@ export function parseCorrection(kind: ValueKind, input: CorrectionInput): Parsed
 
 // ---- export ----
 
-export const exportCsv = (view: SessionView): string => renderCsv(view.exportModel);
-export const exportText = (view: SessionView): string => renderText(view.exportModel);
+const exportLabels = (view: SessionView): ExportLabels => {
+  const messages = new Map(view.items.map((i) => [i.finding.id, i.finding.message]));
+  return {
+    field: view.fieldLabel,
+    doc: view.docName,
+    reason: view.reasonText,
+    finding: (id) => messages.get(id) ?? 'an item no longer in the review',
+    line: view.lineNumber,
+  };
+};
+export const exportCsv = (view: SessionView): string => renderCsv(view.exportModel, exportLabels(view));
+export const exportText = (view: SessionView): string => renderText(view.exportModel, exportLabels(view));
 export const renderCsvOf = exportCsv;
 export const renderTextOf = exportText;
 
@@ -249,8 +312,39 @@ const REASONS: Record<string, string> = {
   no_fact: 'No value was extracted for this field.',
   currency_not_comparable: 'The amounts are in different or unknown currencies.',
   not_found_in_verified_response: 'Not found in a document confirmed as fully extracted.',
+  // engine: evidence and claim checks
+  claim_schema_invalid: 'The extracted value did not have the expected form, so it was not used.',
+  claim_shape_invalid: 'The extracted value did not have the expected form, so it was not used.',
+  block_missing: 'The cited place is not in the document.',
+  excerpt_not_found: 'The cited text was not found in the document.',
+  excerpt_ambiguous_location: 'The cited text appears more than once, so it is not clear which place it comes from.',
+  ambiguous_candidates: 'More than one value in the cited text matches, so it is not clear which one is meant.',
+  currency_mismatch: 'The currency of the extracted value is not the one in the cited text.',
+  unit_not_in_excerpt: 'The unit of the extracted value is not in the cited text.',
+  not_in_successful_chunk: 'This part of the document was not processed successfully.',
+  needs_review: 'The value was held for review.',
+  // adapters (shared wording; an adapter can add its own)
+  no_item_fact: 'No item was extracted for this line.',
+  identity_uncertain: 'The item could not be identified with certainty.',
+  contaminated_value: 'The specification includes the item\'s own code, so it is not a clean specification to compare.',
+  item_code_in_specification: 'The specification includes the item\'s own code, so it is not a clean specification to compare.',
+  currency_differs: 'The amounts are in different currencies.',
+  unit_differs: 'The quantities are in different units.',
+  unknown_currency: 'The currency is not known.',
+  unknown_unit: 'The unit is not known.',
+  unknown_value: 'The value is not known.',
 };
-export const explainReason = (code?: string): string => (code ? (REASONS[code] ?? code.replace(/_/g, ' ')) : '');
+/**
+ * A reason code in plain words. Free text (a sentence) is returned as it is; an unknown code is turned into words, never shown
+ * with underscores.
+ */
+export const explainReason = (code?: string): string => {
+  if (!code) return '';
+  if (REASONS[code]) return REASONS[code]!;
+  return /^[a-z0-9]+(_[a-z0-9]+)+$/.test(code) ? humanise(code) + '.' : code;
+};
+/** Every reason code with an explanation (for tests). */
+export const KNOWN_REASONS = (): string[] => Object.keys(REASONS);
 
 
 // ---- live (uploaded) documents ----

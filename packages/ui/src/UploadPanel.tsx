@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { Block } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
 import { ERROR_TEXT, MAX_CALLS_PER_SESSION, MAX_CHUNKS_PER_DOC, analyseAll, newClientSession, type ClientConfig, type DocumentResult, type ErrorKind } from './extraction-client';
@@ -9,7 +9,9 @@ import { buildLiveFixture, type Fixture } from './session-core';
 //  - A file is parsed ON THE DEVICE as soon as it is chosen. Nothing is sent.
 //  - Text is sent only when the user presses Analyse, after a plain statement that extracted text leaves the device.
 //  - Failures stay visible and recoverable: a failed chunk marks its document "not fully processed", the user can
-//    retry the failed parts manually, and sample mode remains available (R8.10, R9).
+//    retry the failed parts manually, and sample mode remains available (R8.10, R9). A run in which NOTHING was processed
+//    (for example refused with daily_limit or limiter_unavailable) does not replace the page: the sample set stays shown.
+//  - The panel is a collapsed section BELOW the sample results; the privacy statement and the limits are inside it.
 
 export type UploadSlot = { id: string; role: string; label: string; schemaId: string; required: boolean };
 
@@ -51,6 +53,16 @@ export function UploadPanel({
   idPrefix: string;
 }) {
   const uid = useId();
+  const panel = useRef<HTMLDetailsElement>(null);
+  // The in-page link "#upload" opens the collapsed section, so it is never a link to something hidden.
+  useEffect(() => {
+    const open = () => {
+      if (window.location.hash === '#upload' && panel.current) panel.current.open = true;
+    };
+    open();
+    window.addEventListener('hashchange', open);
+    return () => window.removeEventListener('hashchange', open);
+  }, []);
   const [parsed, setParsed] = useState<Record<string, Parsed>>({});
   const [runs, setRuns] = useState<Run[]>([]);
   const [busy, setBusy] = useState(false);
@@ -107,25 +119,31 @@ export function UploadPanel({
     setProgress('');
     setBusy(false);
     analyses.current += 1;
+    // Nothing processed at all: keep showing what was shown (the sample set); the message explains why.
+    if (!next.some((r) => r.result.chunks.some((c) => c.status === 'ok'))) return;
     onResult(buildLiveFixture(next.map((r) => ({ id: r.slot.id, role: r.slot.role, title: (parsed[r.slot.id] as Parsed).file.name, profile: r.slot.schemaId, result: r.result })), `live-upload-${analyses.current}`));
   }
 
   const failed = runs.flatMap((r) => r.result.chunks.filter((c) => c.status !== 'ok').map((c) => ({ label: r.slot.label, c })));
 
   return (
-    <section id="upload" aria-labelledby={`${uid}-h`} className="space-y-3 rounded border-2 border-blue-800 bg-blue-50 p-4">
-      <h2 id={`${uid}-h`} className="text-xl font-semibold">
-        Analyse your own documents
-      </h2>
+    <details ref={panel} id="upload" className="no-print rounded border-2 border-blue-800 bg-blue-50 p-4">
+      <summary className="cursor-pointer">
+        <h2 id={`${uid}-h`} className="inline text-xl font-semibold">
+          Analyse your own documents
+        </h2>
+        <span className="ml-2 text-sm">(optional: sends extracted text to an AI service; limits and privacy inside)</span>
+      </summary>
+      <section aria-labelledby={`${uid}-h`} className="mt-3 space-y-3">
       <p className="text-sm">
         <strong>What leaves your device.</strong> Files are read on your device when you choose them. When you press Analyse, the <em>text extracted from them</em> is sent to an AI service for analysis. Not all processing is local. Do not analyse documents you are not allowed to share. The original files are never uploaded.
       </p>
       <p className="text-sm" data-testid="live-limits">
-        <strong>Live analysis is limited.</strong> Text-layer PDFs only, up to {Math.round(MAX_FILE_BYTES / (1024 * 1024))} MB each. Each document is sent in short requests, one after another: a document needing more than {MAX_CHUNKS_PER_DOC} requests is refused as too long, a session sends at most {MAX_CALLS_PER_SESSION} requests, and nothing is retried automatically. It takes minutes, not seconds: one measured run of three 3-page documents took about 5 minutes (a single run, not a promise). Results cover only what was read; a part that failed is marked not processed. The sample sets below are the instant default and run the same checks on saved extractions.
+        <strong>Live analysis is limited.</strong> Text-layer PDFs only, up to {Math.round(MAX_FILE_BYTES / (1024 * 1024))} MB each. Each document is sent in short requests, one after another: a document needing more than {MAX_CHUNKS_PER_DOC} requests is refused as too long, a session sends at most {MAX_CALLS_PER_SESSION} requests, and nothing is retried automatically. It takes minutes, not seconds: one measured run of three 3-page documents took about 5 minutes (a single run, not a promise). Results cover only what was read; a part that failed is marked not processed. The sample sets above are the instant default and run the same checks on saved extractions.
       </p>
       {!configured && (
         <p role="note" className="rounded border border-amber-800 bg-amber-50 p-2 text-sm font-medium">
-          Analysis is not available on this site yet: no analysis service is connected, and public access is closed until its limits are set. You can still choose files to see them read on your device, and the sample sets below work fully.
+          Analysis is not available on this site yet: no analysis service is connected, and public access is closed until its limits are set. You can still choose files to see them read on your device, and the sample sets above work fully.
         </p>
       )}
       <div className="grid gap-3 md:grid-cols-3">
@@ -185,6 +203,7 @@ export function UploadPanel({
           )}
         </div>
       )}
-    </section>
+      </section>
+    </details>
   );
 }

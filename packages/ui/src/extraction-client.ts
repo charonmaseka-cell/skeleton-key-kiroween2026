@@ -29,11 +29,11 @@ export type ErrorKind = 'daily_limit' | 'rate_limited' | 'quota_exhausted' | 'mo
 
 /** What the user is told, in plain words, for each failure. Never echoes the response body. */
 export const ERROR_TEXT: Record<ErrorKind, { text: string; recoverable: boolean; stopsRun: boolean }> = {
-  daily_limit: { text: 'The daily analysis allowance has been used (it resets at 00:00 UTC), or analysis has not been opened yet. Your documents and anything already extracted are kept. Try again later.', recoverable: true, stopsRun: true },
+  daily_limit: { text: "Live analysis is not available right now: today's allowance has been used, or live analysis has not been opened yet. It resets at 00:00 UTC. Nothing more was sent. Your files stay on your device and anything already extracted is kept. The sample sets on this page still work.", recoverable: true, stopsRun: true },
   rate_limited: { text: 'Too many requests just now. Wait a moment and try again.', recoverable: true, stopsRun: true },
   quota_exhausted: { text: 'The AI service quota is used up, so analysis is temporarily unavailable. Everything already extracted is kept.', recoverable: true, stopsRun: true },
   model_unavailable: { text: 'The AI service is temporarily unavailable. Try again shortly.', recoverable: true, stopsRun: true },
-  limiter_unavailable: { text: 'Usage control is unavailable, so analysis is closed until it recovers.', recoverable: true, stopsRun: true },
+  limiter_unavailable: { text: 'Live analysis is paused: the service that keeps it within its limits is not responding, so nothing more is sent until it recovers. Try again later. Your files stay on your device and anything already extracted is kept. The sample sets on this page still work.', recoverable: true, stopsRun: true },
   timeout: { text: 'The AI service did not answer in time for one part of a document. That part is marked not processed.', recoverable: true, stopsRun: false },
   schema_invalid: { text: 'The AI service returned an unusable answer for one part of a document. That part is marked not processed.', recoverable: true, stopsRun: false },
   too_large: { text: 'One part of a document was too large to send.', recoverable: false, stopsRun: false },

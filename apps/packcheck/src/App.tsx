@@ -5,13 +5,13 @@ import { packCheckAdapter } from './adapter';
 import { FIXTURES } from './fixtures';
 
 const NAV = [
-  { href: '#upload', label: 'Analyse your documents' },
   { href: '#attach-h', label: 'Attachment checks' },
   { href: '#fields-h', label: 'Field checks' },
   { href: '#confirmed-h', label: 'Review queue' },
   { href: '#ne-h', label: 'Not evaluated' },
   { href: '#docs-h', label: 'Documents and values' },
   { href: '#exp-h', label: 'Export' },
+  { href: '#upload', label: 'Analyse your own documents' },
 ];
 
 /**
@@ -41,6 +41,27 @@ export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: 
       nav={NAV}
       announcement={session.announcement}
     >
+      <section aria-labelledby="set-h" className="space-y-2">
+        <h2 id="set-h" className="text-xl font-semibold">
+          {fixture.sample ? 'Sample pack' : 'Your pack'}
+        </h2>
+        <p>
+          <strong>{fixture.title}</strong> ({fixture.sample ? 'sample' : 'live'}). {fixture.description}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={session.reset} className="rounded border border-slate-800 px-3 py-1">
+            Reset corrections, decisions and coverage
+          </button>
+          {!fixture.sample && (
+            <button type="button" onClick={() => session.setFixtureId(FIXTURES[0]!.id)} className="rounded border border-slate-800 px-3 py-1">
+              Back to the sample pack
+            </button>
+          )}
+        </div>
+      </section>
+      <ReviewWorkspace key={fixture.id} session={session} baseName={fixture.id}>
+        <Checks view={view} />
+      </ReviewWorkspace>
       <UploadPanel
         idPrefix="packcheck-upload"
         slots={PACKCHECK_SLOTS}
@@ -51,20 +72,6 @@ export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: 
           session.setFixtureId(f.id);
         }}
       />
-      <section aria-labelledby="set-h" className="space-y-2">
-        <h2 id="set-h" className="text-xl font-semibold">
-          {fixture.sample ? 'Sample pack' : 'Your pack'}
-        </h2>
-        <p>
-          <strong>{fixture.title}</strong> ({fixture.sample ? 'sample' : 'live'}). {fixture.description}
-        </p>
-        <button type="button" onClick={session.reset} className="rounded border border-slate-800 px-3 py-1">
-          Reset corrections, decisions and coverage
-        </button>
-      </section>
-      <ReviewWorkspace key={fixture.id} session={session} baseName={fixture.id}>
-        <Checks view={view} />
-      </ReviewWorkspace>
     </AppShell>
   );
 }

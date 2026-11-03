@@ -96,7 +96,7 @@ describe('review: corrections, decisions and reopening', () => {
     expect(states(v).has(key('quantity.differs', 'CP-100:quantity', 'quote-a'))).toBe(false);
     expect(v.effective.get(fact.id)).toMatchObject({ provenance: 'user_supplied', value: { value: '10', unit: 'units' } });
     expect(v.effective.get(fact.id)!.fact.value).toEqual({ value: '8', unit: 'units' }); // original preserved
-    expect(v.exportModel.corrections).toEqual([{ factId: fact.id, field: 'quantity', originalValue: { value: '8', unit: 'units' }, correctedValue: { value: '10', unit: 'units' }, note: 'checked with supplier', at: 5 }]);
+    expect(v.exportModel.corrections).toEqual([{ factId: fact.id, field: 'quantity', docId: 'quote-a', originalValue: { value: '8', unit: 'units' }, correctedValue: { value: '10', unit: 'units' }, note: 'checked with supplier', at: 5 }]);
   });
 
   it('a decision on a finding is reopened when its inputs change, and the earlier decision stays in the history', () => {
@@ -133,7 +133,7 @@ describe('layout sample: free-text quotation (known limitation kept visible)', (
 
   it('the miss is visible: the comparison is Not evaluated with the reason, and appears in the export', () => {
     const c = v.evaluation.comparisons.find((x) => x.id === 'specification:CP-100~quote-c')!;
-    expect(c).toMatchObject({ status: 'not_evaluated', reason: 'no specification fact in quote-c' });
+    expect(c).toMatchObject({ status: 'not_evaluated', reason: 'No specification was extracted from Quotation QC-31, Cedar Flow Components (free-text layout).', blocked: { docId: 'quote-c', field: 'specification', reason: 'no_fact' } });
     expect(v.exportModel.notEvaluated.map((n) => n.id)).toContain('specification:CP-100~quote-c');
   });
 

@@ -170,3 +170,82 @@ article[data-dismissed] { border-style: dashed; }
 [data-seal] .wax-body { fill: #4b3278; stroke: #8a6cc4; }
 [data-seal] .wax-ring { stroke: #a58ce0; }
 [data-seal] .wax-mark { stroke: #d9ccff; }
+
+/* =====================================================================================================================
+   The bolder pass (HU-28 to HU-31): effects that MOVE, in space that holds no text and no control.
+   ===================================================================================================================== */
+
+/* HU-31 display face, self-hosted (src/fonts, SIL OFL 1.1, an 8.7 kB subset). Only the app title and the séance heading, only when the
+   effects are on. The file is fetched only when something uses it, so Lights on never downloads it. */
+@font-face {
+  font-family: 'Skeleton Display';
+  src: url('./fonts/cormorant-garamond-700-subset.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+:root[data-effects='on'] [data-display] {
+  font-family: 'Skeleton Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 2.6rem; /* rem, not em: the face has a small x-height, so this matches the presence of the 1.5 rem sans title it replaces */
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+:root[data-effects='on'] h3[data-display] { font-size: 1.9rem; }
+
+/* HU-29 thicker fog in the page gutters at wide widths. The gutters are the strips beside the 72 rem content column (at least 64 px
+   at 1280 px); nothing but this lives there. The fog drifts upward once (4.5 s) and rests. Narrower than 1280 px there is no gutter. */
+[data-gutter-fog] { display: none; }
+@media (min-width: 1280px) {
+  [data-gutter-fog] {
+    display: block;
+    width: calc((100% - 72rem) / 2);
+    overflow: hidden;
+    background-image:
+      radial-gradient(ellipse 120% 150px at 50% 50%, color-mix(in srgb, var(--sk-ecto) 34%, transparent), transparent 72%),
+      radial-gradient(ellipse 110% 110px at 40% 50%, color-mix(in srgb, var(--sk-ecto) 26%, transparent), transparent 70%),
+      radial-gradient(ellipse 100% 170px at 62% 50%, color-mix(in srgb, var(--sk-accent) 14%, transparent), transparent 74%);
+    background-size: 100% 560px, 100% 380px, 100% 760px;
+    background-position: 0 0, 0 120px, 0 300px;
+    background-repeat: repeat-y;
+    animation: gutter-fog-drift 4.5s ease-out 1 both;
+  }
+  [data-gutter-fog='right'] { background-position: 0 200px, 0 40px, 0 480px; }
+}
+@keyframes gutter-fog-drift {
+  from { opacity: 0; background-position-y: 180px, 300px, 460px; }
+  to { opacity: 1; }
+}
+
+/* HU-28 the margin ghost: full strength, up the left gutter once, swaying. The vertical travel is set from the page (below the banner
+   and the header); it is drawn only if the gutter is wide enough to be free. */
+[data-margin-ghost] { animation: margin-ghost-rise 4.6s linear 1 both; }
+[data-margin-ghost-sway] { animation: margin-ghost-sway 1.15s ease-in-out 4 alternate both; margin-left: 4px; }
+@keyframes margin-ghost-rise {
+  0% { transform: translateY(var(--ghost-from)); opacity: 0; }
+  7% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { transform: translateY(var(--ghost-to)); opacity: 0; }
+}
+@keyframes margin-ghost-sway { from { transform: translateX(-2px) rotate(-5deg); } to { transform: translateX(3px) rotate(5deg); } }
+.art-ghost { fill: color-mix(in srgb, var(--sk-text) 96%, white); filter: drop-shadow(0 0 9px color-mix(in srgb, var(--sk-ecto) 85%, transparent)); display: block; }
+.art-eye { fill: var(--sk-bg); }
+
+/* HU-30 the séance card: a round table, three candles, a planchette and a few pieces of ectoplasm. It settles in once. */
+.art-table { fill: color-mix(in srgb, var(--sk-bg) 70%, #000); }
+.art-table-top { fill: color-mix(in srgb, var(--sk-surface) 70%, var(--sk-border)); stroke: var(--sk-border); stroke-width: 1; }
+.art-wax { fill: #e4dac0; }
+.art-wick { fill: #3a3a3a; }
+.art-flame { fill: var(--sk-accent); animation: art-flame-in 1.4s ease-out 1 both; }
+.art-flame-glow { fill: color-mix(in srgb, var(--sk-accent) 28%, transparent); animation: art-flame-in 1.4s ease-out 1 both; }
+.art-board { fill: color-mix(in srgb, var(--sk-text) 18%, var(--sk-surface)); stroke: var(--sk-accent); stroke-width: 1.2; }
+.art-lens { fill: var(--sk-bg); stroke: var(--sk-accent); stroke-width: 1; }
+.art-wisp { fill: color-mix(in srgb, var(--sk-ecto) 55%, transparent); animation: art-rise 3.2s ease-out 1 both; transform-box: fill-box; transform-origin: 50% 100%; }
+.art-wisp-2 { animation-delay: 0.5s; }
+.art-orb { fill: color-mix(in srgb, var(--sk-ecto) 85%, transparent); animation: art-orb 3.6s ease-out 1 both; }
+.art-orb-2 { animation-delay: 0.4s; }
+.art-orb-3 { animation-delay: 0.8s; }
+@keyframes art-flame-in { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: none; } }
+@keyframes art-rise { from { opacity: 0; transform: translateY(18px) scaleY(0.6); } to { opacity: 1; transform: none; } }
+@keyframes art-orb { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+.art-flame, .art-flame-glow { transform-box: fill-box; transform-origin: 50% 100%; }

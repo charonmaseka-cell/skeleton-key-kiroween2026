@@ -17,6 +17,9 @@ export const BOO_MS = 2_600;
 export const BOO_COOLDOWN_MS = 5_000;
 export const INK_MS = 3_400;
 export const POINTER_SHOWN_MS = 1_600;
+export const MARGIN_GHOST_MS = 4_800;
+/** The page gutter must be at least this wide (px) for a ghost to travel along it: below this there is no free space. */
+export const MIN_GUTTER_PX = 60;
 
 type Pointer = { x: number; y: number; show: boolean };
 
@@ -41,6 +44,9 @@ const HauntContext = createContext<Haunt>(NONE);
 export const useHaunt = () => useContext(HauntContext);
 
 const isCritical = (i: ReviewItem) => i.finding.state === 'confirmed' && i.finding.severity === 'critical';
+const isMissingConfirmed = (i: ReviewItem) => i.finding.state === 'confirmed' && (i.finding.code === 'item.absent' || i.finding.code === 'attachment.missing');
+
+type GhostRun = { key: number; top: number; bottom: number; size: number };
 
 /** True while a dialog or the correction editor is open, or a field has focus: nothing ambient may happen then. */
 export function interactionOpen(doc: Document = document): boolean {
@@ -64,6 +70,7 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
   const whisperShown = useRef(false);
   const [drip, setDrip] = useState(0);
   const [boo, setBoo] = useState(0);
+  const [ghostRun, setGhostRun] = useState<GhostRun | null>(null);
   const mist = useRef<HTMLDivElement>(null);
 
   // The item after the one last gone to, in page order; the first when there is none yet.
@@ -96,13 +103,26 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
     requestAnimationFrame(settle);
   }, []);
 
+  // Go to a finding: scroll it into view FIRST, then focus it (focus never scrolls: it only moves the caret of the keyboard). A smooth
+  // scroll is used only for a short hop with effects on; a long jump, or reduced motion (effects off), is instant, because a smooth
+  // scroll across thousands of pixels can be interrupted and leave the page where it was. Finally the result is checked: if the
+  // target is not on screen the scroll is done again, instantly.
   const jumpTo = useCallback(
     (id: string) => {
       const el = document.getElementById(`finding-${id}`);
       if (!el) return;
       cursor.current = id;
+      const vh = window.innerHeight;
+      const r = el.getBoundingClientRect();
+      const block: ScrollLogicalPosition = r.height > vh * 0.8 ? 'start' : 'center';
+      const far = Math.abs(r.top + r.height / 2 - vh / 2) > vh * 2;
+      const smooth = effects && !far;
+      el.scrollIntoView({ block, behavior: smooth ? 'smooth' : 'auto' });
       el.focus({ preventScroll: true });
-      el.scrollIntoView({ block: 'center', behavior: effects ? 'smooth' : 'auto' });
+      setTimeout(() => {
+        const q = el.getBoundingClientRect();
+        if (q.bottom <= 0 || q.top >= window.innerHeight) el.scrollIntoView({ block, behavior: 'auto' });
+      }, smooth ? 1000 : 80);
       if (effects) movePointer(el);
     },
     [effects, movePointer],
@@ -173,6 +193,31 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
       const t = setTimeout(() => setDrip(0), INK_MS);
       return () => clearTimeout(t);
     }
+  }, [view, effects]);
+
+  // HU-28: a full-strength ghost drifts along the page margin when a missing item BECOMES confirmed (not for those already confirmed when a
+  // set opens). It travels only through the left gutter, below the banner and the header, and only if the gutter is wide enough to be
+  // free of text and controls; otherwise nothing is drawn.
+  const seenMissing = useRef<{ fixture: string; ids: Set<string> } | null>(null);
+  useEffect(() => {
+    if (!view) return;
+    const ids = view.items.filter(isMissingConfirmed).map((i) => i.finding.id);
+    if (!seenMissing.current || seenMissing.current.fixture !== view.fixture.id) {
+      seenMissing.current = { fixture: view.fixture.id, ids: new Set(ids) };
+      return;
+    }
+    const fresh = ids.filter((id) => !seenMissing.current!.ids.has(id));
+    for (const id of fresh) seenMissing.current.ids.add(id);
+    if (!fresh.length || !effects) return;
+    const gutter = document.querySelector('main')?.getBoundingClientRect().left ?? 0;
+    if (gutter < MIN_GUTTER_PX) return;
+    const below = (sel: string) => document.querySelector(sel)?.getBoundingClientRect().bottom ?? 0;
+    const top = Math.max(below('[aria-label="Sample mode"], [aria-label="Live mode"]'), below('header')) + 12;
+    const bottom = window.innerHeight - 70;
+    if (bottom - top < 160) return;
+    setGhostRun({ key: Date.now(), top, bottom, size: Math.min(56, gutter - 8) });
+    const t = setTimeout(() => setGhostRun(null), MARGIN_GHOST_MS);
+    return () => clearTimeout(t);
   }, [view, effects]);
 
   // HU-26: typing "boo" outside any field, editor or dialog.
@@ -253,6 +298,7 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
             </div>
           )}
           {drip > 0 && <InkDrip key={drip} />}
+          {ghostRun && <MarginGhost key={ghostRun.key} run={ghostRun} />}
           {boo > 0 && <Boo key={boo} />}
         </>
       )}
@@ -278,6 +324,69 @@ function InkDrip() {
       <span data-ink-line="" />
       <span data-ink-drop="" />
     </div>
+  );
+}
+
+/** The margin ghost: full strength (opaque), travelling up the left gutter once, swaying a little. Nothing else is in that space. */
+function MarginGhost({ run }: { run: GhostRun }) {
+  return (
+    <div data-margin-ghost="" data-motif="margin-ghost" aria-hidden="true" className="no-print pointer-events-none fixed left-0 top-0 z-[5]" style={{ ['--ghost-from' as string]: `${run.bottom}px`, ['--ghost-to' as string]: `${run.top}px`, width: run.size + 8 }}>
+      <div data-margin-ghost-sway="">
+        <svg viewBox="0 0 24 24" width={run.size} height={run.size} className="art-ghost">
+          <path d={GHOST_PATH} />
+          <circle cx="9.5" cy="9.5" r="1.4" className="art-eye" />
+          <circle cx="14.5" cy="9.5" r="1.4" className="art-eye" />
+          <ellipse cx="12" cy="14" rx="1.6" ry="2" className="art-eye" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/** Thicker fog in the page gutters at wide widths (HU-29): beside the content, never behind it. Behind everything, drifting in once. */
+export function GutterFog() {
+  const { effects } = useHaunt();
+  if (!effects) return null;
+  return (
+    <>
+      <div data-gutter-fog="left" data-motif="gutter-fog" aria-hidden="true" className="no-print pointer-events-none absolute bottom-0 left-0 top-0" style={{ zIndex: -1 }} />
+      <div data-gutter-fog="right" data-motif="gutter-fog" aria-hidden="true" className="no-print pointer-events-none absolute bottom-0 right-0 top-0" style={{ zIndex: -1 }} />
+    </>
+  );
+}
+
+/** The séance card (HU-30): candles, a planchette and a few pieces of ectoplasm on a round table, beside the counts. No text. */
+export function SeanceArt() {
+  const { effects } = useHaunt();
+  if (!effects) return null;
+  return (
+    <svg data-seance-art="" data-motif="seance-art" aria-hidden="true" focusable="false" viewBox="0 0 168 124" width="168" height="124" className="no-print pointer-events-none hidden shrink-0 self-center md:block">
+      <ellipse className="art-table" cx="84" cy="98" rx="74" ry="20" />
+      <ellipse className="art-table-top" cx="84" cy="94" rx="70" ry="16" />
+      {[
+        { x: 30, h: 30 },
+        { x: 84, h: 38 },
+        { x: 138, h: 30 },
+      ].map((c) => (
+        <g key={c.x} className="art-candle">
+          <rect className="art-wax" x={c.x - 6} y={92 - c.h} width="12" height={c.h} rx="2" />
+          <rect className="art-wick" x={c.x - 0.5} y={92 - c.h - 5} width="1" height="5" />
+          <ellipse className="art-flame-glow" cx={c.x} cy={92 - c.h - 11} rx="9" ry="11" />
+          <path className="art-flame" d={`M${c.x} ${92 - c.h - 19} C${c.x + 5} ${92 - c.h - 12} ${c.x + 4} ${92 - c.h - 4} ${c.x} ${92 - c.h - 4} C${c.x - 4} ${92 - c.h - 4} ${c.x - 5} ${92 - c.h - 12} ${c.x} ${92 - c.h - 19}z`} />
+        </g>
+      ))}
+      <g className="art-planchette">
+        <path className="art-board" d="M57 104c0-5 11-9 27-9s27 4 27 9c0 4-11 7-27 7s-27-3-27-7z" />
+        <circle className="art-lens" cx="84" cy="102" r="3.4" />
+      </g>
+      <g className="art-spirits">
+        <path className="art-wisp art-wisp-1" d="M56 80c-9-10 7-15 0-27s9-14 4-26c8 8 2 16 8 25s-8 17-12 28z" />
+        <path className="art-wisp art-wisp-2" d="M110 78c8-9-6-14 1-25s-8-13-3-24c-7 7-2 15-7 24s7 16 9 25z" />
+        <circle className="art-orb art-orb-1" cx="70" cy="30" r="3" />
+        <circle className="art-orb art-orb-2" cx="99" cy="22" r="2.2" />
+        <circle className="art-orb art-orb-3" cx="84" cy="12" r="1.8" />
+      </g>
+    </svg>
   );
 }
 

@@ -123,6 +123,74 @@ describe('HU-18 planchette', () => {
   });
 });
 
+describe('Next finding scrolls to the item, then focuses it', () => {
+  const rect = (top: number) => ({ top, bottom: top + 400, left: 0, right: 1000, width: 1000, height: 400, x: 0, y: top, toJSON: () => ({}) }) as DOMRect;
+
+  it('scrolls first, then focuses; a short hop is smooth with effects on, a long jump is instant', () => {
+    start();
+    const order: string[] = [];
+    const behaviours: string[] = [];
+    Element.prototype.scrollIntoView = vi.fn(function (this: Element, o?: boolean | ScrollIntoViewOptions) {
+      order.push('scroll');
+      behaviours.push(typeof o === 'object' ? String(o.behavior) : 'none');
+    });
+    const focus = HTMLElement.prototype.focus;
+    HTMLElement.prototype.focus = function (this: HTMLElement, ...a: unknown[]) {
+      if (this.tagName === 'ARTICLE') order.push('focus');
+      return focus.apply(this, a as never);
+    };
+    try {
+      const orig = HTMLElement.prototype.getBoundingClientRect;
+      HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+        return this.tagName === 'ARTICLE' ? rect(900) : orig.call(this);
+      };
+      fireEvent.click(screen.getByRole('button', { name: 'Next finding' }));
+      HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+        return this.tagName === 'ARTICLE' ? rect(11_000) : orig.call(this);
+      };
+      fireEvent.click(screen.getByRole('button', { name: 'Next finding' }));
+      HTMLElement.prototype.getBoundingClientRect = orig;
+    } finally {
+      HTMLElement.prototype.focus = focus;
+    }
+    expect(order).toEqual(['scroll', 'focus', 'scroll', 'focus']);
+    expect(behaviours).toEqual(['smooth', 'auto']); // 900 px away: smooth; 11,000 px away: instant
+  });
+
+  it('is instant under reduced motion and with Lights on', () => {
+    for (const [mode, reduced] of [['off', true], ['on', false]] as const) {
+      cleanup();
+      start(mode, { reduced });
+      const seen: string[] = [];
+      Element.prototype.scrollIntoView = vi.fn(function (this: Element, o?: boolean | ScrollIntoViewOptions) {
+        seen.push(typeof o === 'object' ? String(o.behavior) : 'none');
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Next finding' }));
+      expect(seen[0]).toBe('auto');
+      expect((document.activeElement as HTMLElement).id).toMatch(/^finding-/);
+    }
+  });
+
+  it('if the browser dropped the scroll and the target is still off screen, it scrolls again, instantly', async () => {
+    start();
+    const calls: string[] = [];
+    Element.prototype.scrollIntoView = vi.fn(function (this: Element, o?: boolean | ScrollIntoViewOptions) {
+      calls.push(typeof o === 'object' ? String(o.behavior) : 'none');
+    });
+    const orig = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+      return this.tagName === 'ARTICLE' ? rect(5000) : orig.call(this);
+    };
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Next finding' }));
+      await advance(1200);
+    } finally {
+      HTMLElement.prototype.getBoundingClientRect = orig;
+    }
+    expect(calls).toEqual(['auto', 'auto']);
+  });
+});
+
 describe('HU-19 idle whisper', () => {
   it('after 45 s with no input one polite line names the next item, is a link to it, and never comes again', async () => {
     start();
@@ -278,6 +346,108 @@ describe('HU-23 ink drip', () => {
     const ink = stripComments(sheet.slice(sheet.indexOf('HU-23 ink drip'), sheet.indexOf('HU-24 fog')));
     expect(ink).not.toMatch(/danger|\bred\b|#f00\b|#ff0000\b/i);
     expect(ink).toMatch(/--sk-ecto/);
+  });
+});
+
+describe('HU-28 the margin ghost', () => {
+  const withGutter = (left: number) => {
+    const orig = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+      const box = (l: number, b: number) => ({ left: l, right: l + 800, top: 0, bottom: b, width: 800, height: b, x: l, y: 0, toJSON: () => ({}) }) as DOMRect;
+      if (this.tagName === 'MAIN') return box(left, 3000);
+      if (this.tagName === 'HEADER') return box(0, 330);
+      if (this.getAttribute('aria-label') === 'Sample mode') return box(0, 85);
+      return orig.call(this);
+    };
+    return () => void (HTMLElement.prototype.getBoundingClientRect = orig);
+  };
+
+  it('drifts up the left gutter, below the banner and header, when a missing item becomes confirmed; once; then goes', async () => {
+    const restore = withGutter(64);
+    try {
+      start();
+      expect(document.querySelector('[data-margin-ghost]')).toBeNull(); // nothing for the missing items already there... and none confirmed yet
+      confirmCoverage('quote-b'); // SP-5302 becomes a confirmed missing item
+      const g = document.querySelector('[data-margin-ghost]') as HTMLElement;
+      expect(g).toBeTruthy();
+      expect(g.getAttribute('aria-hidden')).toBe('true');
+      expect(g.textContent).toBe('');
+      const from = parseFloat(g.style.getPropertyValue('--ghost-from'));
+      const to = parseFloat(g.style.getPropertyValue('--ghost-to'));
+      expect(to).toBeGreaterThanOrEqual(330 + 12); // below the header and the banner
+      expect(from - to).toBeGreaterThanOrEqual(160);
+      expect(parseFloat(g.style.width)).toBeLessThanOrEqual(64); // inside the gutter
+      await advance(5000);
+      expect(document.querySelector('[data-margin-ghost]')).toBeNull();
+      fireEvent.click(screen.getByRole('button', { name: /^Withdraw my coverage confirmation for .*Delta Field Instruments/ }));
+      confirmCoverage('quote-b');
+      expect(document.querySelector('[data-margin-ghost]')).toBeNull(); // the same item: once
+    } finally {
+      restore();
+    }
+  });
+
+  it('is not drawn when the gutter is too narrow to be free, for the missing items already confirmed, or with effects off', () => {
+    start(); // jsdom: the content column starts at 0, so there is no gutter
+    confirmCoverage('quote-b');
+    expect(document.querySelector('[data-margin-ghost]')).toBeNull();
+    cleanup();
+    const restore = withGutter(64);
+    try {
+      start('on');
+      confirmCoverage('quote-b');
+      expect(document.querySelector('[data-margin-ghost]')).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  it('is full strength: its art is opaque (not a faint tint), unlike the ghost in a cell', () => {
+    const sheet = css();
+    expect(sheet).toMatch(/\.art-ghost \{ fill: color-mix\(in srgb, var\(--sk-text\) 96%/);
+    expect(sheet).toMatch(/margin-ghost-rise[\s\S]*opacity: 1/);
+  });
+});
+
+describe('HU-29 gutter fog, HU-30 séance card, HU-31 display font', () => {
+  it('gutter fog sits beside the content column, behind everything, only with effects on, and only shows at 1280 px and wider', () => {
+    start();
+    const fog = [...document.querySelectorAll('[data-gutter-fog]')] as HTMLElement[];
+    expect(fog.map((f) => f.getAttribute('data-gutter-fog'))).toEqual(['left', 'right']);
+    for (const f of fog) {
+      expect(f.getAttribute('aria-hidden')).toBe('true');
+      expect(f.style.zIndex).toBe('-1');
+      expect(f.textContent).toBe('');
+      expect(document.querySelector('main')!.contains(f)).toBe(false); // beside the column, not inside it
+    }
+    const sheet = css();
+    expect(sheet).toMatch(/\[data-gutter-fog\] \{ display: none; \}/);
+    expect(sheet).toMatch(/@media \(min-width: 1280px\) \{\s*\[data-gutter-fog\] \{\s*display: block;\s*width: calc\(\(100% - 72rem\) \/ 2\)/);
+    cleanup();
+    start('on');
+    expect(document.querySelector('[data-gutter-fog]')).toBeNull();
+  });
+
+  it('the séance card is an image with no text, beside the counts, only with effects on, and the layout is unchanged without it', () => {
+    start();
+    const art = document.querySelector('[data-seance-art]')!;
+    expect(art.getAttribute('aria-hidden')).toBe('true');
+    expect(art.textContent).toBe('');
+    expect(art.parentElement).toBe(screen.getByLabelText('Summary').parentElement); // in the grid of the séance sentence and the counts
+    expect(art.parentElement!.className).toMatch(/md:grid-cols-\[1fr_1fr_auto\]/);
+    expect(art.querySelectorAll('.art-candle')).toHaveLength(3);
+    expect(art.querySelector('.art-planchette')).toBeTruthy();
+    expect(art.querySelectorAll('.art-wisp, .art-orb').length).toBeGreaterThanOrEqual(4);
+    cleanup();
+    start('on');
+    expect(document.querySelector('[data-seance-art]')).toBeNull();
+    expect(screen.getByLabelText('Summary').parentElement!.className).toMatch(/md:grid-cols-2/);
+    expect(screen.getByLabelText('Summary').parentElement!.className).not.toMatch(/auto/);
+  });
+
+  it('the title and the séance heading carry the display-face hook; nothing else does', () => {
+    start();
+    expect([...document.querySelectorAll('[data-display]')].map((e) => `${e.tagName} ${e.textContent!.trim()}`)).toEqual(['H1 ScopeCheck', 'H3 The séance']);
   });
 });
 

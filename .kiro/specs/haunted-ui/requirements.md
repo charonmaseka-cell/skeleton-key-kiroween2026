@@ -95,3 +95,13 @@ Ten effects, built for both apps. PackCheck uses its own wording for the lines t
 - **HU-26 Easter egg.** Typing "boo" while no text field, editor or dialog has focus shows ghosts behind the page for about 2.5 seconds. At most once every 5 seconds; nothing else triggers it.
 
 Words (PackCheck differs from ScopeCheck only in the whisper): ScopeCheck, "A candle still burns: {item}. Go there."; PackCheck, "The pack is not at rest: {item}. Go there." The candle count, the button label and every other control are the same.
+
+## Revision 4: the bolder pass (2026-11-03, approved by the owner)
+
+Effects that move, not brighter ones, and only in space that holds no text and no control (HU-27 still applies in full).
+
+- **HU-28 Margin ghost.** When a missing item BECOMES confirmed during the session (not for those already confirmed when a set opens), a full-strength ghost travels once up the left page gutter, below the banner and the header, swaying a little. It is drawn only if the gutter is at least 60 px wide (that is, at about 1280 px and wider); narrower, nothing is drawn.
+- **HU-29 Gutter fog.** At 1280 px and wider the page gutters (beside the content column, below the header) hold thicker fog that drifts in once (4.5 s) and rests. There is no gutter fog narrower than that.
+- **HU-30 Séance card.** An illustration with no text (three candles, a planchette, wisps and orbs of ectoplasm on a round table) sits beside the counts from 768 px wide. It settles in once.
+- **HU-31 Display face.** The app title and the séance heading use a serif display face, self-hosted (SIL OFL 1.1, an 8.7 kB subset kept with its licence in `packages/ui/src/fonts`), only when the effects are on. No font is ever loaded from another host.
+- **HU-18 amended: Next finding scrolls.** The target is scrolled into view FIRST, then focused. A smooth scroll is used only for a short hop with effects on; a long jump, reduced motion and Lights on scroll instantly; the outcome is checked and repeated instantly if the page did not move. A browser test requires the target to be inside the viewport afterwards, including when smooth scrolls are dropped.

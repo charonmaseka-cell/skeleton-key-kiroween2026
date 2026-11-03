@@ -91,8 +91,8 @@ async function focusRingWalk(page: Page, limit = 80): Promise<string[]> {
  * fine; decoration painted above them is not. Paint order is read from the browser: the decoration is made hit-testable for a moment,
  * and for every place where it overlaps visible text or a control the stack of elements under that point says which is on top.
  */
-async function motifOverlaps(page: Page): Promise<string[]> {
-  await atRest(page);
+async function motifOverlaps(page: Page, rest = true): Promise<string[]> {
+  if (rest) await atRest(page);
   return page.evaluate(() => {
     const style = document.createElement('style');
     style.textContent = '[data-motif], [data-motif] * { pointer-events: auto !important; }';
@@ -142,19 +142,71 @@ async function noSideways(page: Page): Promise<string[]> {
   return page.evaluate(() => (document.documentElement.scrollWidth <= document.documentElement.clientWidth ? [] : [`scrollWidth ${document.documentElement.scrollWidth} > ${document.documentElement.clientWidth}`]));
 }
 
+/**
+ * "Next finding" from the top of the page: the target must end up inside the viewport (below the sticky banner), focused, and the page
+ * must have scrolled to get there. Waits for a smooth scroll to finish (up to 4 s) before judging, so it checks the outcome, not the timing.
+ */
+async function nextFindingInView(page: Page): Promise<string[]> {
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(100);
+  await page.getByRole('button', { name: 'Next finding' }).click();
+  let last = -1;
+  for (let i = 0; i < 40; i++) {
+    await page.waitForTimeout(100);
+    const y = await page.evaluate(() => scrollY);
+    if (y === last && y > 0) break;
+    last = y;
+  }
+  const r = await page.evaluate(() => {
+    const a = document.activeElement as HTMLElement;
+    const b = a.getBoundingClientRect();
+    return { tag: a.tagName, id: a.id, top: Math.round(b.top), bottom: Math.round(b.bottom), height: Math.round(b.height), vh: innerHeight, y: Math.round(scrollY) };
+  });
+  const bad: string[] = [];
+  if (r.tag !== 'ARTICLE' || !r.id.startsWith('finding-')) bad.push(`focus is on ${r.tag} ${r.id}, not a finding`);
+  if (r.y <= 0) bad.push(`the page did not scroll (scrollY ${r.y})`);
+  if (!(r.top >= 40 && r.top < r.vh * 0.75)) bad.push(`the finding starts at ${r.top}px in a ${r.vh}px viewport: not in view`);
+  if (!(r.bottom <= r.vh || r.height > r.vh * 0.8)) bad.push(`the finding ends at ${r.bottom}px, below the ${r.vh}px viewport`);
+  return bad;
+}
+
+/** Judge where the focused finding is now, without clicking. */
+async function nextFindingInViewNow(page: Page): Promise<string[]> {
+  const r = await page.evaluate(() => {
+    const b = (document.activeElement as HTMLElement).getBoundingClientRect();
+    return { top: Math.round(b.top), vh: innerHeight };
+  });
+  return r.top >= 40 && r.top < r.vh * 0.75 ? [] : [`the focused finding starts at ${r.top}px in a ${r.vh}px viewport`];
+}
+
 const urlOf = (app: (typeof APPS)[number]) => `http://127.0.0.1:${app.port}/`;
 
 /**
  * The signature effects (HU-17 to HU-27), each in the state that triggers it, with the checks that matter: axe, no decoration above
  * text or a control, no sideways scroll. Lights off with motion allowed only (that is when the effects exist).
  */
-async function effectStates(ctx: BrowserContext, app: (typeof APPS)[number], tag: string, check: (page: Page, what: string, problems: string[]) => Promise<void>): Promise<void> {
+async function effectStates(ctx: BrowserContext, app: (typeof APPS)[number], tag: string, width: number, check: (page: Page, what: string, problems: string[]) => Promise<void>): Promise<void> {
   const full = async (page: Page, what: string) => {
     await check(page, `${what}: axe-core`, await axeViolations(page));
     await check(page, `${what}: decoration covers no text or control`, await motifOverlaps(page));
     await check(page, `${what}: no sideways page scroll`, await noSideways(page));
   };
   const expectThat = async (page: Page, what: string, ok: boolean, detail = '') => check(page, what, ok ? [] : [detail || 'not as expected']);
+
+  // Next finding when the browser drops every smooth scroll (an interrupted smooth scroll leaves the page where it was): the target must
+  // still end up in view. This is the failure reported on the live site, which the plain run above does not reproduce in headless Chromium.
+  const dropped = await ctx.newPage();
+  await dropped.addInitScript(() => {
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (this: Element, a?: boolean | ScrollIntoViewOptions) {
+      if (a && typeof a === 'object' && a.behavior === 'smooth') return;
+      return original.call(this, a as never);
+    };
+  });
+  await dropped.goto(urlOf(app));
+  await dropped.waitForSelector('main h2');
+  await check(dropped, 'Next finding still reaches the target when smooth scrolls are dropped', await nextFindingInView(dropped));
+  await dropped.close();
 
   const page = await ctx.newPage();
   await page.goto(urlOf(app));
@@ -164,12 +216,18 @@ async function effectStates(ctx: BrowserContext, app: (typeof APPS)[number], tag
   const needs = Number(await page.locator('dl[aria-label="Summary"] dt:text-is("Needs review") + dd').textContent());
   await expectThat(page, 'candles: one lit candle per item that needs review', lit === needs && lit > 0, `${lit} candles, ${needs} in the summary`);
   await full(page, 'candles');
+  // HU-29 to HU-31: gutter fog (wide only), the séance card, the display face
+  await expectThat(page, 'gutter fog: drawn at 1280 px and wider, not narrower', (await page.locator('[data-gutter-fog]').evaluateAll((els) => els.map((e) => getComputedStyle(e).display))).every((d) => (width >= 1280 ? d === 'block' : d === 'none')));
+  await expectThat(page, 'séance card: drawn beside the counts on wide screens, hidden on narrow ones', (await page.locator('[data-seance-art]').evaluate((e) => getComputedStyle(e).display)) === (width >= 768 ? 'block' : 'none'));
+  const face = await page.evaluate(async () => { await document.fonts.ready; const h = document.querySelector('h1')!; return { family: getComputedStyle(h).fontFamily, loaded: document.fonts.check('700 24px "Skeleton Display"') }; });
+  await expectThat(page, 'display font: the title and the séance heading use the self-hosted face', /Skeleton Display/.test(face.family) && face.loaded, JSON.stringify(face));
   // HU-18 planchette
   await page.getByRole('button', { name: 'Next finding' }).click();
   await page.waitForSelector('[data-planchette][data-show]', { timeout: 5000 }); // placed once the page has stopped scrolling
   await page.waitForTimeout(300);
   const focused = await page.evaluate(() => document.activeElement?.tagName + ' ' + (document.activeElement?.id ?? ''));
   await expectThat(page, 'planchette: focus moved to a finding and a pointer is there', /^ARTICLE finding-/.test(focused) && (await page.locator('[data-planchette][data-show]').count()) === 1, focused);
+  await check(page, 'planchette: the target is inside the viewport', await nextFindingInViewNow(page));
   await full(page, 'planchette');
   // HU-20 possessed hover and focus
   const cell = page.locator(app.name === 'scopecheck' ? 'td[data-possessed="spec"]' : 'tr[data-possessed="spec"]').first();
@@ -180,6 +238,18 @@ async function effectStates(ctx: BrowserContext, app: (typeof APPS)[number], tag
   await full(page, 'possessed hover');
   // HU-21 ghost drift (ScopeCheck needs coverage confirmed first; PackCheck shows its confirmed missing attachment from the start)
   await confirmCoverage(page, app);
+  // HU-28 the margin ghost, measured WHILE it flies (three moments), not after it has gone: it must cover nothing. It needs a free gutter,
+  // so it appears at 1280 px and not at 375 px.
+  if (width >= 1280) {
+    await page.waitForSelector('[data-margin-ghost]', { timeout: 3000 });
+    for (const [i, at] of [300, 1200, 2200].entries()) {
+      await page.waitForTimeout(i === 0 ? at : at - [300, 1200, 2200][i - 1]!);
+      const live = await page.locator('[data-margin-ghost]').count();
+      await check(page, `margin ghost in flight (${at} ms): present and covers no text or control`, live === 1 ? await motifOverlaps(page, false) : ['the ghost is not there']);
+    }
+    const box = await page.locator('[data-margin-ghost]').boundingBox();
+    await expectThat(page, 'margin ghost stays inside the left gutter', !!box && box.x >= 0 && box.x + box.width <= 64 + 1, JSON.stringify(box));
+  } else await expectThat(page, 'margin ghost: no free gutter at this width, so none is drawn', (await page.locator('[data-margin-ghost]').count()) === 0);
   const ghost = page.locator(app.name === 'scopecheck' ? 'td[data-ghost]' : 'tr[data-ghost] > td:last-child').first();
   await ghost.scrollIntoViewIfNeeded();
   await ghost.hover();
@@ -267,6 +337,7 @@ async function main() {
           await check('no sideways page scroll', await page.evaluate(() => (document.documentElement.scrollWidth <= document.documentElement.clientWidth ? [] : [`scrollWidth ${document.documentElement.scrollWidth} > ${document.documentElement.clientWidth}`])));
           await check('visible focus ring on every control reached by Tab', await focusRingWalk(page));
           await check('decoration overlaps no text or control', await motifOverlaps(page));
+          await check('Next finding scrolls the target into view and focuses it', await nextFindingInView(page));
           await check('Lights on has no decorative element', mode === 'on' ? await page.evaluate(() => [...document.querySelectorAll('[data-motif]')].map((m) => m.getAttribute('data-motif') ?? '')) : []);
           if (width === 1280) await page.screenshot({ path: join(SHOTS, `${app.name}-lights-${mode}.png`) });
           // The ghost state: confirm coverage of one document, then re-check the page (axe, overlap) with the ghost drawn.
@@ -279,7 +350,7 @@ async function main() {
               await page.screenshot({ path: join(SHOTS, `${app.name}-ghost-lights-${mode}.png`) });
             }
           }
-          if (mode === 'off') await effectStates(ctx, app, tag, async (_p, what, problems) => check(what, problems));
+          if (mode === 'off') await effectStates(ctx, app, tag, width, async (_p, what, problems) => check(what, problems));
           await ctx.close();
         }
       }
@@ -296,6 +367,11 @@ async function main() {
       const op = await rctx.newPage();
       await op.goto(`http://127.0.0.1:${app.port}/`);
       await op.waitForSelector('main h2');
+      {
+        const bad = await nextFindingInView(op);
+        if (bad.length) failures.push(`${app.name}: reduced motion: Next finding: ${bad.join('; ')}`);
+        else log(`PASS ${app.name}: reduced motion: Next finding scrolls the target into view and focuses it`);
+      }
       await confirmCoverage(op, app);
       const animated = await op.evaluate(() => [...document.querySelectorAll('*')].filter((e) => getComputedStyle(e).animationName !== 'none').map((e) => `${e.tagName.toLowerCase()}${e.getAttribute('data-motif') ? `[${e.getAttribute('data-motif')}]` : ''}`).slice(0, 8));
       if (animated.length) failures.push(`${app.name}: animations under reduced motion in Lights off: ${animated.join(', ')}`);

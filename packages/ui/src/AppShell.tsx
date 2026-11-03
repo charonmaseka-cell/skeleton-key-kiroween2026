@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Candles, HauntProvider, HeaderFog, WhisperLine } from './Haunt';
+import { Candles, GutterFog, HauntProvider, HeaderFog, WhisperLine } from './Haunt';
 import { BrandMark, Motifs } from './Motifs';
 import type { SessionView } from './session-core';
 import { LightsToggle, ThemeProvider, useLights } from './ThemeProvider';
@@ -51,7 +51,7 @@ function Frame({ title, tagline, banner, nav, announcement, children }: AppShell
       {banner}
       <header className="relative border-b border-sk-border px-4 py-4 sm:px-6">
         <LightsToggle />
-        <h1 className="text-2xl font-semibold">
+        <h1 data-display="" className="text-2xl font-semibold">
           <BrandMark />
           {title}
         </h1>
@@ -73,9 +73,12 @@ function Frame({ title, tagline, banner, nav, announcement, children }: AppShell
         )}
         <HeaderFog />
       </header>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6">
-        {children}
-      </main>
+      <div className="relative">
+        <GutterFog />
+        <main id="main" tabIndex={-1} className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6">
+          {children}
+        </main>
+      </div>
       <div role="status" aria-live="polite" className="sr-only">
         {live}
       </div>

@@ -27,7 +27,7 @@ export type PlannedComparison = {
   status: ComparisonStatus;
   /** human-readable reason (always present for not_evaluated) */
   reason?: string;
-  /** what was compared, for display, e.g. "10 units <-> 8 units" */
+  /** what was compared, for display, e.g. "10 units → 8 units" */
   detail?: string;
   blocked?: BlockedInput;
   /** fact IDs whose value in this comparison was typed by the user, not read from a document */

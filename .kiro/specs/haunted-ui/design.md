@@ -112,3 +112,26 @@ Lights on: the same sentence with plain nouns ("2 missing items and 1 stated exc
 ## 10. Not in scope
 
 Sound (decided: none). Third-party fonts, images over 20 kB, scripts or analytics. Any change to a finding's wording, state, severity or evidence. Theme names for rules that do not exist yet (reserved in the requirements table until foundation task 17 builds them).
+
+## 11. Revision 3: the signature pass (HU-17 to HU-27)
+
+**One switch.** `ThemeProvider` computes `effects = mode is off AND the system does not ask for reduced motion` (it follows both), and sets `<html data-effects="on|off">`. Every animated effect is CSS under `:root[data-effects='on']` or a component that renders nothing when `effects` is false. Without `matchMedia` (tests, old browsers) effects are off. Static theme work from HU-T2 to HU-T6 (palette, theme names, ghost styling, fog strips) is unchanged.
+
+**Behind, not over.** The page background moves from the app frame to `<body>` (the `surface` colour); the frame is transparent. Decoration that must sit on the page (header fog, mist, the "boo" ghosts) is `position: fixed or absolute; z-index: -1; pointer-events: none; aria-hidden`, so it is painted behind every piece of text and every card. Candles, the seal and the planchette sit in gaps or on borders (the planchette on the top border of the target card, where there is padding and no text). A browser check measures overlap with visible text and controls for each effect.
+
+**`HauntProvider`** (`packages/ui/src/Haunt.tsx`, inside `AppShell`): holds the unresolved list from the session view (Needs review items; "open" ones for the planchette and the whisper), the glow link between a cell and its evidence, the planchette position, the whisper state, the ink-drip trigger and the "boo" buffer. `labels.voice` (adapter data) supplies the whisper wording.
+
+| Requirement | Mechanism |
+|---|---|
+| HU-17 | `Candles`: ordered ids of unresolved items; a removed id is kept for 1.5 s as an unlit candle with a smoke wisp, `aria-hidden`; lit candles equal the Needs review count |
+| HU-18 | `NextFinding` button (both modes) calls `goNext()`: focus first (`preventScroll`), then `scrollIntoView`; the pointer is a `position:absolute` element moved by a CSS transition (700 ms), then faded |
+| HU-19 | an idle timer (45 s, reset by pointer, key, touch, wheel, scroll); the condition check at fire time; a `<p aria-live="polite">` that exists empty from the start |
+| HU-20 | `data-possessed="spec"` on the cell; CSS glitch (outline and box-shadow only, one run of 0.6 s); a context link sets `data-glow` on the finding's evidence figures while the cell is hovered or focused |
+| HU-21 | `[data-ghost]` cells: a `::before` figure (inline SVG data URI, under 1 kB) animated once on hover or focus-within, cell content raised above it |
+| HU-22 | `WaxSeal` in the decision group while accepted; `data-dismissed` on the card with a one-time fading ghost |
+| HU-23 | `InkDrip`: compares the confirmed critical ids with the set seen so far in this set (first render only records them) |
+| HU-24 | header fog: layered radial gradients at 14 percent ecto; mist: up to 10 pooled `span`s created by `pointermove` and removed on `animationend` |
+| HU-25 | `ThemeProvider.toggle()` shows a dark overlay animated twice (opacity), then applies the mode; nothing if effects are off |
+| HU-26 | `keydown` buffer of the last three letters, ignored in fields, editors and dialogs, cool-down 5 s |
+
+**Measured, not assumed.** The composited colour of the fog and of the glow is checked against text at 4.5:1; the browser script (`tools/a11y/check.ts`) runs axe, the focus walk, overlap and the sideways-scroll check with the effects switched on and in each triggered state, at 1280 px and 375 px; `tools/a11y/effects-shots.ts` freezes each effect at its most visible moment and saves a screenshot.

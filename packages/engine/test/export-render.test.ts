@@ -5,7 +5,7 @@ import { buildExport, renderCsv, renderText, summarizeComparisons, type ExportMo
 // corrections and notes, with sample runs marked. Not evaluated is its own section, never "agrees".
 
 const comparisons: PlannedComparison[] = [
-  { id: 'c1', check: 'x', field: 'amount', docs: ['a', 'b'], status: 'agree', detail: '10 <-> 10' },
+  { id: 'c1', check: 'x', field: 'amount', docs: ['a', 'b'], status: 'agree', detail: '10 → 10' },
   { id: 'c2', check: 'x', field: 'start_date', docs: ['a', 'b'], status: 'not_evaluated', reason: 'start_date in b not validated (date_format_ambiguous)', blocked: { docId: 'b', field: 'start_date', reason: 'date_format_ambiguous' } },
   { id: 'c3', check: 'x', field: 'name', docs: ['a', 'b'], status: 'flagged' },
 ];

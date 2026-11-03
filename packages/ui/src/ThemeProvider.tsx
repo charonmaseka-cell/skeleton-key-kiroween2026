@@ -1,10 +1,23 @@
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { ThemeEntry } from './session-core';
 import { readStored, readSystem, resolveMode, watchSystem, writeStored } from './lights';
 import type { Mode } from './theme-tokens';
 
-type LightsValue = { mode: Mode; toggle: () => void; /** text for the polite live region after a toggle; '' otherwise */ announcement: string };
-const LightsContext = createContext<LightsValue>({ mode: 'on', toggle: () => undefined, announcement: '' });
+type LightsValue = {
+  mode: Mode;
+  toggle: () => void;
+  /** text for the polite live region after a toggle; '' otherwise */
+  announcement: string;
+  /**
+   * Animated effects (haunted-ui HU-17 to HU-27) run only when this is true: Lights off AND the system does not ask for reduced motion
+   * (and the browser can tell: without matchMedia nothing animates). The same switch is `<html data-effects>` for the stylesheet.
+   */
+  effects: boolean;
+};
+const LightsContext = createContext<LightsValue>({ mode: 'on', toggle: () => undefined, announcement: '', effects: false });
+
+/** How long the page flickers before Lights on applies (two dips, under 3 flashes a second). */
+export const FLICKER_MS = 800;
 
 /** The resolved mode and the toggle. Outside a ThemeProvider: Lights on, and the toggle does nothing. */
 export const useLights = () => useContext(LightsContext);
@@ -20,22 +33,46 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [stored, setStored] = useState(() => readStored());
   const [system, setSystem] = useState(() => readSystem());
   const [announcement, setAnnouncement] = useState('');
+  const [flickering, setFlickering] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const mode = resolveMode(stored, system);
+  const canTellMotion = typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+  const effects = mode === 'off' && canTellMotion && !system.reducedMotion;
 
   useEffect(() => watchSystem(() => setSystem(readSystem())), []);
+  useEffect(() => () => clearTimeout(timer.current), []);
   useIsoLayoutEffect(() => {
     document.documentElement.setAttribute('data-lights', mode);
-  }, [mode]);
+    document.documentElement.setAttribute('data-effects', effects ? 'on' : 'off');
+  }, [mode, effects]);
 
-  const toggle = useCallback(() => {
-    const next: Mode = mode === 'on' ? 'off' : 'on';
+  const apply = useCallback((next: Mode) => {
     writeStored(next); // if storage is unavailable the choice still holds for this session
     setStored(next);
     setAnnouncement(next === 'on' ? 'Lights on' : 'Lights off');
-  }, [mode]);
+  }, []);
 
-  const value = useMemo(() => ({ mode, toggle, announcement }), [mode, toggle, announcement]);
-  return <LightsContext.Provider value={value}>{children}</LightsContext.Provider>;
+  const toggle = useCallback(() => {
+    if (flickering) return;
+    if (mode === 'off' && effects) {
+      // HU-25: the lights flicker twice, then Lights on applies. Focus does not move; the mode changes after the flicker.
+      setFlickering(true);
+      timer.current = setTimeout(() => {
+        setFlickering(false);
+        apply('on');
+      }, FLICKER_MS);
+      return;
+    }
+    apply(mode === 'on' ? 'off' : 'on');
+  }, [mode, effects, flickering, apply]);
+
+  const value = useMemo(() => ({ mode, toggle, announcement, effects }), [mode, toggle, announcement, effects]);
+  return (
+    <LightsContext.Provider value={value}>
+      {children}
+      {flickering && <div data-lights-flicker="" aria-hidden="true" className="no-print pointer-events-none fixed inset-0 z-50" />}
+    </LightsContext.Provider>
+  );
 }
 
 /**

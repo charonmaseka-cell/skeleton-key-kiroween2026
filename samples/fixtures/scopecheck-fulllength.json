@@ -1,12 +1,20 @@
 {
   "id": "scopecheck-fulllength",
   "title": "Full-length: tender and two quotations (recorded Llama 3.3 70B output)",
-  "description": "A full-length fictional tender (12 requested lines) against two quotations of 11 lines each, one with a positioned table and one in prose. This is the default sample. The claims were recorded from ONE live run of @cf/meta/llama-3.3-70b-instruct-fp8-fast (12 requests, 1 November 2026, batch sc-t12-fresh) and are replayed here unchanged, including the extraction faults documented in docs/results/sc-t12-fresh-results.md. The smaller two-quotation set is the second option.",
+  "description": "A fictional tender and two quotations. Recorded from one real AI run on 1 November 2026, replayed unchanged.",
   "sample": true,
   "label": "Sample (fictional)",
   "extraction": {
     "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "note": "The claims are recorded output of one live run of Llama 3.3 70B (12 requests on 1 November 2026; documents and labels were written before that run). They are replayed unchanged, faults included. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    "note": "Recorded from one real AI run on 1 November 2026, replayed unchanged.",
+    "details": [
+      "Model: @cf/meta/llama-3.3-70b-instruct-fp8-fast.",
+      "The tender has 12 requested lines; each quotation has 11 lines, one with a positioned table and one in prose. This is the default sample; the smaller two-quotation set is the second option.",
+      "Run: 12 requests, batch sc-t12-fresh. The documents and labels were written before that run.",
+      "The extraction faults are kept, not hidden: see docs/results/sc-t12-fresh-results.md.",
+      "Recorded in: samples/benchmark-results/live-sc-t12-fresh-resume2-2026-11-01T23-11-42-955Z.json.",
+      "All names, items and prices are invented. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    ]
   },
   "docs": [
     {

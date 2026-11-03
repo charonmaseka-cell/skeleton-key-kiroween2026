@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AppShell } from './AppShell';
@@ -28,6 +28,8 @@ afterEach(cleanup);
 
 const shell = () => render(<AppShell title="T" tagline="x" announcement="">content</AppShell>);
 const lights = () => document.documentElement.getAttribute('data-lights');
+/** Off to on first flickers the page twice (HU-25, 0.8 s with effects on), so the mode changes a moment after the click. */
+const becomesOn = () => waitFor(() => expect(lights()).toBe('on'), { timeout: 3000 });
 
 describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
   it('with nothing stored the page starts in Lights off, and the toggle offers Lights on', () => {
@@ -57,7 +59,7 @@ describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
     const b = screen.getByRole('button', { name: 'Lights on' });
     b.focus();
     await user.keyboard('{Enter}');
-    expect(lights()).toBe('on');
+    await becomesOn();
     expect(localStorage.getItem(STORAGE_KEY)).toBe('on');
     expect(document.activeElement).toBe(b);
     expect(b.textContent).toBe('Lights on');
@@ -66,12 +68,12 @@ describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
     expect(b.getAttribute('aria-pressed')).toBe('true');
     const live = screen.getByRole('status');
     expect(live.getAttribute('aria-live')).toBe('polite');
-    expect(live.textContent).toBe('Lights on');
+    await waitFor(() => expect(live.textContent).toBe('Lights on'));
     await user.keyboard(' ');
     expect(lights()).toBe('off');
     expect(localStorage.getItem(STORAGE_KEY)).toBe('off');
     expect(document.activeElement).toBe(b);
-    expect(live.textContent).toBe('Lights off');
+    await waitFor(() => expect(live.textContent).toBe('Lights off'));
     expect(b.textContent).toBe('Lights on');
     expect(b.getAttribute('aria-pressed')).toBe('false');
     expect(b.querySelector('svg')!.getAttribute('data-lights-icon')).toBe('off');
@@ -104,6 +106,7 @@ describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
     const user = userEvent.setup();
     shell();
     await user.click(screen.getByRole('button', { name: 'Lights on' }));
+    await becomesOn();
     setMedia(RM, true);
     setMedia(RM, false);
     expect(lights()).toBe('on');
@@ -119,17 +122,18 @@ describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
       shell();
       expect(lights()).toBe('off');
       await user.click(screen.getByRole('button', { name: 'Lights on' }));
-      expect(lights()).toBe('on');
+      await becomesOn();
     } finally {
       Storage.prototype.getItem = get;
       Storage.prototype.setItem = set;
     }
   });
 
-  it('a later announcement from the page replaces the toggle message in the live region', () => {
+  it('a later announcement from the page replaces the toggle message in the live region', async () => {
     const { rerender } = shell();
     act(() => screen.getByRole('button', { name: 'Lights on' }).click());
-    expect(screen.getByRole('status').textContent).toBe('Lights on');
+    await becomesOn();
+    await waitFor(() => expect(screen.getByRole('status').textContent).toBe('Lights on'));
     rerender(<AppShell title="T" tagline="x" announcement="Decision saved: accepted.">content</AppShell>);
     expect(screen.getByRole('status').textContent).toBe('Decision saved: accepted.');
   });

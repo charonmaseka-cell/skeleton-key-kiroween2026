@@ -76,3 +76,22 @@ Theme names for rules that are not built are reserved, not shown.
 ## Protected scope
 
 If time runs short, ship Lights on (fully accessible) plus the Lights-off palette and typography, then the séance summary and theme names. Cut effects first (ghost fade, possessed boundary animation), then motifs and illustrations. **Never cut HU-2 to HU-7, HU-10's "second name, never a verdict" rule, HU-13's counting rules, or HU-16.**
+
+## Revision 3: the signature pass (2026-11-03, approved by the owner)
+
+Ten effects, built for both apps. PackCheck uses its own wording for the lines that have words. They sit on top of HU-1 to HU-16 and change none of them.
+
+**Rules for all of them (HU-27).** Decoration never covers data: it is drawn behind text and controls, in margins and gaps, or on a border, and a test measures overlap in the browser. Nothing appears at a random time or in a random place: every effect has a defined trigger and a defined position. Every effect is off in Lights on and under `prefers-reduced-motion` (together: "effects off"), and the page then shows exactly the same information and offers exactly the same controls; where an effect has a function (the planchette's jump, the whisper's link), the function stays and only the decoration goes. The existing axe, contrast, focus-ring and no-sideways-scroll checks stay green in both modes at 1280 px and 375 px. No sound. No red decoration. No jump scares: nothing is sudden, large or loud, and no effect flashes more than twice a second.
+
+- **HU-17 Candles.** The header holds one candle per unresolved item, where unresolved means Needs review; the number of lit candles equals the Needs review count in the summary at every moment. When an item stops needing review (a correction, a coverage confirmation) its candle is snuffed out once, with a smoke wisp, and goes. Flames are still.
+- **HU-18 Planchette.** A "Next finding" button (a real button, in both modes) goes to the next unresolved item that is still open (not accepted or dismissed), in page order, and moves focus to it. With effects on, a planchette pointer also glides to the top edge of that item, then fades; with effects off focus simply moves.
+- **HU-19 Idle whisper.** After 45 seconds with no input, at most once per page session, one `aria-live="polite"` line names the next unresolved item and is a button that jumps to it. Never while a dialog or the correction editor is open, or while a field has focus; if blocked it waits for the next 45 seconds of quiet. Effects on only.
+- **HU-20 Possessed hover and focus.** A spec-mismatch cell glitches its border once when hovered or focused, and both evidence lines of its finding glow, in the finding card, for as long as it is hovered or focused. Text never moves, blurs or distorts.
+- **HU-21 Ghost drift.** A translucent figure drifts once through a confirmed-missing-item cell when it is hovered or focused, behind its text.
+- **HU-22 Seal and fade.** Accept stamps a wax seal beside the decision buttons (once, then it stays while the item is accepted); Dismiss fades a ghost out of the card once. A dismissed item stays in the queue and Reopen restores it. The wax is violet, not red.
+- **HU-23 Ink drip.** Once for each critical finding that becomes confirmed during the session (not for those already confirmed when a set opens), a single drop of dark ink or ectoplasm runs down the right margin and stops. Never red.
+- **HU-24 Fog and mist.** Fog sits behind the header text. A faint mist trail follows the pointer, behind the page content, a few puffs at a time, only while the pointer moves.
+- **HU-25 Lights flicker.** Switching to Lights on first flickers the page twice (0.8 s, two flashes: under 3 a second), then applies. Under reduced motion it applies at once.
+- **HU-26 Easter egg.** Typing "boo" while no text field, editor or dialog has focus shows ghosts behind the page for about 2.5 seconds. At most once every 5 seconds; nothing else triggers it.
+
+Words (PackCheck differs from ScopeCheck only in the whisper): ScopeCheck, "A candle still burns: {item}. Go there."; PackCheck, "The pack is not at rest: {item}. Go there." The candle count, the button label and every other control are the same.

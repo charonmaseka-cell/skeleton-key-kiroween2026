@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { formatValue, processingComplete, type EffectiveFact, type Evidence, type Finding, type PlannedComparison, type ReviewItem, type ValueKind } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
+import { FadingGhost, NextFinding, WaxSeal, useHaunt } from './Haunt';
 import { EmptyState } from './Motifs';
 import { Seance } from './Seance';
 import { ThemeName } from './ThemeProvider';
@@ -174,9 +175,23 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
   // A reopen clears the stored note; the input must follow it.
   useEffect(() => setNote(review.note ?? ''), [review.note, review.history.length]);
   const inputs = finding.inputs.map((i) => view.effective.get(i.factId)).filter((x): x is EffectiveFact => !!x);
-  const pair = finding.code.endsWith('.differs') && new Set(finding.evidence.map((e) => e.evidence.docId)).size >= 2;
+  const pair = /differs$/.test(finding.code) && new Set(finding.evidence.map((e) => e.evidence.docId)).size >= 2;
+  const haunt = useHaunt();
+  // HU-22: a seal stamps and a ghost fades only when a decision is made here, not when the card arrives already decided. "Just now"
+  // is a short-lived state, so an unrelated re-render a moment later does not cut the effect short.
+  const prevStatus = useRef(review.status);
+  const [justNow, setJustNow] = useState<string | null>(null);
+  useEffect(() => {
+    if (prevStatus.current === review.status) return;
+    prevStatus.current = review.status;
+    setJustNow(review.status);
+    const t = setTimeout(() => setJustNow(null), 1800);
+    return () => clearTimeout(t);
+  }, [review.status]);
+  const dismissed = haunt.effects && review.status === 'dismissed';
   return (
-    <article id={`finding-${finding.id}`} tabIndex={-1} aria-labelledby={`h-${finding.id}`} className="space-y-2 rounded border border-sk-border bg-sk-surface p-4">
+    <article id={`finding-${finding.id}`} tabIndex={-1} aria-labelledby={`h-${finding.id}`} data-dismissed={dismissed ? '' : undefined} className="relative space-y-2 rounded border border-sk-border bg-sk-surface p-4">
+      {dismissed && justNow === 'dismissed' && <FadingGhost />}
       <h4 id={`h-${finding.id}`} className="break-words text-lg font-semibold">
         {finding.message}
         <ThemeName entry={view.theme[finding.code]} state={finding.state} />
@@ -202,7 +217,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
         <div role="group" aria-label="Source evidence" className="space-y-1">
           <h5 className="font-medium">Source evidence</h5>
           {/* A difference between two documents shows both source lines side by side (stacked on narrow screens), each with the cited words marked. */}
-          <div data-evidence-pair={pair ? '' : undefined} className={pair ? 'grid gap-2 sm:grid-cols-2' : 'space-y-1'}>
+          <div data-evidence="" data-evidence-pair={pair ? '' : undefined} data-glow={haunt.glowId === finding.id ? '' : undefined} className={pair ? 'grid gap-2 sm:grid-cols-2' : 'space-y-1'}>
             {finding.evidence.map((e, i) => (
               <EvidenceView key={`${e.factId}-${i}`} evidence={e.evidence} role={e.role} view={view} />
             ))}
@@ -224,6 +239,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
           <button type="button" aria-label={`Reopen: ${finding.message}`} onClick={() => session.decide(finding, 'open', note)} className="rounded border border-sk-border px-3 py-1">
             Reopen
           </button>
+          {review.status === 'accepted' && <WaxSeal fresh={justNow === 'accepted'} />}
         </div>
         {review.history.length > 0 && (
           <details>
@@ -453,6 +469,7 @@ export function ReviewWorkspace({ session, baseName, children }: { session: Sess
         <Seance view={view} />
         <SummaryBar view={view} />
       </div>
+      <NextFinding />
       {children}
       <ReviewQueue session={session} view={view} />
       <NotEvaluatedList comparisons={view.evaluation.comparisons} session={session} view={view} />

@@ -1,12 +1,18 @@
 {
   "id": "scopecheck-standard",
   "title": "RFQ and two quotations",
-  "description": "One RFQ and two quotations with a quantity difference, a specification difference, an exclusion and an item missing from a quotation. All names, items and prices are invented.",
+  "description": "A fictional RFQ and two quotations. Recorded from real AI runs on 1 November 2026, replayed unchanged.",
   "sample": true,
   "label": "Sample (fictional)",
   "extraction": {
     "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "note": "The claims are recorded model output for these fictional documents (selected benchmark configuration). Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    "note": "Recorded from real AI runs on 1 November 2026, replayed unchanged.",
+    "details": [
+      "Model: @cf/meta/llama-3.3-70b-instruct-fp8-fast.",
+      "It holds a quantity difference, a specification difference, an exclusion and an item missing from a quotation.",
+      "Recorded in: samples/benchmark-results/live-repeat-rfq-2026-11-01T02-22-13-472Z.json; samples/benchmark-results/live-repeat-quote-a-2026-11-01T02-05-56-250Z.json; samples/benchmark-results/live-quote-b-2026-11-01T02-06-09-432Z.json.",
+      "All names, items and prices are invented. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    ]
   },
   "docs": [
     {

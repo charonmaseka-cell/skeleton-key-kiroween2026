@@ -37,9 +37,10 @@ export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: 
     <AppShell
       title="PackCheck"
       tagline="Check a grant application pack for missing attachments and inconsistent values. Ambiguous or unsupported values are held for you, never guessed."
-      banner={fixture.sample ? <SampleBanner note={fixture.extraction.note} /> : <LiveBanner note={fixture.extraction.note} />}
+      banner={fixture.sample ? <SampleBanner note={fixture.extraction.note} details={fixture.extraction.details} /> : <LiveBanner note={fixture.extraction.note} />}
       nav={NAV}
       announcement={session.announcement}
+      haunt={{ view }}
     >
       <section aria-labelledby="set-h" className="space-y-2">
         <h2 id="set-h" className="text-xl font-semibold">

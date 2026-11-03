@@ -56,7 +56,8 @@ export type Fixture = {
   /** true for fictional fixtures; false for documents the user uploaded. Drives every banner and export marker. */
   sample: boolean;
   label: string;
-  extraction: { model: string; note: string };
+  /** `note` is ONE plain line (the banner and the description); `details` hold the rest (model, batch, paths) behind the Details toggle */
+  extraction: { model: string; note: string; details?: string[] };
   docs: FixtureDoc[];
 };
 
@@ -98,7 +99,12 @@ export type ThemeEntry = {
   plainPlural: string;
 };
 
+/** The few words the signature effects speak (haunted-ui HU-19). Adapter data: each app has its own voice. */
+export type Voice = { whisper: (message: string) => string };
+export const DEFAULT_VOICE: Voice = { whisper: (m) => `An item is still unresolved: ${m}. Go there.` };
+
 export type AdapterLabels = {
+  voice?: Voice,
   /** finding code -> second name (Lights off only). Adapter data; the engine and this package know no domain words. */
   theme?: Record<string, ThemeEntry>;
   /** field key -> label, for example organisation_name -> "Organisation name" */
@@ -154,6 +160,7 @@ export type SessionView = {
   reasonText(code?: string): string;
   /** the adapter's theme entries (finding code -> second name) */
   theme: Record<string, ThemeEntry>;
+  voice: Voice;
   /** 1-based position of a block in its document, for "line N" instead of a block ID */
   lineNumber(docId: string, blockId: string): number | null;
 };
@@ -215,6 +222,7 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
     docName: L.docName,
     reasonText: L.reasonText,
     theme: adapter.labels.theme ?? {},
+    voice: adapter.labels.voice ?? DEFAULT_VOICE,
     lineNumber: (docId, blockId) => {
       const i = (blocksByDoc.get(docId) ?? []).findIndex((b) => b.id === blockId);
       return i < 0 ? null : i + 1;

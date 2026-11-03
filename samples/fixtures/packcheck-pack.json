@@ -1,12 +1,19 @@
 {
   "id": "packcheck-pack",
   "title": "Grant application pack",
-  "description": "A four-document grant pack with a missing attachment, an organisation-name inconsistency, an ambiguous date, and a funding request (R1.6 million) that is correctly below the budget (R2 million). All names and amounts are invented.",
+  "description": "A fictional four-document grant application pack. Recorded from real AI runs on 1 and 3 November 2026, replayed unchanged.",
   "sample": true,
   "label": "Sample (fictional)",
   "extraction": {
     "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "note": "The claims are recorded model output for these fictional documents (selected benchmark configuration). Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    "note": "Recorded from real AI runs on 1 and 3 November 2026, replayed unchanged.",
+    "details": [
+      "Model: @cf/meta/llama-3.3-70b-instruct-fp8-fast.",
+      "It holds a missing attachment, an organisation-name inconsistency, an ambiguous date, and a funding request that is correctly below the budget.",
+      "The budget document was re-extracted on 3 November 2026 through a gated staging Worker (one request); the other three were recorded on 1 November 2026.",
+      "Recorded in: samples/benchmark-results/live-packcheck-requirements-v2-2026-11-01T03-00-30-176Z.json; samples/benchmark-results/live-packcheck-application-form-v2-2026-11-01T02-36-58-539Z.json; samples/benchmark-results/live-packcheck-budget-v2-staging-worker-2026-11-03T01-10-14-407Z.json; samples/benchmark-results/live-packcheck-registration-v2-2026-11-01T03-00-42-246Z.json.",
+      "All names, items and prices are invented. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    ]
   },
   "docs": [
     {

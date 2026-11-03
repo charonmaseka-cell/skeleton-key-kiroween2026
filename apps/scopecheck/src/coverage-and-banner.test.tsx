@@ -46,12 +46,20 @@ describe('sample banner', () => {
     expect(line.textContent).toMatch(/SAMPLE MODE: fictional documents/);
     expect(line.textContent).toMatch(/Details/);
     expect(compact.className).toMatch(/sm:hidden/);
-    // the fold holds the explanation, including "Not a real review" and the recorded-output note
+    // the fold holds the explanation: "Not a real review", ONE plain line about the recording, and the details
     expect(compact.textContent).toMatch(/Not a real review/);
-    expect(compact.textContent).toMatch(/recorded model output/);
-    // wide: the complete text is shown without a toggle
+    expect(compact.textContent).toMatch(/Recorded from real AI runs on 1 (and 3 )?November 2026, replayed unchanged\./);
+    // wide: the label and the plain line are shown; the model, run and paths are behind the Details toggle
     const wide = banner.querySelector('div.hidden.sm\\:block')!;
     expect(wide.textContent).toMatch(/SAMPLE MODE: fictional documents\. Not a real review\./);
-    expect(wide.textContent).toMatch(/recorded model output/);
+    expect(wide.textContent).toMatch(/Recorded from real AI runs on 1 (and 3 )?November 2026, replayed unchanged\./);
+    const det = wide.querySelector('details[data-banner-details]') as HTMLDetailsElement;
+    expect(det.open).toBe(false);
+    expect(det.querySelector('summary')!.textContent).toBe('Details');
+    expect(det.textContent).toMatch(/@cf\/meta\/llama-3\.3-70b/);
+    expect(det.textContent).toMatch(/samples\/benchmark-results\//);
+    // the plain line itself carries no model id, batch name or path
+    const plain = [...wide.querySelectorAll('p')].map((p) => p.textContent).join(' ');
+    expect(plain).not.toMatch(/llama|@cf|batch|samples\/|docs\//i);
   });
 });

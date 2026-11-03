@@ -18,7 +18,7 @@ export type ScopeContext = { data: ScopeData; matches: ReturnType<typeof scopeMa
 export const scopeCheckAdapter: DomainAdapter = {
   id: 'scopecheck',
   hints: SCOPECHECK_HINTS,
-  labels: { fields: SCOPE_FIELD_LABELS, roles: SCOPE_ROLE_LABELS, reasons: SCOPE_REASONS, theme: SCOPE_THEME },
+  labels: { fields: SCOPE_FIELD_LABELS, roles: SCOPE_ROLE_LABELS, reasons: SCOPE_REASONS, theme: SCOPE_THEME, voice: { whisper: (m) => `A candle still burns: ${m}. Go there.` } },
   evaluate({ facts, originalFacts, documents, blocks, roles, titles }: EvaluateInput) {
     const rfqDocId = Object.keys(roles).find((d) => roles[d] === 'rfq');
     if (!rfqDocId) return { findings: [], comparisons: [] };

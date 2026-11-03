@@ -11,7 +11,7 @@ import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import { createRequire } from 'node:module';
 import { extname, join, normalize } from 'node:path';
-import { chromium, type Page } from 'playwright';
+import { chromium, type BrowserContext, type Page } from 'playwright';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 const require = createRequire(import.meta.url);
@@ -22,7 +22,7 @@ const TYPES: Record<string, string> = { '.html': 'text/html', '.js': 'text/javas
 
 const APPS = [
   { name: 'scopecheck', port: 4391, ghostButton: /confirm coverage of Offer DF\/0098/i, ghostDoc: 'quote-b' },
-  { name: 'packcheck', port: 4392, ghostButton: null, ghostDoc: null },
+  { name: 'packcheck', port: 4392, ghostButton: /confirm coverage of Application form/i, ghostDoc: 'application-form' },
 ] as const;
 
 /** Open the document's section and press "Confirm coverage": a possible ghost becomes a confirmed one. */
@@ -86,40 +86,156 @@ async function focusRingWalk(page: Page, limit = 80): Promise<string[]> {
   return bad;
 }
 
-/** Decorative rectangles must not overlap any text line or control. */
+/**
+ * Decoration must not COVER text or a control. Decoration drawn behind them (the fog, the mist, the "boo" ghosts: negative z-index) is
+ * fine; decoration painted above them is not. Paint order is read from the browser: the decoration is made hit-testable for a moment,
+ * and for every place where it overlaps visible text or a control the stack of elements under that point says which is on top.
+ */
 async function motifOverlaps(page: Page): Promise<string[]> {
   await atRest(page);
   return page.evaluate(() => {
-    const motifs = [...document.querySelectorAll('[data-motif]')].map((m) => ({ kind: m.getAttribute('data-motif'), r: m.getBoundingClientRect() })).filter((m) => m.r.width > 0);
-    const hit = (a: DOMRect, b: DOMRect) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-    const out: string[] = [];
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const range = document.createRange();
-    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-      if (!n.textContent?.trim() || (n.parentElement && n.parentElement.closest('[data-motif], [aria-hidden="true"], script, style'))) continue;
-      range.selectNodeContents(n);
-      for (const tr of range.getClientRects())
-        for (const m of motifs) {
-          if (tr.width <= 0 || !hit(tr, m.r)) continue;
-          // Text scrolled out of its container (clipped) is not visible, so decoration over its box is not over visible text.
-          const x = (Math.max(tr.left, m.r.left) + Math.min(tr.right, m.r.right)) / 2;
-          const y = (Math.max(tr.top, m.r.top) + Math.min(tr.bottom, m.r.bottom)) / 2;
-          const top = document.elementsFromPoint(x, y).find((e) => !e.closest('[data-motif]'));
-          if (top && n.parentElement && (top === n.parentElement || n.parentElement.contains(top))) out.push(`${m.kind} over text "${n.textContent.trim().slice(0, 30)}"`);
-        }
-    }
-    for (const c of document.querySelectorAll('button, a[href], input, select, summary')) {
-      const cr = c.getBoundingClientRect();
-      for (const m of motifs) {
-        if (cr.width <= 0 || !hit(cr, m.r)) continue;
-        const x = (Math.max(cr.left, m.r.left) + Math.min(cr.right, m.r.right)) / 2;
-        const y = (Math.max(cr.top, m.r.top) + Math.min(cr.bottom, m.r.bottom)) / 2;
-        const top = document.elementsFromPoint(x, y).find((e) => !e.closest('[data-motif]'));
-        if (top && (top === c || c.contains(top))) out.push(`${m.kind} over control ${c.tagName.toLowerCase()}`);
+    const style = document.createElement('style');
+    style.textContent = '[data-motif], [data-motif] * { pointer-events: auto !important; }';
+    document.head.appendChild(style);
+    try {
+      // decoration that is not visible (faded out, or finished its animation at opacity 0) covers nothing
+      const visible = (e: Element) => { for (let n: Element | null = e; n; n = n.parentElement) if (parseFloat(getComputedStyle(n).opacity) < 0.05 || getComputedStyle(n).visibility === 'hidden') return false; return true; };
+      const motifs = [...document.querySelectorAll('[data-motif]')].filter(visible).map((m) => ({ kind: m.getAttribute('data-motif'), r: m.getBoundingClientRect() })).filter((m) => m.r.width > 0 && m.r.height > 0);
+      const hit = (a: DOMRect, b: DOMRect) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+      const out: string[] = [];
+      const centre = (a: DOMRect, b: DOMRect) => [(Math.max(a.left, b.left) + Math.min(a.right, b.right)) / 2, (Math.max(a.top, b.top) + Math.min(a.bottom, b.bottom)) / 2] as const;
+      const covers = (x: number, y: number, owner: Element | null) => {
+        if (!owner) return false;
+        const stack = document.elementsFromPoint(x, y);
+        const iM = stack.findIndex((e) => e.closest('[data-motif]'));
+        const iT = stack.findIndex((e) => e === owner || owner.contains(e));
+        return iM >= 0 && iT >= 0 && iM < iT; // the decoration is above it
+      };
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const range = document.createRange();
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (!n.textContent?.trim() || (n.parentElement && n.parentElement.closest('[data-motif], script, style, .sr-only'))) continue;
+        range.selectNodeContents(n);
+        for (const tr of range.getClientRects())
+          for (const m of motifs) {
+            if (tr.width < 4 || !hit(tr, m.r)) continue;
+            const [x, y] = centre(tr, m.r);
+            if (covers(x, y, n.parentElement)) out.push(`${m.kind} over text "${n.textContent.trim().slice(0, 30)}"`);
+          }
       }
+      for (const c of document.querySelectorAll('button, a[href], input, select, summary')) {
+        const cr = c.getBoundingClientRect();
+        for (const m of motifs) {
+          if (cr.width <= 0 || !hit(cr, m.r)) continue;
+          const [x, y] = centre(cr, m.r);
+          if (covers(x, y, c)) out.push(`${m.kind} over control ${c.tagName.toLowerCase()}`);
+        }
+      }
+      return out.slice(0, 10);
+    } finally {
+      style.remove();
     }
-    return out.slice(0, 10);
   });
+}
+
+async function noSideways(page: Page): Promise<string[]> {
+  return page.evaluate(() => (document.documentElement.scrollWidth <= document.documentElement.clientWidth ? [] : [`scrollWidth ${document.documentElement.scrollWidth} > ${document.documentElement.clientWidth}`]));
+}
+
+const urlOf = (app: (typeof APPS)[number]) => `http://127.0.0.1:${app.port}/`;
+
+/**
+ * The signature effects (HU-17 to HU-27), each in the state that triggers it, with the checks that matter: axe, no decoration above
+ * text or a control, no sideways scroll. Lights off with motion allowed only (that is when the effects exist).
+ */
+async function effectStates(ctx: BrowserContext, app: (typeof APPS)[number], tag: string, check: (page: Page, what: string, problems: string[]) => Promise<void>): Promise<void> {
+  const full = async (page: Page, what: string) => {
+    await check(page, `${what}: axe-core`, await axeViolations(page));
+    await check(page, `${what}: decoration covers no text or control`, await motifOverlaps(page));
+    await check(page, `${what}: no sideways page scroll`, await noSideways(page));
+  };
+  const expectThat = async (page: Page, what: string, ok: boolean, detail = '') => check(page, what, ok ? [] : [detail || 'not as expected']);
+
+  const page = await ctx.newPage();
+  await page.goto(urlOf(app));
+  await page.waitForSelector('main h2');
+  // HU-17 candles: lit candles = the Needs review count in the summary
+  const lit = await page.locator('[data-candle][data-lit="true"]').count();
+  const needs = Number(await page.locator('dl[aria-label="Summary"] dt:text-is("Needs review") + dd').textContent());
+  await expectThat(page, 'candles: one lit candle per item that needs review', lit === needs && lit > 0, `${lit} candles, ${needs} in the summary`);
+  await full(page, 'candles');
+  // HU-18 planchette
+  await page.getByRole('button', { name: 'Next finding' }).click();
+  await page.waitForSelector('[data-planchette][data-show]', { timeout: 5000 }); // placed once the page has stopped scrolling
+  await page.waitForTimeout(300);
+  const focused = await page.evaluate(() => document.activeElement?.tagName + ' ' + (document.activeElement?.id ?? ''));
+  await expectThat(page, 'planchette: focus moved to a finding and a pointer is there', /^ARTICLE finding-/.test(focused) && (await page.locator('[data-planchette][data-show]').count()) === 1, focused);
+  await full(page, 'planchette');
+  // HU-20 possessed hover and focus
+  const cell = page.locator(app.name === 'scopecheck' ? 'td[data-possessed="spec"]' : 'tr[data-possessed="spec"]').first();
+  await cell.scrollIntoViewIfNeeded();
+  await cell.hover();
+  await page.waitForTimeout(200);
+  await expectThat(page, 'possessed: hovering the cell makes both evidence lines glow', (await page.locator('[data-evidence][data-glow] figure').count()) >= 2);
+  await full(page, 'possessed hover');
+  // HU-21 ghost drift (ScopeCheck needs coverage confirmed first; PackCheck shows its confirmed missing attachment from the start)
+  await confirmCoverage(page, app);
+  const ghost = page.locator(app.name === 'scopecheck' ? 'td[data-ghost]' : 'tr[data-ghost] > td:last-child').first();
+  await ghost.scrollIntoViewIfNeeded();
+  await ghost.hover();
+  await page.waitForTimeout(900);
+  await full(page, 'ghost drift');
+  // HU-23 ink drip (ScopeCheck: confirming coverage made SP-5302 a confirmed critical finding)
+  if (app.name === 'scopecheck') await expectThat(page, 'ink drip: ran once when the critical finding became confirmed', (await page.locator('[data-ink]').count()) <= 1);
+  // HU-22 seal and fade
+  await page.getByRole('button', { name: 'Next finding' }).click();
+  await page.locator('article:focus').getByRole('button', { name: /^Accept:/ }).click();
+  await page.waitForTimeout(600);
+  await expectThat(page, 'seal: Accept stamps a wax seal', (await page.locator('[data-seal]').count()) >= 1);
+  await full(page, 'wax seal');
+  // another card to dismiss: the next open one if there is one, else any other card (PackCheck may have only one open item)
+  const more = page.getByRole('button', { name: 'Next finding' });
+  if (await more.count()) {
+    await more.click();
+    await page.locator('article:focus').getByRole('button', { name: /^Dismiss:/ }).click();
+  } else await page.locator('article').nth(1).getByRole('button', { name: /^Dismiss:/ }).click();
+  await page.waitForTimeout(400);
+  await expectThat(page, 'fade: Dismiss keeps the card, dashed, and it can be reopened', (await page.locator('article[data-dismissed]').count()) >= 1 && (await page.locator('article[data-dismissed]').first().getByRole('button', { name: /^Reopen:/ }).count()) === 1);
+  await full(page, 'ghostly fade');
+  // HU-24 mist
+  for (let i = 0; i < 14; i++) {
+    await page.mouse.move(100 + i * 40, 200 + (i % 3) * 30);
+    await page.waitForTimeout(55);
+  }
+  await expectThat(page, 'mist: a trail follows the pointer, at most ten puffs', (await page.locator('[data-motif="mist"] span').count()) > 0 && (await page.locator('[data-motif="mist"] span').count()) <= 10);
+  await full(page, 'mist');
+  // HU-26 boo
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.type('boo');
+  await page.waitForTimeout(700);
+  await expectThat(page, 'boo: typing boo shows the ghosts', (await page.locator('[data-boo] svg').count()) >= 3);
+  await full(page, 'boo ghosts');
+  // HU-25 Lights flicker, then Lights on
+  await page.getByRole('button', { name: 'Lights on' }).click();
+  await page.waitForTimeout(150);
+  const during = { overlay: await page.locator('[data-lights-flicker]').count(), mode: await page.getAttribute('html', 'data-lights') };
+  await page.waitForTimeout(1300);
+  const after = await page.getAttribute('html', 'data-lights');
+  await expectThat(page, 'flicker: the lights flicker first, then Lights on applies', during.overlay === 1 && during.mode === 'off' && after === 'on', JSON.stringify({ during, after }));
+  await page.close();
+
+  // HU-19 idle whisper: a fresh page with a clock the script can move
+  const quiet = await ctx.newPage();
+  await quiet.clock.install();
+  await quiet.goto(urlOf(app));
+  await quiet.waitForSelector('main h2');
+  await quiet.clock.fastForward(46_000);
+  await quiet.waitForSelector('[data-whisper] button', { timeout: 5000 });
+  const words = (await quiet.textContent('[data-whisper] button')) ?? '';
+  await expectThat(quiet, 'whisper: after 45 s idle one line names the next item, in this app\'s words', app.name === 'scopecheck' ? /^A candle still burns: /.test(words) : /^The pack is not at rest: /.test(words), words);
+  await full(quiet, 'whisper');
+  await quiet.close();
+  void tag;
 }
 
 async function main() {
@@ -163,6 +279,7 @@ async function main() {
               await page.screenshot({ path: join(SHOTS, `${app.name}-ghost-lights-${mode}.png`) });
             }
           }
+          if (mode === 'off') await effectStates(ctx, app, tag, async (_p, what, problems) => check(what, problems));
           await ctx.close();
         }
       }

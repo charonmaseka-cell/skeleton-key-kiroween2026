@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { Candles, HauntProvider, HeaderFog, WhisperLine } from './Haunt';
 import { BrandMark, Motifs } from './Motifs';
+import type { SessionView } from './session-core';
 import { LightsToggle, ThemeProvider, useLights } from './ThemeProvider';
 
 type AppShellProps = {
@@ -11,6 +13,8 @@ type AppShellProps = {
   nav?: { href: string; label: string }[];
   /** polite announcement for assistive technology after an action */
   announcement?: string;
+  /** the session's view: the signature effects (candles, Next finding, whisper ...) are driven by its unresolved items */
+  haunt?: { view: SessionView };
   children?: ReactNode;
 };
 
@@ -19,7 +23,9 @@ type AppShellProps = {
 export function AppShell(props: AppShellProps) {
   return (
     <ThemeProvider>
-      <Frame {...props} />
+      <HauntProvider view={props.haunt?.view}>
+        <Frame {...props} />
+      </HauntProvider>
     </ThemeProvider>
   );
 }
@@ -34,7 +40,7 @@ function Frame({ title, tagline, banner, nav, announcement, children }: AppShell
   }, [lights.announcement]);
   const live = fromToggle && lights.announcement ? lights.announcement : announcement;
   return (
-    <div className="min-h-screen bg-sk-surface text-sk-text">
+    <div className="relative min-h-screen text-sk-text">
       <Motifs />
       <a
         href="#main"
@@ -43,13 +49,15 @@ function Frame({ title, tagline, banner, nav, announcement, children }: AppShell
         Skip to main content
       </a>
       {banner}
-      <header className="border-b border-sk-border px-4 py-4 sm:px-6">
+      <header className="relative border-b border-sk-border px-4 py-4 sm:px-6">
         <LightsToggle />
         <h1 className="text-2xl font-semibold">
           <BrandMark />
           {title}
         </h1>
         <p className="text-sk-muted">{tagline}</p>
+        <Candles />
+        <WhisperLine />
         {nav && (
           <nav aria-label="Sections" className="no-print mt-2">
             <ul className="flex flex-wrap gap-x-4 gap-y-1">
@@ -63,6 +71,7 @@ function Frame({ title, tagline, banner, nav, announcement, children }: AppShell
             </ul>
           </nav>
         )}
+        <HeaderFog />
       </header>
       <main id="main" tabIndex={-1} className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6">
         {children}

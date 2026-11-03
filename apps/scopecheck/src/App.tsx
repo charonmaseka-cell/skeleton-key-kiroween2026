@@ -32,9 +32,10 @@ export function App({ deps, baseUrl = API_URL, fixtures = FIXTURES }: { deps?: U
     <AppShell
       title="ScopeCheck"
       tagline="Compare supplier quotations against an RFQ. Differences are stated only when the values are validated; everything uncertain stays in Needs review."
-      banner={fixture.sample ? <SampleBanner note={fixture.extraction.note} /> : <LiveBanner note={fixture.extraction.note} />}
+      banner={fixture.sample ? <SampleBanner note={fixture.extraction.note} details={fixture.extraction.details} /> : <LiveBanner note={fixture.extraction.note} />}
       nav={NAV}
       announcement={session.announcement}
+      haunt={{ view }}
     >
       <section aria-labelledby="set-h" className="space-y-2">
         <h2 id="set-h" className="text-xl font-semibold">

@@ -1,0 +1,450 @@
+{
+  "gateUrl": "https://skeleton-key-extraction-gate.teddykgroup.workers.dev",
+  "startedAt": "2026-11-02T21:36:13.719Z",
+  "endedAt": "2026-11-02T21:36:48.090Z",
+  "complete": true,
+  "ceiling": 4,
+  "prechecks": [
+    {
+      "name": "P0 time before 00:00 UTC",
+      "ok": true,
+      "detail": "144 min to midnight"
+    },
+    {
+      "name": "P0 daily budget headroom",
+      "ok": true,
+      "detail": "746.897 of 8000 estimated today (batch-sc-t12-fresh-8b.json 746.897)"
+    },
+    {
+      "name": "P1 health",
+      "ok": true,
+      "detail": "{\"ok\":true,\"gate\":{\"mode\":\"token\",\"valid\":true,\"credentialBound\":true},\"ceiling\":4,\"used\":0}"
+    },
+    {
+      "name": "P2a no token",
+      "ok": true,
+      "detail": "401 unauthorized"
+    },
+    {
+      "name": "P2b wrong token",
+      "ok": true,
+      "detail": "401 unauthorized"
+    },
+    {
+      "name": "P2c right token, origin not allowed",
+      "ok": true,
+      "detail": "403 origin_denied"
+    },
+    {
+      "name": "P2d counter still 0",
+      "ok": true,
+      "detail": "counter 0"
+    }
+  ],
+  "steps": [
+    {
+      "step": "T1",
+      "payload": "scopecheck/rfq",
+      "bodyBytes": 375,
+      "status": 200,
+      "code": "ok",
+      "ms": 9579,
+      "attempts": 1,
+      "repaired": false,
+      "claims": 9,
+      "dropped": 0,
+      "promptTokens": 405,
+      "completionTokens": 339,
+      "counterBefore": 0,
+      "counterAfter": 1,
+      "reservedBefore": 772.384,
+      "rawClaims": [
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l2",
+          "excerpt": "Item CP-100 Centrifugal pump",
+          "value": "Centrifugal pump"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l2",
+          "excerpt": "qty 10 units",
+          "value": {
+            "value": "10",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l2",
+          "excerpt": "316 stainless steel casing",
+          "value": "316 stainless steel casing"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l3",
+          "excerpt": "Item MS-20 Motor starter",
+          "value": "Motor starter"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l3",
+          "excerpt": "qty 5 units",
+          "value": {
+            "value": "5",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l3",
+          "excerpt": "IP55 enclosure",
+          "value": "IP55 enclosure"
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "Item PG-6 Pressure gauge",
+          "value": "Pressure gauge"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p1-l4",
+          "excerpt": "qty 20 units",
+          "value": {
+            "value": "20",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p1-l4",
+          "excerpt": "0-10 bar range",
+          "value": "0-10 bar range"
+        }
+      ],
+      "observations": {
+        "validated": 9,
+        "heldForReview": {},
+        "droppedByWorker": 0,
+        "droppedReasons": {
+          "unknown_block": 0,
+          "unknown_field": 0,
+          "invalid_value": 0
+        },
+        "suspect": []
+      }
+    },
+    {
+      "step": "T2",
+      "payload": "scopecheck-realistic/rfq#6",
+      "bodyBytes": 4753,
+      "status": 200,
+      "code": "ok",
+      "ms": 14859,
+      "attempts": 1,
+      "repaired": false,
+      "claims": 12,
+      "dropped": 0,
+      "promptTokens": 1471,
+      "completionTokens": 563,
+      "counterBefore": 1,
+      "counterAfter": 2,
+      "reservedBefore": 1028.931,
+      "rawClaims": [
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p2-l14",
+          "excerpt": "Item TK-110 Storage tank 5 m3 | qty 2 units | HDPE, vertical",
+          "value": "Storage tank 5 m3 | HDPE, vertical"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p2-l14",
+          "excerpt": "qty 2 units",
+          "value": {
+            "value": "2",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p2-l15",
+          "excerpt": "Item TK-120 Dosing tank 500 l | qty 3 units | HDPE, with bund",
+          "value": "Dosing tank 500 l | HDPE, with bund"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p2-l15",
+          "excerpt": "qty 3 units",
+          "value": {
+            "value": "3",
+            "unit": "units"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p2-l16",
+          "excerpt": "Item PN-130 Pipe DN50 PN16 | qty 120 lengths | HDPE, 6 m lengths",
+          "value": "Pipe DN50 PN16 | HDPE, 6 m lengths"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p2-l16",
+          "excerpt": "qty 120 lengths",
+          "value": {
+            "value": "120",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p2-l17",
+          "excerpt": "Item PN-140 Pipe DN100 PN16 | qty 80 lengths | HDPE, 6 m lengths",
+          "value": "Pipe DN100 PN16 | HDPE, 6 m lengths"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p2-l17",
+          "excerpt": "qty 80 lengths",
+          "value": {
+            "value": "80",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p2-l14",
+          "excerpt": "HDPE, vertical",
+          "value": "HDPE, vertical"
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p2-l15",
+          "excerpt": "HDPE, with bund",
+          "value": "HDPE, with bund"
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p2-l16",
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        },
+        {
+          "field": "specification",
+          "kind": "text",
+          "blockId": "p2-l17",
+          "excerpt": "HDPE, 6 m lengths",
+          "value": "HDPE, 6 m lengths"
+        }
+      ],
+      "observations": {
+        "validated": 12,
+        "heldForReview": {},
+        "droppedByWorker": 0,
+        "droppedReasons": {
+          "unknown_block": 0,
+          "unknown_field": 0,
+          "invalid_value": 0
+        },
+        "suspect": []
+      }
+    },
+    {
+      "step": "T3",
+      "payload": "scopecheck-realistic/quote-a#8",
+      "bodyBytes": 3495,
+      "status": 200,
+      "code": "ok",
+      "ms": 5071,
+      "attempts": 1,
+      "repaired": false,
+      "claims": 4,
+      "dropped": 0,
+      "promptTokens": 1158,
+      "completionTokens": 181,
+      "counterBefore": 2,
+      "counterAfter": 3,
+      "reservedBefore": 963.241,
+      "rawClaims": [
+        {
+          "field": "item",
+          "kind": "text",
+          "blockId": "p2-l6",
+          "excerpt": "Item PN-140 Pipe DN100 PN16",
+          "value": "PN-140 Pipe DN100 PN16"
+        },
+        {
+          "field": "quantity",
+          "kind": "quantity",
+          "blockId": "p2-l6",
+          "excerpt": "qty 80 lengths",
+          "value": {
+            "value": "80",
+            "unit": "lengths"
+          }
+        },
+        {
+          "field": "unit_price",
+          "kind": "money",
+          "blockId": "p2-l6",
+          "excerpt": "R 690 each",
+          "value": {
+            "amount": "690",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "exclusion",
+          "kind": "text",
+          "blockId": "p2-l11",
+          "excerpt": "Excluded: delivery, installation and commissioning are not included in these prices.",
+          "value": "delivery, installation and commissioning"
+        }
+      ],
+      "observations": {
+        "validated": 4,
+        "heldForReview": {},
+        "droppedByWorker": 0,
+        "droppedReasons": {
+          "unknown_block": 0,
+          "unknown_field": 0,
+          "invalid_value": 0
+        },
+        "suspect": []
+      }
+    },
+    {
+      "step": "T4",
+      "payload": "packcheck/registration",
+      "bodyBytes": 185,
+      "status": 200,
+      "code": "ok",
+      "ms": 2513,
+      "attempts": 1,
+      "repaired": false,
+      "claims": 1,
+      "dropped": 0,
+      "promptTokens": 380,
+      "completionTokens": 43,
+      "counterBefore": 3,
+      "counterAfter": 4,
+      "reservedBefore": 317.562,
+      "rawClaims": [
+        {
+          "field": "organisation_name",
+          "kind": "name",
+          "blockId": "p1-l2",
+          "excerpt": "Registered name: Green Valley Community Trust",
+          "value": "Green Valley Community Trust"
+        }
+      ],
+      "observations": {
+        "validated": 1,
+        "heldForReview": {},
+        "droppedByWorker": 0,
+        "droppedReasons": {
+          "unknown_block": 0,
+          "unknown_field": 0,
+          "invalid_value": 0
+        },
+        "suspect": []
+      }
+    }
+  ],
+  "skipped": [],
+  "stop": null,
+  "refusal": {
+    "step": "R",
+    "payload": "packcheck/registration",
+    "bodyBytes": 185,
+    "status": 429,
+    "code": "daily_limit",
+    "ms": 64,
+    "attempts": null,
+    "repaired": null,
+    "claims": null,
+    "dropped": null,
+    "promptTokens": null,
+    "completionTokens": null,
+    "counterBefore": 4,
+    "counterAfter": 4
+  },
+  "inferenceRequestsSent": 4,
+  "counterEnd": 4,
+  "verdict": "pass",
+  "budget": {
+    "runCap": 2000,
+    "dailyCap": 8000,
+    "dailyBaseline": 746.897,
+    "baselineSources": [
+      "batch-sc-t12-fresh-8b.json 746.897"
+    ],
+    "runCharged": 353.718,
+    "dailyAfter": 1100.615,
+    "overruns": 0,
+    "attempts": [
+      {
+        "step": "T1",
+        "attempt": 1,
+        "reserved": 384.624,
+        "charged": 88.243,
+        "basis": "measured",
+        "promptTokens": 405,
+        "completionTokens": 339,
+        "overrun": false
+      },
+      {
+        "step": "T2",
+        "attempt": 1,
+        "reserved": 512.898,
+        "charged": 169.944,
+        "basis": "measured",
+        "promptTokens": 1471,
+        "completionTokens": 563,
+        "overrun": false
+      },
+      {
+        "step": "T3",
+        "attempt": 1,
+        "reserved": 480.053,
+        "charged": 74.709,
+        "basis": "measured",
+        "promptTokens": 1158,
+        "completionTokens": 181,
+        "overrun": false
+      },
+      {
+        "step": "T4",
+        "attempt": 1,
+        "reserved": 317.562,
+        "charged": 20.822,
+        "basis": "measured",
+        "promptTokens": 380,
+        "completionTokens": 43,
+        "overrun": false
+      }
+    ],
+    "basis": "ESTIMATES: published rates x 1.1 (budget.ts). Reservations at 1 byte per token with the whole output allowance; measured attempts charged in full from reported tokens; unknown attempts keep their reservation. Not dashboard-confirmed."
+  }
+}

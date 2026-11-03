@@ -36,6 +36,8 @@ Both apps were built by `buildApps()` with `VITE_EXTRACTION_API_URL=""` and pass
 
 **Pages redeployed after the haunted pass, 3 November 2026 (Pages only, from clean `main` at `a80cbd08`, PR #32):** ScopeCheck `5009d589-0111-470a-a23f-221cffffe0ef`, PackCheck `117403c6-bc1c-4d83-ac52-d3425101080c` (Cloudflare API: `commit_hash` `a80cbd08`, `commit_dirty` false, success), **built with the production Worker address** (checked in both bundles) because analysis is open. The Worker was not touched (still `b48bca11`; `/health` afterwards: open, 80 / 6000, 0 attempts, 0 charged). Not browser-checked by the sandbox.
 
+**Pages redeployed after the Next finding fix and the bolder pass, 3 November 2026 (Pages only, from clean `main` at `34e9be97`, PR #34):** ScopeCheck `3eec633d-9e61-49dc-a780-14df833325f1`, PackCheck `55918a43-1e47-4e21-8c04-b608ba6a2069` (Cloudflare API: `commit_hash` `34e9be97`, `commit_dirty` false, success), **built with the production Worker address** (checked in both bundles). The Worker was not touched (still `b48bca11`). `--verify-open` run again after the deploy: the Worker checks all pass (open at 80 / 6000, gate public, `/extract` and `/run` refused before anything is held or sent to the model, from a Pages origin and from another origin; health: 0 attempts, 0 charged, 0 overruns); the two Pages checks cannot run from the sandbox (`*.pages.dev` is not reachable from it), so the sites themselves are for the owner to open.
+
 ## What the token needs (account level)
 | Permission | Why | Now |
 |---|---|---|

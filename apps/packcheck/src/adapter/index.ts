@@ -1,7 +1,7 @@
 import { runRules } from '@skeleton-key/engine';
 import type { DomainAdapter, EvaluateInput } from '@skeleton-key/ui';
 import { evaluatePack, packMatches, packRule, type PackData } from './rules';
-import { PACK_FIELD_LABELS, PACK_REASONS, PACK_ROLE_LABELS } from './labels';
+import { PACK_FIELD_LABELS, PACK_REASONS, PACK_ROLE_LABELS, PACK_THEME } from './labels';
 
 export * from './rules';
 export * from './labels';
@@ -18,7 +18,7 @@ export const PACKCHECK_HINTS: Record<string, string[]> = {
 export const packCheckAdapter: DomainAdapter = {
   id: 'packcheck',
   hints: PACKCHECK_HINTS,
-  labels: { fields: PACK_FIELD_LABELS, roles: PACK_ROLE_LABELS, reasons: PACK_REASONS },
+  labels: { fields: PACK_FIELD_LABELS, roles: PACK_ROLE_LABELS, reasons: PACK_REASONS, theme: PACK_THEME },
   evaluate({ facts, documents, roles, titles }: EvaluateInput) {
     const byRole = (r: string) => Object.keys(roles).find((d) => roles[d] === r);
     const requirementsDocId = byRole('requirements');

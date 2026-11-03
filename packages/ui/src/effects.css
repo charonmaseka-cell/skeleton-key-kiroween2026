@@ -1,0 +1,48 @@
+/* Theme effects shared by both apps (haunted-ui HU-11, HU-12). Static in Lights on; the one-time flicker only in Lights off and
+   never under reduced motion. Colours come from the tokens; nothing here carries text. */
+
+/* HU-11 ghost: a confirmed absence. Translucent danger over the page colour (text stays at full contrast: measured in
+   theme-effects.test.ts), a dashed boundary, and the plain "Not in this quotation" badge stays in the cell. */
+[data-ghost],
+[data-ghost] > td,
+[data-ghost] > th {
+  background: color-mix(in srgb, var(--sk-danger) 35%, var(--sk-bg));
+  outline: 2px dashed var(--sk-danger);
+  outline-offset: -3px;
+}
+tr[data-ghost] {
+  background: none;
+  outline: none;
+}
+
+/* One flicker when the ghost appears: two short dips in 0.9 s (about 2 per second, under the 3 per second limit). */
+@keyframes ghost-flicker {
+  0% { opacity: 0.15; }
+  18% { opacity: 1; }
+  32% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 1; }
+}
+:root[data-lights='off'] [data-ghost],
+:root[data-lights='off'] [data-ghost] > td,
+:root[data-lights='off'] [data-ghost] > th {
+  animation: ghost-flicker 0.9s 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-lights='off'] [data-ghost],
+  :root[data-lights='off'] [data-ghost] > td,
+  :root[data-lights='off'] [data-ghost] > th {
+    animation: none !important;
+  }
+}
+
+/* HU-12 possessed cell: a confirmed difference. The boundary changes on hover and on keyboard focus (never the text). */
+[data-possessed] {
+  outline: 1px solid transparent;
+  outline-offset: -2px;
+}
+[data-possessed]:hover,
+[data-possessed]:focus-within {
+  outline: 4px solid var(--sk-danger);
+  outline-offset: -4px;
+}

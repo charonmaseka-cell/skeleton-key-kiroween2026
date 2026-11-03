@@ -1,5 +1,5 @@
 import type { PlannedComparison, ReviewItem } from '@skeleton-key/engine';
-import { ScrollTable, StatusBadge, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
+import { GhostButton, ScrollTable, StatusBadge, useGhosts, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
 import { requirementsOf, type ScopeContext } from './adapter';
 import type { Line } from './adapter/rules';
 import { EXCLUDED_TEXT, formatAmount, totalsFor, type QuoteTotal } from './totals';
@@ -167,6 +167,7 @@ export function TotalsTable({ view }: { view: SessionView }) {
 }
 
 export function ComparisonMatrix({ view }: { view: SessionView }) {
+  const ghosts = useGhosts();
   const { rows, uncertainQuoteLines, exclusions, quotes } = buildMatrix(view);
   return (
     <section aria-labelledby="matrix-h" className="space-y-3">
@@ -220,7 +221,12 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                   )}
                 </th>
                 {r.cells.map((c) => (
-                  <td key={c.quote} className="border border-sk-border p-2">
+                  <td
+                    key={c.quote}
+                    data-ghost={ghosts.isGhost(c.absent) ? '' : undefined}
+                    data-possessed={c.aspects.some((a) => a.finding?.finding.state === 'confirmed' && a.finding.finding.code.endsWith('.differs')) ? '' : undefined}
+                    className="border border-sk-border p-2"
+                  >
                     {c.ambiguous && (
                       <p>
                         <StatusBadge kind="needs_review" label="Allocation unclear: Needs review" />
@@ -238,7 +244,8 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                         <span className="text-sm">{view.reasonText(c.absent.finding.reason)}</span>{' '}
                         <a className="text-sm text-sk-link underline" aria-label={`Open the item: ${c.absent.finding.message}`} href={`#finding-${c.absent.finding.id}`}>
                           Open the item
-                        </a>
+                        </a>{' '}
+                        {ghosts.isGhost(c.absent) && <GhostButton item={c.absent} onSolidify={ghosts.solidify} />}
                       </p>
                     ) : null}
                     <ul className="space-y-1">

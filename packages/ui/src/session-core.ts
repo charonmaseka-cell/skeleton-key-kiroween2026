@@ -83,7 +83,24 @@ export type EvaluateInput = {
  * Plain labels for everything an adapter shows a person. Internal names (field keys, document IDs, reason codes) never reach
  * the screen or an export: each is shown through these labels.
  */
+/**
+ * The second name of a finding in Lights off (HU-10): decoration next to the plain wording, never a verdict. `plain` is what the
+ * séance summary says in Lights on and what screen readers hear. A code without an entry has no second name.
+ */
+export type ThemeEntry = {
+  /** singular and plural noun for a CONFIRMED finding, for example "ghost" / "ghosts" */
+  name: string;
+  plural: string;
+  /** noun for the same finding while it only Needs review, for example "possible ghost" / "possible ghosts" */
+  review?: { name: string; plural: string };
+  /** the plain noun phrase, singular and plural, for example "missing item" / "missing items" */
+  plain: string;
+  plainPlural: string;
+};
+
 export type AdapterLabels = {
+  /** finding code -> second name (Lights off only). Adapter data; the engine and this package know no domain words. */
+  theme?: Record<string, ThemeEntry>;
   /** field key -> label, for example organisation_name -> "Organisation name" */
   fields: Record<string, string>;
   /** document role -> label, used when a document has no title */
@@ -135,6 +152,8 @@ export type SessionView = {
   docName(docId: string): string;
   /** plain explanation of a reason code (adapter reasons first, then the shared ones); free text is returned as it is */
   reasonText(code?: string): string;
+  /** the adapter's theme entries (finding code -> second name) */
+  theme: Record<string, ThemeEntry>;
   /** 1-based position of a block in its document, for "line N" instead of a block ID */
   lineNumber(docId: string, blockId: string): number | null;
 };
@@ -195,6 +214,7 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
     fieldLabel: L.fieldLabel,
     docName: L.docName,
     reasonText: L.reasonText,
+    theme: adapter.labels.theme ?? {},
     lineNumber: (docId, blockId) => {
       const i = (blocksByDoc.get(docId) ?? []).findIndex((b) => b.id === blockId);
       return i < 0 ? null : i + 1;

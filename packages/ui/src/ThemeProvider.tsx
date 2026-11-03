@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import type { ThemeEntry } from './session-core';
 import { readStored, readSystem, resolveMode, watchSystem, writeStored } from './lights';
 import type { Mode } from './theme-tokens';
 
@@ -60,5 +61,22 @@ export function LightsToggle() {
       </svg>
       <span>Lights on</span>
     </button>
+  );
+}
+
+/**
+ * The second name of a finding (HU-10): shown after the plain message, in Lights off only, hidden from assistive technology (the
+ * plain wording is heard once) and from print. A code without an entry, or a finding that only Needs review without a review name,
+ * shows nothing extra. Never used for a Not-evaluated comparison.
+ */
+export function ThemeName({ entry, state }: { entry: ThemeEntry | undefined; state: 'confirmed' | 'needs_review' }) {
+  const { mode } = useLights();
+  if (mode !== 'off' || !entry) return null;
+  const text = state === 'confirmed' ? entry.name : entry.review?.name;
+  if (!text) return null;
+  return (
+    <span data-theme-name="" aria-hidden="true" className="no-print ml-2 text-sm italic text-sk-muted">
+      {text[0]!.toUpperCase() + text.slice(1)}
+    </span>
   );
 }

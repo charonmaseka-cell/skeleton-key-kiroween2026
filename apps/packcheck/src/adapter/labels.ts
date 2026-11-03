@@ -1,3 +1,5 @@
+import type { ThemeEntry } from '@skeleton-key/ui';
+
 // Plain labels for everything PackCheck shows a person. Field keys, document IDs and reason codes are internal names; the
 // interface and the exports show these instead.
 
@@ -27,3 +29,16 @@ export const packField = (field: string): string => PACK_FIELD_LABELS[field] ?? 
 export function packDoc(titles: Record<string, string> | undefined, roles: Record<string, string> | undefined, docId: string): string {
   return titles?.[docId] || PACK_ROLE_LABELS[roles?.[docId] ?? ''] || PACK_ROLE_LABELS[docId] || docId; // the apps always pass titles; the ID is only a fallback for tools (benchmark)
 }
+
+/**
+ * Second names (Lights off only). The mapping is explicit: Lost page = a required attachment is missing; Doppelgänger = the
+ * organisation name differs between documents; Changeling = another value (funding, a date) differs; Bottomless purse = the funding
+ * requested exceeds the total project budget. Other rules have none.
+ */
+export const PACK_THEME: Record<string, ThemeEntry> = {
+  'attachment.missing': { name: 'lost page', plural: 'lost pages', review: { name: 'possible lost page', plural: 'possible lost pages' }, plain: 'missing attachment', plainPlural: 'missing attachments' },
+  'org.name_differs': { name: 'doppelgänger', plural: 'doppelgängers', plain: 'organisation name difference', plainPlural: 'organisation name differences' },
+  'funding.differs': { name: 'changeling', plural: 'changelings', plain: 'other value difference', plainPlural: 'other value differences' },
+  'date.differs': { name: 'changeling', plural: 'changelings', plain: 'other value difference', plainPlural: 'other value differences' },
+  'funding.exceeds_budget': { name: 'bottomless purse', plural: 'bottomless purses', plain: 'budget overrun', plainPlural: 'budget overruns' },
+};

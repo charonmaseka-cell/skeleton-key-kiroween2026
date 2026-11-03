@@ -46,3 +46,13 @@ tr[data-ghost] {
   outline: 4px solid var(--sk-danger);
   outline-offset: -4px;
 }
+
+/* HU-9 fog: one drift when the page opens (4 s), then still. Lights off only (the element does not exist in Lights on); static under
+   reduced motion by the global rule in each app's stylesheet. */
+@keyframes fog-drift {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
+}
+[data-motif='fog'] {
+  animation: fog-drift 4s ease-out 1 both;
+}

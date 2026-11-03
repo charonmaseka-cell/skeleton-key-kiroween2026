@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { formatValue, processingComplete, type EffectiveFact, type Evidence, type Finding, type PlannedComparison, type ReviewItem, type ValueKind } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
+import { EmptyState } from './Motifs';
 import { Seance } from './Seance';
 import { ThemeName } from './ThemeProvider';
 import { exportCsv, exportText, parseCorrection, type CorrectionInput, type SessionView } from './session-core';
@@ -251,7 +252,7 @@ export function ReviewQueue({ session, view }: { session: Session; view: Session
         {title} ({items.length})
       </h3>
       <p className="text-sm text-sk-muted">{blurb}</p>
-      {items.length === 0 ? <p>None.</p> : items.map((i) => <FindingCard key={i.finding.id} item={i} session={session} view={view} />)}
+      {items.length === 0 ? <EmptyState><p>None.</p></EmptyState> : items.map((i) => <FindingCard key={i.finding.id} item={i} session={session} view={view} />)}
     </section>
   );
   return (
@@ -273,7 +274,7 @@ export function NotEvaluatedList({ comparisons, session, view }: { comparisons: 
       </h3>
       <p className="text-sm text-sk-muted">These comparisons did NOT run. That is not the same as "no difference". Each one waits on the input shown.</p>
       {items.length === 0 ? (
-        <p>Every planned comparison ran.</p>
+        <EmptyState><p>Every planned comparison ran.</p></EmptyState>
       ) : (
         <ul className="space-y-2">
           {items.map((c) => {

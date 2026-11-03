@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import type { Block } from '@skeleton-key/engine';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from './App';
+import { STANDARD_FIRST } from './test-fixtures';
 import { FIXTURES } from './fixtures';
 
 afterEach(cleanup);
@@ -31,7 +32,7 @@ function setup(opts: { fail?: (n: number) => { status: number; code: string } | 
     const ids = new Set(body.blocks.map((b) => b.id));
     return new Response(JSON.stringify({ claims: (src!.claims as { blockId: string }[]).filter((c) => ids.has(c.blockId)), meta: {} }), { status: 200 });
   }) as unknown as typeof fetch;
-  const utils = render(<App deps={{ parse, fetchImpl }} baseUrl={opts.baseUrl === null ? undefined : (opts.baseUrl ?? 'https://worker.example')} />);
+  const utils = render(<App fixtures={STANDARD_FIRST} deps={{ parse, fetchImpl }} baseUrl={opts.baseUrl === null ? undefined : (opts.baseUrl ?? 'https://worker.example')} />);
   return { ...utils, get requests() { return requests; }, parsed };
 }
 

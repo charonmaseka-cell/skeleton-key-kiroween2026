@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Run the module's tests when an engine file is saved",
+      "trigger": "PostFileSave",
+      "description": "After the agent saves packages/engine/src/<module>.ts, run packages/engine/test/<module>.test.ts and the engine tests that import it (every engine test if none is found). CI remains authoritative.",
+      "matcher": "packages/engine/src/[^/]+\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "npx tsx tools/hooks/engine-tests.ts",
+        "timeout": 120
+      }
+    }
+  ]
+}

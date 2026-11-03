@@ -200,3 +200,25 @@ Both apps. **Theme names** (`labels.theme` per adapter, `ThemeName`): shown afte
 ## HU-T5: accessibility and visual checks in a real browser (3 Nov 2026)
 `tools/a11y/check.ts` (Playwright + axe-core from npm, the built apps served from the script, nothing fetched): both apps, Lights on and off, 1280 px and 375 px, plus the ghost state after "Confirm coverage". Asserts: stored mode applied, no axe violations, no sideways page scroll, a visible focus ring on every control reached by Tab, no decorative element over visible text or a control (clipped scroll-container text is not visible text), reduced motion resolves to Lights on by itself and no element animates under it (Lights off, ghost drawn), nothing animates in Lights on. Screenshots of both modes and the ghost state: `docs/screenshots/haunted/`. New CI job `a11y` (installs Chromium with Playwright's official installer).
 **Run here** with the sandbox's installed headless Chromium (revision 1232; Playwright pinned to 1.62.0, whose own Chromium is 1234, so `CHROME_PATH` pointed at the installed one): all checks passed after the fixes below. First runs found and I fixed: repeated identically named landmarks in every finding card (now groups, not regions), a visible/accessible-name mismatch on "Withdraw my coverage confirmation", link contrast on the ghost fill (links inside a ghost use the text colour, underlined), and fog strips whose geometry moved during their fade (now opacity only). The accessibility hook in `docs/hooks.md` is not yet recorded as "actually run": see the hooks PR.
+
+## HU-T6: theme complete and reviewed (3 Nov 2026)
+Review of HU-1 to HU-16 against the code and tests (all offline; nothing live):
+| Requirement | Where it is checked |
+|---|---|
+| HU-1 two modes, same function and wording | Lights off/on tests in both apps; theme names are the only extra words |
+| HU-2 readable evidence, no overlap, outline plus colour | `tools/a11y/check.ts` (overlap with visible text and controls), evidence pair test |
+| HU-3 keyboard, constant toggle name, focus ring | `ThemeProvider.test.tsx`, focus-ring walk in `check.ts` |
+| HU-4 AA contrast | `theme-tokens.test.ts`, `theme-effects.test.ts` (composited ghost fill), axe in both modes |
+| HU-5 reduced motion, safe effects | `theme-effects.test.ts`; `check.ts` (no animation under reduced motion or in Lights on) |
+| HU-6 not colour alone | `Badges.test.tsx` (own icon shape and text per state) |
+| HU-7 honest labelling | banners kept on marked lines; `Badges.test.tsx` |
+| HU-8 preference and privacy | `lights.test.ts`, `ThemeProvider.test.tsx` |
+| HU-9 cost containment, no sound | `decoration-rules.test.ts` |
+| HU-10 second name, never a verdict | `haunted.test.tsx` in both apps; exports contain no theme names |
+| HU-11 ghost rows | `haunted.test.tsx`; **changed by the owner's request: one flicker** (requirements revision 3) |
+| HU-12 possessed cells, evidence pair | `haunted.test.tsx`, `fulllength.test.tsx` |
+| HU-13 séance summary | `haunted.test.tsx` (counts equal the summary and the export on every sample, with and without coverage) |
+| HU-14 PackCheck vocabulary | `apps/packcheck/src/haunted.test.tsx` |
+| HU-15 steering | `.kiro/steering/theme.md` (unchanged) |
+| HU-16 ecto | `decoration-rules.test.ts`, `theme-tokens.test.ts` |
+Known limits: the theme's contrast and overlap checks run on the two sample pages and the ghost state, not on every possible live result; screenshots show the 1280 px layout only (375 px is checked, not photographed); the PackCheck sample has no funding-above-budget finding, so Bottomless purse is covered by the mapping test, not by a rendered sample. Screenshots are in the README.

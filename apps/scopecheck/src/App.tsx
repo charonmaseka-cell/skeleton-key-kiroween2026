@@ -23,9 +23,9 @@ export const SCOPECHECK_SLOTS: UploadSlot[] = [
 /** Base URL of the extraction Worker, set at build time. Unset means: no analysis service is connected. */
 const API_URL = (import.meta.env.VITE_EXTRACTION_API_URL as string | undefined) || undefined;
 
-export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: string } = {}) {
+export function App({ deps, baseUrl = API_URL, fixtures = FIXTURES }: { deps?: UploadDeps; baseUrl?: string; /** the sample sets, first one shown by default */ fixtures?: Fixture[] } = {}) {
   const [live, setLive] = useState<Fixture | null>(null);
-  const session = useSession(scopeCheckAdapter, live ? [...FIXTURES, live] : FIXTURES);
+  const session = useSession(scopeCheckAdapter, live ? [...fixtures, live] : fixtures);
   const { fixture, view } = session;
   return (
     <AppShell
@@ -55,7 +55,7 @@ export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: 
         {!fixture.sample && (
           <>
             {' '}
-            <button type="button" onClick={() => session.setFixtureId(FIXTURES[0]!.id)} className="rounded border border-slate-800 px-3 py-1">
+            <button type="button" onClick={() => session.setFixtureId(fixtures[0]!.id)} className="rounded border border-slate-800 px-3 py-1">
               Back to the sample set
             </button>
           </>

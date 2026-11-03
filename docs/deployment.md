@@ -28,6 +28,8 @@ No inference was made and the plan is unchanged. **Still open:** (1) task 5.5, l
 Both apps were built by `buildApps()` with `VITE_EXTRACTION_API_URL=""` and passed the bundle check (no workers.dev host, no `/extract` URL, no env-file URL). So they open in labelled sample mode with analysis disabled and need no Worker. Production admission is 0 (the Worker does not exist); no live inference was made; no plan was changed. When the Worker is deployed, its `ALLOWED_ORIGINS` are exactly the two URLs above.
 
 
+**Redeployment of 3 November 2026 (sandbox, clean `main` at `53d1d385`, after PRs #12 to #17):** ScopeCheck Pages production deployment `cac432f7`, PackCheck `e775418a` (Cloudflare API: `commit_hash` `53d1d385...`, `commit_dirty` false, deploy success). Worker unchanged (admission closed). `--verify-only` must be run by the owner from a network that reaches the sites; it was not possible from the sandbox. This is not a verification until that is reported.
+
 ## What the token needs (account level)
 | Permission | Why | Now |
 |---|---|---|

@@ -19,7 +19,7 @@ export type ExpectedFinding = {
   code: string;
   subject: string;
   response: string;
-  severity: 'critical' | 'warning' | 'info';
+  severity: 'critical' | 'high' | 'warning' | 'info';
   state: 'confirmed' | 'needs_review';
   stateIfCoverageConfirmed?: 'confirmed';
 };

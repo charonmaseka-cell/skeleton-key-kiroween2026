@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { COVERAGE_HINT } from '@skeleton-key/ui';
 import { App } from './App';
+import { STANDARD_FIRST } from './test-fixtures';
 
 afterEach(cleanup);
 
@@ -12,7 +13,7 @@ const sections = () => [...document.querySelectorAll('#docs-h ~ details')] as HT
 describe('coverage hint', () => {
   it('shows the agreed wording beside every document whose coverage is unverified, and only there', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<App fixtures={STANDARD_FIRST} />);
     expect(COVERAGE_HINT).toBe('Confirm coverage after checking every page. This lets us confirm missing items where the match is clear.');
     const docs = sections();
     expect(docs.length).toBeGreaterThan(0);
@@ -36,7 +37,7 @@ describe('coverage hint', () => {
 
 describe('sample banner', () => {
   it('is one line with the details behind a toggle on narrow screens, and complete on wide ones; the label is never hidden', () => {
-    render(<App />);
+    render(<App fixtures={STANDARD_FIRST} />);
     const banner = screen.getByRole('region', { name: 'Sample mode' });
     const compact = banner.querySelector('details[data-banner-compact]') as HTMLDetailsElement;
     expect(compact.open).toBe(false);

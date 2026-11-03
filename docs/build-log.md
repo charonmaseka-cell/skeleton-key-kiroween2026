@@ -240,3 +240,6 @@ Specs in the repository: 4. Tasks ticked: 57 of 85.
 - `scopecheck-real-documents`: 11 of 17 ticked; open: SC-T5, SC-T6, SC-T7, SC-T8, SC-T9, SC-T10
 - `skeleton-key-foundation`: 35 of 54 ticked; open: 5, 5.5, 7, 7.1, 7.2, 7.3, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 <!-- spec-status:end -->
+
+## a11y check: measure at rest (3 Nov 2026)
+On the merge of the clarification-list branch the CI `a11y` job failed once with a contrast violation inside the ghost cell, and the branch was merged in the same command that printed the failure: that was my mistake (the merge ran without reading the result). The cause was in the check, not the page: axe ran while the one-time ghost flicker (0.9 s) was still animating, so the cell was partly transparent. The check now waits for every finite animation to finish before measuring (`atRest` in `tools/a11y/check.ts`). Locally and in CI the page passes at rest.

@@ -9,7 +9,9 @@ export type EnvVars = Partial<Record<
   | 'MAX_BLOCK_CHARS'
   | 'MAX_REPAIR_ATTEMPTS'
   | 'INFERENCE_TIMEOUT_MS'
-  | 'DAILY_ADMISSION_CEILING',
+  | 'DAILY_ADMISSION_CEILING'
+  | 'ACCESS_GATE' // required: "public" or "token" (see gate.ts)
+  | 'TEST_GATE_TOKEN', // secret; only with ACCESS_GATE=token
   string
 >>;
 

@@ -1,0 +1,36 @@
+# THROWAWAY gated staging Worker for the task 5.5 binding test (docs/task-5-5-plan.md). Not the public Worker.
+#   deploy:  npx wrangler deploy -c wrangler.gate.toml      (closed until the secret is bound: ACCESS_GATE=token, no secret)
+#   secret:  npx tsx tools/deploy/gate-secret.ts --put      (generated in the sandbox, piped on stdin, never printed)
+#   delete:  npx wrangler delete -c wrangler.gate.toml      (after the test)
+# Separate script name, so it has its OWN Durable Object counter; the production Worker, counter and ceiling are untouched.
+name = "skeleton-key-extraction-gate"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+workers_dev = true
+
+[ai]
+binding = "AI"
+
+[[durable_objects.bindings]]
+name = "ADMISSION"
+class_name = "AdmissionCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AdmissionCounter"]
+
+[vars]
+# Explicit: authentication is required. A missing TEST_GATE_TOKEN secret closes the service (not_configured).
+ACCESS_GATE = "token"
+# Explicit dummy origin for the authenticated test client only. `.invalid` is reserved (RFC 2606): no real site can hold it,
+# so no browser page can call this Worker. Not authentication; the token is.
+ALLOWED_ORIGINS = "https://gate-test-client.invalid"
+# Proposed task 5.5 input limits, so the test exercises them (largest test payload: 4,753 body bytes, 3,471 chars, 48 blocks).
+MAX_BODY_BYTES = "8192"
+MAX_CHARS = "6000"
+MAX_BLOCKS = "80"
+MAX_BLOCK_CHARS = "1000"
+MAX_REPAIR_ATTEMPTS = "1"
+INFERENCE_TIMEOUT_MS = "25000"
+# Total inference attempts for the whole test, repairs included. Hard stop in the Durable Object.
+DAILY_ADMISSION_CEILING = "4"

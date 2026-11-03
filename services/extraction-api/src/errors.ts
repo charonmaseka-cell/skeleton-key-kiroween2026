@@ -3,6 +3,7 @@
 
 export const ERRORS = {
   not_found: { status: 404, message: 'Not found.', retryable: false },
+  unauthorized: { status: 401, message: 'Not authorised.', retryable: false },
   method_not_allowed: { status: 405, message: 'Method not allowed.', retryable: false },
   origin_denied: { status: 403, message: 'Origin not allowed.', retryable: false },
   invalid_input: { status: 400, message: 'Request is invalid.', retryable: false },

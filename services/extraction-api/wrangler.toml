@@ -16,6 +16,9 @@ new_sqlite_classes = ["AdmissionCounter"]
 [vars]
 # Exact origins only. Add the deployed Pages origins at deploy time. Not authentication.
 ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174"
+# Required, explicit (src/gate.ts). The public Worker binds no TEST_GATE_TOKEN; binding one here closes the service.
+# The gated staging Worker uses wrangler.gate.toml (ACCESS_GATE = "token").
+ACCESS_GATE = "public"
 # Provisional input limits; tune from benchmark results.
 MAX_BODY_BYTES = "65536"
 MAX_CHARS = "24000"

@@ -30,12 +30,13 @@ afterAll(() => rmSync(root, { recursive: true, force: true }));
 
 const vars = (ceiling: number, extra: Record<string, string> = {}) => ({
   ALLOWED_ORIGINS: ORIGIN,
+  ACCESS_GATE: 'public',
   DAILY_ADMISSION_CEILING: String(ceiling),
   INFERENCE_TIMEOUT_MS: '100',
   ...extra,
 });
 
-function start(persist: string, ceiling: number) {
+function start(persist: string, ceiling: number, extra: Record<string, string> = {}) {
   return new Miniflare({
     modules: true,
     scriptPath: script,
@@ -43,7 +44,7 @@ function start(persist: string, ceiling: number) {
     compatibilityDate: '2026-07-01',
     durableObjects: { ADMISSION: { className: 'AdmissionCounter', useSQLite: true } },
     durableObjectsPersist: persist,
-    bindings: vars(ceiling),
+    bindings: vars(ceiling, extra),
   });
 }
 
@@ -211,6 +212,44 @@ describe('GET /health: deployment check with the real Durable Object, no inferen
       const r = await get(mf, { 'x-no-ai': '1' });
       expect(r.status).toBe(503);
       expect(r.body).toMatchObject({ ok: false, checks: { workersAiBinding: 'missing' } });
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+});
+
+describe('gated staging configuration in the Workers runtime (ACCESS_GATE=token)', () => {
+  const TOKEN = 'g'.repeat(43);
+  const t = { 'x-test-now': String(DAY1) };
+  const health = async (mf: Mf) => (await mf.dispatchFetch('http://worker.test/health', { headers: t })).json() as Promise<{ ok: boolean; checks: { accessGate: { mode: string; valid: boolean; credentialBound: boolean } } }>;
+
+  it('without the secret bound: closed (not_configured), health fails, nothing admitted, model not called', async () => {
+    const mf = start(freshPersist(), 4, { ACCESS_GATE: 'token' });
+    try {
+      expect(await call(mf, t)).toEqual({ status: 503, code: 'not_configured' });
+      expect(await call(mf, { ...t, authorization: `Bearer ${TOKEN}` })).toEqual({ status: 503, code: 'not_configured' });
+      const h = await health(mf);
+      expect(h.ok).toBe(false);
+      expect(h.checks.accessGate).toMatchObject({ mode: 'token', valid: false, credentialBound: false });
+      expect(await modelCalls(mf)).toBe(0);
+    } finally {
+      await mf.dispose();
+    }
+  }, 60_000);
+
+  it('with the secret: only the right bearer token is admitted, and the ceiling still holds', async () => {
+    const mf = start(freshPersist(), 2, { ACCESS_GATE: 'token', TEST_GATE_TOKEN: TOKEN });
+    const auth = { ...t, authorization: `Bearer ${TOKEN}` };
+    try {
+      expect(await call(mf, t)).toEqual({ status: 401, code: 'unauthorized' });
+      expect(await call(mf, { ...t, authorization: `Bearer ${'h'.repeat(43)}` })).toEqual({ status: 401, code: 'unauthorized' });
+      expect(await call(mf, { ...auth, origin: 'https://elsewhere.example' })).toEqual({ status: 403, code: 'origin_denied' });
+      expect(await modelCalls(mf)).toBe(0);
+      expect((await call(mf, auth)).code).toBe('ok');
+      expect((await call(mf, auth)).code).toBe('ok');
+      expect(await call(mf, auth)).toEqual({ status: 429, code: 'daily_limit' });
+      expect(await modelCalls(mf)).toBe(2);
+      expect((await health(mf)).checks.accessGate).toMatchObject({ mode: 'token', valid: true, credentialBound: true });
     } finally {
       await mf.dispose();
     }

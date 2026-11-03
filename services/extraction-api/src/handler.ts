@@ -2,6 +2,7 @@ import type { AdmitResult } from './admission';
 import { secondsUntilUtcMidnight } from './admission';
 import { parseConfig, parseOrigins, type EnvVars } from './config';
 import { ERRORS, type ErrorCode } from './errors';
+import { checkGate } from './gate';
 import { classifyUpstream, withTimeout } from './inference';
 import { buildMessages, getProfile, parseModelOutput, responseFormat } from './profiles';
 import { parseExtractRequest, readBounded } from './request';
@@ -39,6 +40,9 @@ export async function handle(request: Request, env: EnvVars, deps: Deps): Promis
 
   try {
     if (url.pathname !== '/extract') return fail('not_found');
+    // Explicit access gate (gate.ts): before the origin check, the body, admission and the model. Fails closed.
+    const gate = await checkGate(env, request);
+    if (gate !== 'pass') return fail(gate);
     // Origin allowlist: an additional control, not authentication.
     if (!allowed) return fail('origin_denied');
 

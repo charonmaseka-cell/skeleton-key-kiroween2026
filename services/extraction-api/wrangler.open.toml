@@ -1,0 +1,44 @@
+# PROPOSAL, NOT APPLIED. Public analysis opening: daily budget 4,000 estimated neurons, the existing per-client limit (6 per 60 s per IP).
+# Review with: npx wrangler deploy --dry-run -c wrangler.open.toml   (nothing is uploaded). Applying is a separate, explicit step.
+name = "skeleton-key-extraction"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+[ai]
+binding = "AI"
+
+[[durable_objects.bindings]]
+name = "ADMISSION"
+class_name = "AdmissionCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AdmissionCounter"]
+
+[vars]
+# Exact origins only. Add the deployed Pages origins at deploy time. Not authentication.
+ALLOWED_ORIGINS = "https://skeleton-key-scopecheck.pages.dev,https://skeleton-key-packcheck.pages.dev"
+# Required, explicit (src/gate.ts). The public Worker binds no TEST_GATE_TOKEN; binding one here closes the service.
+# The gated staging Worker uses wrangler.gate.toml (ACCESS_GATE = "token").
+ACCESS_GATE = "public"
+# Provisional input limits; tune from benchmark results.
+MAX_BODY_BYTES = "65536"
+MAX_CHARS = "24000"
+MAX_BLOCKS = "400"
+MAX_BLOCK_CHARS = "4000"
+MAX_REPAIR_ATTEMPTS = "1"
+INFERENCE_TIMEOUT_MS = "25000"
+# Fail closed: 0 admits no inference. Set from benchmark measurements, not a guess
+# (see docs/build-log.md). Use .dev.vars for local benchmark runs.
+DAILY_ADMISSION_CEILING = "40"
+# Estimated neurons per UTC day, reserved (worst case) before every attempt and settled after it (src/cost.ts). Required.
+# Proposed public value 5000 (docs/task-5-5-plan.md); 0 until task 5.5 passes.
+DAILY_NEURON_BUDGET = "4000"
+
+# Optional per-client abuse control (per-location, eventually consistent). The strict
+# global ceiling does NOT depend on it. Uncomment only after confirming availability.
+[[unsafe.bindings]]
+name = "CLIENT_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 6, period = 60 }

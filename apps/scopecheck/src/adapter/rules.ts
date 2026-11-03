@@ -323,7 +323,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
           }
         }
         const verdict2 = equal(a, b);
-        comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} <-> ${showValue(b.value)}${note?.(a, b) ?? ''}` });
+        comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} → ${showValue(b.value)}${note?.(a, b) ?? ''}` });
         if (verdict2 === 'equal') return;
         const d = describeInputs([a, b]);
         out.push(makeDraft({ ...base, matchStatus: m.status, code, severity: field === 'quantity' ? 'high' : 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${r.reqId}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${r.key} in ${docName(q)}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));

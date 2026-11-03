@@ -79,16 +79,30 @@ export function StatusBadge({ kind, label, children }: { kind: BadgeKind; label?
 }
 
 /**
- * A mode banner: always visible, never dismissible, never replaced by decoration (haunted-ui HU-7). On wide screens the label and
- * the explanation are both shown. On narrow screens the label is ONE line (the mode, and for live mode that text leaves the
- * device) with the explanation folded behind a toggle that is always visible on that line, so only the explanatory text is folded.
+ * A mode banner: always visible, never dismissible, never replaced by decoration (haunted-ui HU-7). It is the mode label and ONE plain
+ * line, with a Details toggle that is always visible for everything else (the model, the run, the paths). On narrow screens the
+ * label is ONE line (the mode, and for live mode that text leaves the device) and the plain line moves behind the same toggle, so
+ * only explanatory text is ever folded, never the label.
  */
-function Banner({ label, tone, short, full, note }: { label: string; tone: string; short: string; full: string; note: string }) {
+function Banner({ label, tone, short, full, note, details }: { label: string; tone: string; short: string; full: string; note: string; details?: string[] }) {
+  const rest = (
+    <ul className="mt-1 list-disc space-y-0.5 pl-5 text-sm">
+      {(details ?? []).map((d) => (
+        <li key={d}>{d}</li>
+      ))}
+    </ul>
+  );
   return (
     <div role="region" aria-label={label} className={`sticky top-0 z-10 border-b-4 px-4 py-2 sm:px-6 ${tone}`}>
       <div className="hidden sm:block">
         <p className="font-semibold">{full}</p>
         <p className="text-sm">{note}</p>
+        {details && details.length > 0 && (
+          <details data-banner-details="">
+            <summary className="cursor-pointer text-sm underline">Details</summary>
+            {rest}
+          </details>
+        )}
       </div>
       <details className="sm:hidden" data-banner-compact="">
         <summary className="flex cursor-pointer list-none items-baseline justify-between gap-2 text-sm">
@@ -97,21 +111,22 @@ function Banner({ label, tone, short, full, note }: { label: string; tone: strin
         </summary>
         <p className="mt-1 text-sm font-semibold">{full}</p>
         <p className="text-sm">{note}</p>
+        {details && details.length > 0 && rest}
       </details>
     </div>
   );
 }
 
-/** Always-visible notice that this is sample mode. Not dismissible. */
-export function SampleBanner({ note }: { note: string }) {
+/** Always-visible notice that this is sample mode. Not dismissible. `note` is one plain line; `details` sit behind the Details toggle. */
+export function SampleBanner({ note, details }: { note: string; details?: string[] }) {
   // banner-colours: labelling, not theme (HU-7). Fixed light chips with dark text: 14:1 or better in both modes.
-  return <Banner label="Sample mode" tone="border-amber-700 bg-amber-100 text-amber-950" short="SAMPLE MODE: fictional documents" full="SAMPLE MODE: fictional documents. Not a real review." note={note} />;
+  return <Banner label="Sample mode" tone="border-amber-700 bg-amber-100 text-amber-950" short="SAMPLE MODE: fictional documents" full="SAMPLE MODE: fictional documents. Not a real review." note={note} details={details} />;
 }
 
 /** Always-visible notice that documents are being analysed live. Not dismissible. */
-export function LiveBanner({ note }: { note: string }) {
+export function LiveBanner({ note, details }: { note: string; details?: string[] }) {
   // banner-colours
-  return <Banner label="Live mode" tone="border-blue-800 bg-blue-100 text-blue-950" short="LIVE: text sent to an AI service" full="LIVE: your documents. Extracted text was sent to an AI service for analysis; not all processing is local." note={note} />;
+  return <Banner label="Live mode" tone="border-blue-800 bg-blue-100 text-blue-950" short="LIVE: text sent to an AI service" full="LIVE: your documents. Extracted text was sent to an AI service for analysis; not all processing is local." note={note} details={details} />;
 }
 
 /**

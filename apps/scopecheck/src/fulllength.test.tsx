@@ -16,8 +16,12 @@ describe('the full-length recorded sample is the default', () => {
     const options = within(select).getAllByRole('option').map((o) => o.textContent);
     expect(options[0]).toMatch(/Full-length.*recorded Llama 3\.3 70B output.*\(sample\)/);
     expect(options[1]).toMatch(/RFQ and two quotations \(sample\)/);
-    expect(screen.getByRole('region', { name: 'Sample mode' }).textContent).toMatch(/recorded output of one live run of Llama 3\.3 70B/);
-    expect(screen.getByRole('region', { name: 'Sample mode' }).textContent).toMatch(/No document is uploaded and no model is called/);
+    const banner = screen.getByRole('region', { name: 'Sample mode' });
+    expect(banner.textContent).toMatch(/Recorded from one real AI run on 1 November 2026, replayed unchanged\./);
+    expect(banner.textContent).toMatch(/No document is uploaded and no model is called/); // behind Details
+    expect(screen.getByText(/A fictional tender and two quotations\. Recorded from one real AI run on 1 November 2026, replayed unchanged\./)).toBeTruthy();
+    const desc = screen.getByText(/A fictional tender and two quotations\./).textContent!;
+    expect(desc).not.toMatch(/llama|@cf|batch|docs\//i);
   });
 
   it('the small set can still be chosen and is unchanged', async () => {

@@ -1,12 +1,18 @@
 {
   "id": "scopecheck-layout",
   "title": "RFQ and a free-text quotation",
-  "description": "The same RFQ against a quotation written as free text (no table columns), including a line whose item identity is genuinely uncertain, and a specification the extraction missed. All names, items and prices are invented.",
+  "description": "A fictional RFQ and one quotation written as free text. Recorded from real AI runs on 1 November 2026, replayed unchanged.",
   "sample": true,
   "label": "Sample (fictional)",
   "extraction": {
     "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "note": "The claims are recorded model output for these fictional documents (selected benchmark configuration). Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    "note": "Recorded from real AI runs on 1 November 2026, replayed unchanged.",
+    "details": [
+      "Model: @cf/meta/llama-3.3-70b-instruct-fp8-fast.",
+      "It holds a line whose item is genuinely uncertain and a specification the extraction missed.",
+      "Recorded in: samples/benchmark-results/live-repeat-rfq-2026-11-01T02-22-13-472Z.json; samples/benchmark-results/live-layout-quote-c-2026-11-01T02-37-35-943Z.json.",
+      "All names, items and prices are invented. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
+    ]
   },
   "docs": [
     {

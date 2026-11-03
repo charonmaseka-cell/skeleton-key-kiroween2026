@@ -19,7 +19,17 @@ const find = (prefix: string) => {
 };
 
 type Spec = { sample: string; doc: string; role: string; title: string; file: string; /** secondary note shown under the title (for example the layout) */ note?: string };
-type FixtureSpec = { id: string; out: string; title: string; description: string; note?: string; docs: Spec[] };
+type FixtureSpec = { id: string; out: string; title: string; /** what the set is, one short sentence; the plain recording line is added to it */ what: string; /** extra lines for the Details toggle (the model, the batch, the paths are added) */ details?: string[]; docs: Spec[] };
+
+const MONTH = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** "Recorded from one real AI run on 1 November 2026, replayed unchanged." Counted and dated from the recorded result files themselves. */
+export function recordedLine(files: string[]): string {
+  const days = [...new Set(files.map((f) => f.match(/(\d{4})-(\d{2})-(\d{2})T/)).filter((m): m is RegExpMatchArray => !!m).map((m) => `${m[1]}-${m[2]}-${m[3]}`))].sort();
+  const parts = days.map((d) => ({ y: Number(d.slice(0, 4)), m: Number(d.slice(5, 7)), d: Number(d.slice(8, 10)) }));
+  const sameMonth = parts.every((p) => p.y === parts[0]!.y && p.m === parts[0]!.m);
+  const text = sameMonth ? `${parts.map((p) => p.d).join(' and ')} ${MONTH[parts[0]!.m - 1]} ${parts[0]!.y}` : parts.map((p) => `${p.d} ${MONTH[p.m - 1]} ${p.y}`).join(' and ');
+  return `Recorded from ${new Set(files).size === 1 ? 'one real AI run' : 'real AI runs'} on ${text}, replayed unchanged.`;
+}
 
 const SCOPE_STANDARD: Spec[] = [
   { sample: 'scopecheck', doc: 'rfq', role: 'rfq', title: 'RFQ-0001 Request for Quotation', file: find('live-repeat-rfq-2026') },
@@ -48,13 +58,17 @@ const FIXTURES: FixtureSpec[] = [
     id: 'scopecheck-fulllength',
     out: 'scopecheck-fulllength.json',
     title: 'Full-length: tender and two quotations (recorded Llama 3.3 70B output)',
-    description: 'A full-length fictional tender (12 requested lines) against two quotations of 11 lines each, one with a positioned table and one in prose. This is the default sample. The claims were recorded from ONE live run of @cf/meta/llama-3.3-70b-instruct-fp8-fast (12 requests, 1 November 2026, batch sc-t12-fresh) and are replayed here unchanged, including the extraction faults documented in docs/results/sc-t12-fresh-results.md. The smaller two-quotation set is the second option.',
-    note: 'The claims are recorded output of one live run of Llama 3.3 70B (12 requests on 1 November 2026; documents and labels were written before that run). They are replayed unchanged, faults included. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called.',
+    what: 'A fictional tender and two quotations.',
+    details: [
+      'The tender has 12 requested lines; each quotation has 11 lines, one with a positioned table and one in prose. This is the default sample; the smaller two-quotation set is the second option.',
+      'Run: 12 requests, batch sc-t12-fresh. The documents and labels were written before that run.',
+      'The extraction faults are kept, not hidden: see docs/results/sc-t12-fresh-results.md.',
+    ],
     docs: SCOPE_FULL,
   },
-  { id: 'scopecheck-standard', out: 'scopecheck-standard.json', title: 'RFQ and two quotations', description: 'One RFQ and two quotations with a quantity difference, a specification difference, an exclusion and an item missing from a quotation. All names, items and prices are invented.', docs: SCOPE_STANDARD },
-  { id: 'scopecheck-layout', out: 'scopecheck-layout.json', title: 'RFQ and a free-text quotation', description: 'The same RFQ against a quotation written as free text (no table columns), including a line whose item identity is genuinely uncertain, and a specification the extraction missed. All names, items and prices are invented.', docs: SCOPE_LAYOUT },
-  { id: 'packcheck-pack', out: 'packcheck-pack.json', title: 'Grant application pack', description: 'A four-document grant pack with a missing attachment, an organisation-name inconsistency, an ambiguous date, and a funding request (R1.6 million) that is correctly below the budget (R2 million). All names and amounts are invented.', docs: PACK },
+  { id: 'scopecheck-standard', out: 'scopecheck-standard.json', title: 'RFQ and two quotations', what: 'A fictional RFQ and two quotations.', details: ['It holds a quantity difference, a specification difference, an exclusion and an item missing from a quotation.'], docs: SCOPE_STANDARD },
+  { id: 'scopecheck-layout', out: 'scopecheck-layout.json', title: 'RFQ and a free-text quotation', what: 'A fictional RFQ and one quotation written as free text.', details: ['It holds a line whose item is genuinely uncertain and a specification the extraction missed.'], docs: SCOPE_LAYOUT },
+  { id: 'packcheck-pack', out: 'packcheck-pack.json', title: 'Grant application pack', what: 'A fictional four-document grant application pack.', details: ['It holds a missing attachment, an organisation-name inconsistency, an ambiguous date, and a funding request that is correctly below the budget.', 'The budget document was re-extracted on 3 November 2026 through a gated staging Worker (one request); the other three were recorded on 1 November 2026.'], docs: PACK },
 ];
 
 if (process.argv[1]?.endsWith('build-fixtures.ts')) for (const f of FIXTURES) {
@@ -81,12 +95,18 @@ if (process.argv[1]?.endsWith('build-fixtures.ts')) for (const f of FIXTURES) {
   const fixture = {
     id: f.id,
     title: f.title,
-    description: f.description,
+    description: `${f.what} ${recordedLine(f.docs.map((d) => d.file))}`,
     sample: true,
     label: 'Sample (fictional)',
     extraction: {
       model: BASELINE_MODEL,
-      note: f.note ?? 'The claims are recorded model output for these fictional documents (selected benchmark configuration). Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called.',
+      note: recordedLine(f.docs.map((d) => d.file)),
+      details: [
+        `Model: ${BASELINE_MODEL}.`,
+        ...(f.details ?? []),
+        `Recorded in: ${[...new Set(f.docs.map((d) => `samples/benchmark-results/${d.file}`))].join('; ')}.`,
+        'All names, items and prices are invented. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called.',
+      ],
     },
     docs,
   };

@@ -154,7 +154,7 @@ export function evaluatePack(ctx: RuleContext<PackData>): { drafts: FindingDraft
             reason = c.reason;
           }
         } else if (anchor.value !== other.value) state = 'confirmed';
-        comparisons.push({ ...cmp, status: state ? 'flagged' : 'agree', reason, userSupplied: [anchor, other].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(anchor.value)} <-> ${showValue(other.value)}` });
+        comparisons.push({ ...cmp, status: state ? 'flagged' : 'agree', reason, userSupplied: [anchor, other].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(anchor.value)} → ${showValue(other.value)}` });
         if (!state) continue;
         const d = describeInputs([anchor, other]);
         out.push(makeDraft({ contextId: 'form-vs-supporting', responseDocId: docId, code, severity: 'critical', state, subjectId: field, message: `${packField(field)} differs between ${doc(formDocId)} and ${doc(docId)}`, reason, inputs: d.inputs, evidence: d.evidence }));

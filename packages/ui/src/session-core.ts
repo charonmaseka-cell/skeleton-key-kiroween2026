@@ -56,7 +56,8 @@ export type Fixture = {
   /** true for fictional fixtures; false for documents the user uploaded. Drives every banner and export marker. */
   sample: boolean;
   label: string;
-  extraction: { model: string; note: string };
+  /** `note` is ONE plain line (the banner and the description); `details` hold the rest (model, batch, paths) behind the Details toggle */
+  extraction: { model: string; note: string; details?: string[] };
   docs: FixtureDoc[];
 };
 

@@ -7,9 +7,25 @@ A reusable document-checking engine powering two separate apps, built with Kiro 
 
 Models extract and suggest; deterministic rules produce findings backed by validated evidence.
 
-**Status (2026-11-01).** Both apps run in **sample mode** on clearly labelled fictional fixtures: validation, identity resolution, matching, rules, corrections, review decisions and export all run in the browser from fixture inputs (source text plus recorded model claims). ScopeCheck also has an **upload path** (choose an RFQ and quotation PDFs, read on your device, then an explicit Analyse step) that works against an analysis service when one is connected through `VITE_EXTRACTION_API_URL`; none is connected yet, so on this site it explains that analysis is unavailable. Real-document processing at scale is the next engineering milestone (see "Roadmap"). Production admission to the extraction Worker is closed (`DAILY_ADMISSION_CEILING = "0"`) until the limits and the deployed controls are validated.
+**Status (2026-11-03).** The haunted interface is built in both apps (see "The haunted interface" below). Earlier status, 2026-11-01: Both apps run in **sample mode** on clearly labelled fictional fixtures: validation, identity resolution, matching, rules, corrections, review decisions and export all run in the browser from fixture inputs (source text plus recorded model claims). ScopeCheck also has an **upload path** (choose an RFQ and quotation PDFs, read on your device, then an explicit Analyse step) that works against an analysis service when one is connected through `VITE_EXTRACTION_API_URL`; none is connected yet, so on this site it explains that analysis is unavailable. Real-document processing at scale is the next engineering milestone (see "Roadmap"). Production admission to the extraction Worker is closed (`DAILY_ADMISSION_CEILING = "0"`) until the limits and the deployed controls are validated.
 
 **Privacy note (planned design):** files will be parsed in the browser, but extracted text is sent to an AI service after you start analysis. Not all processing is local.
+
+## The haunted interface
+
+Two modes, one product. **Lights off** is the haunted presentation (the default); **Lights on** is plain and light, and is chosen automatically when the system asks for reduced motion or more contrast. A choice made with the toggle (first control in the header) is remembered; nothing about the documents is stored.
+
+- **Séance summary** above the ScopeCheck matrix: one sentence per quotation, with the plain counts beside it, built from the same data as the summary and the export. It never says "clean" while anything is uncertain.
+- **Evidence side by side**: a difference between two documents shows both source lines with the exact cited words marked (background and outline, not colour alone).
+- **Ghost rows**: a missing item stays *Needs review* until you confirm the document's coverage; then it becomes a confirmed finding and its cell turns into a ghost with a one-time flicker (none in Lights on or under reduced motion). "Show the evidence" solidifies it and jumps to the finding.
+- **Theme names** are a second name next to the plain wording, in Lights off only and never in exports: ScopeCheck ghost, miscount, curse; PackCheck Lost page, Doppelgänger, Changeling, Bottomless purse.
+- Checked in a real browser in both modes at 1280 px and 375 px (`npm run a11y`: axe-core, focus rings, no sideways scroll, no decoration over text, reduced motion). No sound, no third-party code, no image over 20 kB.
+
+| Lights off | Lights on |
+| --- | --- |
+| ![ScopeCheck, Lights off](docs/screenshots/haunted/scopecheck-lights-off.png) | ![ScopeCheck, Lights on](docs/screenshots/haunted/scopecheck-lights-on.png) |
+| ![ScopeCheck ghost row, Lights off](docs/screenshots/haunted/scopecheck-ghost-lights-off.png) | ![ScopeCheck ghost row, Lights on](docs/screenshots/haunted/scopecheck-ghost-lights-on.png) |
+| ![PackCheck, Lights off](docs/screenshots/haunted/packcheck-lights-off.png) | ![PackCheck, Lights on](docs/screenshots/haunted/packcheck-lights-on.png) |
 
 ## Layout
 
@@ -38,6 +54,7 @@ npm run build:scopecheck    # builds independently of PackCheck
 npm run build:packcheck     # builds independently of ScopeCheck
 npm run preview -w @skeleton-key/scopecheck   # serve the built app on http://localhost:4173 (PackCheck: 4174)
 npm run lint && npm run typecheck && npm test && npm run build
+npm run a11y                # browser checks of both apps in both modes (build first; needs Playwright's Chromium)
 ```
 
 ## Try the sample mode

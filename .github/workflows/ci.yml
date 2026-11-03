@@ -20,3 +20,17 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # Browser accessibility and visual checks, both apps, both modes (haunted-ui HU-T5). The only step that downloads a browser.
+  a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npx tsx tools/a11y/check.ts

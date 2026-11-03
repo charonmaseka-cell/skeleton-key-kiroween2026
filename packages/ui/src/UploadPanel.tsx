@@ -127,7 +127,7 @@ export function UploadPanel({
   const failed = runs.flatMap((r) => r.result.chunks.filter((c) => c.status !== 'ok').map((c) => ({ label: r.slot.label, c })));
 
   return (
-    <details ref={panel} id="upload" className="no-print rounded border-2 border-blue-800 bg-blue-50 p-4">
+    <details ref={panel} id="upload" className="no-print rounded border-2 border-sk-info bg-sk-surface p-4">
       <summary className="cursor-pointer">
         <h2 id={`${uid}-h`} className="inline text-xl font-semibold">
           Analyse your own documents
@@ -142,7 +142,7 @@ export function UploadPanel({
         <strong>Live analysis is limited.</strong> Text-layer PDFs only, up to {Math.round(MAX_FILE_BYTES / (1024 * 1024))} MB each. Each document is sent in short requests, one after another: a document needing more than {MAX_CHUNKS_PER_DOC} requests is refused as too long, a session sends at most {MAX_CALLS_PER_SESSION} requests, and nothing is retried automatically. It takes minutes, not seconds: one measured run of three 3-page documents took about 5 minutes (a single run, not a promise). Results cover only what was read; a part that failed is marked not processed. The sample sets above are the instant default and run the same checks on saved extractions.
       </p>
       {!configured && (
-        <p role="note" className="rounded border border-amber-800 bg-amber-50 p-2 text-sm font-medium">
+        <p role="note" className="rounded border border-sk-accent bg-sk-surface p-2 text-sm font-medium">
           Analysis is not available on this site yet: no analysis service is connected, and public access is closed until its limits are set. You can still choose files to see them read on your device, and the sample sets above work fully.
         </p>
       )}
@@ -158,14 +158,14 @@ export function UploadPanel({
               </label>
               <input id={inputId} type="file" accept="application/pdf,.pdf" disabled={busy} onChange={(e) => void choose(s, e.target.files?.[0])} aria-describedby={`${inputId}-s`} className="w-full text-sm" />
               <p id={`${inputId}-s`} className="text-sm" aria-live="polite">
-                {!p ? 'No file chosen.' : 'error' in p ? <span className="font-medium text-red-900">{p.error}</span> : `Read on your device: ${p.blocks.length} text lines on ${Math.max(...p.blocks.map((b) => b.page ?? 1))} page(s).`}
+                {!p ? 'No file chosen.' : 'error' in p ? <span className="font-medium text-sk-danger">{p.error}</span> : `Read on your device: ${p.blocks.length} text lines on ${Math.max(...p.blocks.map((b) => b.page ?? 1))} page(s).`}
               </p>
             </div>
           );
         })}
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={() => void analyse(false)} disabled={!ready || busy || !configured} className="rounded bg-blue-800 px-4 py-2 font-medium text-white disabled:bg-slate-500">
+        <button type="button" onClick={() => void analyse(false)} disabled={!ready || busy || !configured} className="rounded bg-sk-text px-4 py-2 font-medium text-sk-bg disabled:bg-sk-muted disabled:opacity-70">
           Analyse (sends extracted text)
         </button>
         {busy && (
@@ -189,14 +189,14 @@ export function UploadPanel({
             })}
           </ul>
           {stopped && (
-            <p role="alert" className="rounded border border-red-800 bg-red-50 p-2 font-medium">
+            <p role="alert" className="rounded border border-sk-danger bg-sk-surface p-2 font-medium">
               {ERROR_TEXT[stopped].text}
             </p>
           )}
           {failed.length > 0 && (
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm">{failed.length} part(s) were not processed.</span>
-              <button type="button" onClick={() => void analyse(true)} disabled={busy || !configured} className="rounded border border-slate-800 px-3 py-1">
+              <button type="button" onClick={() => void analyse(true)} disabled={busy || !configured} className="rounded border border-sk-border px-3 py-1">
                 Try the failed parts again
               </button>
             </div>

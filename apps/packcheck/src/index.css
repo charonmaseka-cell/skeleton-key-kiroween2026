@@ -1,10 +1,25 @@
 @import "tailwindcss";
 @source "../../../packages/ui/src";
+@import "../../../packages/ui/src/theme.css";
+@import "../../../packages/ui/src/effects.css";
 
 /* Visible keyboard focus everywhere (R13.1). */
 :focus-visible {
-  outline: 3px solid #1d4ed8;
+  outline: 3px solid var(--sk-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--sk-bg);
+}
+/* Page colours come from the mode (theme.css); before the mode is known the Lights-on variables apply. */
+body {
+  background: var(--sk-bg);
+  color: var(--sk-text);
+}
+a {
+  color: var(--sk-link);
+}
+/* Lights on: every control is at least 44 px tall (HU-4). */
+:root[data-lights='on'] :is(button, summary, select, input:not([type='checkbox'], [type='radio']), [role='button']) {
+  min-height: 44px;
 }
 /* AA contrast for links and controls is set by the colour classes; nothing here relies on colour alone. */
 @media (prefers-reduced-motion: reduce) {

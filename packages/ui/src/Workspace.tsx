@@ -114,7 +114,7 @@ export function ValueEditor({ fact, label, onSave, onCancel }: { fact: Effective
 
 // ---------- findings ----------
 
-const SEVERITY: Record<string, string> = { critical: 'Critical', warning: 'Warning', info: 'Info' };
+const SEVERITY: Record<string, string> = { critical: 'Critical', high: 'High', warning: 'Warning', info: 'Info' };
 
 /** `context` names the place the value is shown in (a finding, a Not-evaluated item), so repeated controls for one value stay distinguishable. */
 export function FactLine({ fact, session, view, context }: { fact: EffectiveFact; session: Session; view: SessionView; context?: string }) {

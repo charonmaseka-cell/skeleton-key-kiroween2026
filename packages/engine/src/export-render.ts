@@ -26,7 +26,7 @@ export type ExportLabels = {
 };
 type L = Required<Omit<ExportLabels, 'line'>> & Pick<ExportLabels, 'line'>;
 const resolve = (l: ExportLabels = {}): L => ({ field: l.field ?? ((k) => k), doc: l.doc ?? ((d) => d), reason: l.reason ?? ((r) => r), finding: l.finding ?? ((f) => f), line: l.line });
-const SEVERITY: Record<string, string> = { critical: 'critical', warning: 'warning', info: 'information' };
+const SEVERITY: Record<string, string> = { critical: 'critical', high: 'high', warning: 'warning', info: 'information' };
 const REVIEW: Record<string, string> = { open: 'not decided', accepted: 'accepted', dismissed: 'dismissed' };
 const COVERAGE: Record<string, string> = { unverified: 'not confirmed as fully extracted', user_confirmed: 'confirmed by the reviewer', verified: 'verified', processing_incomplete: 'not fully processed' };
 const where = (l: L, docId: string, blockId: string) => {

@@ -8,6 +8,7 @@ import { loadBlocks, loadSample, SAMPLES_DIR } from '../src/samples';
 // labelled sample PDFs, and the claims recorded in the named benchmark result. They hold no findings.
 
 const SETS: { file: string; sample: string }[] = [
+  { file: 'scopecheck-fulllength.json', sample: 'scopecheck-fresh' },
   { file: 'scopecheck-standard.json', sample: 'scopecheck' },
   { file: 'scopecheck-layout.json', sample: 'scopecheck-layout' },
   { file: 'packcheck-pack.json', sample: 'packcheck' },

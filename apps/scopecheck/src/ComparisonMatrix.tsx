@@ -2,6 +2,7 @@ import type { PlannedComparison, ReviewItem } from '@skeleton-key/engine';
 import { ScrollTable, StatusBadge, showValue, type BadgeKind, type SessionView } from '@skeleton-key/ui';
 import { requirementsOf, type ScopeContext } from './adapter';
 import type { Line } from './adapter/rules';
+import { EXCLUDED_TEXT, formatAmount, totalsFor, type QuoteTotal } from './totals';
 
 // ScopeCheck comparison view: each RFQ item against each quotation. Built from the rules' own outputs
 // (match resolutions, the comparison ledger, findings). It is computed on every render from the
@@ -82,6 +83,88 @@ const aspectBadge = (a: Aspect): { kind: BadgeKind; text: string } => {
   if (c.status === 'agree') return { kind: 'agree', text: 'Agrees' };
   return { kind: a.finding?.finding.state === 'needs_review' ? 'needs_review' : 'confirmed', text: a.finding?.finding.state === 'needs_review' ? 'Needs review' : 'Differs' };
 };
+
+const money = (t: QuoteTotal, fixed2: string) => `${t.currency ? `${t.currency} ` : ''}${formatAmount(fixed2)}${t.currency ? '' : ' (currency not stated)'}`;
+
+/** "Total as quoted", one row per quotation, under the matrix. A number per quotation only: no ranking, no recommendation. */
+export function TotalsTable({ view }: { view: SessionView }) {
+  const ctx = view.evaluation.context as ScopeContext | undefined;
+  if (!ctx) return null;
+  const totals = totalsFor(view.effective, ctx.data.quoteDocIds);
+  return (
+    <div className="space-y-2">
+      <h4 id="totals-h" className="font-medium">
+        Total as quoted
+      </h4>
+      <p className="text-sm text-slate-800">
+        Each quotation line&apos;s validated unit price times its validated quantity, added up in code. A line with a price or quantity that is held for review or missing is left out and counted, and the total is then shown as incomplete. Quotations are not ranked or compared here.
+      </p>
+      <ScrollTable label="Total as quoted for each quotation">
+        <table className="w-full border-collapse text-left">
+          <caption className="sr-only">Total as quoted for each quotation, with the number of lines counted and left out</caption>
+          <thead>
+            <tr className="bg-slate-100">
+              <th scope="col" className="border border-slate-400 p-2">Quotation</th>
+              <th scope="col" className="border border-slate-400 p-2">Total as quoted</th>
+              <th scope="col" className="border border-slate-400 p-2">Lines counted</th>
+              <th scope="col" className="border border-slate-400 p-2">Lines excluded</th>
+            </tr>
+          </thead>
+          <tbody>
+            {totals.map((t) => (
+              <tr key={t.quote} className="align-top" data-testid={`total-${t.quote}`}>
+                <th scope="row" className="border border-slate-400 p-2 font-normal">{view.docName(t.quote)}</th>
+                <td className="border border-slate-400 p-2">
+                  {t.state === 'complete' && <strong>{money(t, t.sum!)}</strong>}
+                  {t.state === 'incomplete' && (
+                    <>
+                      <StatusBadge kind="needs_review" label={`Incomplete: ${t.excluded.length} ${t.excluded.length === 1 ? 'line' : 'lines'} excluded`} />
+                      <br />
+                      <span className="text-sm">Sum of the {t.counted.length} counted {t.counted.length === 1 ? 'line' : 'lines'} only, not the quotation total: {money(t, t.sum!)}</span>
+                    </>
+                  )}
+                  {t.state === 'none' && (
+                    <>
+                      <StatusBadge kind="needs_review" label={`Incomplete: ${t.excluded.length} ${t.excluded.length === 1 ? 'line' : 'lines'} excluded`} />
+                      <br />
+                      <span className="text-sm">No line has both a validated unit price and a validated quantity, so there is nothing to add up.</span>
+                    </>
+                  )}
+                  {t.state === 'mixed_currency' && (
+                    <>
+                      <StatusBadge kind="needs_review" label="Not totalled: more than one currency" />
+                      <br />
+                      <span className="text-sm">The counted lines use different currencies ({t.currencies.map((c) => c ?? 'not stated').join(', ')}), so they are not added together.</span>
+                    </>
+                  )}
+                </td>
+                <td className="border border-slate-400 p-2">{t.counted.length}</td>
+                <td className="border border-slate-400 p-2">
+                  {t.excluded.length}
+                  {t.excluded.length > 0 && (
+                    <details className="text-sm">
+                      <summary className="cursor-pointer text-blue-900 underline">Show which lines</summary>
+                      <ul className="list-disc pl-5">
+                        {t.excluded.map((x) => {
+                          const n = view.lineNumber(t.quote, x.blockId);
+                          return (
+                            <li key={x.blockId}>
+                              {n ? `Line ${n}` : 'A line'}: {x.reasons.map((r) => EXCLUDED_TEXT[r]).join('; ')}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </details>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </ScrollTable>
+    </div>
+  );
+}
 
 export function ComparisonMatrix({ view }: { view: SessionView }) {
   const { rows, uncertainQuoteLines, exclusions, quotes } = buildMatrix(view);
@@ -191,6 +274,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
           </tbody>
         </table>
       </ScrollTable>
+      <TotalsTable view={view} />
       {uncertainQuoteLines.length > 0 && (
         <div>
           <h4 className="font-medium">Quotation lines whose item identity is uncertain or that carry several items</h4>

@@ -165,7 +165,7 @@ export function scoreFindings(produced: Finding[], expected: ExpectedFinding[], 
   }
   for (const [k, f] of got) {
     if (want.has(k)) continue;
-    if (f.state === 'confirmed' && f.severity === 'critical') score.falseCritical.push(k);
+    if (f.state === 'confirmed' && (f.severity === 'critical' || f.severity === 'high')) score.falseCritical.push(k);
     else score.unexpectedOther.push(`${k}(${f.state})`);
   }
   for (const f of produced) if (opts.mustNotFlag?.includes(f.code)) score.mustNotFlagViolations.push(key(f.code, f.subjectId, f.responseDocId));

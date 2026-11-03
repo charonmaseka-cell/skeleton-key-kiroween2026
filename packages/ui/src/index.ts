@@ -12,3 +12,4 @@ export * from './lights';
 export * from './seance';
 export { Seance } from './Seance';
 export * from './Ghost';
+export * from './Motifs';

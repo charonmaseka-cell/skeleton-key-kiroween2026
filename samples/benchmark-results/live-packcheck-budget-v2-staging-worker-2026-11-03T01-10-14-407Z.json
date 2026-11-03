@@ -1,0 +1,109 @@
+{
+  "kind": "staging-worker-recording",
+  "mode": "live",
+  "label": "packcheck-budget-v2-staging-worker",
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "startedAt": "2026-11-03T01:10:14.904Z",
+  "endedAt": "2026-11-03T01:10:23.563Z",
+  "provenance": {
+    "note": "One extraction request of the CURRENT samples/packcheck/budget.pdf through the token-gated staging Worker (ceiling 1, no repair, no retry). claimsReturned is the Worker response byte for byte; nothing was edited.",
+    "workerCommit": "35d860265f717084b0ee0c2bc8bba7160982eddd",
+    "budgetPdfSha256": "21f7fc6345f7691b95cc1bc084d1fb547df3d3d22e90a27f6888c5e6c532978a",
+    "request": {
+      "sha256": "cfee0d5141419f24caee8d285c3c545f01ada10e98024a8206e360e93af6319e",
+      "bodyBytes": 379,
+      "blocksSent": 5,
+      "schemaId": "packcheck.grant.v2",
+      "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "guaranteedWorstCaseNeurons": 339.888
+    },
+    "attemptsSent": 1,
+    "latencyMs": 8292,
+    "usage": {
+      "promptTokens": 580,
+      "completionTokens": 254
+    },
+    "neurons": {
+      "estimateBeforeMargin": 67.472652,
+      "chargeWithMargin": 74.2199172,
+      "basis": "ESTIMATE from the reported tokens at the repo rates; not dashboard-confirmed"
+    },
+    "workerMeta": {
+      "attempts": 1,
+      "repaired": false,
+      "dropped": 0,
+      "droppedReasons": {
+        "unknown_block": 0,
+        "unknown_field": 0,
+        "invalid_value": 0
+      },
+      "usage": {
+        "promptTokens": 580,
+        "completionTokens": 254
+      }
+    },
+    "replaces": "samples/benchmark-results/live-packcheck-budget-v2-2026-11-01T03-00-38-750Z.json (kept unchanged)"
+  },
+  "settings": {
+    "inferenceTimeoutMs": 25000,
+    "maxRepairAttempts": 0,
+    "note": "The staging Worker was deployed with DAILY_ADMISSION_CEILING=1, so no repair or second request could be admitted."
+  },
+  "samples": [
+    {
+      "sampleId": "packcheck",
+      "docs": [
+        {
+          "docId": "budget",
+          "profile": {
+            "id": "packcheck.grant.v2",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "organisation_name",
+              "kind": "name",
+              "blockId": "p1-l2",
+              "excerpt": "Applicant: Green Valley Community Foundation",
+              "value": "Green Valley Community Foundation"
+            },
+            {
+              "field": "total_project_budget",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "Total project budget: R 2 000 000",
+              "value": {
+                "amount": "2000000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "funding_requested",
+              "kind": "money",
+              "blockId": "p1-l4",
+              "excerpt": "Funding requested from this grant: R 1 600 000",
+              "value": {
+                "amount": "1600000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "project_start_date",
+              "kind": "date",
+              "blockId": "p1-l5",
+              "excerpt": "Project period: 01/03/2026 to 28 February 2027",
+              "value": "2026-03-01"
+            },
+            {
+              "field": "project_end_date",
+              "kind": "date",
+              "blockId": "p1-l5",
+              "excerpt": "Project period: 01/03/2026 to 28 February 2027",
+              "value": "2027-02-28"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

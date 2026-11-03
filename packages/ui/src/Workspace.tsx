@@ -326,11 +326,6 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
             <p className="mt-2 text-sm">
               {d.claims.length} extracted values recorded, {facts.filter((f) => f.usable).length} usable.
             </p>
-            {(d.claimEdits ?? []).map((e, i) => (
-              <p key={i} role="note" className="mt-1 text-sm">
-                Edited sample: this document's text was changed after its extraction was recorded ("{e.from}" is now "{e.to}"), and the recorded excerpts were updated to match. The extracted values are unchanged. {e.reason}
-              </p>
-            ))}
             <h4 className="mt-2 font-medium">Source text</h4>
             <ol className="list-decimal pl-8 font-mono text-sm">
               {d.blocks.map((b) => (

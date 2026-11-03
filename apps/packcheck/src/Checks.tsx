@@ -31,14 +31,14 @@ function Table({ title, id, rows, view, cols }: { title: string; id: string; row
         <table className="w-full border-collapse text-left">
           <caption className="sr-only">{title}</caption>
           <thead>
-            <tr className="bg-slate-100">
-              <th scope="col" className="border border-slate-400 p-2">
+            <tr className="bg-sk-surface">
+              <th scope="col" className="border border-sk-border p-2">
                 {cols[0]}
               </th>
-              <th scope="col" className="border border-slate-400 p-2">
+              <th scope="col" className="border border-sk-border p-2">
                 {cols[1]}
               </th>
-              <th scope="col" className="border border-slate-400 p-2">
+              <th scope="col" className="border border-sk-border p-2">
                 Result
               </th>
             </tr>
@@ -49,12 +49,12 @@ function Table({ title, id, rows, view, cols }: { title: string; id: string; row
               const b = badge(c, f);
               return (
                 <tr key={c.id} className="align-top">
-                  <th scope="row" className="border border-slate-400 p-2 font-normal">
+                  <th scope="row" className="border border-sk-border p-2 font-normal">
                     {view.fieldLabel(c.field)}
                     <br />
                     <span className="text-sm">{c.docs.map(view.docName).join(' vs ')}</span>
                   </th>
-                  <td className="border border-slate-400 p-2">
+                  <td className="border border-sk-border p-2">
                     {c.detail ?? <span className="text-sm">{view.reasonText(c.reason)}</span>}
                     {!!c.userSupplied?.length && (
                       <span className="ml-1">
@@ -62,12 +62,12 @@ function Table({ title, id, rows, view, cols }: { title: string; id: string; row
                       </span>
                     )}
                   </td>
-                  <td className="border border-slate-400 p-2">
+                  <td className="border border-sk-border p-2">
                     <StatusBadge kind={b.kind} label={b.text} />
                     {c.status === 'not_evaluated' && c.blocked && <span className="block text-sm">{view.reasonText(c.blocked.reason)}</span>}
                     {c.status === 'flagged' && c.reason && <span className="block text-sm">{view.reasonText(c.reason)}</span>}
                     {f && (
-                      <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${f.finding.message}`} href={`#finding-${f.finding.id}`}>
+                      <a className="text-sm text-sk-link underline" aria-label={`Open the item: ${f.finding.message}`} href={`#finding-${f.finding.id}`}>
                         Open the item
                       </a>
                     )}

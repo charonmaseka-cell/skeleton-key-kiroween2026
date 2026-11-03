@@ -16,7 +16,7 @@ function Highlighted({ text, start, end }: { text: string; start: number; end: n
   return (
     <span className="font-mono text-sm">
       {text.slice(0, start)}
-      <mark className="rounded bg-yellow-200 px-0.5 text-slate-950 outline outline-1 outline-yellow-700">{text.slice(start, end)}</mark>
+      <mark className="rounded bg-sk-mark-bg px-0.5 text-sk-mark-text outline outline-1 outline-sk-accent">{text.slice(start, end)}</mark>
       {text.slice(end)}
     </span>
   );
@@ -26,8 +26,8 @@ export function EvidenceView({ evidence, role, view }: { evidence: Evidence; rol
   const block = view.blocksByDoc.get(evidence.docId)?.find((b) => b.id === evidence.blockId);
   const intact = !!block && block.text.slice(evidence.start, evidence.end) === evidence.text;
   return (
-    <figure className="rounded border border-slate-300 bg-slate-50 p-2">
-      <figcaption className="text-sm text-slate-800">
+    <figure className="rounded border border-sk-border bg-sk-surface p-2">
+      <figcaption className="text-sm text-sk-muted">
         {view.docName(evidence.docId)}
         {(() => {
           const n = view.lineNumber(evidence.docId, evidence.blockId);
@@ -36,9 +36,9 @@ export function EvidenceView({ evidence, role, view }: { evidence: Evidence; rol
         {block?.page ? `, page ${block.page}` : ''}
         {role === 'superseded_original' ? ' (original value, replaced by your correction)' : ''}
         {/* Evidence detail: the block reference is shown here and nowhere else. */}
-        <span data-evidence-ref="" className="ml-1 text-xs text-slate-700">(source reference {evidence.blockId})</span>
+        <span data-evidence-ref="" className="ml-1 text-xs text-sk-muted">(source reference {evidence.blockId})</span>
       </figcaption>
-      {block && intact ? <Highlighted text={block.text} start={evidence.start} end={evidence.end} /> : <p className="text-sm text-red-900">Source text not available or changed: this evidence cannot be shown.</p>}
+      {block && intact ? <Highlighted text={block.text} start={evidence.start} end={evidence.end} /> : <p className="text-sm text-sk-danger">Source text not available or changed: this evidence cannot be shown.</p>}
     </figure>
   );
 }
@@ -67,11 +67,11 @@ export function ValueEditor({ fact, label, onSave, onCancel }: { fact: Effective
       <label htmlFor={`${id}-${k}`} className="block text-sm font-medium">
         {label}
       </label>
-      <input id={`${id}-${k}`} autoFocus={k === first} value={input[k] ?? ''} onChange={set(k)} aria-describedby={error ? `${id}-err` : undefined} className="w-full rounded border border-slate-600 px-2 py-1" placeholder={hint} />
+      <input id={`${id}-${k}`} autoFocus={k === first} value={input[k] ?? ''} onChange={set(k)} aria-describedby={error ? `${id}-err` : undefined} className="w-full rounded border border-sk-border px-2 py-1" placeholder={hint} />
     </div>
   );
   return (
-    <form onSubmit={submit} className="mt-2 space-y-2 rounded border-2 border-blue-800 bg-blue-50 p-3" aria-label={`Correct ${label}`}>
+    <form onSubmit={submit} className="mt-2 space-y-2 rounded border-2 border-sk-info bg-sk-surface p-3" aria-label={`Correct ${label}`}>
       <p className="text-sm">
         Supply the correct value for <strong>{label}</strong>. The document value ({showValue(fact.fact.value)}) is kept and the new value is labelled user-supplied.
       </p>
@@ -93,18 +93,18 @@ export function ValueEditor({ fact, label, onSave, onCancel }: { fact: Effective
         <label htmlFor={`${id}-note`} className="block text-sm font-medium">
           Note (optional)
         </label>
-        <input id={`${id}-note`} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded border border-slate-600 px-2 py-1" />
+        <input id={`${id}-note`} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded border border-sk-border px-2 py-1" />
       </div>
       {error && (
-        <p id={`${id}-err`} role="alert" className="text-sm font-medium text-red-900">
+        <p id={`${id}-err`} role="alert" className="text-sm font-medium text-sk-danger">
           {error}
         </p>
       )}
       <div className="flex gap-2">
-        <button type="submit" className="rounded bg-blue-800 px-3 py-1 font-medium text-white">
+        <button type="submit" className="rounded bg-sk-text px-3 py-1 font-medium text-sk-bg">
           Save correction
         </button>
-        <button type="button" onClick={onCancel} className="rounded border border-slate-700 px-3 py-1">
+        <button type="button" onClick={onCancel} className="rounded border border-sk-border px-3 py-1">
           Cancel
         </button>
       </div>
@@ -171,14 +171,15 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
   // A reopen clears the stored note; the input must follow it.
   useEffect(() => setNote(review.note ?? ''), [review.note, review.history.length]);
   const inputs = finding.inputs.map((i) => view.effective.get(i.factId)).filter((x): x is EffectiveFact => !!x);
+  const pair = finding.code.endsWith('.differs') && new Set(finding.evidence.map((e) => e.evidence.docId)).size >= 2;
   return (
-    <article id={`finding-${finding.id}`} tabIndex={-1} aria-labelledby={`h-${finding.id}`} className="space-y-2 rounded border border-slate-400 bg-white p-4">
+    <article id={`finding-${finding.id}`} tabIndex={-1} aria-labelledby={`h-${finding.id}`} className="space-y-2 rounded border border-sk-border bg-sk-surface p-4">
       <h4 id={`h-${finding.id}`} className="break-words text-lg font-semibold">
         {finding.message}
       </h4>
       <p className="flex flex-wrap items-center gap-2">
         <StatusBadge kind={finding.state === 'confirmed' ? 'confirmed' : 'needs_review'} />
-        <span className="rounded border border-slate-700 px-2 py-0.5 text-sm">{SEVERITY[finding.severity] ?? finding.severity}</span>
+        <span className="rounded border border-sk-border px-2 py-0.5 text-sm">{SEVERITY[finding.severity] ?? finding.severity}</span>
         <StatusBadge kind={review.status} />
         {review.reopened && <StatusBadge kind="needs_review" label="Reopened: inputs changed since your earlier decision" />}
       </p>
@@ -186,7 +187,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
       {inputs.length > 0 && (
         <section aria-label="Values used">
           <h5 className="font-medium">Values used</h5>
-          <ul className="divide-y divide-slate-200">
+          <ul className="divide-y divide-sk-border">
             {inputs.map((f) => (
               <FactLine key={f.fact.id} fact={f} session={session} view={view} context={finding.message} />
             ))}
@@ -196,24 +197,27 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
       {finding.evidence.length > 0 && (
         <section aria-label="Source evidence" className="space-y-1">
           <h5 className="font-medium">Source evidence</h5>
-          {finding.evidence.map((e, i) => (
-            <EvidenceView key={`${e.factId}-${i}`} evidence={e.evidence} role={e.role} view={view} />
-          ))}
+          {/* A difference between two documents shows both source lines side by side (stacked on narrow screens), each with the cited words marked. */}
+          <div data-evidence-pair={pair ? '' : undefined} className={pair ? 'grid gap-2 sm:grid-cols-2' : 'space-y-1'}>
+            {finding.evidence.map((e, i) => (
+              <EvidenceView key={`${e.factId}-${i}`} evidence={e.evidence} role={e.role} view={view} />
+            ))}
+          </div>
         </section>
       )}
-      <section aria-label="Review decision" className="space-y-1 border-t border-slate-300 pt-2">
+      <section aria-label="Review decision" className="space-y-1 border-t border-sk-border pt-2">
         <label htmlFor={noteId} className="block text-sm font-medium">
           Note for this item (optional)<span className="sr-only">: {finding.message}</span>
         </label>
-        <input id={noteId} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded border border-slate-600 px-2 py-1" />
+        <input id={noteId} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded border border-sk-border px-2 py-1" />
         <div className="flex flex-wrap gap-2">
-          <button type="button" aria-label={`Accept: ${finding.message}`} onClick={() => session.decide(finding, 'accepted', note)} className="rounded bg-green-800 px-3 py-1 text-white">
+          <button type="button" aria-label={`Accept: ${finding.message}`} onClick={() => session.decide(finding, 'accepted', note)} className="rounded bg-sk-ok px-3 py-1 text-sk-bg">
             Accept
           </button>
-          <button type="button" aria-label={`Dismiss: ${finding.message}`} onClick={() => session.decide(finding, 'dismissed', note)} className="rounded bg-slate-800 px-3 py-1 text-white">
+          <button type="button" aria-label={`Dismiss: ${finding.message}`} onClick={() => session.decide(finding, 'dismissed', note)} className="rounded bg-sk-muted px-3 py-1 text-sk-bg">
             Dismiss
           </button>
-          <button type="button" aria-label={`Reopen: ${finding.message}`} onClick={() => session.decide(finding, 'open', note)} className="rounded border border-slate-700 px-3 py-1">
+          <button type="button" aria-label={`Reopen: ${finding.message}`} onClick={() => session.decide(finding, 'open', note)} className="rounded border border-sk-border px-3 py-1">
             Reopen
           </button>
         </div>
@@ -243,7 +247,7 @@ export function ReviewQueue({ session, view }: { session: Session; view: Session
       <h3 id={id} className="text-xl font-semibold">
         {title} ({items.length})
       </h3>
-      <p className="text-sm text-slate-800">{blurb}</p>
+      <p className="text-sm text-sk-muted">{blurb}</p>
       {items.length === 0 ? <p>None.</p> : items.map((i) => <FindingCard key={i.finding.id} item={i} session={session} view={view} />)}
     </section>
   );
@@ -264,7 +268,7 @@ export function NotEvaluatedList({ comparisons, session, view }: { comparisons: 
       <h3 id="ne-h" className="text-xl font-semibold">
         Not evaluated ({items.length})
       </h3>
-      <p className="text-sm text-slate-800">These comparisons did NOT run. That is not the same as "no difference". Each one waits on the input shown.</p>
+      <p className="text-sm text-sk-muted">These comparisons did NOT run. That is not the same as "no difference". Each one waits on the input shown.</p>
       {items.length === 0 ? (
         <p>Every planned comparison ran.</p>
       ) : (
@@ -272,7 +276,7 @@ export function NotEvaluatedList({ comparisons, session, view }: { comparisons: 
           {items.map((c) => {
             const fact = c.blocked?.factId ? view.effective.get(c.blocked.factId) : undefined;
             return (
-              <li key={c.id} className="rounded border border-dashed border-slate-700 bg-slate-50 p-3">
+              <li key={c.id} className="rounded border border-dashed border-sk-border bg-sk-surface p-3">
                 <p className="flex flex-wrap items-center gap-2">
                   <StatusBadge kind="not_evaluated" />
                   <strong>{view.fieldLabel(c.field)}</strong> <span>({c.docs.map(view.docName).join(' vs ')})</span>
@@ -313,7 +317,7 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
         const failedBlocks = new Set((d.chunks ?? []).filter((c) => c.status === 'failed').flatMap((c) => c.blockIds));
         const focusSummary = () => setTimeout(() => document.getElementById(`doc-sum-${d.id}`)?.focus(), 0);
         return (
-          <details key={d.id} className="rounded border border-slate-400 p-3">
+          <details key={d.id} className="rounded border border-sk-border p-3">
             <summary id={`doc-sum-${d.id}`} className="cursor-pointer text-lg font-medium">
               {d.title} <StatusBadge kind={confirmed ? 'verified' : 'unverified'} label={!complete ? 'Part of the document was not processed' : undefined} />
               {d.note && (
@@ -334,19 +338,19 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
             <h4 className="mt-2 font-medium">Source text</h4>
             <ol className="list-decimal pl-8 font-mono text-sm">
               {d.blocks.map((b) => (
-                <li key={b.id} className="break-words border-b border-slate-200 py-0.5">
+                <li key={b.id} className="break-words border-b border-sk-border py-0.5">
                   {b.text}
                   {failedBlocks.has(b.id) ? <span className="ml-2 font-sans text-xs font-medium">(not processed)</span> : unciting.has(b.id) ? <span className="ml-2 font-sans text-xs">(no extracted value cites this line)</span> : null}
                 </li>
               ))}
             </ol>
             <h4 className="mt-2 font-medium">Extracted values</h4>
-            <ul className="divide-y divide-slate-200">
+            <ul className="divide-y divide-sk-border">
               {facts.map((f) => (
                 <FactLine key={f.fact.id} fact={f} session={session} view={view} />
               ))}
             </ul>
-            <div className="mt-2 rounded border border-amber-800 bg-amber-50 p-2">
+            <div className="mt-2 rounded border border-sk-accent bg-sk-surface p-2">
               <p className="text-sm">
                 A successful extraction does not prove every item was found. {confirmed ? 'You confirmed this document.' : 'Until you confirm coverage, anything not found stays Needs review.'}
                 {unciting.size > 0 && ` ${unciting.size} line${unciting.size === 1 ? '' : 's'} of source text ${unciting.size === 1 ? 'is' : 'are'} not cited by any extracted value (marked in the source text).`}
@@ -357,12 +361,12 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
                 </p>
               )}
               {complete && !confirmed && (
-                <button type="button" aria-label={`I checked this document: confirm coverage of ${d.title}`} onClick={() => { session.confirmCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-slate-800 px-3 py-1">
+                <button type="button" aria-label={`I checked this document: confirm coverage of ${d.title}`} onClick={() => { session.confirmCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-sk-border px-3 py-1">
                   I checked this document: confirm coverage
                 </button>
               )}
               {confirmed && (
-                <button type="button" aria-label={`Withdraw coverage confirmation for ${d.title}`} onClick={() => { session.withdrawCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-slate-800 px-3 py-1">
+                <button type="button" aria-label={`Withdraw coverage confirmation for ${d.title}`} onClick={() => { session.withdrawCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-sk-border px-3 py-1">
                   Withdraw my coverage confirmation
                 </button>
               )}
@@ -396,19 +400,19 @@ export function ExportPanel({ view, baseName }: { view: SessionView; baseName: s
         Exports keep every state: {m.findings.length} confirmed, {m.unresolved.length} Needs review, {m.notEvaluated.length} Not evaluated, {m.decisions.length} decisions, {m.corrections.length} corrections. Marked SAMPLE (fictional).
       </p>
       <div className="no-print flex flex-wrap gap-2">
-        <button type="button" onClick={() => download(`${baseName}-sample.csv`, 'text/csv', exportCsv(view))} className="rounded bg-blue-800 px-3 py-1 text-white">
+        <button type="button" onClick={() => download(`${baseName}-sample.csv`, 'text/csv', exportCsv(view))} className="rounded bg-sk-text px-3 py-1 text-sk-bg">
           Download CSV
         </button>
-        <button type="button" onClick={() => download(`${baseName}-sample.txt`, 'text/plain', exportText(view))} className="rounded bg-blue-800 px-3 py-1 text-white">
+        <button type="button" onClick={() => download(`${baseName}-sample.txt`, 'text/plain', exportText(view))} className="rounded bg-sk-text px-3 py-1 text-sk-bg">
           Download text draft
         </button>
-        <button type="button" onClick={() => window.print()} className="rounded border border-slate-800 px-3 py-1">
+        <button type="button" onClick={() => window.print()} className="rounded border border-sk-border px-3 py-1">
           Print or save as PDF
         </button>
       </div>
       <details>
         <summary className="cursor-pointer">Preview of the text export</summary>
-        <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap rounded bg-slate-100 p-3 text-sm">{exportText(view)}</pre>
+        <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap rounded bg-sk-surface p-3 text-sm">{exportText(view)}</pre>
       </details>
     </section>
   );
@@ -419,7 +423,7 @@ export function ExportPanel({ view, baseName }: { view: SessionView; baseName: s
 export function SummaryBar({ view }: { view: SessionView }) {
   const c = view.exportModel.comparisons;
   return (
-    <dl className="flex flex-wrap gap-4 rounded border border-slate-400 bg-slate-50 p-3" aria-label="Summary">
+    <dl className="flex flex-wrap gap-4 rounded border border-sk-border bg-sk-surface p-3" aria-label="Summary">
       {[
         ['Confirmed findings', view.exportModel.findings.length],
         ['Needs review', view.exportModel.unresolved.length],

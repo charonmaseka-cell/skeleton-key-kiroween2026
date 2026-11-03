@@ -96,25 +96,25 @@ export function TotalsTable({ view }: { view: SessionView }) {
       <h4 id="totals-h" className="font-medium">
         Total as quoted
       </h4>
-      <p className="text-sm text-slate-800">
+      <p className="text-sm text-sk-muted">
         Each quotation line&apos;s validated unit price times its validated quantity, added up in code. A line with a price or quantity that is held for review or missing is left out and counted, and the total is then shown as incomplete. Quotations are not ranked or compared here.
       </p>
       <ScrollTable label="Total as quoted for each quotation">
         <table className="w-full border-collapse text-left">
           <caption className="sr-only">Total as quoted for each quotation, with the number of lines counted and left out</caption>
           <thead>
-            <tr className="bg-slate-100">
-              <th scope="col" className="border border-slate-400 p-2">Quotation</th>
-              <th scope="col" className="border border-slate-400 p-2">Total as quoted</th>
-              <th scope="col" className="border border-slate-400 p-2">Lines counted</th>
-              <th scope="col" className="border border-slate-400 p-2">Lines excluded</th>
+            <tr className="bg-sk-surface">
+              <th scope="col" className="border border-sk-border p-2">Quotation</th>
+              <th scope="col" className="border border-sk-border p-2">Total as quoted</th>
+              <th scope="col" className="border border-sk-border p-2">Lines counted</th>
+              <th scope="col" className="border border-sk-border p-2">Lines excluded</th>
             </tr>
           </thead>
           <tbody>
             {totals.map((t) => (
               <tr key={t.quote} className="align-top" data-testid={`total-${t.quote}`}>
-                <th scope="row" className="border border-slate-400 p-2 font-normal">{view.docName(t.quote)}</th>
-                <td className="border border-slate-400 p-2">
+                <th scope="row" className="border border-sk-border p-2 font-normal">{view.docName(t.quote)}</th>
+                <td className="border border-sk-border p-2">
                   {t.state === 'complete' && <strong>{money(t, t.sum!)}</strong>}
                   {t.state === 'incomplete' && (
                     <>
@@ -138,12 +138,12 @@ export function TotalsTable({ view }: { view: SessionView }) {
                     </>
                   )}
                 </td>
-                <td className="border border-slate-400 p-2">{t.counted.length}</td>
-                <td className="border border-slate-400 p-2">
+                <td className="border border-sk-border p-2">{t.counted.length}</td>
+                <td className="border border-sk-border p-2">
                   {t.excluded.length}
                   {t.excluded.length > 0 && (
                     <details className="text-sm">
-                      <summary className="cursor-pointer text-blue-900 underline">Show which lines</summary>
+                      <summary className="cursor-pointer text-sk-link underline">Show which lines</summary>
                       <ul className="list-disc pl-5">
                         {t.excluded.map((x) => {
                           const n = view.lineNumber(t.quote, x.blockId);
@@ -173,17 +173,17 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
       <h3 id="matrix-h" className="text-xl font-semibold">
         Comparison: RFQ items against each quotation
       </h3>
-      <p className="text-sm text-slate-800">Computed now from the validated values by the ScopeCheck rules. Items are matched by item code, recovered from the source text when the extraction left it out.</p>
+      <p className="text-sm text-sk-muted">Computed now from the validated values by the ScopeCheck rules. Items are matched by item code, recovered from the source text when the extraction left it out.</p>
       <ScrollTable label="Comparison: RFQ items against each quotation">
         <table className="w-full border-collapse text-left">
           <caption className="sr-only">Each requested item compared with each quotation: quantity and specification, with the status of every comparison</caption>
           <thead>
-            <tr className="bg-slate-100">
-              <th scope="col" className="border border-slate-400 p-2">
+            <tr className="bg-sk-surface">
+              <th scope="col" className="border border-sk-border p-2">
                 Requested item
               </th>
               {quotes.map((q) => (
-                <th key={q} scope="col" className="border border-slate-400 p-2">
+                <th key={q} scope="col" className="border border-sk-border p-2">
                   {view.docName(q)}
                 </th>
               ))}
@@ -192,7 +192,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
           <tbody>
             {rows.map((r) => (
               <tr key={r.rowId} className="align-top">
-                <th scope="row" className="border border-slate-400 p-2 font-normal">
+                <th scope="row" className="border border-sk-border p-2 font-normal">
                   <strong>{r.held ? 'Held item' : (r.key ?? 'Identity uncertain')}</strong>
                   {r.key && r.rowId !== r.key && (() => {
                     const n = view.lineNumber(view.evaluation.context ? (view.evaluation.context as ScopeContext).data.rfqDocId : '', r.rowId.split('@')[1] ?? '');
@@ -205,7 +205,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                   {r.held && (
                     <>
                       <br />
-                      <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${r.held.finding.message}`} href={`#finding-${r.held.finding.id}`}>
+                      <a className="text-sm text-sk-link underline" aria-label={`Open the item: ${r.held.finding.message}`} href={`#finding-${r.held.finding.id}`}>
                         Open the item
                       </a>
                     </>
@@ -213,20 +213,20 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                   {r.uncertain && (
                     <>
                       <br />
-                      <a className="text-sm text-blue-900 underline" href={`#finding-${r.uncertain.finding.id}`}>
+                      <a className="text-sm text-sk-link underline" href={`#finding-${r.uncertain.finding.id}`}>
                         Identity needs review
                       </a>
                     </>
                   )}
                 </th>
                 {r.cells.map((c) => (
-                  <td key={c.quote} className="border border-slate-400 p-2">
+                  <td key={c.quote} className="border border-sk-border p-2">
                     {c.ambiguous && (
                       <p>
                         <StatusBadge kind="needs_review" label="Allocation unclear: Needs review" />
                         <br />
                         <span className="text-sm">{view.reasonText('ambiguous_allocation')}</span>{' '}
-                        <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${c.ambiguous.finding.message}`} href={`#finding-${c.ambiguous.finding.id}`}>
+                        <a className="text-sm text-sk-link underline" aria-label={`Open the item: ${c.ambiguous.finding.message}`} href={`#finding-${c.ambiguous.finding.id}`}>
                           Open the item
                         </a>
                       </p>
@@ -236,7 +236,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                         <StatusBadge kind={c.absent.finding.state === 'confirmed' ? 'confirmed' : 'needs_review'} label={c.absent.finding.state === 'confirmed' ? 'Not in this quotation' : 'Not found: Needs review'} />
                         <br />
                         <span className="text-sm">{view.reasonText(c.absent.finding.reason)}</span>{' '}
-                        <a className="text-sm text-blue-900 underline" aria-label={`Open the item: ${c.absent.finding.message}`} href={`#finding-${c.absent.finding.id}`}>
+                        <a className="text-sm text-sk-link underline" aria-label={`Open the item: ${c.absent.finding.message}`} href={`#finding-${c.absent.finding.id}`}>
                           Open the item
                         </a>
                       </p>
@@ -258,7 +258,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
                             {a.finding && (
                               <>
                                 {' '}
-                                <a className="text-sm text-blue-900 underline" aria-label={`Open the finding: ${a.finding.finding.message}`} href={`#finding-${a.finding.finding.id}`}>
+                                <a className="text-sm text-sk-link underline" aria-label={`Open the finding: ${a.finding.finding.message}`} href={`#finding-${a.finding.finding.id}`}>
                                   Open the finding
                                 </a>
                               </>
@@ -282,7 +282,7 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
             {uncertainQuoteLines.map((i) => (
               <li key={i.finding.id}>
                 {view.docName(i.finding.responseDocId ?? '')}: {view.reasonText(i.finding.reason) || 'Needs review.'}{' '}
-                <a className="text-blue-900 underline" href={`#finding-${i.finding.id}`}>
+                <a className="text-sk-link underline" href={`#finding-${i.finding.id}`}>
                   Open the item
                 </a>
               </li>

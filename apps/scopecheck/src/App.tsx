@@ -42,20 +42,20 @@ export function App({ deps, baseUrl = API_URL, fixtures = FIXTURES }: { deps?: U
         <label htmlFor="fixture" className="block text-sm font-medium">
           Choose a sample set
         </label>
-        <select id="fixture" value={fixture.id} onChange={(e) => session.setFixtureId(e.target.value)} className="max-w-full rounded border border-slate-700 px-2 py-1">
+        <select id="fixture" value={fixture.id} onChange={(e) => session.setFixtureId(e.target.value)} className="max-w-full rounded border border-sk-border px-2 py-1">
           {session.fixtures.map((f) => (
             <option key={f.id} value={f.id}>
               {f.title} ({f.sample ? 'sample' : 'live'})
             </option>
           ))}
         </select>{' '}
-        <button type="button" onClick={session.reset} className="rounded border border-slate-800 px-3 py-1">
+        <button type="button" onClick={session.reset} className="rounded border border-sk-border px-3 py-1">
           Reset corrections, decisions and coverage
         </button>
         {!fixture.sample && (
           <>
             {' '}
-            <button type="button" onClick={() => session.setFixtureId(fixtures[0]!.id)} className="rounded border border-slate-800 px-3 py-1">
+            <button type="button" onClick={() => session.setFixtureId(fixtures[0]!.id)} className="rounded border border-sk-border px-3 py-1">
               Back to the sample set
             </button>
           </>

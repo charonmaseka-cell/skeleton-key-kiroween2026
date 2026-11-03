@@ -49,11 +49,11 @@ export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: 
           <strong>{fixture.title}</strong> ({fixture.sample ? 'sample' : 'live'}). {fixture.description}
         </p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={session.reset} className="rounded border border-slate-800 px-3 py-1">
+          <button type="button" onClick={session.reset} className="rounded border border-sk-border px-3 py-1">
             Reset corrections, decisions and coverage
           </button>
           {!fixture.sample && (
-            <button type="button" onClick={() => session.setFixtureId(FIXTURES[0]!.id)} className="rounded border border-slate-800 px-3 py-1">
+            <button type="button" onClick={() => session.setFixtureId(FIXTURES[0]!.id)} className="rounded border border-sk-border px-3 py-1">
               Back to the sample pack
             </button>
           )}

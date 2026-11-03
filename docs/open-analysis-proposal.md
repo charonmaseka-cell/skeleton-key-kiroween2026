@@ -17,7 +17,7 @@ Status: prepared 3 November 2026, awaiting owner approval. Nothing deployed; pro
 Measured charges: ScopeCheck full-length baseline (RFQ + quotation A + quotation B, 21 chunks, 22 attempts): **2,906** (sc-t4 baseline). ScopeCheck fresh set (12 chunks): **1,382.1** for the 12 answered calls (sc-t12-fresh). PackCheck v2, four documents: about **209** before margin, about **230** with it.
 | Full run | Charge | Complete runs in 4,000 | Then |
 |---|---|---|---|
-| ScopeCheck, full-length baseline set | ~2,906 | **1** | a second run is refused partway (about 9 of 21 chunks, see below) |
+| ScopeCheck, full-length baseline set | ~2,906 | **1** | a second run is refused partway (about 6 of 21 chunks, see below) |
 | ScopeCheck, fresh set | ~1,382 | **2** | a third gets about 8 of 12 chunks |
 | PackCheck, 4 documents | ~230 | **about 17** | |
 The budget admits an attempt only if charged + that attempt's worst-case reservation (about 364 for a typical chunk) fits, so the last ~364 of the 4,000 are not usable for the final attempt. A timed-out or unanswered attempt keeps its worst-case reservation, so a bad day gives fewer runs. The 40-attempt ceiling does not bind first for ScopeCheck (21 and 12 attempts per run).

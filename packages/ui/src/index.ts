@@ -9,3 +9,6 @@ export * from './UploadPanel';
 export * from './plain-language';
 export * from './ThemeProvider';
 export * from './lights';
+export * from './seance';
+export { Seance } from './Seance';
+export * from './Ghost';

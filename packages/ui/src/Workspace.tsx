@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { formatValue, processingComplete, type EffectiveFact, type Evidence, type Finding, type PlannedComparison, type ReviewItem, type ValueKind } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
+import { Seance } from './Seance';
+import { ThemeName } from './ThemeProvider';
 import { exportCsv, exportText, parseCorrection, type CorrectionInput, type SessionView } from './session-core';
 import type { Session } from './useSession';
 
@@ -176,6 +178,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
     <article id={`finding-${finding.id}`} tabIndex={-1} aria-labelledby={`h-${finding.id}`} className="space-y-2 rounded border border-sk-border bg-sk-surface p-4">
       <h4 id={`h-${finding.id}`} className="break-words text-lg font-semibold">
         {finding.message}
+        <ThemeName entry={view.theme[finding.code]} state={finding.state} />
       </h4>
       <p className="flex flex-wrap items-center gap-2">
         <StatusBadge kind={finding.state === 'confirmed' ? 'confirmed' : 'needs_review'} />
@@ -445,7 +448,10 @@ export function ReviewWorkspace({ session, baseName, children }: { session: Sess
   const { view } = session;
   return (
     <div className="space-y-8">
-      <SummaryBar view={view} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <Seance view={view} />
+        <SummaryBar view={view} />
+      </div>
       {children}
       <ReviewQueue session={session} view={view} />
       <NotEvaluatedList comparisons={view.evaluation.comparisons} session={session} view={view} />

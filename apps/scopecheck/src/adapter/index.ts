@@ -3,7 +3,7 @@ import type { DomainAdapter, EvaluateInput } from '@skeleton-key/ui';
 import { resolveItemIdentities } from './identity';
 import { evaluateScope, scopeMatches, scopeRule, type ScopeData } from './rules';
 
-import { SCOPE_FIELD_LABELS, SCOPE_REASONS, SCOPE_ROLE_LABELS } from './labels';
+import { SCOPE_FIELD_LABELS, SCOPE_REASONS, SCOPE_ROLE_LABELS, SCOPE_THEME } from './labels';
 
 export * from './identity';
 export * from './rules';
@@ -18,7 +18,7 @@ export type ScopeContext = { data: ScopeData; matches: ReturnType<typeof scopeMa
 export const scopeCheckAdapter: DomainAdapter = {
   id: 'scopecheck',
   hints: SCOPECHECK_HINTS,
-  labels: { fields: SCOPE_FIELD_LABELS, roles: SCOPE_ROLE_LABELS, reasons: SCOPE_REASONS },
+  labels: { fields: SCOPE_FIELD_LABELS, roles: SCOPE_ROLE_LABELS, reasons: SCOPE_REASONS, theme: SCOPE_THEME },
   evaluate({ facts, originalFacts, documents, blocks, roles, titles }: EvaluateInput) {
     const rfqDocId = Object.keys(roles).find((d) => roles[d] === 'rfq');
     if (!rfqDocId) return { findings: [], comparisons: [] };

@@ -189,17 +189,17 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
       </p>
       {finding.reason && <p className="text-sm">{finding.state === 'confirmed' ? 'Note' : 'Why this is not a confirmed finding'}: {view.reasonText(finding.reason)}</p>}
       {inputs.length > 0 && (
-        <section aria-label="Values used">
+        <div role="group" aria-label="Values used">
           <h5 className="font-medium">Values used</h5>
           <ul className="divide-y divide-sk-border">
             {inputs.map((f) => (
               <FactLine key={f.fact.id} fact={f} session={session} view={view} context={finding.message} />
             ))}
           </ul>
-        </section>
+        </div>
       )}
       {finding.evidence.length > 0 && (
-        <section aria-label="Source evidence" className="space-y-1">
+        <div role="group" aria-label="Source evidence" className="space-y-1">
           <h5 className="font-medium">Source evidence</h5>
           {/* A difference between two documents shows both source lines side by side (stacked on narrow screens), each with the cited words marked. */}
           <div data-evidence-pair={pair ? '' : undefined} className={pair ? 'grid gap-2 sm:grid-cols-2' : 'space-y-1'}>
@@ -207,9 +207,9 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
               <EvidenceView key={`${e.factId}-${i}`} evidence={e.evidence} role={e.role} view={view} />
             ))}
           </div>
-        </section>
+        </div>
       )}
-      <section aria-label="Review decision" className="space-y-1 border-t border-sk-border pt-2">
+      <div role="group" aria-label="Review decision" className="space-y-1 border-t border-sk-border pt-2">
         <label htmlFor={noteId} className="block text-sm font-medium">
           Note for this item (optional)<span className="sr-only">: {finding.message}</span>
         </label>
@@ -238,7 +238,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
             </ul>
           </details>
         )}
-      </section>
+      </div>
     </article>
   );
 }
@@ -370,7 +370,7 @@ export function DocumentsPanel({ session, view }: { session: Session; view: Sess
                 </button>
               )}
               {confirmed && (
-                <button type="button" aria-label={`Withdraw coverage confirmation for ${d.title}`} onClick={() => { session.withdrawCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-sk-border px-3 py-1">
+                <button type="button" aria-label={`Withdraw my coverage confirmation for ${d.title}`} onClick={() => { session.withdrawCoverage(d.id); focusSummary(); }} className="mt-1 rounded border border-sk-border px-3 py-1">
                   Withdraw my coverage confirmation
                 </button>
               )}

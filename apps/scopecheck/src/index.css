@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source "../../../packages/ui/src";
+@import "../../../packages/ui/src/theme.css";
 
 /* Visible keyboard focus everywhere (R13.1). */
 :focus-visible {

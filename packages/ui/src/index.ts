@@ -7,3 +7,5 @@ export * from './theme-tokens';
 export * from './extraction-client';
 export * from './UploadPanel';
 export * from './plain-language';
+export * from './ThemeProvider';
+export * from './lights';

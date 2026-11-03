@@ -222,3 +222,18 @@ Review of HU-1 to HU-16 against the code and tests (all offline; nothing live):
 | HU-15 steering | `.kiro/steering/theme.md` (unchanged) |
 | HU-16 ecto | `decoration-rules.test.ts`, `theme-tokens.test.ts` |
 Known limits: the theme's contrast and overlap checks run on the two sample pages and the ghost state, not on every possible live result; screenshots show the 1280 px layout only (375 px is checked, not photographed); the PackCheck sample has no funding-above-budget finding, so Bottomless purse is covered by the mapping test, not by a rendered sample. Screenshots are in the README.
+
+
+## Kiro hooks (3 Nov 2026)
+Two save hooks committed in `.kiro/hooks`: `engine-module-tests` (engine file saved: that module's tests) and `golden-fixtures-on-rule-change` (rule or adapter file saved: rerun the golden fixtures and report changed outcomes; replaces the earlier version, which only reran tests). Only trigger names the hook tool lists were used (`PostFileSave`). **The third request, "manual: update the README feature list and build log from the specs", has no hook form: there is no manual trigger, so it is `npm run docs:sync` plus the manual-inclusion steering file `.kiro/steering/sync-docs.md`.**
+**Which actually ran.** No hook has fired in a Kiro session: the hook tool reports that a new hook is active from the next session start. What ran, by hand with hook-like input: the engine command for `findings.ts` (9 tests passed) and for an unknown module (all 92 engine tests passed); the golden command on unchanged rules (56 outcomes unchanged, 42 golden tests passed, exit 0) and after a deliberate, reverted change of the quantity severity (10 outcomes reported CHANGED, exit 1, while the 42 golden tests still passed because they do not pin severity: the report adds something the tests do not); `npm run docs:sync` (wrote both generated blocks). Evidence and commands: `docs/hooks.md`. New files: `tools/hooks/` (scripts, `golden-outcomes.json` snapshot, tests including one that fails when the snapshot differs from the outcomes computed now), `tools/docs/sync-from-specs.ts` (with tests).
+
+## Spec status (generated)
+<!-- spec-status:start -->
+Specs in the repository: 4. Tasks ticked: 57 of 85.
+
+- `haunted-ui`: 8 of 8 ticked
+- `packcheck-real-documents`: 3 of 6 ticked; open: PC-T4, PC-T5, PC-T6
+- `scopecheck-real-documents`: 11 of 17 ticked; open: SC-T5, SC-T6, SC-T7, SC-T8, SC-T9, SC-T10
+- `skeleton-key-foundation`: 35 of 54 ticked; open: 5, 5.5, 7, 7.1, 7.2, 7.3, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+<!-- spec-status:end -->

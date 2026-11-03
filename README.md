@@ -27,6 +27,114 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 | ![ScopeCheck ghost row, Lights off](docs/screenshots/haunted/scopecheck-ghost-lights-off.png) | ![ScopeCheck ghost row, Lights on](docs/screenshots/haunted/scopecheck-ghost-lights-on.png) |
 | ![PackCheck, Lights off](docs/screenshots/haunted/packcheck-lights-off.png) | ![PackCheck, Lights on](docs/screenshots/haunted/packcheck-lights-on.png) |
 
+## Feature list (from the specs)
+
+<!-- features:start -->
+| Spec | Delivered | Open |
+|---|---|---|
+| `haunted-ui` | 8 | 0 |
+| `packcheck-real-documents` | 3 | 3 |
+| `scopecheck-real-documents` | 11 | 6 |
+| `skeleton-key-foundation` | 35 | 19 |
+
+**haunted-ui** (delivered):
+- HU-T0: Visual system, Lights-on behaviour and the palette contrast test
+- HU-T0b: Ectoplasm token
+- HU-T1: Mode logic and toggle
+- HU-T2: Lights on first, then Lights off, across `packages/ui` and both apps
+- HU-T3: Theme names, séance summary, ghost rows and possessed cells
+- HU-T4: Motifs and effects behind the reduced-motion guard
+- HU-T5: Accessibility and visual checks in both modes for both apps
+- HU-T6: Theme complete and reviewed; build-log entry; screenshots in the README. Before 30 November.
+
+**packcheck-real-documents** (delivered):
+- PC-T1: Pre-registered realistic pack, done 2026-11-01, offline
+- PC-T2: (partly) Offline tests with a mock model on PC-T1
+- PC-T3: Upload and role assignment
+
+**scopecheck-real-documents** (delivered):
+- SC-T1: Pre-register the realistic ScopeCheck documents and expected outputs
+- SC-T2: (partly) Offline multi-chunk tests with a mock model on SC-T1
+- SC-T3: Browser upload path for ScopeCheck
+- SC-T2b: Output-aware chunking
+- SC-T4: Live baseline on SC-T1, done 2026-11-01
+- SC-T11: Requirement-line identity, multi-item blocks and evidence-empty items
+- SC-T4a: Correctness fixes from the saved baseline responses, done 2026-11-01
+- SC-T13: Bounded concurrency PREPARED
+- SC-T12: Fresh-document validation, live batch run 2026-11-01
+- SC-T14: Cell boundaries reach the model, done 2026-11-01 offline
+- SC-T15: Second-model comparison on the fresh set, done 2026-11-02
+
+**skeleton-key-foundation** (delivered):
+- 1: Scaffold monorepo
+- 1.1: npm workspaces, TypeScript, ESLint, Vitest, Tailwind config; root scripts `lint`, `typecheck`, `test`,…
+- 1.2: Empty `apps/scopecheck`, `apps/packcheck`, `packages/*`, `services/extraction-api`, `samples/*`,…
+- 1.3: GitHub Actions
+- 1.4: Engine boundary test and `no-restricted-imports` rule
+- 2: Engine core
+- 2.1: Types and Zod schemas
+- 2.2: Evidence validator with normalisation and code-computed offsets
+- 2.3: Value support validators
+- 2.4: Effective-value resolution with Corrections preserving originals
+- 2.5: Matcher with configurable threshold and decision states
+- 2.6: Rule runner, fingerprinting and review-state reopening
+- 2.7: Document completeness tracking and needs-review propagation
+- 2.8: Export model
+- 2.9: Property tests listed in R10.8 using a generic test Adapter
+- 3: Extraction Worker with enforced limits
+- 3.1: (Durable Object confirmed locally; Rate Limiting binding left optional and unverified) evaluate a…
+- 3.2: `/extract` handler
+- 3.3: Per-client limit and global daily ceiling; set values from benchmark results, not request count alone
+- 3.4: Workers AI call with JSON mode, profile token cap, timeout, at most one counted repair; map quota errors to…
+- 3.5: Content-free logging; no persistence or AI caching
+- 3.6: Handler tests for every limit and error code
+- 4: Fictional samples and expected outputs
+- 4.1: Original RFQ + 2 quotes
+- 4.2: Original grant pack
+- 5.1: Minimal PDF.js Node/browser parser to Blocks with pages and bbox; scanned PDF rejection
+- 5.2: (chunker in engine; client bounds via attempt budget and admission ceiling) Chunker and ExtractionClient with…
+- 5.3: `tools/benchmark` ran on both sample sets and a layout variant with two candidate models
+- 5.4: Results and model/scope decision recorded in `docs/build-log.md` and `docs/model-comparison.md`
+- 6: Minimal app shells on labelled fixtures
+- 6.1: `packages/ui` primitives
+- 6.2: ScopeCheck Adapter
+- 6.3: PackCheck grant Adapter
+- 6.4: Golden fixture tests
+- 6.5: Review interface and exports
+
+**Open:**
+- `packcheck-real-documents` PC-T4: Attachment mapping UI with manual remap
+- `packcheck-real-documents` PC-T5: Live measurement on PC-T1 within an authorised attempt budget
+- `packcheck-real-documents` PC-T6: Live wiring, deployment and end-to-end run; record in the build log
+- `scopecheck-real-documents` SC-T5: Foundation task 9 live wiring for ScopeCheck
+- `scopecheck-real-documents` SC-T6: Foundation task 5.5 limits and deployment validation
+- `scopecheck-real-documents` SC-T7: Deploy ScopeCheck
+- `scopecheck-real-documents` SC-T8: 2 to 5 quotations
+- `scopecheck-real-documents` SC-T9: DOCX input
+- `scopecheck-real-documents` SC-T10: Supplier-specific clarification email drafts
+- `skeleton-key-foundation` 5: Live-extraction benchmark
+- `skeleton-key-foundation` 5.5: OPEN. Derive and set `DAILY_ADMISSION_CEILING`, `MAX_CHARS`, `MAX_BLOCKS`, `MAX_BLOCK_CHARS` and the profile…
+- `skeleton-key-foundation` 7: First deployments
+- `skeleton-key-foundation` 7.1: Two Pages projects and the Worker; origins and limits configured
+- `skeleton-key-foundation` 7.2: Optional hook
+- `skeleton-key-foundation` 7.3: Build log entry for M1 with measured values
+- `skeleton-key-foundation` 8: Upload ingestion for both apps
+- `skeleton-key-foundation` 9: Live adapter wiring
+- `skeleton-key-foundation` 10: End-to-end live run for RFQ + 2 quotes and for the grant pack; extraction/matching/rules measured separately
+- `skeleton-key-foundation` 11: Playwright flows with mocked Worker for error codes; axe checks
+- `skeleton-key-foundation` 12: Comparison matrix, match confirmation, fact corrections, accept/dismiss/notes, reopen-on-change
+- `skeleton-key-foundation` 13: Export
+- `skeleton-key-foundation` 14: Calibrate match threshold from fixtures
+- `skeleton-key-foundation` 15: Attachment mapping UI with manual remap, grant-field review and corrections on uploads
+- `skeleton-key-foundation` 16: Export for grant review with unresolved items marked
+- `skeleton-key-foundation` 17: ScopeCheck M5 checks
+- `skeleton-key-foundation` 18: DOCX via Mammoth with paragraph/cell refs; 2–5 quotes
+- `skeleton-key-foundation` 19: Regression run, accessibility pass, decorative polish if time, README
+- `skeleton-key-foundation` 20: Confirm free-tier usage and keep apps available through 29 January 2027
+
+_Generated from `.kiro/specs/*/tasks.md` by `npm run docs:sync`. A ticked task means its tests passed in CI; what was measured and what was not is in `docs/build-log.md`._
+<!-- features:end -->
+
 ## Layout
 
 | Path | Purpose |

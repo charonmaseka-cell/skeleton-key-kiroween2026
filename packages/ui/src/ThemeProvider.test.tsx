@@ -40,7 +40,7 @@ describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
   it('is a real button, the first control after the skip link, inside the header', async () => {
     const user = userEvent.setup();
     shell();
-    const b = screen.getByRole('button', { name: /^Lights (on|off)$/ });
+    const b = screen.getByRole('button', { name: 'Lights on' });
     expect(b.tagName).toBe('BUTTON');
     expect(b.getAttribute('type')).toBe('button');
     expect(b.closest('header')).toBeTruthy();
@@ -60,7 +60,9 @@ describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
     expect(lights()).toBe('on');
     expect(localStorage.getItem(STORAGE_KEY)).toBe('on');
     expect(document.activeElement).toBe(b);
-    expect(b.textContent).toBe('Lights off');
+    expect(b.textContent).toBe('Lights on');
+    expect(b.querySelector('svg')!.getAttribute('data-lights-icon')).toBe('on');
+    expect(b.querySelector('svg')!.getAttribute('aria-hidden')).toBe('true');
     expect(b.getAttribute('aria-pressed')).toBe('true');
     const live = screen.getByRole('status');
     expect(live.getAttribute('aria-live')).toBe('polite');
@@ -70,6 +72,9 @@ describe('mode toggle and ThemeProvider (HU-3, HU-8)', () => {
     expect(localStorage.getItem(STORAGE_KEY)).toBe('off');
     expect(document.activeElement).toBe(b);
     expect(live.textContent).toBe('Lights off');
+    expect(b.textContent).toBe('Lights on');
+    expect(b.getAttribute('aria-pressed')).toBe('false');
+    expect(b.querySelector('svg')!.getAttribute('data-lights-icon')).toBe('off');
     expect(localStorage.length).toBe(1);
   });
 

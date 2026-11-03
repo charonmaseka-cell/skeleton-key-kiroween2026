@@ -38,20 +38,27 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * The mode toggle: a real button, first in the header after the skip link. Its text names the mode it switches TO ("Lights on" while the
- * page is off); aria-pressed is true while Lights on is active. It does not move focus. Hidden in print.
+ * The mode toggle: a real button, first in the header after the skip link. Its name is constant, "Lights on" (WAI-ARIA: a toggle
+ * button keeps one name and `aria-pressed` carries the state: true while Lights on is active). The icon shows the state visually
+ * (a lit bulb while on, an unlit one while off) and is decorative (`aria-hidden`). It does not move focus. Hidden in print.
  */
 export function LightsToggle() {
   const { mode, toggle } = useLights();
+  const on = mode === 'on';
   return (
     <button
       type="button"
       data-lights-toggle
-      aria-pressed={mode === 'on'}
+      aria-pressed={on}
       onClick={toggle}
-      className="no-print mb-2 min-h-11 rounded border-2 border-sk-ecto bg-sk-surface px-3 py-1 text-sk-text"
+      className="no-print mb-2 inline-flex min-h-11 items-center gap-2 rounded border-2 border-sk-ecto bg-sk-surface px-3 py-1 text-sk-text"
     >
-      {mode === 'on' ? 'Lights off' : 'Lights on'}
+      <svg data-lights-icon={on ? 'on' : 'off'} aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 18h6M10 21h4" />
+        <path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill={on ? 'currentColor' : 'none'} />
+        {on ? <path d="M12 0.5v1M3.5 4l.7.7M20.5 4l-.7.7M1 11h1M22 11h1" /> : <path d="M5 5l14 14" />}
+      </svg>
+      <span>Lights on</span>
     </button>
   );
 }

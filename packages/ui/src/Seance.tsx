@@ -14,7 +14,7 @@ export function Seance({ view }: { view: SessionView }) {
   const themed = mode === 'off';
   return (
     <section aria-labelledby="seance-h" data-seance="" className="space-y-1 rounded border border-sk-border bg-sk-surface p-3">
-      <h3 id="seance-h" className="text-lg font-semibold">
+      <h3 id="seance-h" data-display="" className="text-lg font-semibold">
         {themed ? 'The séance' : 'Summary of this review'}
       </h3>
       <ul className="space-y-1">

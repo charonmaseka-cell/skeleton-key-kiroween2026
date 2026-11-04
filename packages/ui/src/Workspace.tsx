@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { formatValue, processingComplete, type EffectiveFact, type Evidence, type Finding, type PlannedComparison, type ReviewItem, type ValueKind } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
-import { FadingGhost, NextFinding, SeanceArt, WaxSeal, useHaunt } from './Haunt';
+import { SeanceArt } from './Art';
+import { FadingGhost, NextFinding, WaxSeal, useHaunt } from './Haunt';
 import { EmptyState } from './Motifs';
 import { Seance } from './Seance';
 import { ThemeName } from './ThemeProvider';
@@ -465,7 +466,7 @@ export function ReviewWorkspace({ session, baseName, children }: { session: Sess
   const { view } = session;
   const haunt = useHaunt();
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-unlock={haunt.effects ? '' : undefined}>
       <div className={`grid gap-4 ${haunt.effects ? 'md:grid-cols-[1fr_1fr_auto]' : 'md:grid-cols-2'}`}>
         <Seance view={view} />
         <SummaryBar view={view} />

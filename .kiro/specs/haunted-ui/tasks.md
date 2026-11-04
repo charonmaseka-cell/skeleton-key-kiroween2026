@@ -15,6 +15,8 @@ Introduced 2026-11-01; **revised 2026-11-02** for requirements revision 2 (HU-1 
 
 - [x] HU-T8 The bolder pass (HU-28 to HU-31) and the Next finding scroll fix (HU-18 amended). Both apps. Tests: the order scroll-then-focus, instant for long jumps and reduced motion, a safety re-scroll, the margin ghost (once, gutter only, never at narrow widths), gutter fog, séance card, display-face rules, and the browser checks (target inside the viewport, also with smooth scrolls dropped; the margin ghost measured in flight at three moments). Done 2026-11-03.
 
+- [x] HU-T9 Candlelight (HU-32 to HU-40): near-black palette with the warm-colour rules, original art, skeleton-key unlock, trick or treat, fonts, ritual stage names, themed 404, title glow. Both apps. Done 2026-11-03.
+
 ## Dependencies and order
 
 HU-T1 before HU-T2 (the toggle and variables must exist before components use them). HU-T3 needs HU-T2 (the semantic utilities and state icons) and the existing adapters; its theme names use rules that exist today, and names for rules built later (foundation task 17) are added with those rules. HU-T4 is decorative and last of the features. HU-T5 needs HU-T1 to HU-T3 to be testable and runs after HU-T4 so it checks the motifs too.

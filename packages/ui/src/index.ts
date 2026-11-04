@@ -15,3 +15,5 @@ export * from './Ghost';
 export * from './Motifs';
 export * from './ProgressView';
 export * from './Haunt';
+export * from './Art';
+export * from './Runes';

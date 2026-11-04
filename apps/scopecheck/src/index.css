@@ -14,6 +14,10 @@ body {
   background: var(--sk-surface);
   color: var(--sk-text);
 }
+/* Lights off: the page itself is near-black (--sk-bg); the cards keep the lighter surface. */
+:root[data-lights='off'] body {
+  background: var(--sk-bg);
+}
 a {
   color: var(--sk-link);
 }

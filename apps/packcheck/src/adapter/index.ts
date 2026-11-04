@@ -18,7 +18,7 @@ export const PACKCHECK_HINTS: Record<string, string[]> = {
 export const packCheckAdapter: DomainAdapter = {
   id: 'packcheck',
   hints: PACKCHECK_HINTS,
-  labels: { fields: PACK_FIELD_LABELS, roles: PACK_ROLE_LABELS, reasons: PACK_REASONS, theme: PACK_THEME, voice: { whisper: (m) => `The pack is not at rest: ${m}. Go there.` } },
+  labels: { fields: PACK_FIELD_LABELS, roles: PACK_ROLE_LABELS, reasons: PACK_REASONS, theme: PACK_THEME, voice: { whisper: (m) => `The pack is not at rest: ${m}. Go there.`, stages: { reading: 'Unsealing the pack', extracting: 'Calling the spirits', matching: 'Tying the threads', checking: 'Reading the signs' } } },
   evaluate({ facts, documents, roles, titles }: EvaluateInput) {
     const byRole = (r: string) => Object.keys(roles).find((d) => roles[d] === r);
     const requirementsDocId = byRole('requirements');

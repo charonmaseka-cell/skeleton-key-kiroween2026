@@ -33,7 +33,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 <!-- features:start -->
 | Spec | Delivered | Open |
 |---|---|---|
-| `haunted-ui` | 10 | 0 |
+| `haunted-ui` | 11 | 0 |
 | `packcheck-real-documents` | 3 | 3 |
 | `scopecheck-real-documents` | 11 | 6 |
 | `skeleton-key-foundation` | 35 | 19 |
@@ -49,6 +49,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - HU-T6: Theme complete and reviewed; build-log entry; screenshots in the README. Before 30 November.
 - HU-T7: The signature pass
 - HU-T8: The bolder pass
+- HU-T9: Candlelight
 
 **packcheck-real-documents** (delivered):
 - PC-T1: Pre-registered realistic pack, done 2026-11-01, offline
@@ -137,6 +138,9 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 
 _Generated from `.kiro/specs/*/tasks.md` by `npm run docs:sync`. A ticked task means its tests passed in CI; what was measured and what was not is in `docs/build-log.md`._
 <!-- features:end -->
+
+## Candlelight, art and font credits
+Warm jack-o'-lantern candlelight (Lights off): original SVG art only, listed in `docs/art.md`; no stock photos, no sound. Fonts are self-hosted, each with its licence file beside it in `packages/ui/src/fonts/`: **Pirata One** (SIL OFL 1.1, unmodified) for the app title, and **Special Elite** (Apache License 2.0; the committed file is a subset, see the NOTICE in `packages/ui/src/fonts/README.md`) for the séance card and stage names. Data text stays in the system sans-serif.
 
 ## Layout
 

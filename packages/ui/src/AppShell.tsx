@@ -1,4 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { CornerPumpkin, HeaderArt } from './Art';
+import { DisplayText } from './Runes';
 import { Candles, GutterFog, HauntProvider, HeaderFog, WhisperLine } from './Haunt';
 import { BrandMark, Motifs } from './Motifs';
 import type { SessionView } from './session-core';
@@ -51,9 +53,11 @@ function Frame({ title, tagline, banner, nav, announcement, children }: AppShell
       {banner}
       <header className="relative border-b border-sk-border px-4 py-4 sm:px-6">
         <LightsToggle />
+        <CornerPumpkin />
+        <HeaderArt />
         <h1 data-display="" className="text-2xl font-semibold">
           <BrandMark />
-          {title}
+          <DisplayText text={title} />
         </h1>
         <p className="text-sk-muted">{tagline}</p>
         <Candles />

@@ -100,8 +100,11 @@ export type ThemeEntry = {
 };
 
 /** The few words the signature effects speak (haunted-ui HU-19). Adapter data: each app has its own voice. */
-export type Voice = { whisper: (message: string) => string };
-export const DEFAULT_VOICE: Voice = { whisper: (m) => `An item is still unresolved: ${m}. Go there.` };
+export type Voice = { whisper: (message: string) => string; /** themed names for the four analysis stages (Lights off only; the plain stage is always shown beneath) */ stages: Record<'reading' | 'extracting' | 'matching' | 'checking', string> };
+export const DEFAULT_VOICE: Voice = {
+  whisper: (m) => `An item is still unresolved: ${m}. Go there.`,
+  stages: { reading: 'Opening the book', extracting: 'Summoning spirits', matching: 'Binding the pairs', checking: 'Weighing the omens' },
+};
 
 export type AdapterLabels = {
   voice?: Voice,

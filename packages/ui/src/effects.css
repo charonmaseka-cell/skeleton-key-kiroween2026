@@ -80,8 +80,8 @@ tr[data-ghost] {
 [data-candle] [data-flame] {
   position: absolute; bottom: 26px; left: 3px; width: 6px; height: 10px;
   border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
-  background: radial-gradient(ellipse at 50% 72%, #fff3c4 0%, var(--sk-accent) 72%);
-  box-shadow: 0 0 9px 2px color-mix(in srgb, var(--sk-accent) 50%, transparent);
+  background: radial-gradient(ellipse at 50% 72%, #fff3c4 0%, var(--sk-warm-flame) 72%);
+  box-shadow: 0 0 9px 2px color-mix(in srgb, var(--sk-warm-flame) 50%, transparent);
   animation: flame-in 0.9s ease-out 1 both;
 }
 [data-candle][data-lit='false'] [data-flame] { animation: flame-out 0.35s ease-in 1 forwards; }
@@ -99,19 +99,19 @@ tr[data-ghost] {
 [data-planchette][data-show] { opacity: 1; }
 
 /* HU-20 possessed: the border of a spec-mismatch cell glitches once when hovered or focused (inset shadows only; the text does not
-   move, blur or change), and both evidence lines of its finding glow while it is hovered or focused. Blue and amber, never red or ecto. */
+   move, blur or change), and both evidence lines of its finding glow while it is hovered or focused. Blue and the text colour, never red, never amber (amber is the Needs review colour). */
 :root[data-effects='on'] [data-possessed='spec']:is(:hover, :focus-within) { animation: glitch-border 0.6s steps(1, end) 1; }
 @keyframes glitch-border {
-  0% { box-shadow: inset 3px 0 0 var(--sk-info), inset -3px 0 0 var(--sk-accent); }
-  20% { box-shadow: inset -3px 0 0 var(--sk-info), inset 3px 0 0 var(--sk-accent); }
-  40% { box-shadow: inset 0 3px 0 var(--sk-accent), inset 0 -3px 0 var(--sk-info); }
+  0% { box-shadow: inset 3px 0 0 var(--sk-info), inset -3px 0 0 var(--sk-text); }
+  20% { box-shadow: inset -3px 0 0 var(--sk-info), inset 3px 0 0 var(--sk-text); }
+  40% { box-shadow: inset 0 3px 0 var(--sk-text), inset 0 -3px 0 var(--sk-info); }
   60% { box-shadow: inset 4px 0 0 var(--sk-text), inset -4px 0 0 var(--sk-text); }
   80% { box-shadow: inset 0 -3px 0 var(--sk-info); }
   100% { box-shadow: none; }
 }
 :root[data-effects='on'] [data-evidence][data-glow] figure,
 :root[data-effects='on'] [data-evidence]:is(:hover, :focus-within) figure {
-  box-shadow: 0 0 0 2px var(--sk-accent), 0 0 14px 3px color-mix(in srgb, var(--sk-mark-bg) 50%, transparent);
+  box-shadow: 0 0 0 2px var(--sk-info), 0 0 14px 3px color-mix(in srgb, var(--sk-mark-bg) 50%, transparent);
   transition: box-shadow 0.25s ease;
 }
 
@@ -175,23 +175,42 @@ article[data-dismissed] { border-style: dashed; }
    The bolder pass (HU-28 to HU-31): effects that MOVE, in space that holds no text and no control.
    ===================================================================================================================== */
 
-/* HU-31 display face, self-hosted (src/fonts, SIL OFL 1.1, an 8.7 kB subset). Only the app title and the séance heading, only when the
-   effects are on. The file is fetched only when something uses it, so Lights on never downloads it. */
+/* HU-31/HU-37 fonts, self-hosted (src/fonts; licences and notices in that folder). Pirata One (SIL OFL 1.1, shipped unmodified) for the
+   app title only; Special Elite (Apache 2.0, a 28 kB subset) for the séance card and the themed stage names only. Data stays in the page's
+   sans-serif. Both only when the effects are on; a file is fetched only when something uses it, so Lights on downloads neither. */
 @font-face {
-  font-family: 'Skeleton Display';
-  src: url('./fonts/cormorant-garamond-700-subset.woff2') format('woff2');
-  font-weight: 700;
+  font-family: 'Skeleton Title';
+  src: url('./fonts/pirata-one-latin-400.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
-:root[data-effects='on'] [data-display] {
-  font-family: 'Skeleton Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  font-weight: 700;
-  font-size: 2.6rem; /* rem, not em: the face has a small x-height, so this matches the presence of the 1.5 rem sans title it replaces */
+@font-face {
+  font-family: 'Skeleton Typewriter';
+  src: url('./fonts/special-elite-400-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+:root[data-effects='on'] h1[data-display] {
+  font-family: 'Skeleton Title', 'Pirata One', Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: 2.6rem;
   letter-spacing: 0.01em;
   line-height: 1.1;
 }
-:root[data-effects='on'] h3[data-display] { font-size: 1.9rem; }
+:root[data-effects='on'] [data-typewriter] {
+  font-family: 'Skeleton Typewriter', 'Special Elite', ui-monospace, 'Courier New', monospace;
+  font-weight: 400;
+}
+:root[data-effects='on'] h3[data-typewriter] { font-size: 1.5rem; }
+
+/* HU-39 title glow: a slow ectoplasm glow gathers round the app title over 4.5 s, then stays steady (no pulsing: HU-5). Title only. */
+:root[data-effects='on'] h1[data-display] {
+  text-shadow: 0 0 14px color-mix(in srgb, var(--sk-ecto) 55%, transparent), 0 0 3px color-mix(in srgb, var(--sk-ecto) 40%, transparent);
+  animation: title-glow 4.5s ease-in-out 1 both;
+}
+@keyframes title-glow { from { text-shadow: 0 0 0 transparent, 0 0 0 transparent; } }
 
 /* HU-29 thicker fog in the page gutters at wide widths. The gutters are the strips beside the 72 rem content column (at least 64 px
    at 1280 px); nothing but this lives there. The fog drifts upward once (4.5 s) and rests. Narrower than 1280 px there is no gutter. */
@@ -204,7 +223,7 @@ article[data-dismissed] { border-style: dashed; }
     background-image:
       radial-gradient(ellipse 120% 150px at 50% 50%, color-mix(in srgb, var(--sk-ecto) 34%, transparent), transparent 72%),
       radial-gradient(ellipse 110% 110px at 40% 50%, color-mix(in srgb, var(--sk-ecto) 26%, transparent), transparent 70%),
-      radial-gradient(ellipse 100% 170px at 62% 50%, color-mix(in srgb, var(--sk-accent) 14%, transparent), transparent 74%);
+      radial-gradient(ellipse 100% 170px at 62% 50%, color-mix(in srgb, var(--sk-warm-glow) 16%, transparent), transparent 74%);
     background-size: 100% 560px, 100% 380px, 100% 760px;
     background-position: 0 0, 0 120px, 0 300px;
     background-repeat: repeat-y;
@@ -236,10 +255,10 @@ article[data-dismissed] { border-style: dashed; }
 .art-table-top { fill: color-mix(in srgb, var(--sk-surface) 70%, var(--sk-border)); stroke: var(--sk-border); stroke-width: 1; }
 .art-wax { fill: #e4dac0; }
 .art-wick { fill: #3a3a3a; }
-.art-flame { fill: var(--sk-accent); animation: art-flame-in 1.4s ease-out 1 both; }
-.art-flame-glow { fill: color-mix(in srgb, var(--sk-accent) 28%, transparent); animation: art-flame-in 1.4s ease-out 1 both; }
-.art-board { fill: color-mix(in srgb, var(--sk-text) 18%, var(--sk-surface)); stroke: var(--sk-accent); stroke-width: 1.2; }
-.art-lens { fill: var(--sk-bg); stroke: var(--sk-accent); stroke-width: 1; }
+.art-flame { fill: var(--sk-warm-flame); animation: art-flame-in 1.4s ease-out 1 both; }
+.art-flame-glow { fill: color-mix(in srgb, var(--sk-warm-flame) 28%, transparent); animation: art-flame-in 1.4s ease-out 1 both; }
+.art-board { fill: color-mix(in srgb, var(--sk-text) 18%, var(--sk-surface)); stroke: var(--sk-warm-deep); stroke-width: 1.2; }
+.art-lens { fill: var(--sk-bg); stroke: var(--sk-warm-deep); stroke-width: 1; }
 .art-wisp { fill: color-mix(in srgb, var(--sk-ecto) 55%, transparent); animation: art-rise 3.2s ease-out 1 both; transform-box: fill-box; transform-origin: 50% 100%; }
 .art-wisp-2 { animation-delay: 0.5s; }
 .art-orb { fill: color-mix(in srgb, var(--sk-ecto) 85%, transparent); animation: art-orb 3.6s ease-out 1 both; }
@@ -249,3 +268,63 @@ article[data-dismissed] { border-style: dashed; }
 @keyframes art-rise { from { opacity: 0; transform: translateY(18px) scaleY(0.6); } to { opacity: 1; transform: none; } }
 @keyframes art-orb { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
 .art-flame, .art-flame-glow { transform-box: fill-box; transform-origin: 50% 100%; }
+
+/* =====================================================================================================================
+   The candlelight pass (HU-32 to HU-40). Warm colours (amber, orange) are custom properties here and are used ONLY by the selectors for
+   the header, the gutters and the illustrations ([data-fog], [data-gutter-fog], [data-candle], [data-warm], .art-*); decoration.test
+   enforces it. They never go on or next to a status badge or a finding card (Needs review is amber: HU-16).
+   ===================================================================================================================== */
+:root {
+  --sk-warm-glow: #ff8f1f;
+  --sk-warm-flame: #ffb347;
+  --sk-warm-pumpkin: #d96a12;
+  --sk-warm-rind: #a8480a;
+  --sk-warm-deep: #7a3306;
+  --sk-warm-dark: #2a1406;
+  --sk-warm-iron: #1b1714;
+}
+[data-fog] {
+  background:
+    radial-gradient(ellipse 60% 130% at 12% 0%, color-mix(in srgb, var(--sk-ecto) 13%, transparent), transparent 70%),
+    radial-gradient(ellipse 34% 120% at 86% 0%, color-mix(in srgb, var(--sk-warm-glow) 14%, transparent), transparent 72%),
+    radial-gradient(ellipse 50% 110% at 90% 100%, color-mix(in srgb, var(--sk-ecto) 9%, transparent), transparent 70%);
+}
+
+/* pumpkins (carved, lit from inside), lantern, candles: original shapes drawn in Art.tsx */
+.art-glow { fill: color-mix(in srgb, var(--sk-warm-glow) 22%, transparent); animation: art-glow-in 1.4s ease-out 1 both; transform-box: fill-box; transform-origin: 50% 50%; }
+.art-pumpkin { fill: var(--sk-warm-pumpkin); stroke: var(--sk-warm-rind); stroke-width: 1.4; }
+.art-pumpkin-mid { fill: color-mix(in srgb, var(--sk-warm-pumpkin) 88%, #fff); stroke: var(--sk-warm-rind); stroke-width: 1.4; }
+.art-rib { fill: none; stroke: var(--sk-warm-rind); stroke-width: 1.2; stroke-linecap: round; opacity: 0.7; }
+.art-stem { fill: var(--sk-warm-deep); stroke: var(--sk-warm-dark); stroke-width: 1; }
+.art-carve { fill: var(--sk-warm-flame); stroke: var(--sk-warm-dark); stroke-width: 1.2; stroke-linejoin: round; }
+.art-iron { fill: var(--sk-warm-iron); stroke: var(--sk-warm-deep); stroke-width: 1; }
+.art-iron-line { fill: none; stroke: var(--sk-warm-iron); stroke-width: 2.4; stroke-linecap: round; }
+.art-glass { fill: color-mix(in srgb, var(--sk-warm-glow) 30%, var(--sk-warm-dark)); stroke: var(--sk-warm-iron); stroke-width: 2; }
+
+/* HU-34 the skeleton key unlock: a spectral key slides into the lock, turns, the shackle lifts (0.8 s, once per set). The lock is keyed by
+   the set, so it replays each time a sample loads or a live run finishes. The results fade in behind it (below). */
+.art-shackle { stroke: var(--sk-warm-deep); stroke-width: 5; stroke-linecap: round; animation: art-shackle 0.8s ease-out 1 both; }
+.art-lock { fill: var(--sk-warm-iron); stroke: var(--sk-warm-deep); stroke-width: 1.6; }
+.art-keyhole { fill: var(--sk-warm-glow); }
+.art-key { stroke: var(--sk-ecto); stroke-width: 2.6; stroke-linecap: round; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--sk-ecto) 80%, transparent)); transform-origin: 42px 56px; animation: art-key-turn 0.8s ease-in-out 1 both; }
+@keyframes art-key-turn {
+  0% { opacity: 0; transform: translateX(34px); }
+  35% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 1; transform: rotate(80deg); }
+}
+@keyframes art-shackle { 0%, 55% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+@keyframes art-glow-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* The results fade in once the key has turned: 0.75 s wait, 0.5 s fade, total 1.25 s (under 1.5 s). Opacity only; the layout never moves. */
+[data-unlock] { animation: unlock-fade 0.5s ease-out 0.75s 1 backwards; }
+@keyframes unlock-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* HU-35 trick or treat. The pumpkin button sits in the header's top-right corner. */
+[data-trick-or-treat] { background: transparent; cursor: pointer; }
+[data-trick-or-treat][data-busy] { cursor: default; }
+/* the treat: ghost particles fall behind the page for 3 s */
+[data-treat] svg { position: absolute; top: -60px; color: color-mix(in srgb, var(--sk-text) 22%, transparent); animation: treat-fall 2400ms linear 1 both; }
+@keyframes treat-fall { 0% { opacity: 0; transform: translateY(0); } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(calc(100vh + 80px)); } }
+
+/* HU-38 the themed stage name, above the plain stage */
+[data-stage-theme] { font-size: 1.05rem; }

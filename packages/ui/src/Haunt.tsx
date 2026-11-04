@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReviewItem } from '@skeleton-key/engine';
 import { useLights } from './ThemeProvider';
 import type { SessionView } from './session-core';
+import { RUNE_MS, RUNE_STEP_MS, RuneContext } from './Runes';
 
 // The signature pass (haunted-ui HU-17 to HU-27). Everything here is decoration or navigation sugar on top of the plain page:
 //  - it runs only when `effects` is true (Lights off AND no reduced-motion request); otherwise it renders nothing and the page shows
@@ -18,6 +19,8 @@ export const BOO_COOLDOWN_MS = 5_000;
 export const INK_MS = 3_400;
 export const POINTER_SHOWN_MS = 1_600;
 export const MARGIN_GHOST_MS = 4_800;
+/** Trick or treat (HU-35): both last this long. */
+export const TRICK_TREAT_MS = RUNE_MS;
 /** The page gutter must be at least this wide (px) for a ghost to travel along it: below this there is no free space. */
 export const MIN_GUTTER_PX = 60;
 
@@ -37,9 +40,13 @@ type Haunt = {
   whisper: { id: string; text: string } | null;
   voice: SessionView['voice'] | null;
   fixtureId: string;
+  /** the corner pumpkin: odd clicks give a treat (ghost particles), even clicks a trick (runes on the title); ignored while one runs */
+  trickOrTreat: () => void;
+  /** true for the 3 s a trick or treat is running */
+  busy: boolean;
 };
 
-const NONE: Haunt = { effects: false, unresolved: [], open: [], goNext: () => undefined, jumpTo: () => undefined, glowId: null, cellProps: () => ({}), whisper: null, voice: null, fixtureId: '' };
+const NONE: Haunt = { effects: false, unresolved: [], open: [], goNext: () => undefined, jumpTo: () => undefined, glowId: null, cellProps: () => ({}), whisper: null, voice: null, fixtureId: '', trickOrTreat: () => undefined, busy: false };
 const HauntContext = createContext<Haunt>(NONE);
 export const useHaunt = () => useContext(HauntContext);
 
@@ -72,6 +79,33 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
   const [boo, setBoo] = useState(0);
   const [ghostRun, setGhostRun] = useState<GhostRun | null>(null);
   const mist = useRef<HTMLDivElement>(null);
+  // Trick or treat: a click count decides (odd = treat, even = trick), so nothing is random. One runs at a time, for 3 s.
+  const [tt, setTt] = useState<{ kind: 'treat' | 'trick'; key: number } | null>(null);
+  const clicks = useRef(0);
+  const ttRef = useRef(tt);
+  ttRef.current = tt;
+  const trickOrTreat = useCallback(() => {
+    if (ttRef.current) return;
+    clicks.current += 1;
+    setTt({ kind: clicks.current % 2 === 1 ? 'treat' : 'trick', key: clicks.current });
+  }, []);
+  useEffect(() => {
+    if (!tt) return;
+    const t = setTimeout(() => setTt(null), TRICK_TREAT_MS);
+    return () => clearTimeout(t);
+  }, [tt]);
+  useEffect(() => {
+    if (!effects) setTt(null);
+  }, [effects]);
+  const [runeStep, setRuneStep] = useState(0);
+  const runesOn = tt?.kind === 'trick';
+  useEffect(() => {
+    if (!runesOn) return setRuneStep(0);
+    const t = setInterval(() => setRuneStep((n) => n + 1), RUNE_STEP_MS);
+    return () => clearInterval(t);
+  }, [runesOn, tt?.key]);
+  const runeValue = useMemo(() => ({ on: runesOn, step: runeStep }), [runesOn, runeStep]);
+  const busy = !!tt;
 
   // The item after the one last gone to, in page order; the first when there is none yet.
   const pick = useCallback((): ReviewItem | undefined => {
@@ -282,13 +316,13 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
   );
 
   const value = useMemo<Haunt>(
-    () => ({ effects, unresolved, open, goNext, jumpTo, glowId, cellProps, whisper, voice: view?.voice ?? null, fixtureId }),
-    [effects, unresolved, open, goNext, jumpTo, glowId, cellProps, whisper, view, fixtureId],
+    () => ({ effects, unresolved, open, goNext, jumpTo, glowId, cellProps, whisper, voice: view?.voice ?? null, fixtureId, trickOrTreat, busy }),
+    [effects, unresolved, open, goNext, jumpTo, glowId, cellProps, whisper, view, fixtureId, trickOrTreat, busy],
   );
 
   return (
     <HauntContext.Provider value={value}>
-      {children}
+      <RuneContext.Provider value={runeValue}>{children}</RuneContext.Provider>
       {effects && (
         <>
           <div ref={mist} data-motif="mist" aria-hidden="true" className="no-print pointer-events-none fixed inset-0" style={{ zIndex: -1 }} />
@@ -300,6 +334,7 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
           {drip > 0 && <InkDrip key={drip} />}
           {ghostRun && <MarginGhost key={ghostRun.key} run={ghostRun} />}
           {boo > 0 && <Boo key={boo} />}
+          {tt?.kind === 'treat' && <GhostRain key={tt.key} />}
         </>
       )}
     </HauntContext.Provider>
@@ -310,7 +345,7 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
 
 function Planchette() {
   return (
-    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" className="text-sk-accent drop-shadow">
+    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" className="text-sk-text drop-shadow">
       <path d="M12 2c5 0 10 4 10 9 0 6-7 11-10 13C9 22 2 17 2 11 2 6 7 2 12 2z" fill="color-mix(in srgb, var(--sk-surface) 82%, transparent)" />
       <circle cx="12" cy="11" r="3.2" />
     </svg>
@@ -355,41 +390,6 @@ export function GutterFog() {
   );
 }
 
-/** The séance card (HU-30): candles, a planchette and a few pieces of ectoplasm on a round table, beside the counts. No text. */
-export function SeanceArt() {
-  const { effects } = useHaunt();
-  if (!effects) return null;
-  return (
-    <svg data-seance-art="" data-motif="seance-art" aria-hidden="true" focusable="false" viewBox="0 0 168 124" width="168" height="124" className="no-print pointer-events-none hidden shrink-0 self-center md:block">
-      <ellipse className="art-table" cx="84" cy="98" rx="74" ry="20" />
-      <ellipse className="art-table-top" cx="84" cy="94" rx="70" ry="16" />
-      {[
-        { x: 30, h: 30 },
-        { x: 84, h: 38 },
-        { x: 138, h: 30 },
-      ].map((c) => (
-        <g key={c.x} className="art-candle">
-          <rect className="art-wax" x={c.x - 6} y={92 - c.h} width="12" height={c.h} rx="2" />
-          <rect className="art-wick" x={c.x - 0.5} y={92 - c.h - 5} width="1" height="5" />
-          <ellipse className="art-flame-glow" cx={c.x} cy={92 - c.h - 11} rx="9" ry="11" />
-          <path className="art-flame" d={`M${c.x} ${92 - c.h - 19} C${c.x + 5} ${92 - c.h - 12} ${c.x + 4} ${92 - c.h - 4} ${c.x} ${92 - c.h - 4} C${c.x - 4} ${92 - c.h - 4} ${c.x - 5} ${92 - c.h - 12} ${c.x} ${92 - c.h - 19}z`} />
-        </g>
-      ))}
-      <g className="art-planchette">
-        <path className="art-board" d="M57 104c0-5 11-9 27-9s27 4 27 9c0 4-11 7-27 7s-27-3-27-7z" />
-        <circle className="art-lens" cx="84" cy="102" r="3.4" />
-      </g>
-      <g className="art-spirits">
-        <path className="art-wisp art-wisp-1" d="M56 80c-9-10 7-15 0-27s9-14 4-26c8 8 2 16 8 25s-8 17-12 28z" />
-        <path className="art-wisp art-wisp-2" d="M110 78c8-9-6-14 1-25s-8-13-3-24c-7 7-2 15-7 24s7 16 9 25z" />
-        <circle className="art-orb art-orb-1" cx="70" cy="30" r="3" />
-        <circle className="art-orb art-orb-2" cx="99" cy="22" r="2.2" />
-        <circle className="art-orb art-orb-3" cx="84" cy="12" r="1.8" />
-      </g>
-    </svg>
-  );
-}
-
 const GHOST_PATH = 'M12 2C7.6 2 5 5.4 5 9.5V21l2.6-2 2.2 2 2.2-2 2.2 2 2.2-2L19 21V9.5C19 5.4 16.4 2 12 2z';
 
 /** The easter egg: ghosts drift up BEHIND the page, in fixed places, for about two seconds. */
@@ -405,6 +405,22 @@ function Boo() {
     <div data-boo="" data-motif="boo" aria-hidden="true" className="no-print pointer-events-none fixed inset-0" style={{ zIndex: -1 }}>
       {spots.map((s, i) => (
         <svg key={i} viewBox="0 0 24 24" width={s.size} height={s.size} style={{ left: s.left, right: s.right, top: s.top, animationDelay: `${i * 90}ms` }}>
+          <path d={GHOST_PATH} fill="currentColor" />
+          <circle cx="9.5" cy="9.5" r="1.3" fill="var(--sk-bg)" />
+          <circle cx="14.5" cy="9.5" r="1.3" fill="var(--sk-bg)" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+/** The treat: ghost particles fall behind the page for 3 s, from fixed places in a fixed order. Nothing is random. */
+function GhostRain() {
+  const ghosts = Array.from({ length: 14 }, (_, i) => ({ left: `${3 + ((i * 37) % 94)}%`, size: 20 + ((i * 11) % 5) * 6, delay: (i % 6) * 100, dur: 1700 + ((i * 5) % 4) * 200 }));
+  return (
+    <div data-treat="" data-motif="treat" aria-hidden="true" className="no-print pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: -1 }}>
+      {ghosts.map((g, i) => (
+        <svg key={i} viewBox="0 0 24 24" width={g.size} height={g.size} style={{ left: g.left, animationDelay: `${g.delay}ms`, animationDuration: `${g.dur}ms` }}>
           <path d={GHOST_PATH} fill="currentColor" />
           <circle cx="9.5" cy="9.5" r="1.3" fill="var(--sk-bg)" />
           <circle cx="14.5" cy="9.5" r="1.3" fill="var(--sk-bg)" />
@@ -452,7 +468,7 @@ function CandleRow({ ids }: { ids: string[] }) {
   // their place, new ones at the end) and the ones still being snuffed.
   const shown = [...order.filter((id) => current.has(id) || !expired.has(id)), ...ids.filter((id) => !order.includes(id))];
   return (
-    <div data-candles="" data-motif="candles" aria-hidden="true" className="no-print pointer-events-none mt-2 flex min-h-8 flex-wrap items-end gap-1.5">
+    <div data-candles="" data-warm="" data-motif="candles" aria-hidden="true" className="no-print pointer-events-none mt-2 flex min-h-8 flex-wrap items-end gap-1.5">
       {shown.map((id) => (
         <span key={id} data-candle="" data-lit={current.has(id) ? 'true' : 'false'}>
           <span data-flame="" />

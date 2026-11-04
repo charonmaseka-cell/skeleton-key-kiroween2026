@@ -14,6 +14,9 @@ import type { ScopeContext } from './adapter';
 
 const ASK: Record<string, string> = {
   'quantity.differs': 'Please confirm the quantity you are offering.',
+  'unit.ambiguous': 'Please state the unit you are quoting in, and the quantity in the unit the tender asks for.',
+  'price.arithmetic': 'Please confirm the line total and the unit price.',
+  'price.unclear': 'Please explain how the line total is calculated (discount, tax, rounding).',
   'spec.differs': 'Please confirm the specification you are offering.',
   'item.absent': 'Please confirm whether this item is included in your offer.',
   'exclusion.stated': 'Please confirm that this exclusion is intended, and whether an alternative price is available.',

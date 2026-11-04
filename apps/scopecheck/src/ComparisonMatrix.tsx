@@ -54,7 +54,7 @@ export function buildMatrix(view: SessionView): { rows: Row[]; uncertainQuoteLin
         field,
         label: LABEL[field],
         comparison: r.key ? ledger(`${field}:${r.reqId}~${quote}`) : undefined,
-        finding: r.key ? byCode(CODE[field], (i) => i.finding.subjectId === `${r.reqId}:${field}` && i.finding.responseDocId === quote) : undefined,
+        finding: r.key ? (() => { const here = (i: ReviewItem) => i.finding.subjectId === `${r.reqId}:${field}` && i.finding.responseDocId === quote; return byCode(CODE[field], here) ?? (field === 'quantity' ? byCode('unit.ambiguous', here) : undefined); })() : undefined,
       }));
       const absent = r.key ? byCode('item.absent', (i) => i.finding.subjectId === r.reqId && i.finding.responseDocId === quote) : undefined;
       const ambiguous = r.key ? byCode('item.allocation_ambiguous', (i) => i.finding.subjectId === r.reqId && i.finding.responseDocId === quote) : undefined;

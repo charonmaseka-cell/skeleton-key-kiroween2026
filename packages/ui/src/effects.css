@@ -204,6 +204,11 @@ article[data-dismissed] { border-style: dashed; }
   font-weight: 400;
 }
 :root[data-effects='on'] h3[data-typewriter] { font-size: 1.5rem; }
+/* Numbers in the séance stay in the data font (sans-serif, tabular figures): in Special Elite a 1 looks like a lowercase l. */
+:root[data-effects='on'] [data-typewriter] [data-figure] {
+  font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
 
 /* HU-39 title glow: a slow ectoplasm glow gathers round the app title over 4.5 s, then stays steady (no pulsing: HU-5). Title only. */
 :root[data-effects='on'] h1[data-display] {

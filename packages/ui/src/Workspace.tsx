@@ -231,7 +231,7 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
         </label>
         <input id={noteId} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded border border-sk-border px-2 py-1" />
         <div className="flex flex-wrap gap-2">
-          <button type="button" aria-label={`Accept: ${finding.message}`} onClick={() => session.decide(finding, 'accepted', note)} className="rounded bg-sk-ok px-3 py-1 text-sk-bg">
+          <button type="button" aria-label={`Accept: ${finding.message}`} onClick={() => session.decide(finding, 'accepted', note)} className="rounded border-2 border-sk-text bg-sk-text px-3 py-1 font-medium text-sk-bg">
             Accept
           </button>
           <button type="button" aria-label={`Dismiss: ${finding.message}`} onClick={() => session.decide(finding, 'dismissed', note)} className="rounded bg-sk-muted px-3 py-1 text-sk-bg">

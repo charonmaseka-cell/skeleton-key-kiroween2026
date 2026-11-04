@@ -7,12 +7,23 @@ export const SCOPE_FIELD_LABELS: Record<string, string> = {
   quantity: 'Quantity',
   specification: 'Specification',
   unit_price: 'Unit price',
+  line_total: 'Line total',
+  discount: 'Discount',
+  tax: 'Tax',
   exclusion: 'Exclusion',
 };
 
 export const SCOPE_ROLE_LABELS: Record<string, string> = { rfq: 'RFQ', quote: 'Quotation' };
 
-export const SCOPE_REASONS: Record<string, string> = {};
+export const SCOPE_REASONS: Record<string, string> = {
+  unit_missing: 'A quantity has no unit, so it cannot be compared with the requested quantity.',
+  unit_differs: 'The offered unit is not the requested unit, and no conversion between them is stated in the documents. Nothing was converted.',
+  tax_basis_unclear: 'Tax is stated on this line, and the documents do not show whether the total includes it, so the total cannot be checked.',
+  discount_basis_unclear: 'A discount is stated but not as a percentage between 0 and 100, so the total cannot be checked.',
+  currency_unknown: 'The currency of the unit price or the total is not known.',
+  currency_differs: 'The unit price and the total are in different currencies; nothing is converted.',
+  unit_unknown: 'The unit of the quantity is not known, so no exact price check is made.',
+};
 
 export const scopeField = (field: string): string => SCOPE_FIELD_LABELS[field] ?? field.replace(/_/g, ' ');
 

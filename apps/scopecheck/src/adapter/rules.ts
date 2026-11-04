@@ -13,9 +13,11 @@ import {
   type FindingDraft,
   type MatchCandidate,
   type PlannedComparison,
+  type Quantity,
   type Rule,
   type RuleContext,
 } from '@skeleton-key/engine';
+import { checkLinePrice, unitVerdict } from './arithmetic';
 import { descriptionOverlap, type ItemIdentity } from './identity';
 import { scopeDoc, scopeField } from './labels';
 
@@ -322,8 +324,27 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
             return;
           }
         }
-        const verdict2 = equal(a, b);
-        comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} → ${showValue(b.value)}${note?.(a, b) ?? ''}` });
+        // Units (R2.9, R6.4): a missing unit, or a unit that differs from the RFQ's without a conversion the documents state, is a unit
+        // question, never a quantity difference. A stated conversion ("1 box = 100 each") is applied with decimal arithmetic.
+        let unitNote = '';
+        let compared: EffectiveFact = b;
+        if (field === 'quantity') {
+          const texts = [r.line, offer].flatMap((l) => Object.values(l.all).flat().flatMap((e) => e.fact.evidence.map((ev) => ev.text)));
+          const uv = unitVerdict(a.value as Quantity, b.value as Quantity, texts);
+          if (uv.kind === 'unclear') {
+            comparisons.push({ ...cmp, status: 'flagged', reason: uv.reason, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} → ${showValue(b.value)}` });
+            const du = describeInputs([a, b]);
+            const said = (u: string | null) => (u ? `"${u}"` : 'no unit');
+            out.push(makeDraft({ ...base, matchStatus: m.status, code: 'unit.ambiguous', severity: 'high', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: uv.reason === 'unit_missing' ? `Unit is missing for ${r.key} in ${docName(q)} (tender: ${said(uv.requested)}, offer: ${said(uv.offered)})` : `Unit differs for ${r.key} in ${docName(q)} (tender: ${said(uv.requested)}, offer: ${said(uv.offered)}) and no conversion is stated`, reason: uv.reason, inputs: du.inputs, evidence: du.evidence }));
+            return;
+          }
+          if (uv.kind === 'converted') {
+            unitNote = ` (offer ${uv.from} converted at the stated 1 ${uv.from} = ${uv.factor} ${uv.to}: ${uv.quantity.value} ${uv.to})`;
+            compared = { ...b, value: uv.quantity } as EffectiveFact;
+          }
+        }
+        const verdict2 = field === 'quantity' && unitNote ? compareQuantities(a.value as never, compared.value as never).result : equal(a, b);
+        comparisons.push({ ...cmp, status: verdict2 === 'equal' ? 'agree' : 'flagged', reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} → ${showValue(b.value)}${unitNote}${note?.(a, b) ?? ''}` });
         if (verdict2 === 'equal') return;
         const d = describeInputs([a, b]);
         out.push(makeDraft({ ...base, matchStatus: m.status, code, severity: field === 'quantity' ? 'high' : 'critical', state: verdict2 === 'different' ? 'confirmed' : 'needs_review', subjectId: `${r.reqId}:${field}`, message: why ?? `${field === 'quantity' ? 'Quantity' : 'Specification text'} ${verdict2 === 'different' ? 'differs' : 'cannot be compared'} for ${r.key} in ${docName(q)}`, reason: verdict2 === 'incomparable' ? 'incomparable' : undefined, inputs: d.inputs, evidence: d.evidence }));
@@ -341,6 +362,41 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         const d = describeInputs([ex]);
         out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'exclusion.stated', severity: 'info', state: 'confirmed', subjectId: `${q}:${l.blockId}:exclusion${i > 0 ? `#${i + 1}` : ''}`, message: `Exclusion stated in ${docName(q)} (unpriced): ${showValue(ex.value)}`, inputs: d.inputs, evidence: d.evidence }));
       });
+    }
+    // Price arithmetic (R2.9, R6): where a quotation line states its own total, check quantity x unit price (less a stated discount) with
+    // decimal arithmetic. A mismatch is reported only when the values justify the basis; anything doubtful stays Needs review and the
+    // check is listed as Not evaluated. A line without a stated total is not checked (nothing is inferred or invented).
+    for (const l of qLines) {
+      const total = l.f.line_total;
+      if (!total || isMulti(l)) continue;
+      const subject = `${q}:${l.blockId}:price`;
+      const cmpId = `line_total:${q}:${l.blockId}`;
+      const parts = [l.f.quantity, l.f.unit_price, total, l.f.discount, l.f.tax].filter((x): x is EffectiveFact => !!x);
+      const unclear = (reason: string, why: string, held?: EffectiveFact) => {
+        const du = describeInputs(parts);
+        comparisons.push({ id: cmpId, check: 'quote_aspect', field: 'line_total', docs: [q], status: 'not_evaluated', reason: why, blocked: { docId: q, field: held?.fact.field ?? 'line_total', reason, ...(held ? { factId: held.fact.id } : {}) } });
+        out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'price.unclear', severity: 'warning', state: 'needs_review', subjectId: subject, message: `Line total in ${docName(q)} cannot be checked against quantity and unit price`, reason, inputs: du.inputs, evidence: du.evidence }));
+      };
+      const dup = (['quantity', 'unit_price', 'line_total', 'discount', 'tax'] as const).find((f) => (l.all[f]?.length ?? 0) > 1);
+      if (dup) { unclear('multiple_candidates', `The same line has more than one ${scopeField(dup).toLowerCase()}; it is not clear which to use.`, l.all[dup]![0]); continue; }
+      if (!l.f.quantity || !l.f.unit_price) { unclear('no_fact', `The ${!l.f.quantity ? 'quantity' : 'unit price'} of this line was not extracted, so the stated total cannot be checked.`); continue; }
+      const held = parts.find((x) => !x.usable);
+      if (held) { unclear(held.fact.reason ?? 'unvalidated_input', `${scopeField(held.fact.field)} in ${docName(q)} was not validated.`, held); continue; }
+      let discount: string | null = null;
+      if (l.f.discount) {
+        const dv = l.f.discount.value as Quantity;
+        if (dv.unit !== '%') { unclear('discount_basis_unclear', 'A discount is stated but not as a percentage, so the basis is not clear.', l.f.discount); continue; }
+        discount = dv.value;
+      }
+      const res = checkLinePrice({ quantity: l.f.quantity.value as Quantity, unitPrice: l.f.unit_price.value as never, lineTotal: total.value as never, discountPercent: discount, taxStated: !!l.f.tax });
+      if (res.result === 'unclear') {
+        unclear(res.reason, { currency_unknown: 'The currency of the unit price or the total is not known.', currency_differs: 'The unit price and the total are in different currencies; nothing is converted.', unit_unknown: 'The unit of the quantity is not known.', tax_basis_unclear: 'Tax is stated on this line, and the documents do not show whether the total includes it.', discount_basis_unclear: 'The discount is not a percentage between 0 and 100.' }[res.reason]);
+        continue;
+      }
+      const du = describeInputs(parts);
+      comparisons.push({ id: cmpId, check: 'quote_aspect', field: 'line_total', docs: [q], status: res.result === 'ok' ? 'agree' : 'flagged', detail: `${showValue(l.f.quantity.value)} × ${showValue(l.f.unit_price.value)}${discount ? ` less ${discount} %` : ''} = ${res.expected} ${res.currency}; stated ${res.stated} ${res.currency}` });
+      if (res.result === 'ok') continue;
+      out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'price.arithmetic', severity: 'high', state: 'confirmed', subjectId: subject, message: `Line total does not match quantity × unit price in ${docName(q)}: expected ${res.expected} ${res.currency}, stated ${res.stated} ${res.currency}`, inputs: du.inputs, evidence: du.evidence }));
     }
     // Several item facts in one quotation block: which one a quantity or specification belongs to is not known.
     for (const l of offers.multi) {
@@ -369,10 +425,12 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
 
 export const scopeRule: Rule<ScopeData> = {
   id: 'bench.scope',
+  // 5 (2026-11-03): unit questions (missing unit, unit differs without a stated conversion) are unit.ambiguous, not a quantity difference;
+  // a stated line total is checked against quantity x unit price (price.arithmetic, or price.unclear when the basis is not justified).
   // 4 (2026-11-02): a specification that carries the row's own item code is contaminated: Needs review, comparison Not evaluated.
   // 3 (2026-11-02): leading connectors are not a specification difference; unresolved requirement lines list their
   // comparisons as Not evaluated; each stated exclusion is its own finding (identified by its source line).
-  version: '4',
+  version: '5',
   run(ctx: RuleContext<ScopeData>) {
     return evaluateScope(ctx).drafts;
   },

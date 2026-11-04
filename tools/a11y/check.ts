@@ -37,8 +37,20 @@ function serve(dir: string, port: number): Promise<Server> {
   const server = createServer((req, res) => {
     const path = normalize(decodeURIComponent((req.url ?? '/').split('?')[0]!)).replace(/^(\.\.[/\\])+/, '');
     let file = join(dir, path);
-    if (!existsSync(file) || statSync(file).isDirectory()) file = join(dir, 'index.html');
-    res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' });
+    let status = 200;
+    if (!existsSync(file) || statSync(file).isDirectory()) {
+      // Like Cloudflare Pages: a path with no file is answered with 404 and the top-level 404.html (a missing asset gets a bare 404).
+      if (extname(path)) {
+        res.writeHead(404).end();
+        return;
+      }
+      if (path === '/' || path === '') file = join(dir, 'index.html');
+      else {
+        file = join(dir, '404.html');
+        status = 404;
+      }
+    }
+    res.writeHead(status, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' });
     createReadStream(file).pipe(res);
   });
   return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve(server)));
@@ -219,8 +231,64 @@ async function effectStates(ctx: BrowserContext, app: (typeof APPS)[number], tag
   // HU-29 to HU-31: gutter fog (wide only), the séance card, the display face
   await expectThat(page, 'gutter fog: drawn at 1280 px and wider, not narrower', (await page.locator('[data-gutter-fog]').evaluateAll((els) => els.map((e) => getComputedStyle(e).display))).every((d) => (width >= 1280 ? d === 'block' : d === 'none')));
   await expectThat(page, 'séance card: drawn beside the counts on wide screens, hidden on narrow ones', (await page.locator('[data-seance-art]').evaluate((e) => getComputedStyle(e).display)) === (width >= 768 ? 'block' : 'none'));
-  const face = await page.evaluate(async () => { await document.fonts.ready; const h = document.querySelector('h1')!; return { family: getComputedStyle(h).fontFamily, loaded: document.fonts.check('700 24px "Skeleton Display"') }; });
-  await expectThat(page, 'display font: the title and the séance heading use the self-hosted face', /Skeleton Display/.test(face.family) && face.loaded, JSON.stringify(face));
+  const face = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const fam = (sel: string) => getComputedStyle(document.querySelector(sel)!).fontFamily;
+    return { title: fam('h1'), seance: fam('h3[data-typewriter]'), data: fam('table td, dl dd'), titleOk: document.fonts.check('400 24px "Skeleton Title"'), typeOk: document.fonts.check('400 16px "Skeleton Typewriter"') };
+  });
+  await expectThat(page, 'fonts: gothic title, typewriter séance heading, data stays in the sans-serif', /Skeleton Title/.test(face.title) && /Skeleton Typewriter/.test(face.seance) && !/Skeleton/.test(face.data) && face.titleOk && face.typeOk, JSON.stringify(face));
+  await expectThat(page, 'séance heading and sentences are typewriter, the counts are not', await page.evaluate(() => [...document.querySelectorAll('[data-seance] [data-typewriter]')].every((e) => /Skeleton Typewriter/.test(getComputedStyle(e).fontFamily)) && !/Skeleton/.test(getComputedStyle(document.querySelector('dl[aria-label="Summary"] dd')!).fontFamily)));
+  // HU-32 warm decoration never within 24 px of a status badge
+  const near = await page.evaluate(() => {
+    const warm = [...document.querySelectorAll('[data-warm]')].map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0);
+    const out: string[] = [];
+    for (const b of document.querySelectorAll('[data-badge]')) {
+      const r = b.getBoundingClientRect();
+      if (r.width === 0) continue;
+      for (const w of warm) if (r.left < w.right + 24 && r.right > w.left - 24 && r.top < w.bottom + 24 && r.bottom > w.top - 24) out.push(`${b.textContent} is within 24px of warm art`);
+    }
+    return out;
+  });
+  await check(page, 'warm decoration is 24 px or more from every status badge', near);
+  // HU-35 the corner pumpkin overlaps no text or control, and is a labelled button
+  const pumpkin = await page.evaluate(() => {
+    const b = document.querySelector('[data-trick-or-treat]') as HTMLElement | null;
+    if (!b) return ['no corner pumpkin'];
+    const r = b.getBoundingClientRect();
+    const bad: string[] = [];
+    if (b.getAttribute('aria-label') !== 'Trick or treat' || r.width < 44 || r.height < 44) bad.push('not a labelled 44 px button');
+    const hit = (q: DOMRect) => r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top;
+    for (const e of document.querySelectorAll('header a, header button, header h1, header p, header nav, header [data-header-art]')) if (e !== b && !b.contains(e) && hit(e.getBoundingClientRect())) bad.push(`overlaps ${e.tagName.toLowerCase()} ${e.textContent?.slice(0, 20)}`);
+    return bad;
+  });
+  await check(page, 'corner pumpkin: a labelled button that overlaps nothing in the header', pumpkin);
+  // HU-34 the unlock: fade done inside 1.5 s of a set loading
+  const unlockMs = await page.evaluate(() => {
+    const el = document.querySelector('[data-unlock]')!;
+    const a = el.getAnimations().find((x) => (x as CSSAnimation).animationName === 'unlock-fade');
+    return a ? Number(a.effect!.getComputedTiming().endTime) : (null as number | null);
+  });
+  await expectThat(page, 'unlock: the results fade in within 1.5 s, once', unlockMs === null || unlockMs < 1500, String(unlockMs));
+  // HU-35 treat, then trick
+  await page.locator('[data-trick-or-treat]').click();
+  await expectThat(page, 'treat: ghost particles fall, no runes', (await page.locator('[data-treat] svg').count()) === 14 && (await page.locator('[data-runes]').count()) === 0);
+  await page.waitForTimeout(3200);
+  await expectThat(page, 'treat: gone after 3 s', (await page.locator('[data-treat]').count()) === 0);
+  const dataBefore = await page.locator('main').innerText();
+  await page.locator('[data-trick-or-treat]').click();
+  await page.waitForTimeout(400);
+  const runeHosts = await page.evaluate(() => [...document.querySelectorAll('[data-runes-host]')].map((h) => h.closest('h1,h3')?.tagName));
+  await expectThat(page, 'trick: runes only on the app title and the séance heading', runeHosts.sort().join() === 'H1,H3', runeHosts.join());
+  await expectThat(page, 'trick: no overlap with text or controls', (await motifOverlaps(page, false)).length === 0);
+  await page.waitForTimeout(3000);
+  await expectThat(page, 'trick: runes gone after 3 s and data text unchanged', (await page.locator('[data-runes]').count()) === 0 && (await page.locator('main').innerText()) === dataBefore);
+  // HU-36 the 404 page
+  const nf = await page.context().newPage();
+  const resp = await nf.goto(`${urlOf(app)}does-not-exist`);
+  await expectThat(nf, '404: unknown path answers 404 with the themed page and a way back', resp?.status() === 404 && (await nf.locator('h1').textContent()) === 'Lost in the catacombs' && (await nf.locator('a[href="/"]').count()) === 1);
+  await check(nf, '404: axe-core, no violations', await axeViolations(nf));
+  await expectThat(nf, '404: no sideways scroll', await nf.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+  await nf.close();
   // HU-18 planchette
   await page.getByRole('button', { name: 'Next finding' }).click();
   await page.waitForSelector('[data-planchette][data-show]', { timeout: 5000 }); // placed once the page has stopped scrolling

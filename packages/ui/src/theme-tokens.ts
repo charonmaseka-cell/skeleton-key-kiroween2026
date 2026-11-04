@@ -33,7 +33,7 @@ export type Palette = {
 
 export const PALETTES: Record<Mode, Palette> = {
   off: {
-    bg: '#0f1117',
+    bg: '#0a0a0d',
     surface: '#181b24',
     text: '#e8e6e3',
     muted: '#b8b4ad',

@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Block } from '@skeleton-key/engine';
 import { StatusBadge } from './Badges';
-import { ProgressView, initialStages, setStage, type Stage } from './ProgressView';
+import { ProgressView, type ProgressNames, initialStages, setStage, type Stage } from './ProgressView';
 import { ERROR_TEXT, MAX_CALLS_PER_SESSION, MAX_CHUNKS_PER_DOC, analyseAll, newClientSession, refusalText, type ClientConfig, type DocumentResult, type ErrorKind, type RunRefusal } from './extraction-client';
 import { buildLiveFixture, type Fixture } from './session-core';
 
@@ -45,12 +45,15 @@ export function UploadPanel({
   deps = {},
   onResult,
   idPrefix,
+  stageNames,
 }: {
   slots: UploadSlot[];
   /** Worker URL. When missing, Analyse is unavailable and the panel says so. */
   baseUrl?: string;
   deps?: UploadDeps;
   onResult: (fixture: Fixture) => void;
+  /** themed names for the analysis stages (Lights off only) */
+  stageNames?: ProgressNames;
   idPrefix: string;
 }) {
   const uid = useId();
@@ -224,7 +227,7 @@ export function UploadPanel({
           {refusalText(refusal)}
         </p>
       )}
-      {stages && <ProgressView stages={stages} />}
+      {stages && <ProgressView stages={stages} names={stageNames} />}
       {runs.length > 0 && (
         <div aria-live="polite" className="space-y-2">
           <h3 className="font-medium">Result of the last analysis</h3>

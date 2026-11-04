@@ -68,6 +68,7 @@ export function App({ deps, baseUrl = API_URL }: { deps?: UploadDeps; baseUrl?: 
         slots={PACKCHECK_SLOTS}
         baseUrl={baseUrl}
         deps={deps}
+        stageNames={view.voice.stages}
         onResult={(f) => {
           setLive(f);
           session.setFixtureId(f.id);

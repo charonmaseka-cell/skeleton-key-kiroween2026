@@ -32,7 +32,7 @@
   --sk-mark-text: #1a1300;
 }
 :root[data-lights='off'] {
-  --sk-bg: #0f1117;
+  --sk-bg: #0a0a0d;
   --sk-surface: #181b24;
   --sk-text: #e8e6e3;
   --sk-muted: #b8b4ad;

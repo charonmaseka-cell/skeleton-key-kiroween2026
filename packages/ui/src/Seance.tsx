@@ -1,3 +1,4 @@
+import { DisplayText } from './Runes';
 import { useLights } from './ThemeProvider';
 import { seanceSentences } from './seance';
 import type { SessionView } from './session-core';
@@ -14,14 +15,14 @@ export function Seance({ view }: { view: SessionView }) {
   const themed = mode === 'off';
   return (
     <section aria-labelledby="seance-h" data-seance="" className="space-y-1 rounded border border-sk-border bg-sk-surface p-3">
-      <h3 id="seance-h" data-display="" className="text-lg font-semibold">
-        {themed ? 'The séance' : 'Summary of this review'}
+      <h3 id="seance-h" data-typewriter="" className="text-lg font-semibold">
+        <DisplayText text={themed ? 'The séance' : 'Summary of this review'} />
       </h3>
       <ul className="space-y-1">
         {s.docs.map((d) => (
           <li key={d.docId}>
             {themed && (
-              <span data-theme-name="" aria-hidden="true">
+              <span data-theme-name="" data-typewriter="" aria-hidden="true">
                 {d.text}
               </span>
             )}

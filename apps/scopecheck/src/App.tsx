@@ -73,6 +73,7 @@ export function App({ deps, baseUrl = API_URL, fixtures = FIXTURES }: { deps?: U
         slots={SCOPECHECK_SLOTS}
         baseUrl={baseUrl}
         deps={deps}
+        stageNames={view.voice.stages}
         onResult={(f) => {
           setLive(f);
           session.setFixtureId(f.id);

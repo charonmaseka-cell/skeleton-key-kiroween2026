@@ -435,7 +435,8 @@ describe('HU-29 gutter fog, HU-30 séance card, HU-31 display font', () => {
     expect(art.textContent).toBe('');
     expect(art.parentElement).toBe(screen.getByLabelText('Summary').parentElement); // in the grid of the séance sentence and the counts
     expect(art.parentElement!.className).toMatch(/md:grid-cols-\[1fr_1fr_auto\]/);
-    expect(art.querySelectorAll('.art-candle')).toHaveLength(3);
+    expect(art.querySelectorAll('.art-wax')).toHaveLength(4); // three candles and the lantern's
+    expect(art.querySelectorAll('.art-carve').length).toBeGreaterThan(0); // a carved pumpkin
     expect(art.querySelector('.art-planchette')).toBeTruthy();
     expect(art.querySelectorAll('.art-wisp, .art-orb').length).toBeGreaterThanOrEqual(4);
     cleanup();
@@ -445,9 +446,77 @@ describe('HU-29 gutter fog, HU-30 séance card, HU-31 display font', () => {
     expect(screen.getByLabelText('Summary').parentElement!.className).not.toMatch(/auto/);
   });
 
-  it('the title and the séance heading carry the display-face hook; nothing else does', () => {
+  it('the title carries the gothic hook; the séance heading and themed sentences the typewriter hook; nothing else does', () => {
     start();
-    expect([...document.querySelectorAll('[data-display]')].map((e) => `${e.tagName} ${e.textContent!.trim()}`)).toEqual(['H1 ScopeCheck', 'H3 The séance']);
+    expect([...document.querySelectorAll('[data-display]')].map((e) => `${e.tagName} ${e.textContent!.trim()}`)).toEqual(['H1 ScopeCheck']);
+    const tw = [...document.querySelectorAll('[data-typewriter]')];
+    expect(tw.some((e) => e.tagName === 'H3' && e.textContent === 'The séance')).toBe(true);
+    expect(tw.every((e) => e.closest('[data-seance]') !== null)).toBe(true);
+  });
+});
+
+describe('HU-34 unlock, HU-35 trick or treat', () => {
+  const pumpkin = () => screen.getByRole('button', { name: 'Trick or treat' });
+  const dataText = () => document.querySelector('main')!.textContent;
+
+  it('the results carry the unlock hook (and the key art) only with effects on; the fade is under 1.5 s', () => {
+    start();
+    expect(document.querySelector('[data-unlock]')).toBeTruthy();
+    expect(document.querySelector('.art-key')).toBeTruthy();
+    const rule = css().match(/\[data-unlock\]\s*\{[^}]*\}/)![0];
+    const [dur, delay] = [...rule.matchAll(/animation:\s*unlock-fade\s+([\d.]+)s\s+ease-out\s+([\d.]+)s/g)][0]!.slice(1).map(Number);
+    expect(dur! + delay!).toBeLessThan(1.5);
+    cleanup();
+    start('on');
+    expect(document.querySelector('[data-unlock]')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Trick or treat' })).toBeNull();
+  });
+
+  it('first click is a treat (ghosts fall for 3 s), second a trick (runes on the title and séance heading only); data text never changes', async () => {
+    start();
+    const before = dataText();
+    fireEvent.click(pumpkin());
+    expect(document.querySelectorAll('[data-treat] svg').length).toBe(14);
+    expect(document.querySelector('[data-runes]')).toBeNull();
+    fireEvent.click(pumpkin()); // ignored while one runs
+    await advance(2900);
+    expect(document.querySelector('[data-treat]')).toBeTruthy();
+    await advance(200);
+    expect(document.querySelector('[data-treat]')).toBeNull();
+    expect(dataText()).toBe(before);
+
+    fireEvent.click(pumpkin());
+    const hosts = [...document.querySelectorAll('[data-runes-host]')];
+    expect(hosts.map((h) => h.closest('h1,h3')!.tagName).sort()).toEqual(['H1', 'H3']);
+    expect(document.querySelectorAll('[data-runes]')).toHaveLength(2);
+    expect(document.querySelectorAll('[data-runes]')[0]!.getAttribute('aria-hidden')).toBe('true');
+    const first = document.querySelector('[data-runes]')!.innerHTML;
+    await advance(100);
+    expect(document.querySelector('[data-runes]')!.innerHTML).not.toBe(first); // deterministic step, not random
+    expect(document.querySelector('h1')!.textContent).toContain('ScopeCheck'); // the real text stays for assistive technology
+    expect(document.querySelectorAll('td [data-runes], [data-ghost] [data-runes]')).toHaveLength(0);
+    await advance(3000);
+    expect(document.querySelector('[data-runes]')).toBeNull();
+    expect(dataText()).toBe(before);
+  });
+
+  it('is deterministic: the same clicks give the same runes', async () => {
+    const run = async () => {
+      start();
+      fireEvent.click(pumpkin());
+      await advance(3100);
+      fireEvent.click(pumpkin());
+      await advance(300);
+      const html = document.querySelector('[data-runes]')!.innerHTML;
+      cleanup();
+      return html;
+    };
+    expect(await run()).toBe(await run());
+  });
+
+  it('shows the themed stage names only in Lights off, never to assistive technology', () => {
+    const lines = css();
+    expect(lines).toMatch(/\[data-stage-theme\]/);
   });
 });
 
@@ -581,18 +650,18 @@ describe('HU-26 easter egg', () => {
 describe('rules for all of them (HU-27)', () => {
   it('Lights on and reduced motion draw no decoration and no animation hook, and the page keeps the same controls', () => {
     start();
-    const withEffects = buttonNames().filter((n) => n !== 'Lights on');
+    const withEffects = buttonNames().filter((n) => n !== 'Lights on' && n !== 'Trick or treat');
     cleanup();
     start('on');
     expect(document.querySelectorAll('[data-motif]')).toHaveLength(0);
     expect(document.documentElement.getAttribute('data-effects')).toBe('off');
-    expect(buttonNames().filter((n) => n !== 'Lights on')).toEqual(withEffects);
+    expect(buttonNames().filter((n) => n !== 'Lights on' && n !== 'Trick or treat')).toEqual(withEffects);
     cleanup();
     start('off', { reduced: true });
     expect(document.documentElement.getAttribute('data-lights')).toBe('off');
     expect(document.documentElement.getAttribute('data-effects')).toBe('off');
     expect([...document.querySelectorAll('[data-motif]')].map((m) => m.getAttribute('data-motif')).filter((m) => m !== 'fog')).toEqual(['fog'].slice(1));
-    expect(buttonNames().filter((n) => n !== 'Lights on')).toEqual(withEffects);
+    expect(buttonNames().filter((n) => n !== 'Lights on' && n !== 'Trick or treat')).toEqual(withEffects);
   });
 
   it('every decorative element is hidden from assistive technology, ignores the pointer, and carries no text', async () => {

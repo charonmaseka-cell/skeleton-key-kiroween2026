@@ -455,6 +455,25 @@ describe('HU-29 gutter fog, HU-30 séance card, HU-31 display font', () => {
   });
 });
 
+describe('séance digits and the Accept button', () => {
+  it('every number in the séance sentences is a data-font figure, so a 1 never reads as an l; the heading has none', () => {
+    start();
+    const sec = document.querySelector('[data-seance]')!;
+    const figs = [...sec.querySelectorAll('[data-figure]')];
+    expect(figs.length).toBeGreaterThan(0);
+    expect(figs.every((f) => /^\d+$/.test(f.textContent!))).toBe(true);
+    expect(sec.querySelector('h3 [data-figure]')).toBeNull();
+    const visible = [...sec.querySelectorAll('[data-theme-name]')].map((e) => e.textContent!.replace(/\d+/g, '').trim());
+    expect(visible.length).toBeGreaterThan(0);
+    expect(css()).toMatch(/\[data-typewriter\] \[data-figure\]\s*\{[^}]*tabular-nums/);
+  });
+  it('Accept is a neutral button, not the green of the Agrees / Validated status', () => {
+    start();
+    const accept = screen.getAllByRole('button', { name: /^Accept/ })[0]!;
+    expect(accept.className).not.toMatch(/sk-ok/);
+  });
+});
+
 describe('HU-34 unlock, HU-35 trick or treat', () => {
   const pumpkin = () => screen.getByRole('button', { name: 'Trick or treat' });
   const dataText = () => document.querySelector('main')!.textContent;

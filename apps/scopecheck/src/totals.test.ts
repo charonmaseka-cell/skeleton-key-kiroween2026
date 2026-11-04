@@ -125,6 +125,9 @@ describe('the full-length recorded sample file', () => {
     const got = new Map(v.items.map((i) => [`${i.finding.code}|${i.finding.subjectId}|${i.finding.responseDocId}`, i.finding.state]));
     for (const e of m.expectedFindings) expect(got.get(`${e.code}|${e.subject}|${e.response}`), `${e.code} ${e.subject}`).toBe(e.state);
     expect(got.size - m.expectedFindings.length).toBe(1);
-    expect(got.get('quantity.differs|SP-5302:quantity|quote-a')).toBe('needs_review');
+    // the one documented unexpected finding: the recorded extraction read "1 l" (the bottle size) as the offered quantity, so the unit
+    // (each vs l) is unclear. It is a unit question (unit.ambiguous), not a quantity difference.
+    expect(got.get('unit.ambiguous|SP-5302:quantity|quote-a')).toBe('needs_review');
+    expect(got.has('quantity.differs|SP-5302:quantity|quote-a')).toBe(false);
   });
 });

@@ -238,6 +238,18 @@ async function effectStates(ctx: BrowserContext, app: (typeof APPS)[number], tag
   });
   await expectThat(page, 'fonts: gothic title, typewriter séance heading, data stays in the sans-serif', /Skeleton Title/.test(face.title) && /Skeleton Typewriter/.test(face.seance) && !/Skeleton/.test(face.data) && face.titleOk && face.typeOk, JSON.stringify(face));
   await expectThat(page, 'séance heading and sentences are typewriter, the counts are not', await page.evaluate(() => [...document.querySelectorAll('[data-seance] [data-typewriter]')].every((e) => /Skeleton Typewriter/.test(getComputedStyle(e).fontFamily)) && !/Skeleton/.test(getComputedStyle(document.querySelector('dl[aria-label="Summary"] dd')!).fontFamily)));
+  // Séance numbers are data: sans-serif with tabular figures, never the typewriter face (a 1 would read as an l)
+  const figs = await page.evaluate(() => [...document.querySelectorAll('[data-seance] [data-figure]')].map((e) => { const c = getComputedStyle(e); return { t: e.textContent, f: c.fontFamily, n: c.fontVariantNumeric }; }));
+  await expectThat(page, 'séance numbers: sans-serif data font with tabular figures', figs.length > 0 && figs.every((x) => !/Skeleton|Elite/.test(x.f) && /tabular/.test(x.n)), JSON.stringify(figs.filter((x) => /Skeleton|Elite/.test(x.f) || !/tabular/.test(x.n)).slice(0, 3)));
+  // Accept is not the green of the Agrees / Validated status
+  const green = await page.evaluate(() => {
+    const a = document.querySelector('button[aria-label^="Accept"]');
+    const ok = document.querySelector('[data-badge="validated"], [data-badge="agree"]');
+    if (!a || !ok) return [];
+    const bg = getComputedStyle(a).backgroundColor;
+    return bg === getComputedStyle(ok).borderTopColor ? [`Accept background ${bg} equals the status green`] : [];
+  });
+  await check(page, 'Accept button: not the status green', green);
   // HU-32 warm decoration never within 24 px of a status badge
   const near = await page.evaluate(() => {
     const warm = [...document.querySelectorAll('[data-warm]')].map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0);

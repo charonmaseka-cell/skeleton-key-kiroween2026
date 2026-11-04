@@ -62,3 +62,6 @@ It proves the bindings are wired in the deployed Worker and that the deployed co
 
 ## Tests (offline)
 `services/extraction-api/test/durable-object.test.ts` (the check against the real SQLite Durable Object in workerd: closed, after real admissions, missing AI binding), `test/health.test.ts` (failure cases, nothing sensitive in the body), `tools/deploy/deploy.test.ts` (the verification logic against a fake deployment).
+
+## Candlelight pass deployed (3 Nov 2026)
+Pages only, built with the Worker address, from `2541b39` (PR #36): ScopeCheck `1ac4aafd`, PackCheck `92cd5f02`. The Worker was not touched (still `b48bca11`, ceiling 80, budget 6000, open). `--verify-open` Worker checks pass; the two Pages reachability checks fail from the sandbox (HTTP 599, `*.pages.dev` is unreachable here), so the live pages were not fetched. No inference was run.

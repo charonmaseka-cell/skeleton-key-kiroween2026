@@ -48,11 +48,11 @@ describe('sample banner', () => {
     expect(compact.className).toMatch(/sm:hidden/);
     // the fold holds the explanation: "Not a real review", ONE plain line about the recording, and the details
     expect(compact.textContent).toMatch(/Not a real review/);
-    expect(compact.textContent).toMatch(/Recorded from real AI runs on 1 (and 3 )?November 2026, replayed unchanged\./);
+    expect(compact.textContent).toMatch(/Recorded from real AI runs on 1 (and [35] )?November 2026, replayed unchanged\./);
     // wide: the label and the plain line are shown; the model, run and paths are behind the Details toggle
     const wide = banner.querySelector('div.hidden.sm\\:block')!;
     expect(wide.textContent).toMatch(/SAMPLE MODE: fictional documents\. Not a real review\./);
-    expect(wide.textContent).toMatch(/Recorded from real AI runs on 1 (and 3 )?November 2026, replayed unchanged\./);
+    expect(wide.textContent).toMatch(/Recorded from real AI runs on 1 (and [35] )?November 2026, replayed unchanged\./);
     const det = wide.querySelector('details[data-banner-details]') as HTMLDetailsElement;
     expect(det.open).toBe(false);
     expect(det.querySelector('summary')!.textContent).toBe('Details');

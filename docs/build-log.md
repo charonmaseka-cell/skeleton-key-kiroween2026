@@ -7,6 +7,11 @@ While checking why a re-record request was refused, I sent one valid `scopecheck
 
 **First production run, spend against the plan.** PackCheck, 1 `/run` + 4 `/extract`: **229.719 neurons settled** (4 attempts), against the earlier planning figure of about 600 neurons per run.
 
+## Line totals: quotation profile v2, the two small-sample quotations re-recorded (5 Nov 2026)
+Approved by the owner: `line_total` only (no discount or tax). **Profile.** `scopecheck.quote.v2` adds `line_total`; `v1` is frozen and the Worker accepts both (checked without any charge: an oversized plan answers `too_large` for a known profile, `invalid_input` for an unknown one). The Worker was redeployed from `011b279` as version `afcf4876` with the same 80 / 6,000 limits and the same bindings; only the profile code changed. **Sample.** quote-a and quote-b of the small sample now state a total on every line (clearly fictional, rand), with exactly one planted error: QA-17, PG-6, 20 units at R 450 is R 9 000, the quotation states R 9 500. **Recording.** One foreground run, concurrency 1, one attempt per part (inside a run the Worker makes no automatic repair), stop on any failed request or at 2,360 neurons: 3 parts (quote-a 2, quote-b 1), all returned, none failed. **Settled spend 285.564 estimated neurons**, 3 attempts, 0 unsettled, 0 overruns, against an estimate of about 1,180 for the first attempts and a stop line of 2,360 (the estimate is a guaranteed upper bound, not the expected spend). Ledger that day: 11 attempts and 764.597 neurons before, 14 and 1,050.161 after; remaining 66 attempts and 4,949.839 neurons. New recordings: `samples/benchmark-results/live-scopecheck-quote-{a,b}-v2-2026-11-05T22-17-04-903Z.json` (claims unedited; the 1 Nov recordings are kept unchanged and no longer used by the standard sample).
+**Result.** All five stated line totals were extracted correctly (amounts and currency), none missed, and every unit price still reads correctly. The rules then find exactly one price problem: a confirmed `price.arithmetic` finding on QA-17 PG-6 (expected R 9 000, stated R 9 500), none on QB-04, and the other four lines agree. The comparison ledger of the small sample goes from 12 to 17 planned. **Fresh set (SC-T12).** Not re-run (owner decision, option 3 stands for now): its recordings are unchanged, and on the v1 recordings (full-length and free-text samples) one plain line says "Price arithmetic didn't run on this sample: it was recorded before line totals were extracted." No price row is added and no recording is relabelled. Whether to re-run the fresh set under a separate 5,000 cap is the owner's decision.
+**Side effect worth knowing.** A user correction can create a price finding: correcting QA-17's quantity from 8 to 10 removes the quantity difference but makes the stated R 100 000 disagree with 10 x R 12 500, so a price finding appears on the corrected value, marked as depending on a user-supplied value.
+
 ## Beta sweep of 52107e2: fixes (5 Nov 2026)
 Report: no P0/P1, "ready with known limitations". Fixed in one PR, one regression test each, no new features. **D1** a note typed after Accept/Dismiss/Reopen is now saved on blur or with "Save note", kept in the item and recorded in the decision history (`noted`), and appears in the text export, the CSV and after switching samples. **D2** the export line says "Marked SAMPLE (fictional)" only for samples; live results say they are marked as a live analysis, and the live text export now opens with a LIVE ANALYSIS line (CSV column "LIVE (your documents)", files named `-live`). **D4** README Status and privacy note rewritten (live analysis open at 6,000 neurons / 80 attempts; the privacy note is current); delivered tasks ticked (SC-T5, SC-T10, PC-T6, foundation 7.1, 7.2, 8, 9, 13, 16) and `docs:sync` run; SC-T6 and SC-T7 stay open with the reason written in the task (dashboard-confirmed consumption; no ScopeCheck end-to-end live run yet). **D5** each failed part lists its reason from the error text. **D6** the same file (name, size, SHA-256 on the device) in two slots shows a warning; Analyse stays available. **D7** section links, "Open the item" and "Correct this value" are at least 24 px tall at 640 px and below (checked in the browser at 375 px). **D8** the sample picker shows plain names; the model name is in Details. **D9** the unit finding is titled "Unit unclear for <code> in <document>". **D3** (live still at 2541b39) is the redeploy, done as the next step.
 
@@ -279,11 +284,11 @@ Warm jack-o'-lantern candlelight on a near-black page (`#0a0a0d`), beside the ec
 
 ## Spec status (generated)
 <!-- spec-status:start -->
-Specs in the repository: 4. Tasks ticked: 69 of 88.
+Specs in the repository: 4. Tasks ticked: 70 of 88.
 
 - `haunted-ui`: 11 of 11 ticked
 - `packcheck-real-documents`: 4 of 6 ticked; open: PC-T4, PC-T5
-- `scopecheck-real-documents`: 13 of 17 ticked; open: SC-T6, SC-T7, SC-T8, SC-T9
+- `scopecheck-real-documents`: 14 of 17 ticked; open: SC-T6, SC-T8, SC-T9
 - `skeleton-key-foundation`: 41 of 54 ticked; open: 5, 5.5, 7, 7.3, 10, 11, 12, 14, 15, 17, 18, 19, 20
 <!-- spec-status:end -->
 

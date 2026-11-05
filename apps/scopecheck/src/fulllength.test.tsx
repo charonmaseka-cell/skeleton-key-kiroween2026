@@ -29,7 +29,7 @@ describe('the full-length recorded sample is the default', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.selectOptions(screen.getByLabelText('Choose a sample set'), 'scopecheck-standard');
-    expect(screen.getByRole('heading', { name: /Confirmed findings \(3\)/ })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Confirmed findings \(4\)/ })).toBeTruthy();
   });
 });
 

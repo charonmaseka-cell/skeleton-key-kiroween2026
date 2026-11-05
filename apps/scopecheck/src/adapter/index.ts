@@ -19,13 +19,16 @@ export const scopeCheckAdapter: DomainAdapter = {
   id: 'scopecheck',
   hints: SCOPECHECK_HINTS,
   labels: { fields: SCOPE_FIELD_LABELS, roles: SCOPE_ROLE_LABELS, reasons: SCOPE_REASONS, theme: SCOPE_THEME, voice: { whisper: (m) => `A candle still burns: ${m}. Go there.`, stages: { reading: 'Opening the grimoire', extracting: 'Summoning spirits', matching: 'Binding the pairs', checking: 'Weighing the omens' } } },
-  evaluate({ facts, originalFacts, documents, blocks, roles, titles }: EvaluateInput) {
+  evaluate({ facts, originalFacts, documents, blocks, roles, titles, profiles }: EvaluateInput) {
     const rfqDocId = Object.keys(roles).find((d) => roles[d] === 'rfq');
     if (!rfqDocId) return { findings: [], comparisons: [] };
     const quoteDocIds = Object.keys(roles).filter((d) => roles[d] === 'quote');
     // Identity is resolved on the facts exactly as validated from the documents (corrections are handled by the matcher's provenance rule).
     const identity = resolveItemIdentities(originalFacts as Fact[], blocks);
-    const data: ScopeData = { rfqDocId, quoteDocIds, identities: identity.identities, titles, roles };
+    // Documents whose extraction profile asks for a line total (quote v2 and later). For such a quote line that has a quantity and a unit
+    // price but no line total in the extraction, the price-arithmetic check is reported Not evaluated (never silently, never "agrees").
+    const pricedDocIds = quoteDocIds.filter((d) => (profiles?.[d] ?? '').startsWith('scopecheck.quote.') && (profiles?.[d] ?? '') !== 'scopecheck.quote.v1');
+    const data: ScopeData = { rfqDocId, quoteDocIds, pricedDocIds, identities: identity.identities, titles, roles };
     const matches = scopeMatches(facts as Map<string, EffectiveFact>, data);
     const ctx = { facts, documents, matches, data };
     return { findings: runRules([scopeRule], ctx), comparisons: evaluateScope(ctx).comparisons, context: { data, matches, identity } satisfies ScopeContext };

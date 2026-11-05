@@ -22,7 +22,7 @@ const plainBuild = () => {
 afterAll(() => {
   rmSync(ENV_FILE, { force: true });
   buildApps(['scopecheck']); // leave a public build behind
-});
+}, 60_000); // the rebuild takes about 10 s on a busy machine: the default 10 s hook limit made the whole file fail intermittently
 
 describe('public build with an analysis URL in an env file', () => {
   it('the env file is not tracked by git (it is a local override)', () => {

@@ -92,12 +92,12 @@
       "id": "quote-a",
       "file": "quote-a.pdf",
       "role": "response",
-      "schemaId": "scopecheck.quote.v1",
+      "schemaId": "scopecheck.quote.v2",
       "lines": [
         "Quotation QA-17 from Alder Pump Supplies (fictional sample)",
-        "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each",
-        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each",
-        "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each",
+        "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each | line total R 100 000",
+        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each | line total R 16 000",
+        "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each | line total R 9 500",
         "Excluded: delivery and installation are not included in this price."
       ],
       "facts": [
@@ -136,6 +136,16 @@
           }
         },
         {
+          "field": "line_total",
+          "kind": "money",
+          "line": 1,
+          "excerpt": "line total R 100 000",
+          "value": {
+            "amount": "100000",
+            "currency": "ZAR"
+          }
+        },
+        {
           "field": "item",
           "kind": "text",
           "line": 2,
@@ -166,6 +176,16 @@
           "excerpt": "R 3 200 each",
           "value": {
             "amount": "3200",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "line_total",
+          "kind": "money",
+          "line": 2,
+          "excerpt": "line total R 16 000",
+          "value": {
+            "amount": "16000",
             "currency": "ZAR"
           }
         },
@@ -204,6 +224,16 @@
           }
         },
         {
+          "field": "line_total",
+          "kind": "money",
+          "line": 3,
+          "excerpt": "line total R 9 500",
+          "value": {
+            "amount": "9500",
+            "currency": "ZAR"
+          }
+        },
+        {
           "field": "exclusion",
           "kind": "text",
           "line": 4,
@@ -216,11 +246,11 @@
       "id": "quote-b",
       "file": "quote-b.pdf",
       "role": "response",
-      "schemaId": "scopecheck.quote.v1",
+      "schemaId": "scopecheck.quote.v2",
       "lines": [
         "Quotation QB-04 from Birch Industrial Trading (fictional sample)",
-        "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each",
-        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each"
+        "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each | line total R 119 000",
+        "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each | line total R 15 500"
       ],
       "facts": [
         {
@@ -258,6 +288,16 @@
           }
         },
         {
+          "field": "line_total",
+          "kind": "money",
+          "line": 1,
+          "excerpt": "line total R 119 000",
+          "value": {
+            "amount": "119000",
+            "currency": "ZAR"
+          }
+        },
+        {
           "field": "item",
           "kind": "text",
           "line": 2,
@@ -288,6 +328,16 @@
           "excerpt": "R 3 100 each",
           "value": {
             "amount": "3100",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "line_total",
+          "kind": "money",
+          "line": 2,
+          "excerpt": "line total R 15 500",
+          "value": {
+            "amount": "15500",
             "currency": "ZAR"
           }
         }
@@ -323,6 +373,13 @@
       "severity": "critical",
       "state": "needs_review",
       "stateIfCoverageConfirmed": "confirmed"
+    },
+    {
+      "code": "price.arithmetic",
+      "subject": "quote-a:p1-l4:price",
+      "response": "quote-a",
+      "severity": "high",
+      "state": "confirmed"
     }
   ]
 }

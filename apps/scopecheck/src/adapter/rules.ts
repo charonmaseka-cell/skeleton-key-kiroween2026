@@ -104,6 +104,8 @@ export const sameSpec = (a: unknown, b: unknown): { same: boolean; removed: stri
 export type ScopeData = {
   rfqDocId: string;
   quoteDocIds: string[];
+  /** quotations whose extraction profile asks for a line total (quote v2+); a line with no recorded total is reported Not evaluated, not skipped */
+  pricedDocIds?: string[];
   /**
    * Item identities from the ScopeCheck identity step (recovered codes, description-only,
    * uncertain), keyed by fact ID. When absent, the original behaviour applies (key from the value).
@@ -364,9 +366,16 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
     }
     // Price arithmetic (R2.9, R6): where a quotation line states its own total, check quantity x unit price (less a stated discount) with
     // decimal arithmetic. A mismatch is reported only when the values justify the basis; anything doubtful stays Needs review and the
-    // check is listed as Not evaluated. A line without a stated total is not checked (nothing is inferred or invented).
+    // check is listed as Not evaluated. When the quotation's profile asks for a line total but the extraction returned none for a priced
+    // line (it has a quantity and a unit price), the check is listed as Not evaluated for that line, never silently skipped and never
+    // "agrees". When the profile does not ask for a line total at all (quote v1), a line without one is simply not a price check.
+    const priced = (data.pricedDocIds ?? []).includes(q);
     for (const l of qLines) {
       const total = l.f.line_total;
+      if (!total && priced && !isMulti(l) && l.f.quantity && l.f.unit_price) {
+        comparisons.push({ id: `line_total:${q}:${l.blockId}`, check: 'quote_aspect', field: 'line_total', docs: [q], status: 'not_evaluated', reason: `No line total was in the extraction for this line of ${docName(q)}, so its total cannot be checked against quantity and unit price.`, blocked: { docId: q, field: 'line_total', reason: 'no_line_total_extracted' } });
+        continue;
+      }
       if (!total || isMulti(l)) continue;
       const subject = `${q}:${l.blockId}:price`;
       const cmpId = `line_total:${q}:${l.blockId}`;
@@ -393,7 +402,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
         continue;
       }
       const du = describeInputs(parts);
-      comparisons.push({ id: cmpId, check: 'quote_aspect', field: 'line_total', docs: [q], status: res.result === 'ok' ? 'agree' : 'flagged', detail: `${showValue(l.f.quantity.value)} × ${showValue(l.f.unit_price.value)}${discount ? ` less ${discount} %` : ''} = ${res.expected} ${res.currency}; stated ${res.stated} ${res.currency}` });
+      comparisons.push({ id: cmpId, check: 'quote_aspect', field: 'line_total', docs: [q], status: res.result === 'ok' ? 'agree' : 'flagged', userSupplied: parts.filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(l.f.quantity.value)} × ${showValue(l.f.unit_price.value)}${discount ? ` less ${discount} %` : ''} = ${res.expected} ${res.currency}; stated ${res.stated} ${res.currency}` });
       if (res.result === 'ok') continue;
       out.push(makeDraft({ contextId: 'rfq-vs-quote', responseDocId: q, code: 'price.arithmetic', severity: 'high', state: 'confirmed', subjectId: subject, message: `Line total does not match quantity × unit price in ${docName(q)}: expected ${res.expected} ${res.currency}, stated ${res.stated} ${res.currency}`, inputs: du.inputs, evidence: du.evidence }));
     }
@@ -424,12 +433,13 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
 
 export const scopeRule: Rule<ScopeData> = {
   id: 'bench.scope',
+  // 6 (2026-11-05): a priced quotation (profile asks for a line total) with no line total extracted for a line lists that price check Not evaluated.
   // 5 (2026-11-03): unit questions (missing unit, unit differs without a stated conversion) are unit.ambiguous, not a quantity difference;
   // a stated line total is checked against quantity x unit price (price.arithmetic, or price.unclear when the basis is not justified).
   // 4 (2026-11-02): a specification that carries the row's own item code is contaminated: Needs review, comparison Not evaluated.
   // 3 (2026-11-02): leading connectors are not a specification difference; unresolved requirement lines list their
   // comparisons as Not evaluated; each stated exclusion is its own finding (identified by its source line).
-  version: '5',
+  version: '6',
   run(ctx: RuleContext<ScopeData>) {
     return evaluateScope(ctx).drafts;
   },

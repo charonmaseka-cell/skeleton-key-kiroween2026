@@ -1,0 +1,172 @@
+{
+  "kind": "production-worker-recording",
+  "mode": "live",
+  "label": "scopecheck-quote-a-v2",
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "startedAt": "2026-11-05T22:17:49.324Z",
+  "provenance": {
+    "note": "One live run of the CURRENT samples/scopecheck/quote-a.pdf through the production public Worker under scopecheck.quote.v2 (adds line_total). concurrency 1, the Worker's single per-chunk repair allowance. claimsReturned is the Worker response, unedited.",
+    "worker": "https://skeleton-key-extraction.teddykgroup.workers.dev",
+    "pdfSha256": "c7bc2edd6b71b1dd9751db629161a7099feb5f5334399fa633e8fe2c50b09572",
+    "chunks": [
+      "ok",
+      "ok"
+    ],
+    "runSettledNeurons": 285.564
+  },
+  "samples": [
+    {
+      "sampleId": "scopecheck",
+      "docs": [
+        {
+          "docId": "quote-a",
+          "profile": {
+            "id": "scopecheck.quote.v2",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump",
+              "value": "CP-100 Centrifugal pump"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "qty 8 units",
+              "value": {
+                "value": "8",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l2",
+              "excerpt": "R 12 500 each",
+              "value": {
+                "amount": "12500",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "line_total",
+              "kind": "money",
+              "blockId": "p1-l2",
+              "excerpt": "line total R 100 000",
+              "value": {
+                "amount": "100000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "316 stainless steel casing",
+              "value": "316 stainless steel casing"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter",
+              "value": "MS-20 Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "qty 5 units",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "R 3 200 each",
+              "value": {
+                "amount": "3200",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "line_total",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "line total R 16 000",
+              "value": {
+                "amount": "16000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "IP55 enclosure",
+              "value": "IP55 enclosure"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "Item PG-6 Pressure gauge",
+              "value": "PG-6 Pressure gauge"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l4",
+              "excerpt": "qty 20 units",
+              "value": {
+                "value": "20",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l4",
+              "excerpt": "R 450 each",
+              "value": {
+                "amount": "450",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "line_total",
+              "kind": "money",
+              "blockId": "p1-l4",
+              "excerpt": "line total R 9 500",
+              "value": {
+                "amount": "9500",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l4",
+              "excerpt": "0-10 bar range",
+              "value": "0-10 bar range"
+            },
+            {
+              "field": "exclusion",
+              "kind": "text",
+              "blockId": "p1-l5",
+              "excerpt": "delivery and installation are not included in this price",
+              "value": "delivery and installation are not included in this price"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

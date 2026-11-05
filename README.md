@@ -35,7 +35,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 |---|---|---|
 | `haunted-ui` | 11 | 0 |
 | `packcheck-real-documents` | 4 | 2 |
-| `scopecheck-real-documents` | 13 | 4 |
+| `scopecheck-real-documents` | 14 | 3 |
 | `skeleton-key-foundation` | 41 | 13 |
 
 **haunted-ui** (delivered):
@@ -64,6 +64,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - SC-T2b: Output-aware chunking
 - SC-T4: Live baseline on SC-T1, done 2026-11-01
 - SC-T5: Foundation task 9 live wiring for ScopeCheck
+- SC-T7: Deploy ScopeCheck
 - SC-T10: Supplier-specific clarification email drafts
 - SC-T11: Requirement-line identity, multi-item blocks and evidence-empty items
 - SC-T4a: Correctness fixes from the saved baseline responses, done 2026-11-01
@@ -119,7 +120,6 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - `packcheck-real-documents` PC-T4: Attachment mapping UI with manual remap
 - `packcheck-real-documents` PC-T5: Live measurement on PC-T1 within an authorised attempt budget
 - `scopecheck-real-documents` SC-T6: Foundation task 5.5 limits and deployment validation
-- `scopecheck-real-documents` SC-T7: Deploy ScopeCheck
 - `scopecheck-real-documents` SC-T8: 2 to 5 quotations
 - `scopecheck-real-documents` SC-T9: DOCX input
 - `skeleton-key-foundation` 5: Live-extraction benchmark

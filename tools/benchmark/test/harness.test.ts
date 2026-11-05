@@ -186,8 +186,8 @@ describe('ScopeCheck item identity in the harness', () => {
     const sc = r.samples[0]!;
     // before: the original matching misses expected findings (and may emit false critical ones)
     expect(sc.findingsBefore!.score.missed.length + sc.findingsBefore!.score.falseCritical.length).toBeGreaterThan(0);
-    // after: strict identities match exactly, nothing confirmed beyond the labels
-    expect(sc.findings.score).toMatchObject({ expected: 4, matchedExactState: 4, missed: [], falseCritical: [], overConfident: [] });
+    // after: strict identities match exactly, nothing confirmed beyond the labels (the planted line-total error is now a 5th label)
+    expect(sc.findings.score).toMatchObject({ expected: 5, matchedExactState: 5, missed: [], falseCritical: [], overConfident: [] });
     expect(sc.findings.score.unexpectedOther).toEqual([]);
     expect(sc.identity!.counts.recovered).toBeGreaterThan(0);
     expect(sc.identity!.uncertain).toEqual([]);

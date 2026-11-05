@@ -73,7 +73,10 @@ describe('uploaded PDFs, in chunks, through a fake Worker, to findings', () => {
     expect(s.get('spec.differs|CP-100:specification|quote-2')).toBe('confirmed');
     expect([...s.keys()].filter((k) => k.startsWith('exclusion.stated|quote-1:') && k.endsWith(':exclusion|quote-1'))).toHaveLength(1);
     expect(s.get('item.absent|PG-6|quote-2')).toBe('needs_review');
-    expect([...s.values()].filter((x) => x === 'confirmed')).toHaveLength(3);
+    // the planted line-total error in the first quotation is the fourth confirmed finding; the second quotation has none
+    expect(s.get('price.arithmetic|quote-1:p1-l4:price|quote-1')).toBe('confirmed');
+    expect([...s.keys()].filter((k) => k.startsWith('price.arithmetic|'))).toHaveLength(1);
+    expect([...s.values()].filter((x) => x === 'confirmed')).toHaveLength(4);
     for (const d of v.documents.values()) expect(d.coverage.state).toBe('unverified');
   });
 

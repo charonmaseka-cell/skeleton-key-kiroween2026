@@ -1,0 +1,120 @@
+{
+  "kind": "production-worker-recording",
+  "mode": "live",
+  "label": "scopecheck-quote-b-v2",
+  "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "startedAt": "2026-11-05T22:17:49.325Z",
+  "provenance": {
+    "note": "One live run of the CURRENT samples/scopecheck/quote-b.pdf through the production public Worker under scopecheck.quote.v2 (adds line_total). concurrency 1, the Worker's single per-chunk repair allowance. claimsReturned is the Worker response, unedited.",
+    "worker": "https://skeleton-key-extraction.teddykgroup.workers.dev",
+    "pdfSha256": "323bfd407f3b42d597735a58317a4036e5603be1fe6d48abbd1ee547f98663c8",
+    "chunks": [
+      "ok"
+    ],
+    "runSettledNeurons": 285.564
+  },
+  "samples": [
+    {
+      "sampleId": "scopecheck",
+      "docs": [
+        {
+          "docId": "quote-b",
+          "profile": {
+            "id": "scopecheck.quote.v2",
+            "source": "recorded"
+          },
+          "claimsReturned": [
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "Item CP-100 Centrifugal pump",
+              "value": "Centrifugal pump"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l2",
+              "excerpt": "qty 10 units",
+              "value": {
+                "value": "10",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l2",
+              "excerpt": "R 11 900 each",
+              "value": {
+                "amount": "11900",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "line_total",
+              "kind": "money",
+              "blockId": "p1-l2",
+              "excerpt": "line total R 119 000",
+              "value": {
+                "amount": "119000",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l2",
+              "excerpt": "cast iron casing",
+              "value": "cast iron casing"
+            },
+            {
+              "field": "item",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "Item MS-20 Motor starter",
+              "value": "Motor starter"
+            },
+            {
+              "field": "quantity",
+              "kind": "quantity",
+              "blockId": "p1-l3",
+              "excerpt": "qty 5 units",
+              "value": {
+                "value": "5",
+                "unit": "units"
+              }
+            },
+            {
+              "field": "unit_price",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "R 3 100 each",
+              "value": {
+                "amount": "3100",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "line_total",
+              "kind": "money",
+              "blockId": "p1-l3",
+              "excerpt": "line total R 15 500",
+              "value": {
+                "amount": "15500",
+                "currency": "ZAR"
+              }
+            },
+            {
+              "field": "specification",
+              "kind": "text",
+              "blockId": "p1-l3",
+              "excerpt": "IP55 enclosure",
+              "value": "IP55 enclosure"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

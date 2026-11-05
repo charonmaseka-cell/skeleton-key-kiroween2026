@@ -166,6 +166,12 @@ export function TotalsTable({ view }: { view: SessionView }) {
   );
 }
 
+/**
+ * True for a recorded sample whose quotations were extracted with the first quotation profile (v1), which has no line-total field:
+ * the price-arithmetic check had nothing to run on. No row is added and the recording is not relabelled; one plain line says so.
+ */
+export const priceArithmeticDidNotRun = (view: SessionView): boolean => view.fixture.sample && view.fixture.docs.some((d) => d.role === 'quote' && d.profile === 'scopecheck.quote.v1');
+
 export function ComparisonMatrix({ view }: { view: SessionView }) {
   const ghosts = useGhosts();
   const haunt = useHaunt();
@@ -176,6 +182,11 @@ export function ComparisonMatrix({ view }: { view: SessionView }) {
         Comparison: RFQ items against each quotation
       </h3>
       <p className="text-sm text-sk-muted">Computed now from the validated values by the ScopeCheck rules. Items are matched by item code, recovered from the source text when the extraction left it out.</p>
+      {priceArithmeticDidNotRun(view) && (
+        <p data-price-note="" className="text-sm">
+          Price arithmetic didn't run on this sample: it was recorded before line totals were extracted.
+        </p>
+      )}
       <ScrollTable label="Comparison: RFQ items against each quotation">
         <table className="w-full border-collapse text-left">
           <caption className="sr-only">Each requested item compared with each quotation: quantity and specification, with the status of every comparison</caption>

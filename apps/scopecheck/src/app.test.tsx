@@ -12,7 +12,7 @@ describe('ScopeCheck interface', () => {
     render(<App fixtures={STANDARD_FIRST} />);
     expect(screen.getByRole('region', { name: 'Sample mode' }).textContent).toMatch(/SAMPLE MODE: fictional documents/);
     expect(screen.getByRole('heading', { name: /Comparison: RFQ items against each quotation/ })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: /Confirmed findings \(3\)/ })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Confirmed findings \(4\)/ })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /Needs review \(1\)/ })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /Not evaluated \(2\)/ })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Export' })).toBeTruthy();
@@ -45,7 +45,7 @@ describe('ScopeCheck interface', () => {
   it('a correction can be made with the keyboard; the original is shown and the comparison updates', async () => {
     const user = userEvent.setup();
     render(<App fixtures={STANDARD_FIRST} />);
-    const before = screen.getByRole('heading', { name: /Confirmed findings \(3\)/ });
+    const before = screen.getByRole('heading', { name: /Confirmed findings \(4\)/ });
     expect(before).toBeTruthy();
     const card = screen.getByRole('heading', { name: /Quantity differs for CP-100 in Quotation QA-17, Alder Pump Supplies/ }).closest('article')! as HTMLElement;
     // buttons are named with the field and document, so the right value can be picked without a pointer
@@ -57,7 +57,11 @@ describe('ScopeCheck interface', () => {
     await user.type(within(form).getByLabelText('Unit (optional)'), 'units');
     await user.keyboard('{Enter}');
     expect(screen.getByRole('status').textContent).toMatch(/Correction saved. The original value is kept/);
-    expect(screen.getByRole('heading', { name: /Confirmed findings \(2\)/ })).toBeTruthy();
+    // The quantity difference is gone. The stated total of that line (R 100 000) is no longer 10 x R 12 500, so the price check now
+    // raises its own finding on the corrected value: the count is unchanged, and the new finding says which value it depends on.
+    expect(screen.queryByRole('heading', { name: /Quantity differs for CP-100 in Quotation QA-17/ })).toBeNull();
+    expect(screen.getByRole('heading', { name: /Line total does not match quantity × unit price in Quotation QA-17.*expected 125000\.00 ZAR, stated 100000\.00 ZAR/ })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Confirmed findings \(4\)/ })).toBeTruthy();
   });
 
   it('switching to the free-text sample shows the known miss as Not evaluated and the uncertain line in Needs review', async () => {

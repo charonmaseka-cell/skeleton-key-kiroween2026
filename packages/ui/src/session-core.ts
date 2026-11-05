@@ -79,6 +79,8 @@ export type EvaluateInput = {
   roles: Record<string, string>;
   /** document titles by ID, so rules can name documents in plain words (never by their internal ID) */
   titles?: Record<string, string>;
+  /** the extraction profile (schema) ID each document was processed with, so a rule can tell which fields were asked for */
+  profiles?: Record<string, string>;
 };
 
 /**
@@ -202,6 +204,7 @@ export function evaluateSession(adapter: DomainAdapter, fixture: Fixture, state:
     blocks: fixture.docs.flatMap((d) => d.blocks),
     roles: Object.fromEntries(fixture.docs.map((d) => [d.id, d.role])),
     titles: L.titles,
+    profiles: Object.fromEntries(fixture.docs.map((d) => [d.id, d.profile])),
   });
   const { items, store } = reconcileReview(evaluation.findings, state.store, at);
   const coverage = fixture.docs.map((d) => {

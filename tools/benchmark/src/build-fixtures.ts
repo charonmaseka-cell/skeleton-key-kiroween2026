@@ -33,8 +33,8 @@ export function recordedLine(files: string[]): string {
 
 const SCOPE_STANDARD: Spec[] = [
   { sample: 'scopecheck', doc: 'rfq', role: 'rfq', title: 'RFQ-0001 Request for Quotation', file: find('live-repeat-rfq-2026') },
-  { sample: 'scopecheck', doc: 'quote-a', role: 'quote', title: 'Quotation QA-17, Alder Pump Supplies', file: find('live-repeat-quote-a-2026') },
-  { sample: 'scopecheck', doc: 'quote-b', role: 'quote', title: 'Quotation QB-04, Birch Industrial Trading', file: find('live-quote-b-2026') },
+  { sample: 'scopecheck', doc: 'quote-a', role: 'quote', title: 'Quotation QA-17, Alder Pump Supplies', file: find('live-scopecheck-quote-a-v2-2026') },
+  { sample: 'scopecheck', doc: 'quote-b', role: 'quote', title: 'Quotation QB-04, Birch Industrial Trading', file: find('live-scopecheck-quote-b-v2-2026') },
 ];
 const FRESH_RUN = find('live-sc-t12-fresh-resume2-2026');
 const SCOPE_FULL: Spec[] = [
@@ -66,7 +66,7 @@ const FIXTURES: FixtureSpec[] = [
     ],
     docs: SCOPE_FULL,
   },
-  { id: 'scopecheck-standard', out: 'scopecheck-standard.json', title: 'RFQ and two quotations', what: 'A fictional RFQ and two quotations.', details: ['It holds a quantity difference, a specification difference, an exclusion and an item missing from a quotation.'], docs: SCOPE_STANDARD },
+  { id: 'scopecheck-standard', out: 'scopecheck-standard.json', title: 'RFQ and two quotations', what: 'A fictional RFQ and two quotations.', details: ['It holds a quantity difference, a specification difference, an exclusion and an item missing from a quotation.', 'Both quotations state a total for each line. One is a planted arithmetic error: in QA-17, 20 units at R 450 come to R 9 000, but the quotation states R 9 500. The two quotations were re-recorded on 5 November 2026, asking for the total of each line as well; the tender was recorded on 1 November 2026.'], docs: SCOPE_STANDARD },
   { id: 'scopecheck-layout', out: 'scopecheck-layout.json', title: 'RFQ and a free-text quotation', what: 'A fictional RFQ and one quotation written as free text.', details: ['It holds a line whose item is genuinely uncertain and a specification the extraction missed.'], docs: SCOPE_LAYOUT },
   { id: 'packcheck-pack', out: 'packcheck-pack.json', title: 'Grant application pack', what: 'A fictional four-document grant application pack.', details: ['It holds a missing attachment, an organisation-name inconsistency, an ambiguous date, and a funding request that is correctly below the budget.', 'The budget document was re-extracted on 3 November 2026 through a gated staging Worker (one request); the other three were recorded on 1 November 2026.'], docs: PACK },
 ];

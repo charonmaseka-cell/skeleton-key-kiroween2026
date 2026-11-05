@@ -1,16 +1,17 @@
 {
   "id": "scopecheck-standard",
   "title": "RFQ and two quotations",
-  "description": "A fictional RFQ and two quotations. Recorded from real AI runs on 1 November 2026, replayed unchanged.",
+  "description": "A fictional RFQ and two quotations. Recorded from real AI runs on 1 and 5 November 2026, replayed unchanged.",
   "sample": true,
   "label": "Sample (fictional)",
   "extraction": {
     "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "note": "Recorded from real AI runs on 1 November 2026, replayed unchanged.",
+    "note": "Recorded from real AI runs on 1 and 5 November 2026, replayed unchanged.",
     "details": [
       "Model: @cf/meta/llama-3.3-70b-instruct-fp8-fast.",
       "It holds a quantity difference, a specification difference, an exclusion and an item missing from a quotation.",
-      "Recorded in: samples/benchmark-results/live-repeat-rfq-2026-11-01T02-22-13-472Z.json; samples/benchmark-results/live-repeat-quote-a-2026-11-01T02-05-56-250Z.json; samples/benchmark-results/live-quote-b-2026-11-01T02-06-09-432Z.json.",
+      "Both quotations state a total for each line. One is a planted arithmetic error: in QA-17, 20 units at R 450 come to R 9 000, but the quotation states R 9 500. The two quotations were re-recorded on 5 November 2026, asking for the total of each line as well; the tender was recorded on 1 November 2026.",
+      "Recorded in: samples/benchmark-results/live-repeat-rfq-2026-11-01T02-22-13-472Z.json; samples/benchmark-results/live-scopecheck-quote-a-v2-2026-11-05T22-17-04-903Z.json; samples/benchmark-results/live-scopecheck-quote-b-v2-2026-11-05T22-17-04-903Z.json.",
       "All names, items and prices are invented. Validation, matching, rules, review and export run in your browser on this input. No document is uploaded and no model is called."
     ]
   },
@@ -154,8 +155,8 @@
       "id": "quote-a",
       "role": "quote",
       "title": "Quotation QA-17, Alder Pump Supplies",
-      "profile": "scopecheck.quote.v1",
-      "recordedIn": "samples/benchmark-results/live-repeat-quote-a-2026-11-01T02-05-56-250Z.json",
+      "profile": "scopecheck.quote.v2",
+      "recordedIn": "samples/benchmark-results/live-scopecheck-quote-a-v2-2026-11-05T22-17-04-903Z.json",
       "blocks": [
         {
           "id": "p1-l1",
@@ -174,12 +175,12 @@
           "id": "p1-l2",
           "docId": "quote-a",
           "kind": "pdf-run",
-          "text": "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each",
+          "text": "Item CP-100 Centrifugal pump | qty 8 units | 316 stainless steel casing | R 12 500 each | line total R 100 000",
           "page": 1,
           "bbox": [
             50,
             758,
-            384.09,
+            478.40999999999985,
             10
           ]
         },
@@ -187,12 +188,12 @@
           "id": "p1-l3",
           "docId": "quote-a",
           "kind": "pdf-run",
-          "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each",
+          "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 200 each | line total R 16 000",
           "page": 1,
           "bbox": [
             50,
             736,
-            307.37999999999994,
+            396.1399999999999,
             10
           ]
         },
@@ -200,12 +201,12 @@
           "id": "p1-l4",
           "docId": "quote-a",
           "kind": "pdf-run",
-          "text": "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each",
+          "text": "Item PG-6 Pressure gauge | qty 20 units | 0-10 bar range | R 450 each | line total R 9 500",
           "page": 1,
           "bbox": [
             50,
             714,
-            311.28999999999996,
+            394.4899999999999,
             10
           ]
         },
@@ -252,6 +253,16 @@
           }
         },
         {
+          "field": "line_total",
+          "kind": "money",
+          "blockId": "p1-l2",
+          "excerpt": "line total R 100 000",
+          "value": {
+            "amount": "100000",
+            "currency": "ZAR"
+          }
+        },
+        {
           "field": "specification",
           "kind": "text",
           "blockId": "p1-l2",
@@ -282,6 +293,16 @@
           "excerpt": "R 3 200 each",
           "value": {
             "amount": "3200",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "line_total",
+          "kind": "money",
+          "blockId": "p1-l3",
+          "excerpt": "line total R 16 000",
+          "value": {
+            "amount": "16000",
             "currency": "ZAR"
           }
         },
@@ -320,6 +341,16 @@
           }
         },
         {
+          "field": "line_total",
+          "kind": "money",
+          "blockId": "p1-l4",
+          "excerpt": "line total R 9 500",
+          "value": {
+            "amount": "9500",
+            "currency": "ZAR"
+          }
+        },
+        {
           "field": "specification",
           "kind": "text",
           "blockId": "p1-l4",
@@ -339,8 +370,8 @@
       "id": "quote-b",
       "role": "quote",
       "title": "Quotation QB-04, Birch Industrial Trading",
-      "profile": "scopecheck.quote.v1",
-      "recordedIn": "samples/benchmark-results/live-quote-b-2026-11-01T02-06-09-432Z.json",
+      "profile": "scopecheck.quote.v2",
+      "recordedIn": "samples/benchmark-results/live-scopecheck-quote-b-v2-2026-11-05T22-17-04-903Z.json",
       "blocks": [
         {
           "id": "p1-l1",
@@ -359,12 +390,12 @@
           "id": "p1-l2",
           "docId": "quote-b",
           "kind": "pdf-run",
-          "text": "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each",
+          "text": "Item CP-100 Centrifugal pump | qty 10 units | cast iron casing | R 11 900 each | line total R 119 000",
           "page": 1,
           "bbox": [
             50,
             758,
-            345.17999999999995,
+            439.4999999999999,
             10
           ]
         },
@@ -372,12 +403,12 @@
           "id": "p1-l3",
           "docId": "quote-b",
           "kind": "pdf-run",
-          "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each",
+          "text": "Item MS-20 Motor starter | qty 5 units | IP55 enclosure | R 3 100 each | line total R 15 500",
           "page": 1,
           "bbox": [
             50,
             736,
-            307.37999999999994,
+            396.1399999999999,
             10
           ]
         }
@@ -407,6 +438,16 @@
           "excerpt": "R 11 900 each",
           "value": {
             "amount": "11900",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "line_total",
+          "kind": "money",
+          "blockId": "p1-l2",
+          "excerpt": "line total R 119 000",
+          "value": {
+            "amount": "119000",
             "currency": "ZAR"
           }
         },
@@ -441,6 +482,16 @@
           "excerpt": "R 3 100 each",
           "value": {
             "amount": "3100",
+            "currency": "ZAR"
+          }
+        },
+        {
+          "field": "line_total",
+          "kind": "money",
+          "blockId": "p1-l3",
+          "excerpt": "line total R 15 500",
+          "value": {
+            "amount": "15500",
             "currency": "ZAR"
           }
         },

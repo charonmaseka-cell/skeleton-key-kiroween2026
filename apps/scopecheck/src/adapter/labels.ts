@@ -23,6 +23,7 @@ export const SCOPE_REASONS: Record<string, string> = {
   currency_unknown: 'The currency of the unit price or the total is not known.',
   currency_differs: 'The unit price and the total are in different currencies; nothing is converted.',
   unit_unknown: 'The unit of the quantity is not known, so no exact price check is made.',
+  no_line_total_extracted: 'No line total was in the extraction for this line, so its total cannot be checked against quantity and unit price.',
 };
 
 export const scopeField = (field: string): string => SCOPE_FIELD_LABELS[field] ?? field.replace(/_/g, ' ');

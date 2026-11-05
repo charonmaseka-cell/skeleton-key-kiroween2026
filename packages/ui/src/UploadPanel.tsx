@@ -166,7 +166,7 @@ export function UploadPanel({
     st = setStage(st, 'matching', 'done');
     setStages(setStage(st, 'checking', 'active'));
     await tick();
-    onResult(buildLiveFixture(next.map((r) => ({ id: r.slot.id, role: r.slot.role, title: (parsed[r.slot.id] as Parsed).file.name, profile: r.slot.schemaId, result: r.result })), `live-upload-${analyses.current}`));
+    onResult(buildLiveFixture(next.map((r) => ({ id: r.slot.id, role: r.slot.role, fileName: (parsed[r.slot.id] as Parsed).file.name, profile: r.slot.schemaId, result: r.result })), `live-upload-${analyses.current}`));
     await tick();
     setStages(setStage(st, 'checking', 'done'));
     setBusy(false);

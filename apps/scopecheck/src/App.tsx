@@ -17,8 +17,8 @@ const NAV = [
 /** Document slots for the upload path: one RFQ and up to two quotations (2 to 5 quotations is a later task). */
 export const SCOPECHECK_SLOTS: UploadSlot[] = [
   { id: 'rfq', role: 'rfq', label: 'RFQ', schemaId: 'scopecheck.rfq.v1', required: true },
-  { id: 'quote-1', role: 'quote', label: 'Quotation 1', schemaId: 'scopecheck.quote.v1', required: true },
-  { id: 'quote-2', role: 'quote', label: 'Quotation 2', schemaId: 'scopecheck.quote.v1', required: false },
+  { id: 'quote-1', role: 'quote', label: 'Quotation 1', schemaId: 'scopecheck.quote.v2', required: true },
+  { id: 'quote-2', role: 'quote', label: 'Quotation 2', schemaId: 'scopecheck.quote.v2', required: false },
 ];
 
 /** Base URL of the extraction Worker, set at build time. Unset means: no analysis service is connected. */

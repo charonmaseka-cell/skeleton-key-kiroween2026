@@ -136,9 +136,13 @@ describe('Analyse', () => {
     await user.click(analyseBtn());
     await waitFor(() => expect(screen.getByRole('region', { name: 'Live mode' })).toBeTruthy());
     const pre = document.querySelector('pre')!.textContent!;
-    // documents are named by the file the user chose, never by the slot ID
-    expect(pre).toMatch(/\[NEEDS REVIEW\] PG-6 not found in quote-b\.pdf/);
+    // Documents are named by the extracted document title when there is one (quote-b opens with its own heading), never by the slot ID.
+    expect(pre).toMatch(/\[NEEDS REVIEW\] PG-6 not found in Quotation QB-04 from Birch Industrial Trading \(fictional sample\)/);
     expect(pre).not.toMatch(/quote-2/);
+    // The file name the user chose stays visible as secondary text in the documents panel, so they can match the entry to their upload.
+    const docsPanel = document.querySelector('#docs-h')!.closest('section')!;
+    expect(docsPanel.textContent).toMatch(/File: quote-b\.pdf/);
+    expect(docsPanel.textContent).toMatch(/Quotation QB-04 from Birch Industrial Trading \(fictional sample\)/);
   });
 
   it('a daily-allowance error is a recoverable alert; nothing is invented; sample mode still works', async () => {

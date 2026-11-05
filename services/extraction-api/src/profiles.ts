@@ -48,6 +48,22 @@ export const PROFILES: Record<string, Profile> = {
       f('exclusion', 'text', 'something the supplier states is excluded or not included'),
     ],
   },
+  // v2 (5 Nov 2026): adds line_total for the price-arithmetic rule (foundation R2.9, R6). Only this field is new; v1 above is frozen
+  // so earlier recordings stay reproducible. Discount and tax are deliberately NOT added (percentage discounts are not validated yet).
+  'scopecheck.quote.v2': {
+    id: 'scopecheck.quote.v2',
+    model: MODEL,
+    maxOutputTokens: 1500,
+    purpose: 'a supplier quotation',
+    fields: [
+      f('item', 'text', 'description of an offered item'),
+      f('quantity', 'quantity', 'offered quantity, with its unit only if written next to the number'),
+      f('unit_price', 'money', 'price of one unit, with its currency'),
+      f('line_total', 'money', 'the stated total price for this whole line (its own figure, not one you calculate), with its currency, only when the line states such a total'),
+      f('specification', 'text', 'a stated technical specification for an offered item'),
+      f('exclusion', 'text', 'something the supplier states is excluded or not included'),
+    ],
+  },
   'packcheck.grant.v1': {
     id: 'packcheck.grant.v1',
     model: MODEL,

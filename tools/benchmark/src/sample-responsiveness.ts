@@ -48,7 +48,7 @@ if (baselineFile) {
   for (const id of ['rfq', 'quote-a', 'quote-b']) {
     const blocks = await parsePdf(new Uint8Array(readFileSync(new URL(`../../../samples/scopecheck-realistic/${id}.pdf`, import.meta.url))), id);
     const claims = saved.samples[0]!.docs.find((d) => d.docId === id)!.claimsReturned;
-    docs.push({ id, role: id === 'rfq' ? 'rfq' : 'quote', title: id, profile: id === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result: { docId: id, blocks, claims, chunks: [{ index: 0, blockIds: blocks.map((b) => b.id), status: 'ok' as const, claims: claims.length }] } });
+    docs.push({ id, role: id === 'rfq' ? 'rfq' : 'quote', fileName: `${id}.pdf`, profile: id === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result: { docId: id, blocks, claims, chunks: [{ index: 0, blockIds: blocks.map((b) => b.id), status: 'ok' as const, claims: claims.length }] } });
   }
   rows.push(measure('ScopeCheck full-length (saved responses, same code path)', scopeCheckAdapter, buildLiveFixture(docs)));
 }

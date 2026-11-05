@@ -17,7 +17,7 @@ async function fixtureFor(docIds: string[], mutate: (docId: string, claims: { fi
     const blocks = await parsePdf(new Uint8Array(readFileSync(new URL(`../../../samples/scopecheck-realistic/${id}.pdf`, import.meta.url))), id);
     const claims = mutate(id, baseline.samples[0]!.docs.find((d) => d.docId === id)!.claimsReturned as { field?: string; blockId?: string }[]);
     const result: DocumentResult = { docId: id, blocks, claims, chunks: [{ index: 0, blockIds: blocks.map((b) => b.id), status: 'ok', claims: claims.length }] };
-    docs.push({ id, role: id === 'rfq' ? 'rfq' : 'quote', title: `${id}.pdf`, profile: id === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result });
+    docs.push({ id, role: id === 'rfq' ? 'rfq' : 'quote', fileName: `${id}.pdf`, profile: id === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result });
   }
   return buildLiveFixture(docs);
 }

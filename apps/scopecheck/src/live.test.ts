@@ -45,7 +45,7 @@ async function analyse(w: ReturnType<typeof fakeWorker>, limits = { maxChars: 18
   const used = SCOPECHECK_SLOTS.filter((s) => blocks[s.id]);
   const all = await analyseAll(cfg, session, used.map((slot) => ({ docId: slot.id, schemaId: slot.schemaId, blocks: blocks[slot.id]! })));
   const results: Record<string, DocumentResult> = Object.fromEntries(all.results.map((r) => [r.docId, r]));
-  const fixture = buildLiveFixture(SCOPECHECK_SLOTS.filter((s) => results[s.id]).map((s) => ({ id: s.id, role: s.role, title: PDFS[s.id]!, profile: s.schemaId, result: results[s.id]! })), 'live-upload-1');
+  const fixture = buildLiveFixture(SCOPECHECK_SLOTS.filter((s) => results[s.id]).map((s) => ({ id: s.id, role: s.role, fileName: PDFS[s.id]!, profile: s.schemaId, result: results[s.id]! })), 'live-upload-1');
   return { fixture, results };
 }
 const run = (f: Fixture, s = emptySession(), at = 1) => evaluateSession(scopeCheckAdapter, f, s, at);

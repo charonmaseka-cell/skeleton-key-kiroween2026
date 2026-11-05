@@ -34,7 +34,7 @@ async function analyse(w: ReturnType<typeof fakeWorker>, limits?: { maxChars: nu
   const cfg: ClientConfig = { baseUrl: 'https://worker.example', fetchImpl: w.fetchImpl, limits };
   const docs = pack.docs.map((d) => ({ docId: d.id, schemaId: PACKCHECK_SLOTS.find((s) => s.id === d.id)!.schemaId, blocks: d.blocks }));
   const { results } = await analyseAll(cfg, newClientSession(), docs);
-  const fixture = buildLiveFixture(results.map((r, i) => ({ id: r.docId, role: PACKCHECK_SLOTS.find((s) => s.id === r.docId)!.role, title: `${r.docId}.pdf`, profile: docs[i]!.schemaId, result: r })));
+  const fixture = buildLiveFixture(results.map((r, i) => ({ id: r.docId, role: PACKCHECK_SLOTS.find((s) => s.id === r.docId)!.role, fileName: `${r.docId}.pdf`, profile: docs[i]!.schemaId, result: r })));
   return { fixture, results };
 }
 

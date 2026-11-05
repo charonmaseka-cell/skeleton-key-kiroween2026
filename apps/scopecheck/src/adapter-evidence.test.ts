@@ -17,7 +17,7 @@ function run(docs: { id: string; role: 'rfq' | 'quote'; lines: string[]; claims:
     const claims = d.claims(blocks).map((c) => ({ kind: KIND[c.field] ?? 'text', ...c })); // the Worker attaches the field kind
     for (const c of claims) if (!blocks.find((b) => b.id === c.blockId)!.text.includes(c.excerpt)) throw new Error(`test claim excerpt not in its block: ${c.excerpt}`);
     const result: DocumentResult = { docId: d.id, blocks, claims, chunks: [{ index: 0, blockIds: blocks.map((b) => b.id), status: 'ok', claims: claims.length }] };
-    return { id: d.id, role: d.role, title: d.id, profile: d.role === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result };
+    return { id: d.id, role: d.role, fileName: `${d.id}.pdf`, profile: d.role === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result };
   }));
   return evaluateSession(scopeCheckAdapter, fixture, emptySession(), 1);
 }

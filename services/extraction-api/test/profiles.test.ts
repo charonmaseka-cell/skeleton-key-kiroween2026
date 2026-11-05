@@ -39,7 +39,7 @@ describe('profile versions', () => {
   });
 
   it('the other profiles are untouched by the new version', () => {
-    expect(Object.keys(PROFILES).sort()).toEqual(['packcheck.grant.v1', 'packcheck.grant.v2', 'scopecheck.quote.v1', 'scopecheck.rfq.v1']);
+    expect(Object.keys(PROFILES).sort()).toEqual(['packcheck.grant.v1', 'packcheck.grant.v2', 'scopecheck.quote.v1', 'scopecheck.quote.v2', 'scopecheck.rfq.v1']);
   });
 });
 

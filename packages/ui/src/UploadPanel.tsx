@@ -36,8 +36,35 @@ function parseError(e: unknown): string {
   return 'This file could not be read.';
 }
 
-type Parsed = { file: File; blocks: Block[] } | { file: File; error: string };
+type Parsed = ({ file: File; blocks: Block[] } | { file: File; error: string }) & { /** SHA-256 of the file's bytes (hex), or '' when it could not be computed */ hash?: string };
+
+/** SHA-256 of the file, on this device. Used only to notice the same file chosen twice; never sent anywhere. */
+async function fileHash(file: File): Promise<string> {
+  try {
+    const d = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+    return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return '';
+  }
+}
+
+/** Slots holding the very same file (same name, size and content), as groups of slot ids. Two slots are never merged or blocked. */
+export function duplicateSlots(parsed: Record<string, Parsed | undefined>): string[][] {
+  const groups = new Map<string, string[]>();
+  for (const [id, p] of Object.entries(parsed)) {
+    if (!p?.hash) continue;
+    const k = `${p.file.name}|${p.file.size}|${p.hash}`;
+    groups.set(k, [...(groups.get(k) ?? []), id]);
+  }
+  return [...groups.values()].filter((g) => g.length > 1);
+}
 type Run = { slot: UploadSlot; result: DocumentResult };
+
+/** Why one part was not processed, in the same plain words the rest of the page uses (ERROR_TEXT); a part never sent says so. */
+export function failureReason(c: { status: string; error?: ErrorKind }): string {
+  if (c.error) return ERROR_TEXT[c.error].text;
+  return c.status === 'not_sent' ? 'It was not sent, because the analysis stopped before it.' : 'It failed for a reason the service did not give.';
+}
 
 export function UploadPanel({
   slots,
@@ -94,8 +121,8 @@ export function UploadPanel({
     if (file.size > MAX_FILE_BYTES) return setParsed((p) => ({ ...p, [slot.id]: { file, error: `This file is larger than ${MAX_FILE_BYTES / 1024 / 1024} MB, which is more than this version reads.` } }));
     if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') return setParsed((p) => ({ ...p, [slot.id]: { file, error: 'Only PDF files with a text layer are supported in this version.' } }));
     try {
-      const blocks = await parse(file, slot.id);
-      setParsed((p) => ({ ...p, [slot.id]: { file, blocks } }));
+      const [blocks, hash] = await Promise.all([parse(file, slot.id), fileHash(file)]);
+      setParsed((p) => ({ ...p, [slot.id]: { file, blocks, hash } }));
     } catch (e) {
       setParsed((p) => ({ ...p, [slot.id]: { file, error: parseError(e) } }));
     }
@@ -212,6 +239,11 @@ export function UploadPanel({
           );
         })}
       </div>
+      {duplicateSlots(parsed).map((g) => (
+        <p key={g.join()} role="status" data-duplicate-file="" className="rounded border border-sk-border bg-sk-surface p-2 text-sm font-medium">
+          The same file is chosen for {g.map((id) => slots.find((x) => x.id === id)?.label ?? id).join(' and ')}. Check that this is intended; Analyse still works.
+        </p>
+      ))}
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={() => void analyse(false)} disabled={!ready || busy || !configured} className="rounded bg-sk-text px-4 py-2 font-medium text-sk-bg disabled:bg-sk-muted disabled:opacity-70">
           Analyse (sends extracted text)
@@ -248,11 +280,20 @@ export function UploadPanel({
             </p>
           )}
           {failed.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm">{failed.length} part(s) were not processed.</span>
-              <button type="button" onClick={() => void analyse(true)} disabled={busy || !configured} className="rounded border border-sk-border px-3 py-1">
-                Try the failed parts again
-              </button>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm">{failed.length} part(s) were not processed.</span>
+                <button type="button" onClick={() => void analyse(true)} disabled={busy || !configured} className="rounded border border-sk-border px-3 py-1">
+                  Try the failed parts again
+                </button>
+              </div>
+              <ul data-failed-reasons="" className="list-disc pl-5 text-sm">
+                {failed.map(({ label, c }) => (
+                  <li key={`${label}-${c.index}`}>
+                    {label}, part {c.index + 1}: {failureReason(c)}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>

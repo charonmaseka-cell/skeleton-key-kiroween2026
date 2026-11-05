@@ -334,8 +334,7 @@ export function evaluateScope(ctx: RuleContext<ScopeData>): { drafts: FindingDra
           if (uv.kind === 'unclear') {
             comparisons.push({ ...cmp, status: 'flagged', reason: uv.reason, userSupplied: [a, b].filter((x) => x.provenance === 'user_supplied').map((x) => x.fact.id), detail: `${showValue(a.value)} → ${showValue(b.value)}` });
             const du = describeInputs([a, b]);
-            const said = (u: string | null) => (u ? `"${u}"` : 'no unit');
-            out.push(makeDraft({ ...base, matchStatus: m.status, code: 'unit.ambiguous', severity: 'high', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: uv.reason === 'unit_missing' ? `Unit is missing for ${r.key} in ${docName(q)} (tender: ${said(uv.requested)}, offer: ${said(uv.offered)})` : `Unit differs for ${r.key} in ${docName(q)} (tender: ${said(uv.requested)}, offer: ${said(uv.offered)}) and no conversion is stated`, reason: uv.reason, inputs: du.inputs, evidence: du.evidence }));
+            out.push(makeDraft({ ...base, matchStatus: m.status, code: 'unit.ambiguous', severity: 'high', state: 'needs_review', subjectId: `${r.reqId}:${field}`, message: `Unit unclear for ${r.key} in ${docName(q)}`, reason: uv.reason, inputs: du.inputs, evidence: du.evidence }));
             return;
           }
           if (uv.kind === 'converted') {

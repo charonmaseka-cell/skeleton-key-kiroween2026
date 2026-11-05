@@ -7,9 +7,9 @@ A reusable document-checking engine powering two separate apps, built with Kiro 
 
 Models extract and suggest; deterministic rules produce findings backed by validated evidence.
 
-**Status (2026-11-03).** The haunted interface is built in both apps (see "The haunted interface" below). Earlier status, 2026-11-01: Both apps run in **sample mode** on clearly labelled fictional fixtures: validation, identity resolution, matching, rules, corrections, review decisions and export all run in the browser from fixture inputs (source text plus recorded model claims). ScopeCheck also has an **upload path** (choose an RFQ and quotation PDFs, read on your device, then an explicit Analyse step) that works against an analysis service when one is connected through `VITE_EXTRACTION_API_URL`; none is connected yet, so on this site it explains that analysis is unavailable. Real-document processing at scale is the next engineering milestone (see "Roadmap"). Production admission to the extraction Worker is closed (`DAILY_ADMISSION_CEILING = "0"`) until the limits and the deployed controls are validated.
+**Status (2026-11-05).** Both apps run in **sample mode** on clearly labelled fictional fixtures, and **live analysis is open** on the deployed sites: choose your own text-layer PDFs (read on your device), press Analyse, and the extracted text is sent to the extraction Worker, which calls the AI model. Live analysis is capped for everyone together at **6,000 estimated neurons and 80 attempts per UTC day**, and a whole run is held against that allowance before anything is sent. When the allowance is used up, the page says so and the sample sets still work. The first real production run (PackCheck, five requests, no retries) is recorded in `docs/build-log.md`. Validation, identity resolution, matching, rules, corrections, review decisions and export run in the browser in both modes. ScopeCheck also writes a clarification list per supplier. See "Roadmap" for what is next, and `docs/deployment.md` for what is deployed.
 
-**Privacy note (planned design):** files will be parsed in the browser, but extracted text is sent to an AI service after you start analysis. Not all processing is local.
+**Privacy note:** files are parsed in your browser, but when you press Analyse the **extracted text is sent** to the extraction service and an AI model. Not all processing is local. File names and the original PDFs are not sent. The service does not store your text; it keeps daily usage counters to enforce the limit, and its logs hold sizes and counts, not content. Sample mode sends nothing.
 
 ## The haunted interface
 
@@ -34,9 +34,9 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 | Spec | Delivered | Open |
 |---|---|---|
 | `haunted-ui` | 11 | 0 |
-| `packcheck-real-documents` | 3 | 3 |
-| `scopecheck-real-documents` | 11 | 6 |
-| `skeleton-key-foundation` | 35 | 19 |
+| `packcheck-real-documents` | 4 | 2 |
+| `scopecheck-real-documents` | 13 | 4 |
+| `skeleton-key-foundation` | 41 | 13 |
 
 **haunted-ui** (delivered):
 - HU-T0: Visual system, Lights-on behaviour and the palette contrast test
@@ -55,6 +55,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - PC-T1: Pre-registered realistic pack, done 2026-11-01, offline
 - PC-T2: (partly) Offline tests with a mock model on PC-T1
 - PC-T3: Upload and role assignment
+- PC-T6: Live wiring, deployment and end-to-end run; record in the build log
 
 **scopecheck-real-documents** (delivered):
 - SC-T1: Pre-register the realistic ScopeCheck documents and expected outputs
@@ -62,6 +63,8 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - SC-T3: Browser upload path for ScopeCheck
 - SC-T2b: Output-aware chunking
 - SC-T4: Live baseline on SC-T1, done 2026-11-01
+- SC-T5: Foundation task 9 live wiring for ScopeCheck
+- SC-T10: Supplier-specific clarification email drafts
 - SC-T11: Requirement-line identity, multi-item blocks and evidence-empty items
 - SC-T4a: Correctness fixes from the saved baseline responses, done 2026-11-01
 - SC-T13: Bounded concurrency PREPARED
@@ -105,32 +108,29 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - 6.3: PackCheck grant Adapter
 - 6.4: Golden fixture tests
 - 6.5: Review interface and exports
+- 7.1: Two Pages projects and the Worker; origins and limits configured
+- 7.2: Optional hook
+- 8: Upload ingestion for both apps
+- 9: Live adapter wiring
+- 13: Export
+- 16: Export for grant review with unresolved items marked
 
 **Open:**
 - `packcheck-real-documents` PC-T4: Attachment mapping UI with manual remap
 - `packcheck-real-documents` PC-T5: Live measurement on PC-T1 within an authorised attempt budget
-- `packcheck-real-documents` PC-T6: Live wiring, deployment and end-to-end run; record in the build log
-- `scopecheck-real-documents` SC-T5: Foundation task 9 live wiring for ScopeCheck
 - `scopecheck-real-documents` SC-T6: Foundation task 5.5 limits and deployment validation
 - `scopecheck-real-documents` SC-T7: Deploy ScopeCheck
 - `scopecheck-real-documents` SC-T8: 2 to 5 quotations
 - `scopecheck-real-documents` SC-T9: DOCX input
-- `scopecheck-real-documents` SC-T10: Supplier-specific clarification email drafts
 - `skeleton-key-foundation` 5: Live-extraction benchmark
 - `skeleton-key-foundation` 5.5: OPEN. Derive and set `DAILY_ADMISSION_CEILING`, `MAX_CHARS`, `MAX_BLOCKS`, `MAX_BLOCK_CHARS` and the profile…
 - `skeleton-key-foundation` 7: First deployments
-- `skeleton-key-foundation` 7.1: Two Pages projects and the Worker; origins and limits configured
-- `skeleton-key-foundation` 7.2: Optional hook
 - `skeleton-key-foundation` 7.3: Build log entry for M1 with measured values
-- `skeleton-key-foundation` 8: Upload ingestion for both apps
-- `skeleton-key-foundation` 9: Live adapter wiring
 - `skeleton-key-foundation` 10: End-to-end live run for RFQ + 2 quotes and for the grant pack; extraction/matching/rules measured separately
 - `skeleton-key-foundation` 11: Playwright flows with mocked Worker for error codes; axe checks
 - `skeleton-key-foundation` 12: Comparison matrix, match confirmation, fact corrections, accept/dismiss/notes, reopen-on-change
-- `skeleton-key-foundation` 13: Export
 - `skeleton-key-foundation` 14: Calibrate match threshold from fixtures
 - `skeleton-key-foundation` 15: Attachment mapping UI with manual remap, grant-field review and corrections on uploads
-- `skeleton-key-foundation` 16: Export for grant review with unresolved items marked
 - `skeleton-key-foundation` 17: ScopeCheck M5 checks
 - `skeleton-key-foundation` 18: DOCX via Mammoth with paragraph/cell refs; 2–5 quotes
 - `skeleton-key-foundation` 19: Regression run, accessibility pass, decorative polish if time, README

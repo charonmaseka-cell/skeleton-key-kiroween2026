@@ -66,3 +66,18 @@ body {
   min-width: 10rem;
   overflow-wrap: break-word;
 }
+
+/* Narrow screens: in-page section links and the small text controls ("Open the item", "Correct this value") are at least 24 px tall,
+   so they are easy to hit with a finger (WCAG 2.5.8 target size, AA). Wider screens are unchanged. */
+@media (max-width: 640px) {
+  nav[aria-label='Sections'] a,
+  a[aria-label^='Open the item'],
+  button[aria-label^='Correct this value'],
+  button[aria-label^='Change correction'],
+  button[aria-label^='Close:'] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding-block: 2px;
+  }
+}

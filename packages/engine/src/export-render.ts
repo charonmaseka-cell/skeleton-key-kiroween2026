@@ -5,6 +5,7 @@ import type { ExportEntry, ExportModel } from './export';
 // corrections and notes. Sample runs carry an unmissable marker. No network, no files.
 
 export const SAMPLE_MARK = 'SAMPLE (fictional): invented documents, not a real review';
+export const LIVE_MARK = 'LIVE ANALYSIS of the documents you uploaded: values were read by an AI service and checked on your device; nothing here is a sample';
 
 import { formatValue } from './format';
 
@@ -46,7 +47,7 @@ function entryLines(e: ExportEntry, l: L): string[] {
 export function renderText(m: ExportModel, labels?: ExportLabels): string {
   const l = resolve(labels);
   const L: string[] = [];
-  if (m.sample) L.push(SAMPLE_MARK, '');
+  L.push(m.sample ? SAMPLE_MARK : LIVE_MARK, '');
   const c = m.comparisons;
   L.push(`Comparisons planned: ${c.planned}; agree: ${c.agree}; flagged: ${c.flagged}; NOT EVALUATED: ${c.notEvaluated}`, '');
   L.push(`CONFIRMED FINDINGS (${m.findings.length})`, ...(m.findings.length ? m.findings.flatMap((e) => entryLines(e, l)) : ['(none)']), '');
@@ -73,6 +74,7 @@ export function renderText(m: ExportModel, labels?: ExportLabels): string {
 function decision(status: string): string {
   const [event, st] = status.split(':');
   if (event === 'reopened') return 'reopened';
+  if (event === 'noted') return `note saved (${REVIEW[st ?? ''] ?? st})`;
   return REVIEW[st ?? ''] ?? status;
 }
 
@@ -88,7 +90,7 @@ export function renderCsv(m: ExportModel, labels?: ExportLabels): string {
   const l = resolve(labels);
   const head = ['Section', 'Sample', 'State', 'Description', 'Severity', 'Review', 'Reopened', 'Field', 'Why', 'Documents', 'Blocked input', 'Evidence', 'Note'];
   const rows: unknown[][] = [];
-  const sample = m.sample ? 'SAMPLE (fictional)' : '';
+  const sample = m.sample ? 'SAMPLE (fictional)' : 'LIVE (your documents)';
   const entry = (section: string, e: ExportEntry) =>
     rows.push([section, sample, e.state === 'confirmed' ? 'confirmed' : 'needs review', e.message, SEVERITY[e.severity] ?? e.severity, REVIEW[e.review] ?? e.review, e.reopened ? 'yes' : 'no', '', e.reason ? l.reason(e.reason) : '', '', '', e.evidence.map((x) => `${where(l, x.docId, x.blockId)}, characters ${x.start}-${x.end}: ${x.text}`).join(' | '), e.note]);
   m.findings.forEach((e) => entry('confirmed finding', e));

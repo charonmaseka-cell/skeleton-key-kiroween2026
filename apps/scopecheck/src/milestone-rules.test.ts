@@ -68,6 +68,16 @@ function editQuoteA(f: Fixture, edit: (block: { text: string }, claims: Claim[])
 }
 const total = (text: string, amount: string): Claim => ({ field: 'line_total', kind: 'money', blockId: 'p1-l2', excerpt: text, value: { amount, currency: 'ZAR' } });
 
+describe('D9: the unit finding is titled as unclear while it is Needs review', () => {
+  it('"Unit unclear for <code>", not a statement about units differing', () => {
+    const f = clone(FIXTURES.find((x) => x.id === 'scopecheck-fulllength')!);
+    const item = run(f).items.find((i) => i.finding.code === 'unit.ambiguous')!;
+    expect(item.finding.state).toBe('needs_review');
+    expect(item.finding.message).toMatch(/^Unit unclear for SP-5302 in /);
+    expect(item.finding.message).not.toMatch(/differs|missing|conversion/);
+  });
+});
+
 describe('the rules on the recorded samples: what each finds', () => {
   it('unit ambiguity finds exactly one case, in the full-length sample (SP-5302, Hydro-Lab: the recorded extraction read "1 l" as the offered quantity); none in the other two', () => {
     const found = FIXTURES.map((f) => `${f.id}: ${find(f, 'unit.ambiguous').join(', ') || 'none'}`);

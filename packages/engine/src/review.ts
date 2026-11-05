@@ -7,7 +7,7 @@ export type ReviewHistoryEntry = {
   note?: string;
   fingerprint: string;
   at: number;
-  event: 'decided' | 'reopened';
+  event: 'decided' | 'reopened' | 'noted';
 };
 
 export type ReviewDecision = {
@@ -34,6 +34,29 @@ export function decide(store: ReviewStore, finding: Finding, status: ReviewStatu
       note,
       reopened: false,
       history: [...(prev?.history ?? []), { status, note, fingerprint: finding.fingerprint, at, event: 'decided' }],
+    },
+  };
+}
+
+/**
+ * Save a note on its own, without changing the decision. The note becomes the current note of the item and is recorded in the decision
+ * history (event 'noted') with the status it was written under. An empty note clears it (also recorded). A finding that has no decision
+ * yet gets one with status 'open', so a note on an undecided item is kept too.
+ */
+export function saveNote(store: ReviewStore, finding: Finding, note: string, at: number): ReviewStore {
+  const prev = store[finding.id];
+  const text = note.trim() || undefined;
+  if ((prev?.note ?? undefined) === text) return store; // nothing changed: no history entry
+  const status = prev?.status ?? 'open';
+  return {
+    ...store,
+    [finding.id]: {
+      findingId: finding.id,
+      fingerprint: prev?.fingerprint ?? finding.fingerprint,
+      status,
+      note: text,
+      reopened: prev?.reopened ?? false,
+      history: [...(prev?.history ?? []), { status, note: text, fingerprint: prev?.fingerprint ?? finding.fingerprint, at, event: 'noted' }],
     },
   };
 }

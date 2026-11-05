@@ -6,6 +6,7 @@ import { chunkBlocks, chunkByOutput, schemaEstimator, type Block, type ChunkLimi
 export const SCHEMA_FIELDS: Record<string, SchemaField[]> = {
   'scopecheck.rfq.v1': [{ kind: 'text' }, { kind: 'quantity' }, { kind: 'text' }],
   'scopecheck.quote.v1': [{ kind: 'text' }, { kind: 'quantity' }, { kind: 'money' }, { kind: 'text' }, { kind: 'text' }],
+  'scopecheck.quote.v2': [{ kind: 'text' }, { kind: 'quantity' }, { kind: 'money' }, { kind: 'money' }, { kind: 'text' }, { kind: 'text' }],
   'packcheck.grant.v1': [{ kind: 'name' }, { kind: 'money' }, { kind: 'money' }, { kind: 'date' }, { kind: 'date' }, { kind: 'text' }],
   'packcheck.grant.v2': [{ kind: 'name' }, { kind: 'money' }, { kind: 'money' }, { kind: 'date' }, { kind: 'date' }, { kind: 'text' }],
 };

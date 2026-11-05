@@ -2,6 +2,21 @@
 
 Factual record of Kiro tasks, tests and decisions. Only completed work is recorded.
 
+## First live PRODUCTION run (5 Nov 2026, ~16:08 UTC / ~18:08 SAST)
+The first real inference run on the public production Worker (`skeleton-key-extraction.teddykgroup.workers.dev`, ceiling 80, budget 6,000, open). PackCheck, the four PDFs from `samples/packcheck/`, uploaded on the live site.
+- 1 `/run` + 4 `/extract` requests, no retries, no errors, about 28 s in total. All four documents **Fully processed**.
+- Findings identical to the recorded sample: 1 confirmed (organisation name Trust -> Foundation), 2 Needs review (tax clearance not listed; ambiguous start date 01/03/2026), 1 Not evaluated, 7 of 10 planned comparisons agree. Same values, same evidence references (p1-l2, p1-l5).
+- **Spend (production Worker `/health`, settled):** 4 attempts, **229.719 estimated neurons charged** today, 0 unsettled, 0 overruns. Remaining today after this run: 76 of 80 attempts, 5,770.281 of 6,000 neurons. These are the Worker's own settled estimates, not dashboard-confirmed consumption.
+- **Correction to earlier reports:** the "0 inference runs in production" statement no longer holds. Production has now served one real run (the figures above). No fixture or recording was changed by this run.
+
+## SC-T12 fresh-set live re-run: not done; estimate-gap explained (5 Nov 2026)
+The owner approved **option 3**: no live re-run of the SC-T12 fresh validation set with the new `line_total` profile. Its recordings are unchanged. On the fresh set, price arithmetic shows **Not evaluated** ("the recorded extraction states no line total for this line"), never "agrees".
+**Why the new estimate (~4,506 first-attempt neurons) does not match the preregistered 3,000 run cap for the same 12 requests.** They measure different quantities, and both are consistent with the preregistration:
+- ~4,506 is the **sum of all 12 worst-case reservations** (1-byte-per-token guaranteed bound, whole 1,500-token output allowance each), i.e. the total a reservation-by-reservation estimator adds up. The preregistration states the same sum as **4,420** and explicitly notes "the sum of all worst cases (4,420) is not the spend". The new field raises it by ~15-20 neurons per request (one extra line in the system prompt, one more possible value per line): 4,420 -> ~4,506. So the original plan was not low; it named the sum too.
+- The **3,000 run cap** was sized against the **expected settled charge (~1,450**, from measured tokens) plus headroom for ~4 repair/retry attempts, not against the sum of worst-case reservations. With concurrency 1 each reservation is released as its attempt settles, so the **peak** reservation held at once is ~1,726 (charged so far + one worst case), well under 3,000.
+- My earlier stop at the 2,500 ceiling used the conservative reading (total worst-case reservations, ~4,506 > 2,500), which is correct for a "stop if the estimate goes over" instruction. A run cap of 3,000 would still admit all 12 because the cap is checked against charged + claimed + this one reservation, never the running sum of settled-then-released reservations.
+Line_total's effect on admission bounds: none at the day level. `DAILY_ADMISSION_CEILING` (80) and `DAILY_NEURON_BUDGET` (6,000) are per-UTC-day totals independent of profile fields; the per-request worst case rises only ~15-20 neurons, so a PackCheck/ScopeCheck run of a few chunks stays far inside the day budget.
+
 ## Task 1: Monorepo scaffold (1 Nov 2026)
 - Created npm workspaces, shared TypeScript/ESLint/Vitest config, minimal engine and UI packages, two app shells, placeholder Worker and benchmark packages, CI workflow.
 - Engine boundary test and ESLint restriction added (R1.3).

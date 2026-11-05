@@ -79,6 +79,6 @@ describe('browser schema fields stay in step with the server profiles', () => {
       expect(PROFILES[id], `${id} exists on the server`).toBeDefined();
       expect(SCHEMA_FIELDS[id]!.map((f) => f.kind)).toEqual(PROFILES[id]!.fields.map((f) => f.kind));
     }
-    for (const id of ['scopecheck.rfq.v1', 'scopecheck.quote.v1', 'packcheck.grant.v2']) expect(SCHEMA_FIELDS[id], `${id} is covered`).toBeDefined();
+    for (const id of ['scopecheck.rfq.v1', 'scopecheck.quote.v1', 'scopecheck.quote.v2', 'packcheck.grant.v2']) expect(SCHEMA_FIELDS[id], `${id} is covered`).toBeDefined();
   });
 });

@@ -319,7 +319,7 @@ export const renderTextOf = exportText;
 
 /** Plain-language explanation of engine and adapter reason codes. */
 const REASONS: Record<string, string> = {
-  coverage_unverified: 'The document has not been confirmed as fully extracted, so "not found" cannot be stated as fact.',
+  coverage_unverified: 'You haven\'t confirmed this document\'s coverage yet, so "not found" can\'t be stated as fact.',
   absence_requires_verified_coverage: 'An absence can only be confirmed once the document\'s extraction is verified or you confirm it.',
   match_unresolved: 'The item could not be matched with certainty, so no omission or difference is asserted.',
   multiple_codes: 'More than one item code is tied to this line, so the item cannot be identified with certainty.',
@@ -386,7 +386,21 @@ export const KNOWN_REASONS = (): string[] => Object.keys(REASONS);
  * validation, rules, review and export code is identical for both. Chunk statuses carry over: a failed or unsent
  * chunk makes the document "processing incomplete".
  */
-export function buildLiveFixture(docs: { id: string; role: string; title: string; profile: string; result: DocumentResult }[], id = 'live-upload'): Fixture {
+/**
+ * The name to show for an uploaded document. A real document usually opens with its own title line; when the first block of page 1 is
+ * a short, title-like line (not a data row with a "label: value" or a pipe-delimited table, and not just a code or a number) it is
+ * used as the heading. Otherwise the file name is the heading. The file name is always kept so the user can match the entry to the
+ * file they chose, whichever is the heading. The extracted text is validated by the parser already (it came from the document); this
+ * only chooses which validated text to show, and never invents a title.
+ */
+export function liveDocTitle(blocks: { text: string; page?: number }[], fileName: string): { title: string; note: string } {
+  const first = blocks.find((b) => (b.page ?? 1) === 1 && b.text.trim().length > 0);
+  const t = first?.text.trim() ?? '';
+  const titleLike = t.length >= 3 && t.length <= 90 && !/[|]/.test(t) && !/:\s*\S/.test(t) && /[A-Za-z]/.test(t) && /\s/.test(t) && !/^[A-Za-z]{1,4}-\d+\b/.test(t);
+  return titleLike && t !== fileName ? { title: t, note: fileName } : { title: fileName, note: fileName };
+}
+
+export function buildLiveFixture(docs: { id: string; role: string; fileName: string; profile: string; result: DocumentResult }[], id = 'live-upload'): Fixture {
   return {
     id,
     title: 'Your uploaded documents',
@@ -394,15 +408,20 @@ export function buildLiveFixture(docs: { id: string; role: string; title: string
     sample: false,
     label: 'Live (your documents)',
     extraction: { model: 'server-selected', note: 'Extracted text from your documents was sent to an AI service after you pressed Analyse. Everything else (validation, matching, rules, review, export) runs on your device.' },
-    docs: docs.map((d) => ({
-      id: d.id,
-      role: d.role,
-      title: d.title,
-      profile: d.profile,
-      recordedIn: 'live extraction',
-      blocks: d.result.blocks,
-      claims: d.result.claims,
-      chunks: d.result.chunks.map((c) => ({ blockIds: c.blockIds, status: c.status === 'ok' ? ('ok' as const) : ('failed' as const) })),
-    })),
+    docs: docs.map((d) => {
+      const { title, note } = liveDocTitle(d.result.blocks, d.fileName);
+      return {
+        id: d.id,
+        role: d.role,
+        title,
+        // The file name, shown as secondary text under the title, so the user can match the entry to the file they uploaded.
+        note: `File: ${note}`,
+        profile: d.profile,
+        recordedIn: 'live extraction',
+        blocks: d.result.blocks,
+        claims: d.result.claims,
+        chunks: d.result.chunks.map((c) => ({ blockIds: c.blockIds, status: c.status === 'ok' ? ('ok' as const) : ('failed' as const) })),
+      };
+    }),
   };
 }

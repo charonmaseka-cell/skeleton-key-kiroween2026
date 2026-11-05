@@ -47,7 +47,7 @@ function run() {
     const blocks = d.lines.map((t, i) => blk(d.id, `p1-l${i + 1}`, t));
     const claims = d.claims(blocks).map((c) => ({ kind: KIND[c.field], ...c }));
     const result: DocumentResult = { docId: d.id, blocks, claims, chunks: [{ index: 0, blockIds: blocks.map((b) => b.id), status: 'ok', claims: claims.length }] };
-    return { id: d.id, role: d.role, title: d.id, profile: d.role === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result };
+    return { id: d.id, role: d.role, fileName: `${d.id}.pdf`, profile: d.role === 'rfq' ? 'scopecheck.rfq.v1' : 'scopecheck.quote.v1', result };
   }));
   return evaluateSession(scopeCheckAdapter, fixture, emptySession(), 1);
 }

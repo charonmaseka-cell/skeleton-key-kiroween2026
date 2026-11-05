@@ -2,6 +2,9 @@
 
 Factual record of Kiro tasks, tests and decisions. Only completed work is recorded.
 
+## Beta sweep of 52107e2: fixes (5 Nov 2026)
+Report: no P0/P1, "ready with known limitations". Fixed in one PR, one regression test each, no new features. **D1** a note typed after Accept/Dismiss/Reopen is now saved on blur or with "Save note", kept in the item and recorded in the decision history (`noted`), and appears in the text export, the CSV and after switching samples. **D2** the export line says "Marked SAMPLE (fictional)" only for samples; live results say they are marked as a live analysis, and the live text export now opens with a LIVE ANALYSIS line (CSV column "LIVE (your documents)", files named `-live`). **D4** README Status and privacy note rewritten (live analysis open at 6,000 neurons / 80 attempts; the privacy note is current); delivered tasks ticked (SC-T5, SC-T10, PC-T6, foundation 7.1, 7.2, 8, 9, 13, 16) and `docs:sync` run; SC-T6 and SC-T7 stay open with the reason written in the task (dashboard-confirmed consumption; no ScopeCheck end-to-end live run yet). **D5** each failed part lists its reason from the error text. **D6** the same file (name, size, SHA-256 on the device) in two slots shows a warning; Analyse stays available. **D7** section links, "Open the item" and "Correct this value" are at least 24 px tall at 640 px and below (checked in the browser at 375 px). **D8** the sample picker shows plain names; the model name is in Details. **D9** the unit finding is titled "Unit unclear for <code> in <document>". **D3** (live still at 2541b39) is the redeploy, done as the next step.
+
 ## First live PRODUCTION run (5 Nov 2026, ~16:08 UTC / ~18:08 SAST)
 The first real inference run on the public production Worker (`skeleton-key-extraction.teddykgroup.workers.dev`, ceiling 80, budget 6,000, open). PackCheck, the four PDFs from `samples/packcheck/`, uploaded on the live site.
 - 1 `/run` + 4 `/extract` requests, no retries, no errors, about 28 s in total. All four documents **Fully processed**.
@@ -271,12 +274,12 @@ Warm jack-o'-lantern candlelight on a near-black page (`#0a0a0d`), beside the ec
 
 ## Spec status (generated)
 <!-- spec-status:start -->
-Specs in the repository: 4. Tasks ticked: 60 of 88.
+Specs in the repository: 4. Tasks ticked: 69 of 88.
 
 - `haunted-ui`: 11 of 11 ticked
-- `packcheck-real-documents`: 3 of 6 ticked; open: PC-T4, PC-T5, PC-T6
-- `scopecheck-real-documents`: 11 of 17 ticked; open: SC-T5, SC-T6, SC-T7, SC-T8, SC-T9, SC-T10
-- `skeleton-key-foundation`: 35 of 54 ticked; open: 5, 5.5, 7, 7.1, 7.2, 7.3, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+- `packcheck-real-documents`: 4 of 6 ticked; open: PC-T4, PC-T5
+- `scopecheck-real-documents`: 13 of 17 ticked; open: SC-T6, SC-T7, SC-T8, SC-T9
+- `skeleton-key-foundation`: 41 of 54 ticked; open: 5, 5.5, 7, 7.3, 10, 11, 12, 14, 15, 17, 18, 19, 20
 <!-- spec-status:end -->
 
 ## a11y check: measure at rest (3 Nov 2026)

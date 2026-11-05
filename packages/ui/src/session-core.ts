@@ -3,6 +3,7 @@ import {
   buildExport,
   confirmCoverage,
   decide,
+  saveNote,
   newExtraction,
   processingComplete,
   reconcileReview,
@@ -249,6 +250,9 @@ export const decideFinding = (state: SessionState, finding: Finding, status: Rev
   ...state,
   store: decide(state.store, finding, status, note || undefined, at),
 });
+
+/** Save a note on its own (after a decision, or before one). It is recorded in the decision history and appears in every export. */
+export const saveFindingNote = (state: SessionState, finding: Finding, note: string, at: number): SessionState => ({ ...state, store: saveNote(state.store, finding, note, at) });
 
 export const confirmDocumentCoverage = (state: SessionState, docId: string, at: number): SessionState => ({ ...state, confirmed: { ...state.confirmed, [docId]: at } });
 

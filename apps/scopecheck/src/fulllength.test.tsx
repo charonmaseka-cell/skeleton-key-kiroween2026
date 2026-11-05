@@ -14,11 +14,12 @@ describe('the full-length recorded sample is the default', () => {
     const select = screen.getByLabelText('Choose a sample set') as HTMLSelectElement;
     expect(select.value).toBe('scopecheck-fulllength');
     const options = within(select).getAllByRole('option').map((o) => o.textContent);
-    expect(options[0]).toMatch(/Full-length.*recorded Llama 3\.3 70B output.*\(sample\)/);
+    expect(options[0]).toBe('Full-length: tender and two quotations (sample)'); // plain name: the model is behind Details (D8)
     expect(options[1]).toMatch(/RFQ and two quotations \(sample\)/);
     const banner = screen.getByRole('region', { name: 'Sample mode' });
     expect(banner.textContent).toMatch(/Recorded from one real AI run on 1 November 2026, replayed unchanged\./);
     expect(banner.textContent).toMatch(/No document is uploaded and no model is called/); // behind Details
+    expect(banner.textContent).toMatch(/Model: @cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/); // the model name, also behind Details
     expect(screen.getByText(/A fictional tender and two quotations\. Recorded from one real AI run on 1 November 2026, replayed unchanged\./)).toBeTruthy();
     const desc = screen.getByText(/A fictional tender and two quotations\./).textContent!;
     expect(desc).not.toMatch(/llama|@cf|batch|docs\//i);

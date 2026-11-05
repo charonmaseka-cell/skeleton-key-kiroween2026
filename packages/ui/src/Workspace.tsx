@@ -229,8 +229,11 @@ export function FindingCard({ item, session, view }: { item: ReviewItem; session
         <label htmlFor={noteId} className="block text-sm font-medium">
           Note for this item (optional)<span className="sr-only">: {finding.message}</span>
         </label>
-        <input id={noteId} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded border border-sk-border px-2 py-1" />
+        <input id={noteId} value={note} onChange={(e) => setNote(e.target.value)} onBlur={() => note !== (review.note ?? '') && session.saveNote(finding, note)} className="w-full rounded border border-sk-border px-2 py-1" />
         <div className="flex flex-wrap gap-2">
+          <button type="button" aria-label={`Save note: ${finding.message}`} onClick={() => session.saveNote(finding, note)} disabled={note === (review.note ?? '')} className="rounded border border-sk-border px-3 py-1 disabled:opacity-60">
+            Save note
+          </button>
           <button type="button" aria-label={`Accept: ${finding.message}`} onClick={() => session.decide(finding, 'accepted', note)} className="rounded border-2 border-sk-text bg-sk-text px-3 py-1 font-medium text-sk-bg">
             Accept
           </button>
@@ -418,13 +421,13 @@ export function ExportPanel({ view, baseName }: { view: SessionView; baseName: s
         Export
       </h3>
       <p className="text-sm">
-        Exports keep every state: {m.findings.length} confirmed, {m.unresolved.length} Needs review, {m.notEvaluated.length} Not evaluated, {m.decisions.length} decisions, {m.corrections.length} corrections. Marked SAMPLE (fictional).
+        Exports keep every state: {m.findings.length} confirmed, {m.unresolved.length} Needs review, {m.notEvaluated.length} Not evaluated, {m.decisions.length} decisions, {m.corrections.length} corrections. {view.fixture.sample ? 'Marked SAMPLE (fictional).' : "Marked as a live analysis of your documents."}
       </p>
       <div className="no-print flex flex-wrap gap-2">
-        <button type="button" onClick={() => download(`${baseName}-sample.csv`, 'text/csv', exportCsv(view))} className="rounded bg-sk-text px-3 py-1 text-sk-bg">
+        <button type="button" onClick={() => download(`${baseName}${view.fixture.sample ? '-sample' : '-live'}.csv`, 'text/csv', exportCsv(view))} className="rounded bg-sk-text px-3 py-1 text-sk-bg">
           Download CSV
         </button>
-        <button type="button" onClick={() => download(`${baseName}-sample.txt`, 'text/plain', exportText(view))} className="rounded bg-sk-text px-3 py-1 text-sk-bg">
+        <button type="button" onClick={() => download(`${baseName}${view.fixture.sample ? '-sample' : '-live'}.txt`, 'text/plain', exportText(view))} className="rounded bg-sk-text px-3 py-1 text-sk-bg">
           Download text draft
         </button>
         <button type="button" onClick={() => window.print()} className="rounded border border-sk-border px-3 py-1">

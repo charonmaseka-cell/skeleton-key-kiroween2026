@@ -57,7 +57,7 @@ const FIXTURES: FixtureSpec[] = [
   {
     id: 'scopecheck-fulllength',
     out: 'scopecheck-fulllength.json',
-    title: 'Full-length: tender and two quotations (recorded Llama 3.3 70B output)',
+    title: 'Full-length: tender and two quotations',
     what: 'A fictional tender and two quotations.',
     details: [
       'The tender has 12 requested lines; each quotation has 11 lines, one with a positioned table and one in prose. This is the default sample; the smaller two-quotation set is the second option.',

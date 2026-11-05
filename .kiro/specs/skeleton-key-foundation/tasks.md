@@ -66,25 +66,25 @@ The original task numbering and history above are kept. These corrections reflec
   - [x] 6.4 Golden fixture tests: zero false critical findings. (R10.5) Done: golden tests per app; the known `quote-c` miss is asserted, not hidden.
   - [x] 6.5 Review interface and exports: rejected or held critical fields appear as Needs review items; dependent comparisons show **Not evaluated** with reason and blocked input, in a separate section of the panel and of every export; never rendered as "no difference". Reuse the ScopeCheck identity resolver (`apps/scopecheck/src/adapter/identity.ts`) and the benchmark's comparison ledger shape. (R4.9, R7.6) Done in both apps and in the text/CSV exports.
 - [ ] 7. First deployments
-  - [ ] 7.1 Two Pages projects and the Worker; origins and limits configured. Keep the endpoint closed to the public until 3.3 limits pass tests. (R11.5, R8.7) Includes a deployment check of the Workers AI binding and the deployed Durable Object that makes no inference call; public live extraction stays closed (`DAILY_ADMISSION_CEILING` 0, apps built without an analysis URL) until task 5.5 passes. **2026-11-02: PARTIAL. Both Pages apps deployed from `main` `722b4fd` (sample mode, analysis disabled); the Worker is NOT deployed (token lacks Workers Scripts: Edit and Account Settings: Read); browser check not possible from this environment (egress proxy). See `docs/deployment.md`.**
-  - [ ] 7.2 Optional hook: rerun golden fixtures on engine rule changes, only if supported; record honestly. (R12.3)
+  - [x] 7.1 Two Pages projects and the Worker; origins and limits configured. Keep the endpoint closed to the public until 3.3 limits pass tests. (R11.5, R8.7) Includes a deployment check of the Workers AI binding and the deployed Durable Object that makes no inference call; public live extraction stays closed (`DAILY_ADMISSION_CEILING` 0, apps built without an analysis URL) until task 5.5 passes. **2026-11-05: DONE. Both Pages apps and the Worker are deployed; the Worker has been open at 6,000 neurons / 80 attempts since 3 Nov and the apps carry its address; `--verify-open` checks the Worker without inference. The earlier partial state (2 Nov) and every redeploy are in `docs/deployment.md`.**
+  - [x] 7.2 Optional hook: rerun golden fixtures on engine rule changes, only if supported; record honestly. (R12.3)
   - [ ] 7.3 Build log entry for M1 with measured values. (R12.2)
 
 ## M2: Real document path
 
-- [ ] 8. Upload ingestion for both apps (text PDF), explicit Analyse step, mode banner "Live: extracted text sent to AI service". (R3.1, R8.1–8.3) **Built and tested against a fake Worker for both apps (SC-T3, PC-T3); open until a deployed Worker is connected.**
-- [ ] 9. Live adapter wiring: Zod validation, evidence and value-support validation, session extraction reuse, quota/limit banners with manual retry and intact session. (R4, R5.2, R8.10)
+- [x] 8. Upload ingestion for both apps (text PDF), explicit Analyse step, mode banner "Live: extracted text sent to AI service". (R3.1, R8.1–8.3) **Built and tested against a fake Worker for both apps (SC-T3, PC-T3); connected to the deployed Worker and run live (PackCheck, 5 Nov).**
+- [x] 9. Live adapter wiring: Zod validation, evidence and value-support validation, session extraction reuse, quota/limit banners with manual retry and intact session. (R4, R5.2, R8.10)
 - [ ] 10. End-to-end live run for RFQ + 2 quotes and for the grant pack; extraction/matching/rules measured separately. (R10.6)
 - [ ] 11. Playwright flows with mocked Worker for error codes; axe checks. (R13)
 
 ## M3: ScopeCheck completion
 - [ ] 12. Comparison matrix, match confirmation, fact corrections, accept/dismiss/notes, reopen-on-change. (R2.3, R7.1–7.4) **Matrix, corrections, decisions and reopen exist from Task 6; manual match confirmation is the remaining part.**
-- [ ] 13. Export (CSV, text, print/PDF) with unresolved items marked. (R7.5) **CSV, text and print exist from Task 6 with Needs review and Not evaluated sections; supplier clarification drafts are SC-T10.**
+- [x] 13. Export (CSV, text, print/PDF) with unresolved items marked. (R7.5) **CSV, text and print exist from Task 6 with Needs review and Not evaluated sections; supplier clarification drafts are SC-T10 (done 3 Nov).**
 - [ ] 14. Calibrate match threshold from fixtures. (R5.6)
 
 ## M4: PackCheck completion
 - [ ] 15. Attachment mapping UI with manual remap, grant-field review and corrections on uploads. (R3.2–3.6, R7)
-- [ ] 16. Export for grant review with unresolved items marked. (R7.5)
+- [x] 16. Export for grant review with unresolved items marked. (R7.5)
 
 ## M5: Later checks and submission
 - [ ] 17. ScopeCheck M5 checks: delivery lead time and Incoterm differences; changed payment terms; missing or shorter warranty; arithmetic inconsistencies with a clear quantity/price/discount/tax/rounding basis. Unclear terms stay Needs review. (R2.9, R6)

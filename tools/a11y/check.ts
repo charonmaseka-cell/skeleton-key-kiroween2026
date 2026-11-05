@@ -418,6 +418,17 @@ async function main() {
           await check('visible focus ring on every control reached by Tab', await focusRingWalk(page));
           await check('decoration overlaps no text or control', await motifOverlaps(page));
           await check('Next finding scrolls the target into view and focuses it', await nextFindingInView(page));
+          // D7 (beta sweep): section links and the small text controls are at least 24 px tall at narrow widths
+          if (width === 375) {
+            await check('touch targets: section links, "Open the item" and "Correct this value" are at least 24 px tall', await page.evaluate(() => {
+              const small: string[] = [];
+              const sel = "nav[aria-label='Sections'] a, a[aria-label^='Open the item'], button[aria-label^='Correct this value'], button[aria-label^='Change correction']";
+              const els = [...document.querySelectorAll(sel)];
+              if (els.length === 0) small.push('no such control found');
+              for (const e of els) { const h = e.getBoundingClientRect().height; if (h < 24) small.push(`${(e.getAttribute('aria-label') ?? e.textContent ?? '').slice(0, 40)} is ${Math.round(h)} px`); }
+              return small.slice(0, 5);
+            }));
+          }
           await check('Lights on has no decorative element', mode === 'on' ? await page.evaluate(() => [...document.querySelectorAll('[data-motif]')].map((m) => m.getAttribute('data-motif') ?? '')) : []);
           if (width === 1280) await page.screenshot({ path: join(SHOTS, `${app.name}-lights-${mode}.png`) });
           // The ghost state: confirm coverage of one document, then re-check the page (axe, overlap) with the ghost drawn.

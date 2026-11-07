@@ -1,34 +1,71 @@
 # Skeleton Key
 
-A reusable document-checking engine powering two separate apps, built with Kiro for Kiroween 2026 (Skeleton Crew):
+**One open-source document-checking engine, two haunted apps built on it.** Skeleton Key checks a set of documents against what was required, and points to the exact source line behind every gap. A language model only reads the documents; plain code decides what counts as a finding.
 
-- **ScopeCheck** (`apps/scopecheck`): compares supplier quotations against an RFQ.
-- **PackCheck** (`apps/packcheck`): checks grant-application packs for completeness and consistency.
+Built for **Kiroween 2026**, Skeleton Crew category.
 
-Models extract and suggest; deterministic rules produce findings backed by validated evidence.
+| App | What it checks | Live |
+| --- | --- | --- |
+| **ScopeCheck** | Supplier quotations against the RFQ they answer: missing items, quantity and specification differences, unclear units, exclusions | https://skeleton-key-scopecheck.pages.dev/ |
+| **PackCheck** | A grant application pack: missing attachments, and names, amounts and dates that disagree across documents | https://skeleton-key-packcheck.pages.dev/ |
 
-**Status (2026-11-05).** Both apps run in **sample mode** on clearly labelled fictional fixtures, and **live analysis is open** on the deployed sites: choose your own text-layer PDFs (read on your device), press Analyse, and the extracted text is sent to the extraction Worker, which calls the AI model. Live analysis is capped for everyone together at **6,000 estimated neurons and 80 attempts per UTC day**, and a whole run is held against that allowance before anything is sent. When the allowance is used up, the page says so and the sample sets still work. The first real production run (PackCheck, five requests, no retries) is recorded in `docs/build-log.md`. Validation, identity resolution, matching, rules, corrections, review decisions and export run in the browser in both modes. ScopeCheck also writes a clarification list per supplier. See "Roadmap" for what is next, and `docs/deployment.md` for what is deployed.
+> *Stop finding out at delivery that the cheapest quote left something out.*
 
-**Privacy note:** files are parsed in your browser, but when you press Analyse the **extracted text is sent** to the extraction service and an AI model. Not all processing is local. File names and the original PDFs are not sent. The service does not store your text; it keeps daily usage counters to enforce the limit, and its logs hold sizes and counts, not content. Sample mode sends nothing.
+## Try it in 30 seconds
 
-## The haunted interface
+1. Open **ScopeCheck**. A full-length fictional tender and two quotations load at once. They are recorded from one real AI run and replayed, so nothing is sent anywhere.
+2. Read **the séance**: what was confirmed, what needs review and what was not evaluated, with plain counts beside it.
+3. Click any **Differs** cell in the comparison matrix: both source lines open side by side, with the cited words highlighted.
+4. Find a missing item under **Needs review**, then **confirm coverage** of that quotation: only then does it become a confirmed finding (a ghost).
+5. **Accept**, **Dismiss** or **Correct** a value; the rules rerun on your device. Then **Export** a CSV, a text report, or a clarification list for each supplier.
+6. Open **PackCheck** to see the same engine doing an unrelated job.
 
-Two modes, one product. **Lights off** is the haunted presentation (the default); **Lights on** is plain and light, and is chosen automatically when the system asks for reduced motion or more contrast. A choice made with the toggle (first control in the header) is remembered; nothing about the documents is stored.
+Prefer no atmosphere? Press **Lights on**. It's also automatic if your system asks for reduced motion.
 
-- **Séance summary** above the ScopeCheck matrix: one sentence per quotation, with the plain counts beside it, built from the same data as the summary and the export. It never says "clean" while anything is uncertain.
-- **Evidence side by side**: a difference between two documents shows both source lines with the exact cited words marked (background and outline, not colour alone).
-- **Ghost rows**: a missing item stays *Needs review* until you confirm the document's coverage; then it becomes a confirmed finding and its cell turns into a ghost with a one-time flicker (none in Lights on or under reduced motion). "Show the evidence" solidifies it and jumps to the finding.
-- **Theme names** are a second name next to the plain wording, in Lights off only and never in exports: ScopeCheck ghost, miscount, curse; PackCheck Lost page, Doppelgänger, Changeling, Bottomless purse.
-- **The signature pass** (Lights off only; off under Lights on and reduced motion, and the page then shows the same information): one candle per item that needs review (snuffed with a wisp of smoke when it is resolved), a **Next finding** button with a gliding planchette, an idle whisper after 45 s, glitching borders and glowing evidence on spec mismatches, a ghost that drifts through missing-item cells, a wax seal on Accept and a ghostly fade on Dismiss, one drop of ink when a critical finding is confirmed, fog behind the header and a faint mist trail, the lights flickering twice before Lights on, and a small easter egg. A full-strength ghost drifts up the margin when a missing item is confirmed, the page gutters hold thicker fog at wide widths, a séance card sits beside the counts, and the title and séance heading use a self-hosted serif face (all in space with no text). Each effect, caught at its most visible moment: `docs/screenshots/haunted/effects/` (and `haunted-pass.webm`).
-- Checked in a real browser in both modes at 1280 px and 375 px (`npm run a11y`: axe-core, focus rings, no sideways scroll, no decoration over text, reduced motion). No sound, no third-party code, no image over 20 kB.
+## Using your own documents
 
-| Lights off | Lights on |
-| --- | --- |
-| ![ScopeCheck, Lights off](docs/screenshots/haunted/scopecheck-lights-off.png) | ![ScopeCheck, Lights on](docs/screenshots/haunted/scopecheck-lights-on.png) |
-| ![ScopeCheck ghost row, Lights off](docs/screenshots/haunted/scopecheck-ghost-lights-off.png) | ![ScopeCheck ghost row, Lights on](docs/screenshots/haunted/scopecheck-ghost-lights-on.png) |
-| ![PackCheck, Lights off](docs/screenshots/haunted/packcheck-lights-off.png) | ![PackCheck, Lights on](docs/screenshots/haunted/packcheck-lights-on.png) |
+Expand **Analyse your own documents** at the end of either page.
 
-## Feature list (from the specs)
+- **What leaves your device:** files are read in your browser. When you press Analyse, only the *extracted text* is sent to an AI service (Llama 3.3 70B on Cloudflare Workers AI). The original files are never uploaded, and nothing is stored.
+- **Limits:** text-layer PDFs up to 5 MB; scanned PDFs are refused. ScopeCheck takes an RFQ and up to two quotations. A small run takes about 30 seconds; full-length documents take minutes.
+- **Shared daily allowance:** live analysis runs on a small free budget. Each run is priced before anything is sent; if today's allowance can't cover the whole run, it is refused up front, and the samples keep working.
+
+Use fictional or non-confidential documents.
+
+## How it works
+
+```
+ ScopeCheck adapter        PackCheck adapter          each app: schema, rules, labels, theme words
+        \                        /
+   ┌──────────────── Skeleton Key engine (domain-neutral) ────────────────┐
+   │  Ingest → Extract (AI) → Validate evidence → Match → Check (code)   │
+   └──────────────────────────────────────────────────────────────────────┘
+                                │
+      Shared haunted UI: séance, matrix, evidence pane, review, export, Lights on
+```
+
+- **The model extracts; code decides.** I don't trust a language model to judge a quotation, so it only reads. Every value it returns must quote text that really exists at the cited block, or it is dropped. Findings come only from deterministic rules.
+- **Unknown stays unknown.** An absence is never confirmed until the response is confirmed as fully read. A comparison that can't run is listed as *Not evaluated* with its reason. Ambiguous dates, units and identities are held for you.
+- **The engine stays generic.** A test fails if any procurement or grant vocabulary appears in it. PackCheck is about 500 lines on top of the shared engine and UI.
+- **Measured, not promised.** On a pre-registered set of three documents with 12 expected findings, the pipeline found 12 of 12 with no false critical and no over-confident finding, first with extraction profile `scopecheck.quote.v1` (1 Nov 2026) and again with `scopecheck.quote.v2` (7 Nov 2026), which also asks for each line's total. One set, one model, two runs; the misses and extraction faults are in [`docs/results/sc-t12-fresh-results.md`](docs/results/sc-t12-fresh-results.md).
+
+## Run it locally
+
+```bash
+npm install
+npm run dev:scopecheck   # http://localhost:5173
+npm run dev:packcheck    # http://localhost:5174
+npm test                 # unit and integration tests
+npm run a11y             # browser accessibility and visual checks, both apps, both modes
+```
+
+Without an extraction service configured, both apps run fully on the bundled samples.
+
+## Built with Kiro
+
+I built Skeleton Key with Kiro, spec first: I wrote down what each part must guarantee, reviewed the requirements and design before any code, and had Kiro implement one small milestone at a time. [`docs/kiro.md`](docs/kiro.md) explains how: four specs, six steering files, two hooks, and a build log of what each milestone delivered.
+
+## Project status
 
 <!-- features:start -->
 | Spec | Delivered | Open |
@@ -140,63 +177,9 @@ _Generated from `.kiro/specs/*/tasks.md` by `npm run docs:sync`. A ticked task m
 <!-- features:end -->
 
 ## Candlelight, art and font credits
-Warm jack-o'-lantern candlelight (Lights off): original SVG art only, listed in `docs/art.md`; no stock photos, no sound. Fonts are self-hosted, each with its licence file beside it in `packages/ui/src/fonts/`: **Pirata One** (SIL OFL 1.1, unmodified) for the app title, and **Special Elite** (Apache License 2.0; the committed file is a subset, see the NOTICE in `packages/ui/src/fonts/README.md`) for the séance card and stage names. Data text stays in the system sans-serif.
 
-## Layout
-
-| Path | Purpose |
-| --- | --- |
-| `apps/scopecheck`, `apps/packcheck` | Separate runnable apps |
-| `packages/engine` | Domain-neutral engine (must not import app code) |
-| `packages/ui` | Components shared by both apps |
-| `services/extraction-api` | Cloudflare Worker (extraction profiles, limits, admission counter) |
-| `tools/benchmark` | Live-extraction benchmark, model comparison, fixture builder |
-| `samples/` | Fictional sample documents (`scopecheck*`, `packcheck*`, realistic and fresh-validation sets with pre-registered labels), `fixtures/` (app inputs), `benchmark-results/` |
-| `.kiro/` | Steering and specs (requirements, design, tasks) |
-| `docs/build-log.md` | Factual build record |
-| `docs/model-comparison.md`, `docs/handoff-task-6.md` | Model decision; Task 6 handoff |
-| `docs/reference/scopecheck-build-brief.md` | The original build brief (historical; approved amendments in `.kiro/steering/brief.md` take precedence) |
-| `docs/hooks.md`, `docs/reviews/` | Hooks (configured vs actually run); source review and its resolution |
-| `.kiro/specs/` | Foundation spec plus focused specs for ScopeCheck, PackCheck and the haunted interface; `README.md` there is the index with introduction dates |
-
-## Commands (Node 20+)
-
-```bash
-npm install
-npm run dev:scopecheck      # http://localhost:5173
-npm run dev:packcheck       # http://localhost:5174
-npm run build:scopecheck    # builds independently of PackCheck
-npm run build:packcheck     # builds independently of ScopeCheck
-npm run preview -w @skeleton-key/scopecheck   # serve the built app on http://localhost:4173 (PackCheck: 4174)
-npm run lint && npm run typecheck && npm test && npm run build
-npm run a11y                # browser checks of both apps in both modes (build first; needs Playwright's Chromium)
-```
-
-## Try the sample mode
-
-1. `npm install`, then `npm run dev:scopecheck` (or `dev:packcheck`) and open the printed address.
-2. The amber **SAMPLE MODE** banner is always visible. Nothing is uploaded and no model is called.
-3. ScopeCheck: comparison table of RFQ items against each quotation (switch to the free-text sample with the selector). PackCheck: attachment checks and field checks across the pack.
-4. Every item with a source shows the cited text highlighted. **Needs review** items and **Not evaluated** comparisons (which did *not* run, with the reason and the blocked input) have their own sections.
-5. Try: *Correct this value* on a held value (for example the ambiguous start date in PackCheck), *Accept* or *Dismiss* a finding, *confirm coverage* of a document (an omission only becomes a confirmed finding after that), then *Download CSV / text* (all states are kept) or *Print*.
-6. Keyboard: Tab through the page (skip link first), Enter or Space on buttons and links; the correction editor takes focus when it opens, and results are announced to screen readers.
-
-Regenerate the fixtures from the samples with `npm run fixtures -w @skeleton-key/benchmark`. Screenshots: `docs/screenshots/`.
-
-## Roadmap (what is next, in order)
-
-1. Merge PR #4 (samples, benchmark, model decision) and PR #5 (both apps in sample mode, reviewed).
-2. **Real documents, multi-chunk first:** original multi-page documents for both apps with expected outputs committed before extraction; upload, chunking, live wiring. A failed or missed chunk can never yield a confirmed absence. Specs: `scopecheck-real-documents`, `packcheck-real-documents`.
-3. Production limits (task 5.5) and validation of the Workers AI binding and the deployed Durable Object, before any public access.
-4. The shared haunted interface (`haunted-ui`): Lights off (haunted) and Lights on (plain), both with readable evidence, keyboard access, AA contrast and reduced motion.
-5. Then 2 to 5 quotations, DOCX and supplier-specific clarification email drafts, before final regression.
-
-Targets: ScopeCheck upload workflow deployed by **22 November**; PackCheck working upload workflow by **29 November**. If scope must shrink, both apps, evidence quality and the review states (Needs review, Not evaluated, coverage) are protected; DOCX, extra quotations, email drafts and decoration go first.
-
-## Measured, not promised
-
-The model (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) was chosen over `@cf/meta/llama-3.1-8b-instruct` by a pre-registered comparison on fictional documents (`docs/model-comparison.md`). The benchmark envelope is single-chunk text PDFs of up to about 400 characters; nothing beyond it is validated. The 70B model misses some extractions (for example one specification in the free-text sample), and the apps show such gaps as Not evaluated rather than hiding them.
+Original SVG art only, listed in `docs/art.md`; no stock photos, no sound. Fonts are self-hosted, each with its licence file beside it in `packages/ui/src/fonts/`: **Pirata One** (SIL OFL 1.1, unmodified) for the app title, and **Special Elite** (Apache License 2.0; a subset, see `packages/ui/src/fonts/README.md`) for the séance card and stage names. Data text stays in the system sans-serif.
 
 ## Licence
 
-MIT
+MIT. All sample documents, companies and amounts are fictional.

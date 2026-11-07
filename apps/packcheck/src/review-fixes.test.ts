@@ -3,7 +3,7 @@ import { applyCorrection, confirmDocumentCoverage, emptySession, evaluateSession
 import { packCheckAdapter } from './adapter';
 import { FIXTURES } from './fixtures';
 
-// Regression tests for the source review of Task 6 (docs/reviews/task-6-source-review.md), PackCheck side.
+// Regression tests for the source review of Task 6 (docs/archive/task-6-source-review.md), PackCheck side.
 
 const pack = FIXTURES[0]!;
 const run = (f: Fixture, s: SessionState = emptySession(), at = 1) => evaluateSession(packCheckAdapter, f, s, at);

@@ -69,7 +69,7 @@ function editQuoteA(f: Fixture, edit: (block: { text: string }, claims: Claim[])
   return out;
 }
 
-describe('D9: the unit finding is titled as unclear while it is Needs review', () => {
+describe('the unit finding is titled as unclear while it is Needs review', () => {
   it('"Unit unclear for <code>", not a statement about units differing', () => {
     const f = clone(FIXTURES.find((x) => x.id === 'scopecheck-fulllength')!);
     const item = run(f).items.find((i) => i.finding.code === 'unit.ambiguous')!;

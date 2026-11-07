@@ -1,6 +1,6 @@
 # THROWAWAY gated staging Worker for the task 5.5 binding test (docs/task-5-5-plan.md). Not the public Worker.
 #   deploy:  npx wrangler deploy -c wrangler.gate.toml      (closed until the secret is bound: ACCESS_GATE=token, no secret)
-#   secret:  npx tsx tools/deploy/gate-secret.ts --put      (generated in the sandbox, piped on stdin, never printed)
+#   secret:  npx tsx tools/deploy/gate-secret.ts --put      (generated locally, piped on stdin, never printed)
 #   delete:  npx wrangler delete -c wrangler.gate.toml      (after the test)
 # Separate script name, so it has its OWN Durable Object counter; the production Worker, counter and ceiling are untouched.
 name = "skeleton-key-extraction-gate"

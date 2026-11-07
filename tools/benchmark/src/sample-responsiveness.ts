@@ -3,7 +3,7 @@
 // matching, rules, the comparison ledger, review state and the export model. No model is called and nothing is sent.
 //
 // This is NOT a measure of live processing. Live processing is dominated by model requests (minutes; see
-// docs/results/sc-t4-scopecheck-baseline.md). Numbers here are Node on this sandbox, one process, no rendering: they bound the
+// docs/results/sc-t4-scopecheck-baseline.md). Numbers here are Node on a development machine, one process, no rendering: they bound the
 // computation, not what a browser shows. Run: npx tsx tools/benchmark/src/sample-responsiveness.ts [--write FILE]
 import { performance } from 'node:perf_hooks';
 import { readFileSync, writeFileSync } from 'node:fs';

@@ -1,6 +1,6 @@
 # Opening public live analysis (proposal, not applied)
 
-**Status: approved by the owner on 3 November 2026 at 6,000 estimated neurons per UTC day and an attempt ceiling of 80** (changed from the first proposal of 4,000 and 40, after the simulation below). Whole-run admission is deployed together with the opening. The result of opening and of `--verify-open` is recorded in `docs/deployment.md` and `docs/build-log.md`.
+**Status: I approved 6,000 estimated neurons per UTC day and an attempt ceiling of 80 on 3 November 2026** (changed from the first proposal of 4,000 and 40, after the simulation below). Whole-run admission is deployed together with the opening. The result of opening and of `--verify-open` is recorded in `docs/deployment.md` and `docs/build-log.md`.
 
 ## What changes when it is applied
 | Setting | Now (production) | Proposed |

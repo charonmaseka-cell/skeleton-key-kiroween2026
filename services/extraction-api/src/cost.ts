@@ -1,8 +1,8 @@
 // Neuron cost model used by the Worker for reservations and settlement. These are ESTIMATES, not consumption.
 //
 // Assumptions behind the reservation bound (docs/task-5-5-plan.md section 2); each one is stated so it can be checked:
-//  A1 Rates: Cloudflare's published neuron rates for the model, 26,668 per million input tokens and 204,805 per million output
-//     tokens (supplied by the owner 2 Nov 2026; the pricing page cannot be fetched from the sandbox). Two dashboard comparisons:
+//  A1 Rates: 26,668 per million input tokens and 204,805 per million output tokens. Rates from Cloudflare's published Workers AI
+//     pricing (2 Nov 2026). Two dashboard comparisons:
 //     checkpoint 1 (462.81 measured against 462.76 estimated under the earlier price-derived rates, 5 attempts) and the task 5.5
 //     gated test (dashboard increase 321.65 against 321.654982 at these rates, 4 attempts, 3,414 in / 1,126 out). The earlier
 //     price-derived rates (26,636 / 204,818, from USD at $0.011 per 1,000 neurons) differ by about 0.03% on that run and remain

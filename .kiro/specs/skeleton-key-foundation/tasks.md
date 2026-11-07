@@ -6,7 +6,7 @@ One milestone slice per PR. Checks must pass before each PR. Update `docs/build-
 
 The original task numbering and history above are kept. These corrections reflect what exists and what is next.
 
-**State.** Both apps run end to end in clearly labelled **sample mode** on fictional fixtures (recorded model claims; rules run in the browser). They do **not** yet process an uploaded document. Merged: PRs #1 to #3. PR #4 (Tasks 4 to 5: samples, benchmark, 70B model decision) is ready for review and awaits merge; PR #5 (Task 6) is a draft on top of it and has passed a source review (`docs/reviews/`). Production admission is closed (`DAILY_ADMISSION_CEILING = "0"`).
+**State.** Both apps run end to end in clearly labelled **sample mode** on fictional fixtures (recorded model claims; rules run in the browser). They do **not** yet process an uploaded document. Merged: PRs #1 to #3. PR #4 (Tasks 4 to 5: samples, benchmark, 70B model decision) is ready for review and awaits merge; PR #5 (Task 6) is a draft on top of it and has passed a source review (`docs/archive/`). Production admission is closed (`DAILY_ADMISSION_CEILING = "0"`).
 
 **Delivery order (next engineering milestone: real documents).**
 1. Merge PR #4; rebase PR #5 onto `main`, confirm its base is `main` and its diff is Task 6 only; merge after review.

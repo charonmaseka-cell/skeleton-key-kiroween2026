@@ -1,23 +1,24 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { featureBlock, readSpecs, replaceBlock } from './sync-from-specs';
 
-// D4 (beta sweep): the README status and privacy note describe what is deployed, not what was planned.
+// The README describes what is deployed and what leaves the device, and its generated block is in step with the specs.
+const ROOT = new URL('../../', import.meta.url).pathname;
 const readme = readFileSync(new URL('../../README.md', import.meta.url), 'utf8');
-const status = readme.slice(readme.indexOf('**Status ('), readme.indexOf('## The haunted interface'));
 
-describe('README status and privacy note', () => {
-  it('says live analysis is open at 6,000 neurons and 80 attempts per UTC day, and no longer says admission is closed', () => {
-    expect(status).toMatch(/live analysis is open/i);
-    expect(status).toMatch(/6,000 estimated neurons and 80 attempts per UTC day/);
-    expect(status).not.toMatch(/admission to the extraction Worker is closed|none is connected yet|DAILY_ADMISSION_CEILING = "0"/);
+describe('README', () => {
+  it('links both live apps and says exactly what leaves the device', () => {
+    expect(readme).toContain('https://skeleton-key-scopecheck.pages.dev/');
+    expect(readme).toContain('https://skeleton-key-packcheck.pages.dev/');
+    expect(readme).toMatch(/only the \*extracted text\* is sent to an AI service/);
+    expect(readme).toMatch(/original files are never uploaded/);
+    expect(readme).not.toMatch(/planned design|none is connected yet|admission .* is closed/i);
   });
-  it('has a current privacy note, not a planned one: extracted text is sent, not all processing is local', () => {
-    expect(readme).toMatch(/\*\*Privacy note:\*\*/);
-    expect(readme).not.toMatch(/Privacy note \(planned design\)/);
-    expect(status).toMatch(/extracted text is sent/);
-    expect(status).toMatch(/Not all processing is local/);
+  it('names the extraction profile behind each measured result', () => {
+    expect(readme).toMatch(/`scopecheck\.quote\.v1`/);
+    expect(readme).toMatch(/`scopecheck\.quote\.v2`/);
   });
-  it('the generated feature block and spec status are in step with the specs (docs:sync leaves nothing to change)', () => {
-    expect(readme).toMatch(/<!-- features:start -->|## Feature list/);
+  it('the generated feature block matches the specs (npm run docs:sync leaves nothing to change)', () => {
+    expect(replaceBlock(readme, 'features', featureBlock(readSpecs(ROOT)))).toBe(readme);
   });
 });

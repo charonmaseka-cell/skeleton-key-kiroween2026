@@ -25,7 +25,7 @@ export const MODELS: Record<string, ModelConfig> = {
     id: BASELINE_MODEL,
     role: 'baseline',
     neuronsPerMillion: { input: 26_668, output: 204_805 },
-    ratesBasis: 'PUBLISHED NEURON RATES: 26,668 per million input tokens and 204,805 per million output tokens (Cloudflare, supplied by the owner on 2 Nov 2026). These are prices, not consumption. Dashboard comparisons: checkpoint 1 (462.81 against 462.76 estimated, under the earlier price-derived rates 26,636 and 204,818) and the task 5.5 gated test (dashboard increase 321.65 against 321.654982 at these rates, 4 attempts). Results written before this change keep their original notes and figures.',
+    ratesBasis: 'PUBLISHED NEURON RATES: 26,668 per million input tokens and 204,805 per million output tokens (published Cloudflare Workers AI pricing, 2 Nov 2026). These are prices, not consumption. Dashboard comparisons: checkpoint 1 (462.81 against 462.76 estimated, under the earlier price-derived rates 26,636 and 204,818) and the task 5.5 gated test (dashboard increase 321.65 against 321.654982 at these rates, 4 attempts). Results written before this change keep their original notes and figures.',
   },
   [SECOND_CANDIDATE]: {
     id: SECOND_CANDIDATE,

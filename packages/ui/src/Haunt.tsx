@@ -73,7 +73,9 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
   const [glowId, setGlow] = useState<string | null>(null);
   const [pointer, setPointer] = useState<Pointer | null>(null);
   const pointerTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [whisper, setWhisper] = useState<{ id: string; text: string } | null>(null);
+  // Only the id is kept. The words are built from the CURRENT result's finding every time they are shown (see `whisper` below), so a
+  // line said about one result can never outlive it: a different result has no such finding and shows nothing.
+  const [whisperId, setWhisperId] = useState<string | null>(null);
   const whisperShown = useRef(false);
   const [drip, setDrip] = useState(0);
   const [boo, setBoo] = useState(0);
@@ -194,8 +196,8 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
       const next = pick();
       if (!next || interactionOpen()) return arm(); // wait for the next quiet stretch
       whisperShown.current = true;
-      setWhisper({ id: next.finding.id, text: view?.voice.whisper(next.finding.message) ?? '' });
-      hide = setTimeout(() => setWhisper(null), WHISPER_SHOWN_MS);
+      setWhisperId(next.finding.id);
+      hide = setTimeout(() => setWhisperId(null), WHISPER_SHOWN_MS);
     };
     const arm = () => {
       clearTimeout(t);
@@ -314,6 +316,16 @@ export function HauntProvider({ view, children }: { view?: SessionView; children
     (id: string | undefined) => (id ? { onMouseEnter: () => setGlow(id), onMouseLeave: () => setGlow(null), onFocus: () => setGlow(id), onBlur: () => setGlow(null) } : {}),
     [],
   );
+
+  // A new result (another sample, or a live result replacing it) starts afresh: nothing said about the old one carries over.
+  useEffect(() => {
+    setWhisperId(null);
+    whisperShown.current = false;
+  }, [fixtureId]);
+  const whisper = useMemo(() => {
+    const item = whisperId === null ? undefined : open.find((i) => i.finding.id === whisperId);
+    return item && view ? { id: item.finding.id, text: view.voice.whisper(item.finding.message) } : null;
+  }, [whisperId, open, view]);
 
   const value = useMemo<Haunt>(
     () => ({ effects, unresolved, open, goNext, jumpTo, glowId, cellProps, whisper, voice: view?.voice ?? null, fixtureId, trickOrTreat, busy }),

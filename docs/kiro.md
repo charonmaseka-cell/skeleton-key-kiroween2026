@@ -27,7 +27,7 @@ The app specs reference foundation requirements by ID instead of copying them, s
 - **Engine module tests:** when an engine file is saved, run that module's tests.
 - **Golden fixtures on rule change:** when a rule or adapter file is saved, recompute every rule outcome on every sample and report anything that changed. In a deliberate check, reverting one severity rule left all 42 golden tests passing, but this hook reported **10 changed outcomes**: a regression the tests alone would have missed.
 
-Both hook commands are verified, and CI runs the same checks on every pull request.
+I verified both hook commands by running them directly. They have not yet fired automatically in a Kiro session (the workspace was reported as untrusted), so I make no claim that they do. CI does not run the hooks; it runs the checks they stand for on every pull request: all engine tests, both apps' golden tests, and a test that fails when the committed outcome snapshot differs from the outcomes computed now. Details are in `docs/hooks.md`.
 
 ## What spec-driven development changed
 

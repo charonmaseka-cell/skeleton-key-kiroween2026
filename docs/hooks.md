@@ -2,6 +2,16 @@
 
 Rule from `.kiro/steering/workflow.md`: never claim a hook ran unless it did. **CI in GitHub (Web) is the authoritative check**; hooks are a convenience that gives earlier feedback in a local Kiro IDE or CLI session.
 
+## Where this stands (7 Nov 2026)
+
+- **Verified:** both hook commands, by running them directly with hook-like input (results in the table below).
+- **Not verified:** automatic execution in a Kiro session. No hook has fired on its own. The blocker observed was Kiro's own log for the workspace, which reported it as untrusted, so hooks did not run (I read that in the session log and have not reproduced its text here). I have stopped troubleshooting it for now.
+- **What CI runs.** The hooks themselves are not run in CI; the workflow (`.github/workflows/ci.yml`) runs the checks they stand for, on every pull request and on pushes to `main`:
+  - `engine-module-tests` corresponds to `npm test`, which runs every engine test, a superset of the one module a save would run.
+  - `golden-fixtures-on-rule-change` corresponds to `npm test` too: it runs both apps' golden and review-regression tests, and `tools/hooks/hooks.test.ts`, which fails when the committed outcome snapshot (`tools/hooks/golden-outcomes.json`) differs from the outcomes computed now. So a rule change that alters any outcome fails CI until the snapshot is updated on purpose, which is the same signal the hook reports on save.
+  - The same workflow also runs `npm run lint`, `npm run typecheck` and `npm run build`, and a separate `a11y` job runs the browser checks (`tools/a11y/check.ts`).
+- **If I add a hook through the IDE panel later,** I will validate and commit the configuration it generates, keep a single active copy of each hook, and update this page.
+
 ## Status (2026-11-03)
 
 | Hook | Trigger | Purpose | Configured | Actually run |

@@ -191,6 +191,61 @@ describe('Next finding scrolls to the item, then focuses it', () => {
   });
 });
 
+describe('the idle whisper belongs to the current result', () => {
+  const CODE = /\b[A-Z]{1,4}-\d+\b/g;
+  it('after a live result replaces the sample, no whisper text names an item that is not in the live result', async () => {
+    const standard = FIXTURES.find((f) => f.id === 'scopecheck-standard')!;
+    const liveCodes = new Set(standard.docs.flatMap((d) => d.blocks.flatMap((b) => b.text.match(CODE) ?? [])));
+    const SOURCE: Record<string, string> = { 'rfq.pdf': 'rfq', 'quote-a.pdf': 'quote-a' };
+    const parse = async (f: File, id: string) => standard.docs.find((d) => d.id === SOURCE[f.name])!.blocks.map((b) => ({ ...b, docId: id })) as never;
+    const fetchImpl = (async (url: string, init: RequestInit) => {
+      if (/\/run(\/close)?$/.test(String(url))) return new Response(JSON.stringify({ runId: 1, token: 't'.repeat(32), holdNeurons: 1, attempts: 1, budget: 4000, remaining: 3999, closed: true }), { status: 200 });
+      const body = JSON.parse(String(init.body)) as { blocks: { id: string; text: string }[] };
+      const src = standard.docs.find((d) => body.blocks.every((b) => d.blocks.some((x) => x.id === b.id && x.text === b.text)));
+      const ids = new Set(body.blocks.map((b) => b.id));
+      return new Response(JSON.stringify({ claims: (src!.claims as { blockId: string }[]).filter((c) => ids.has(c.blockId)), meta: {} }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    localStorage.setItem(STORAGE_KEY, 'off');
+    render(<App deps={{ parse, fetchImpl }} baseUrl="https://worker.example" />);
+    const line = document.querySelector('[data-whisper]')!;
+    await advance(IDLE_MS + 100);
+    const sampleWhisper = line.textContent ?? '';
+    const sampleCodes = sampleWhisper.match(CODE) ?? [];
+    expect(sampleCodes.length).toBeGreaterThan(0); // the sample did whisper about one of its own items
+    expect(sampleCodes.some((c) => !liveCodes.has(c))).toBe(true); // and that item is not in the live result: the case that went wrong
+
+    const file = (n: string) => new File(['%PDF-1.4 fake'], n, { type: 'application/pdf' });
+    fireEvent.change(screen.getByLabelText('RFQ'), { target: { files: [file('rfq.pdf')] } });
+    fireEvent.change(screen.getByLabelText('Quotation 1'), { target: { files: [file('quote-a.pdf')] } });
+    await advance(50);
+    const analyse = screen.getByRole('button', { name: /^Analyse \(sends extracted text\)/ });
+    for (let i = 0; i < 30 && (analyse as HTMLButtonElement).disabled; i++) await advance(100);
+    expect((analyse as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(analyse);
+    for (let i = 0; i < 30 && !screen.queryByRole('region', { name: 'Live mode' }); i++) await advance(100);
+    expect(screen.getByRole('region', { name: 'Live mode' })).toBeTruthy();
+
+    // right after the result is replaced, and again after the whisper's whole idle time, nothing names a sample item
+    const named = () => (document.querySelector('[data-whisper]')!.textContent ?? '').match(CODE) ?? [];
+    expect(named().filter((c) => !liveCodes.has(c))).toEqual([]);
+    await advance(IDLE_MS + 100);
+    const text = document.querySelector('[data-whisper]')!.textContent ?? '';
+    expect(named().filter((c) => !liveCodes.has(c)), text).toEqual([]);
+    for (const c of named()) expect(liveCodes.has(c)).toBe(true);
+  });
+
+  it('shows nothing when the current result has no open item', async () => {
+    start();
+    const line = document.querySelector('[data-whisper]')!;
+    await advance(IDLE_MS + 100);
+    expect(line.textContent).not.toBe('');
+    fireEvent.change(screen.getByLabelText('Choose a sample set'), { target: { value: 'scopecheck-layout' } });
+    await advance(50);
+    expect(document.querySelector('[data-whisper]')!.textContent).not.toMatch(/FD-4215|LB-31|SP-53/); // never words about the previous sample
+  });
+});
+
 describe('HU-19 idle whisper', () => {
   it('after 45 s with no input one polite line names the next item, is a link to it, and never comes again', async () => {
     start();

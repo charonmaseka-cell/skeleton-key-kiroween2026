@@ -35,8 +35,8 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 |---|---|---|
 | `haunted-ui` | 11 | 0 |
 | `packcheck-real-documents` | 4 | 2 |
-| `scopecheck-real-documents` | 14 | 3 |
-| `skeleton-key-foundation` | 41 | 13 |
+| `scopecheck-real-documents` | 15 | 2 |
+| `skeleton-key-foundation` | 43 | 11 |
 
 **haunted-ui** (delivered):
 - HU-T0: Visual system, Lights-on behaviour and the palette contrast test
@@ -64,6 +64,7 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - SC-T2b: Output-aware chunking
 - SC-T4: Live baseline on SC-T1, done 2026-11-01
 - SC-T5: Foundation task 9 live wiring for ScopeCheck
+- SC-T6: Foundation task 5.5 limits and deployment validation
 - SC-T7: Deploy ScopeCheck
 - SC-T10: Supplier-specific clarification email drafts
 - SC-T11: Requirement-line identity, multi-item blocks and evidence-empty items
@@ -99,10 +100,12 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 - 4: Fictional samples and expected outputs
 - 4.1: Original RFQ + 2 quotes
 - 4.2: Original grant pack
+- 5: Live-extraction benchmark
 - 5.1: Minimal PDF.js Node/browser parser to Blocks with pages and bbox; scanned PDF rejection
 - 5.2: (chunker in engine; client bounds via attempt budget and admission ceiling) Chunker and ExtractionClient with…
 - 5.3: `tools/benchmark` ran on both sample sets and a layout variant with two candidate models
 - 5.4: Results and model/scope decision recorded in `docs/build-log.md` and `docs/model-comparison.md`
+- 5.5: Done 2026-11-07
 - 6: Minimal app shells on labelled fixtures
 - 6.1: `packages/ui` primitives
 - 6.2: ScopeCheck Adapter
@@ -119,11 +122,8 @@ Two modes, one product. **Lights off** is the haunted presentation (the default)
 **Open:**
 - `packcheck-real-documents` PC-T4: Attachment mapping UI with manual remap
 - `packcheck-real-documents` PC-T5: Live measurement on PC-T1 within an authorised attempt budget
-- `scopecheck-real-documents` SC-T6: Foundation task 5.5 limits and deployment validation
 - `scopecheck-real-documents` SC-T8: 2 to 5 quotations
 - `scopecheck-real-documents` SC-T9: DOCX input
-- `skeleton-key-foundation` 5: Live-extraction benchmark
-- `skeleton-key-foundation` 5.5: OPEN. Derive and set `DAILY_ADMISSION_CEILING`, `MAX_CHARS`, `MAX_BLOCKS`, `MAX_BLOCK_CHARS` and the profile…
 - `skeleton-key-foundation` 7: First deployments
 - `skeleton-key-foundation` 7.3: Build log entry for M1 with measured values
 - `skeleton-key-foundation` 10: End-to-end live run for RFQ + 2 quotes and for the grant pack; extraction/matching/rules measured separately

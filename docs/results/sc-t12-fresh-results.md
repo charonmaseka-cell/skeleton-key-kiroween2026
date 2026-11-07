@@ -101,3 +101,17 @@ Identity: 1 uncertain (quotation A `p1-l16`, `multiple_codes`: `ISO-17034`, `CL-
 - **Attempts: 14 of 16** (12 answered, 2 dispatched and never answered; 0 repairs). 2 unused. The earlier 3 unused attempts are still unused.
 - **Measured tokens (answered calls):** prompt 6,217, completion 5,326. Unknown for the 2 unanswered calls.
 - **Estimated charges** (published rates, 1.1 margin; not dashboard-confirmed): **2,109.2 of 3,000** for the batch = 1,382.1 from the 12 answered calls + 727.1 standing reservations for the 2 unanswered ones. Daily ledger: 6,399.9 of 8,000 (it was 4,290.7 at the start). The model's own usage field reported 1,256.6 neurons for the 12 answered calls; that is the provider's per-call figure, also not dashboard-confirmed.
+
+## Re-run under `scopecheck.quote.v2` (7 November 2026)
+The same fresh set, run once more through the production Worker with the tender under `scopecheck.rfq.v1` and both quotations under `scopecheck.quote.v2` (which also asks for each line's total). Recording: `samples/benchmark-results/live-sc-t12-fresh-quote-v2-2026-11-07T18-48-22-626Z.json`, claims unedited; the accepted recording above is unchanged. Same 12 parts, concurrency 1, no retry; hard stop 5,000 neurons, hold 3,558.822, **1,424.194 settled**; about 194 s for the 12 parts.
+
+| | `quote.v1` (1 Nov) | `quote.v2` (7 Nov) |
+| --- | --- | --- |
+| Expected findings exact | 12 of 12 | 12 of 12 |
+| Missed / false critical / over-confident | 0 / 0 / 0 | 0 / 0 / 0 |
+| Produced | 13 (1 unexpected Needs review) | 12 |
+| Line totals extracted | not asked | 0 (the documents state none) |
+| Price findings | none | none |
+| Comparisons (agree / flagged / not evaluated) | 48 (33 / 6 / 9) | 67 (36 / 5 / 26) |
+
+The 19 added comparison rows all read "no line total was extracted for this line"; none says "agrees". Extraction counts (correct / differ from label / held / missed): tender 24 / 12 / 0 / 0, quotation A 30 / 11 / 1 / 3, quotation B 43 / 2 / 0 / 1 (before: 24 / 11 / 0 / 1, 30 / 10 / 2 / 3, 44 / 1 / 0 / 1). The model is not deterministic: 16 of 123 values differ in wording from the first run, and the `SP-5302` quantity was read correctly this time, so the earlier unexpected finding did not recur. No rule or label was changed after the result. Score it with `npx tsx --tsconfig packages/ui/tsconfig.json tools/benchmark/src/score-fresh.ts <recording>`.

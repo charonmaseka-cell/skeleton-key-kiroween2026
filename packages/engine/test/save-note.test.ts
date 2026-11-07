@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { decide, saveNote, type Finding } from '../src';
 
-// D1 (beta sweep): a note saved on its own is kept in the current decision and in its history.
+// A note saved on its own is kept in the current decision and in its history.
 const finding = { id: 'f1', fingerprint: 'fp' } as unknown as Finding;
 
 describe('saveNote', () => {

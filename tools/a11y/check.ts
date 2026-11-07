@@ -418,7 +418,7 @@ async function main() {
           await check('visible focus ring on every control reached by Tab', await focusRingWalk(page));
           await check('decoration overlaps no text or control', await motifOverlaps(page));
           await check('Next finding scrolls the target into view and focuses it', await nextFindingInView(page));
-          // D7 (beta sweep): section links and the small text controls are at least 24 px tall at narrow widths
+          // Section links and the small text controls are at least 24 px tall at narrow widths
           if (width === 375) {
             await check('touch targets: section links, "Open the item" and "Correct this value" are at least 24 px tall', await page.evaluate(() => {
               const small: string[] = [];

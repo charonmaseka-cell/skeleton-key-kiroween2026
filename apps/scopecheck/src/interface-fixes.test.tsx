@@ -10,7 +10,7 @@ import { App } from './App';
 import { STANDARD_FIRST } from './test-fixtures';
 import { FIXTURES } from './fixtures';
 
-// One regression test per defect from the beta sweep of 52107e2 (D1, D2, D5, D6, D8; D4, D7 and D9 are checked in their own files).
+// Regression tests for the interface fixes found in the beta acceptance test: saved notes, export marking, failure reasons, duplicate files, plain sample names and touch targets.
 afterEach(cleanup);
 
 const standard = FIXTURES.find((f) => f.id === 'scopecheck-standard')!;
@@ -35,7 +35,7 @@ function setup(opts: { fail?: (n: number) => { status: number; code: string } | 
 const analyseBtn = () => screen.getByRole('button', { name: /^Analyse \(sends extracted text\)/ }) as HTMLButtonElement;
 const exportPre = () => document.querySelector('#exp-h')!.closest('section')!.querySelector('pre')!.textContent!;
 
-describe('D1: a note typed after a decision is saved', () => {
+describe('a note typed after a decision is saved', () => {
   it('decide, then type a note, then export: the note is in the text export, the CSV-bound model and the decision history', async () => {
     const user = userEvent.setup();
     setup();
@@ -66,7 +66,7 @@ describe('D1: a note typed after a decision is saved', () => {
   });
 });
 
-describe('D2: the export line says what the export is marked as', () => {
+describe('the export line says what the export is marked as', () => {
   it('sample: "Marked SAMPLE (fictional)."; live: marked as a live analysis of your documents, and the export is marked live', async () => {
     const user = userEvent.setup();
     setup();
@@ -84,7 +84,7 @@ describe('D2: the export line says what the export is marked as', () => {
   });
 });
 
-describe('D5: each failed part says why', () => {
+describe('each failed part says why', () => {
   it('a timed-out part shows the plain reason from the error text next to the count', async () => {
     const user = userEvent.setup();
     setup({ fail: (n) => (n === 2 ? { status: 504, code: 'timeout' } : null) });
@@ -103,7 +103,7 @@ describe('D5: each failed part says why', () => {
   });
 });
 
-describe('D6: the same file in two slots is flagged, and Analyse stays available', () => {
+describe('the same file in two slots is flagged, and Analyse stays available', () => {
   it('warns when one file (name, size, content) is chosen twice; a different file does not warn', async () => {
     const user = userEvent.setup();
     setup();
@@ -122,7 +122,7 @@ describe('D6: the same file in two slots is flagged, and Analyse stays available
   });
 });
 
-describe('D8: the sample picker shows plain names; the model name is behind Details', () => {
+describe('the sample picker shows plain names; the model name is behind Details', () => {
   it('no option names the model, and the Details toggle of the full-length sample does', () => {
     setup({ fixtures: FIXTURES });
     const options = [...(screen.getByLabelText('Choose a sample set') as HTMLSelectElement).options].map((o) => o.textContent!);
@@ -133,7 +133,7 @@ describe('D8: the sample picker shows plain names; the model name is behind Deta
   });
 });
 
-describe('D7: small controls are at least 24 px tall on narrow screens', () => {
+describe('small controls are at least 24 px tall on narrow screens', () => {
   it('both apps\' stylesheets set the minimum for section links, "Open the item" and "Correct this value" at 640 px and below', () => {
     for (const app of ['scopecheck', 'packcheck']) {
       const css = readFileSync(resolve(process.cwd(), `apps/${app}/src/index.css`), 'utf8');

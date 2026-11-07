@@ -3,7 +3,7 @@ import { applyCorrection, confirmDocumentCoverage, emptySession, evaluateSession
 import { scopeCheckAdapter } from './adapter';
 import { FIXTURES } from './fixtures';
 
-// Regression tests for the source review of Task 6 (docs/reviews/task-6-source-review.md).
+// Regression tests for the source review of Task 6 (docs/archive/task-6-source-review.md).
 // Each one fails against the behaviour the review reported.
 
 const standard = FIXTURES.find((f) => f.id === 'scopecheck-standard')!;

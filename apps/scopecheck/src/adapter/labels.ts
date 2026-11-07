@@ -42,4 +42,5 @@ export const SCOPE_THEME: Record<string, ThemeEntry> = {
   'quantity.differs': { name: 'miscount', plural: 'miscounts', plain: 'quantity difference', plainPlural: 'quantity differences' },
   'spec.differs': { name: 'curse', plural: 'curses', plain: 'specification difference', plainPlural: 'specification differences' },
   'exclusion.stated': { name: 'fine-print spectre', plural: 'fine-print spectres', plain: 'stated exclusion', plainPlural: 'stated exclusions' },
+  'price.arithmetic': { name: 'phantom maths', plural: 'phantom maths', plain: 'line total difference', plainPlural: 'line total differences' },
 };

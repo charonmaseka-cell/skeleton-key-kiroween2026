@@ -1,0 +1,1301 @@
+{
+  "note": "Offline. Exact request bodies and Worker messages built from the sample PDFs and frozen chunk plans; no model call. Reservations are budget charges at published rates x 1.1 (budget.ts), not consumption.",
+  "cellsRuleBytes": 297,
+  "largest": {
+    "bodyBytes": "scopecheck-realistic/rfq#6",
+    "workerChars": "scopecheck-realistic/rfq#6",
+    "blocks": "scopecheck-realistic/rfq#6",
+    "longestBlockChars": "scopecheck-fresh/quote-b#3",
+    "longestBlockWithCellsChars": "scopecheck-fresh/quote-a#4",
+    "messageBytes": "scopecheck-realistic/rfq#6"
+  },
+  "maxima": {
+    "bodyBytes": 4753,
+    "workerChars": 3471,
+    "blocks": 48,
+    "longestBlockChars": 118,
+    "longestBlockWithCellsChars": 142,
+    "reserveStrictRepair": 516,
+    "reserveCalibratedRepair": 427.9
+  },
+  "permitted": [
+    {
+      "maxBodyBytes": 8192,
+      "perProfile": [
+        {
+          "profile": "scopecheck.rfq.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 9782,
+          "strict": 626.4,
+          "calibrated": 483.1
+        },
+        {
+          "profile": "scopecheck.quote.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 9921,
+          "strict": 630.5,
+          "calibrated": 485.2
+        },
+        {
+          "profile": "packcheck.grant.v1",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 9991,
+          "strict": 565,
+          "calibrated": 418.6
+        },
+        {
+          "profile": "packcheck.grant.v2",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 10559,
+          "strict": 581.6,
+          "calibrated": 426.9
+        }
+      ],
+      "worstStrict": 630.5,
+      "worstCalibrated": 485.2
+    },
+    {
+      "maxBodyBytes": 12288,
+      "perProfile": [
+        {
+          "profile": "scopecheck.rfq.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 13878,
+          "strict": 746.4,
+          "calibrated": 543.1
+        },
+        {
+          "profile": "scopecheck.quote.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 14017,
+          "strict": 750.5,
+          "calibrated": 545.2
+        },
+        {
+          "profile": "packcheck.grant.v1",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 14087,
+          "strict": 685,
+          "calibrated": 478.6
+        },
+        {
+          "profile": "packcheck.grant.v2",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 14655,
+          "strict": 701.6,
+          "calibrated": 486.9
+        }
+      ],
+      "worstStrict": 750.5,
+      "worstCalibrated": 545.2
+    },
+    {
+      "maxBodyBytes": 16384,
+      "perProfile": [
+        {
+          "profile": "scopecheck.rfq.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 17974,
+          "strict": 866.5,
+          "calibrated": 603.1
+        },
+        {
+          "profile": "scopecheck.quote.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 18113,
+          "strict": 870.5,
+          "calibrated": 605.2
+        },
+        {
+          "profile": "packcheck.grant.v1",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 18183,
+          "strict": 805,
+          "calibrated": 538.6
+        },
+        {
+          "profile": "packcheck.grant.v2",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 18751,
+          "strict": 821.6,
+          "calibrated": 546.9
+        }
+      ],
+      "worstStrict": 870.5,
+      "worstCalibrated": 605.2
+    },
+    {
+      "maxBodyBytes": 32768,
+      "perProfile": [
+        {
+          "profile": "scopecheck.rfq.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 34358,
+          "strict": 1346.5,
+          "calibrated": 843.2
+        },
+        {
+          "profile": "scopecheck.quote.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 34497,
+          "strict": 1350.6,
+          "calibrated": 845.2
+        },
+        {
+          "profile": "packcheck.grant.v1",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 34567,
+          "strict": 1285,
+          "calibrated": 778.6
+        },
+        {
+          "profile": "packcheck.grant.v2",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 35135,
+          "strict": 1301.7,
+          "calibrated": 787
+        }
+      ],
+      "worstStrict": 1350.6,
+      "worstCalibrated": 845.2
+    },
+    {
+      "maxBodyBytes": 65536,
+      "perProfile": [
+        {
+          "profile": "scopecheck.rfq.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 67126,
+          "strict": 2306.6,
+          "calibrated": 1323.2
+        },
+        {
+          "profile": "scopecheck.quote.v1",
+          "maxOutputTokens": 1500,
+          "messageBytesBound": 67265,
+          "strict": 2310.7,
+          "calibrated": 1325.3
+        },
+        {
+          "profile": "packcheck.grant.v1",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 67335,
+          "strict": 2245.1,
+          "calibrated": 1258.7
+        },
+        {
+          "profile": "packcheck.grant.v2",
+          "maxOutputTokens": 1200,
+          "messageBytesBound": 67903,
+          "strict": 2261.8,
+          "calibrated": 1267
+        }
+      ],
+      "worstStrict": 2310.7,
+      "worstCalibrated": 1325.3
+    }
+  ],
+  "payloads": [
+    {
+      "id": "scopecheck/rfq",
+      "sample": "scopecheck",
+      "doc": "rfq",
+      "chunk": 1,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 4,
+      "workerChars": 232,
+      "bodyBytes": 375,
+      "messageBytes": 1529,
+      "repairMessageBytes": 1636,
+      "longestBlockChars": 72,
+      "longestBlockWithCellsChars": 72,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 384.6,
+        "calibrated": 362.2,
+        "strictRepair": 387.8,
+        "calibratedRepair": 363.8
+      }
+    },
+    {
+      "id": "scopecheck/quote-a",
+      "sample": "scopecheck",
+      "doc": "quote-a",
+      "chunk": 1,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 5,
+      "workerChars": 352,
+      "bodyBytes": 522,
+      "messageBytes": 1813,
+      "repairMessageBytes": 1920,
+      "longestBlockChars": 87,
+      "longestBlockWithCellsChars": 87,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 392.9,
+        "calibrated": 366.4,
+        "strictRepair": 396.1,
+        "calibratedRepair": 368
+      }
+    },
+    {
+      "id": "scopecheck/quote-b",
+      "sample": "scopecheck",
+      "doc": "quote-b",
+      "chunk": 1,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 3,
+      "workerChars": 212,
+      "bodyBytes": 332,
+      "messageBytes": 1623,
+      "repairMessageBytes": 1730,
+      "longestBlockChars": 78,
+      "longestBlockWithCellsChars": 78,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 387.4,
+        "calibrated": 363.6,
+        "strictRepair": 390.5,
+        "calibratedRepair": 365.2
+      }
+    },
+    {
+      "id": "scopecheck-layout/rfq",
+      "sample": "scopecheck-layout",
+      "doc": "rfq",
+      "chunk": 1,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 4,
+      "workerChars": 232,
+      "bodyBytes": 375,
+      "messageBytes": 1529,
+      "repairMessageBytes": 1636,
+      "longestBlockChars": 72,
+      "longestBlockWithCellsChars": 72,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 384.6,
+        "calibrated": 362.2,
+        "strictRepair": 387.8,
+        "calibratedRepair": 363.8
+      }
+    },
+    {
+      "id": "scopecheck-layout/quote-c",
+      "sample": "scopecheck-layout",
+      "doc": "quote-c",
+      "chunk": 1,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 5,
+      "workerChars": 357,
+      "bodyBytes": 527,
+      "messageBytes": 1818,
+      "repairMessageBytes": 1925,
+      "longestBlockChars": 86,
+      "longestBlockWithCellsChars": 86,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 393.1,
+        "calibrated": 366.5,
+        "strictRepair": 396.2,
+        "calibratedRepair": 368
+      }
+    },
+    {
+      "id": "packcheck/requirements",
+      "sample": "packcheck",
+      "doc": "requirements",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v1",
+      "blocks": 5,
+      "workerChars": 225,
+      "bodyBytes": 394,
+      "messageBytes": 1756,
+      "repairMessageBytes": 1863,
+      "longestBlockChars": 62,
+      "longestBlockWithCellsChars": 62,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 323.7,
+        "calibrated": 298,
+        "strictRepair": 326.8,
+        "calibratedRepair": 299.5
+      }
+    },
+    {
+      "id": "packcheck/application-form",
+      "sample": "packcheck",
+      "doc": "application-form",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v1",
+      "blocks": 8,
+      "workerChars": 314,
+      "bodyBytes": 558,
+      "messageBytes": 1920,
+      "repairMessageBytes": 2027,
+      "longestBlockChars": 53,
+      "longestBlockWithCellsChars": 53,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 328.5,
+        "calibrated": 300.4,
+        "strictRepair": 331.6,
+        "calibratedRepair": 301.9
+      }
+    },
+    {
+      "id": "packcheck/budget",
+      "sample": "packcheck",
+      "doc": "budget",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v1",
+      "blocks": 5,
+      "workerChars": 204,
+      "bodyBytes": 373,
+      "messageBytes": 1735,
+      "repairMessageBytes": 1842,
+      "longestBlockChars": 46,
+      "longestBlockWithCellsChars": 46,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 323.1,
+        "calibrated": 297.7,
+        "strictRepair": 326.2,
+        "calibratedRepair": 299.2
+      }
+    },
+    {
+      "id": "packcheck/registration",
+      "sample": "packcheck",
+      "doc": "registration",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v1",
+      "blocks": 2,
+      "workerChars": 91,
+      "bodyBytes": 185,
+      "messageBytes": 1547,
+      "repairMessageBytes": 1654,
+      "longestBlockChars": 46,
+      "longestBlockWithCellsChars": 46,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 317.6,
+        "calibrated": 294.9,
+        "strictRepair": 320.7,
+        "calibratedRepair": 296.5
+      }
+    },
+    {
+      "id": "scopecheck-realistic/rfq#1",
+      "sample": "scopecheck-realistic",
+      "doc": "rfq",
+      "chunk": 1,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 30,
+      "workerChars": 2363,
+      "bodyBytes": 3177,
+      "messageBytes": 4331,
+      "repairMessageBytes": 4438,
+      "longestBlockChars": 96,
+      "longestBlockWithCellsChars": 96,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 466.7,
+        "calibrated": 403.3,
+        "strictRepair": 469.9,
+        "calibratedRepair": 404.8
+      }
+    },
+    {
+      "id": "scopecheck-realistic/rfq#2",
+      "sample": "scopecheck-realistic",
+      "doc": "rfq",
+      "chunk": 2,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 5,
+      "workerChars": 286,
+      "bodyBytes": 458,
+      "messageBytes": 1612,
+      "repairMessageBytes": 1719,
+      "longestBlockChars": 72,
+      "longestBlockWithCellsChars": 72,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 387.1,
+        "calibrated": 363.4,
+        "strictRepair": 390.2,
+        "calibratedRepair": 365
+      }
+    },
+    {
+      "id": "scopecheck-realistic/rfq#3",
+      "sample": "scopecheck-realistic",
+      "doc": "rfq",
+      "chunk": 3,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 5,
+      "workerChars": 269,
+      "bodyBytes": 438,
+      "messageBytes": 1592,
+      "repairMessageBytes": 1699,
+      "longestBlockChars": 67,
+      "longestBlockWithCellsChars": 67,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 386.5,
+        "calibrated": 363.1,
+        "strictRepair": 389.6,
+        "calibratedRepair": 364.7
+      }
+    },
+    {
+      "id": "scopecheck-realistic/rfq#4",
+      "sample": "scopecheck-realistic",
+      "doc": "rfq",
+      "chunk": 4,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 5,
+      "workerChars": 274,
+      "bodyBytes": 443,
+      "messageBytes": 1597,
+      "repairMessageBytes": 1704,
+      "longestBlockChars": 65,
+      "longestBlockWithCellsChars": 65,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 386.6,
+        "calibrated": 363.2,
+        "strictRepair": 389.8,
+        "calibratedRepair": 364.8
+      }
+    },
+    {
+      "id": "scopecheck-realistic/rfq#5",
+      "sample": "scopecheck-realistic",
+      "doc": "rfq",
+      "chunk": 5,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 5,
+      "workerChars": 271,
+      "bodyBytes": 444,
+      "messageBytes": 1598,
+      "repairMessageBytes": 1705,
+      "longestBlockChars": 67,
+      "longestBlockWithCellsChars": 67,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 386.6,
+        "calibrated": 363.2,
+        "strictRepair": 389.8,
+        "calibratedRepair": 364.8
+      }
+    },
+    {
+      "id": "scopecheck-realistic/rfq#6",
+      "sample": "scopecheck-realistic",
+      "doc": "rfq",
+      "chunk": 6,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 48,
+      "workerChars": 3471,
+      "bodyBytes": 4753,
+      "messageBytes": 5907,
+      "repairMessageBytes": 6014,
+      "longestBlockChars": 89,
+      "longestBlockWithCellsChars": 89,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 512.9,
+        "calibrated": 426.4,
+        "strictRepair": 516,
+        "calibratedRepair": 427.9
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#1",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 1,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 20,
+      "workerChars": 1587,
+      "bodyBytes": 2143,
+      "messageBytes": 3434,
+      "repairMessageBytes": 3541,
+      "longestBlockChars": 96,
+      "longestBlockWithCellsChars": 96,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 440.4,
+        "calibrated": 390.1,
+        "strictRepair": 443.6,
+        "calibratedRepair": 391.7
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#2",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 2,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 259,
+      "bodyBytes": 408,
+      "messageBytes": 1699,
+      "repairMessageBytes": 1806,
+      "longestBlockChars": 86,
+      "longestBlockWithCellsChars": 86,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.6,
+        "calibrated": 364.7,
+        "strictRepair": 392.7,
+        "calibratedRepair": 366.3
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#3",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 3,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 266,
+      "bodyBytes": 415,
+      "messageBytes": 1706,
+      "repairMessageBytes": 1813,
+      "longestBlockChars": 87,
+      "longestBlockWithCellsChars": 87,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.8,
+        "calibrated": 364.8,
+        "strictRepair": 392.9,
+        "calibratedRepair": 366.4
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#4",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 4,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 246,
+      "bodyBytes": 395,
+      "messageBytes": 1686,
+      "repairMessageBytes": 1793,
+      "longestBlockChars": 82,
+      "longestBlockWithCellsChars": 82,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.2,
+        "calibrated": 364.5,
+        "strictRepair": 392.4,
+        "calibratedRepair": 366.1
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#5",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 5,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 273,
+      "bodyBytes": 422,
+      "messageBytes": 1713,
+      "repairMessageBytes": 1820,
+      "longestBlockChars": 104,
+      "longestBlockWithCellsChars": 104,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 390,
+        "calibrated": 364.9,
+        "strictRepair": 393.2,
+        "calibratedRepair": 366.5
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#6",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 6,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 248,
+      "bodyBytes": 395,
+      "messageBytes": 1686,
+      "repairMessageBytes": 1793,
+      "longestBlockChars": 80,
+      "longestBlockWithCellsChars": 80,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.2,
+        "calibrated": 364.5,
+        "strictRepair": 392.4,
+        "calibratedRepair": 366.1
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#7",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 7,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 244,
+      "bodyBytes": 390,
+      "messageBytes": 1681,
+      "repairMessageBytes": 1788,
+      "longestBlockChars": 77,
+      "longestBlockWithCellsChars": 77,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.1,
+        "calibrated": 364.5,
+        "strictRepair": 392.2,
+        "calibratedRepair": 366
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-a#8",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-a",
+      "chunk": 8,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 34,
+      "workerChars": 2575,
+      "bodyBytes": 3495,
+      "messageBytes": 4786,
+      "repairMessageBytes": 4893,
+      "longestBlockChars": 96,
+      "longestBlockWithCellsChars": 96,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 480.1,
+        "calibrated": 409.9,
+        "strictRepair": 483.2,
+        "calibratedRepair": 411.5
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-b#1",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-b",
+      "chunk": 1,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 22,
+      "workerChars": 1721,
+      "bodyBytes": 2329,
+      "messageBytes": 3620,
+      "repairMessageBytes": 3727,
+      "longestBlockChars": 96,
+      "longestBlockWithCellsChars": 96,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 445.9,
+        "calibrated": 392.9,
+        "strictRepair": 449,
+        "calibratedRepair": 394.4
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-b#2",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-b",
+      "chunk": 2,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 271,
+      "bodyBytes": 420,
+      "messageBytes": 1711,
+      "repairMessageBytes": 1818,
+      "longestBlockChars": 92,
+      "longestBlockWithCellsChars": 92,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 390,
+        "calibrated": 364.9,
+        "strictRepair": 393.1,
+        "calibratedRepair": 366.5
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-b#3",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-b",
+      "chunk": 3,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 278,
+      "bodyBytes": 427,
+      "messageBytes": 1718,
+      "repairMessageBytes": 1825,
+      "longestBlockChars": 93,
+      "longestBlockWithCellsChars": 93,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 390.2,
+        "calibrated": 365,
+        "strictRepair": 393.3,
+        "calibratedRepair": 366.6
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-b#4",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-b",
+      "chunk": 4,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 258,
+      "bodyBytes": 407,
+      "messageBytes": 1698,
+      "repairMessageBytes": 1805,
+      "longestBlockChars": 88,
+      "longestBlockWithCellsChars": 88,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.6,
+        "calibrated": 364.7,
+        "strictRepair": 392.7,
+        "calibratedRepair": 366.3
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-b#5",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-b",
+      "chunk": 5,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 262,
+      "bodyBytes": 410,
+      "messageBytes": 1701,
+      "repairMessageBytes": 1808,
+      "longestBlockChars": 87,
+      "longestBlockWithCellsChars": 87,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.7,
+        "calibrated": 364.8,
+        "strictRepair": 392.8,
+        "calibratedRepair": 366.3
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-b#6",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-b",
+      "chunk": 6,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 254,
+      "bodyBytes": 400,
+      "messageBytes": 1691,
+      "repairMessageBytes": 1798,
+      "longestBlockChars": 84,
+      "longestBlockWithCellsChars": 84,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 389.4,
+        "calibrated": 364.6,
+        "strictRepair": 392.5,
+        "calibratedRepair": 366.2
+      }
+    },
+    {
+      "id": "scopecheck-realistic/quote-b#7",
+      "sample": "scopecheck-realistic",
+      "doc": "quote-b",
+      "chunk": 7,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 32,
+      "workerChars": 2419,
+      "bodyBytes": 3289,
+      "messageBytes": 4580,
+      "repairMessageBytes": 4687,
+      "longestBlockChars": 96,
+      "longestBlockWithCellsChars": 96,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 474,
+        "calibrated": 406.9,
+        "strictRepair": 477.2,
+        "calibratedRepair": 408.5
+      }
+    },
+    {
+      "id": "scopecheck-fresh/rfq#1",
+      "sample": "scopecheck-fresh",
+      "doc": "rfq",
+      "chunk": 1,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 20,
+      "workerChars": 1442,
+      "bodyBytes": 2084,
+      "messageBytes": 3536,
+      "repairMessageBytes": 3643,
+      "longestBlockChars": 87,
+      "longestBlockWithCellsChars": 113,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 443.4,
+        "calibrated": 391.6,
+        "strictRepair": 446.6,
+        "calibratedRepair": 393.2
+      }
+    },
+    {
+      "id": "scopecheck-fresh/rfq#2",
+      "sample": "scopecheck-fresh",
+      "doc": "rfq",
+      "chunk": 2,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 6,
+      "workerChars": 505,
+      "bodyBytes": 814,
+      "messageBytes": 2266,
+      "repairMessageBytes": 2373,
+      "longestBlockChars": 64,
+      "longestBlockWithCellsChars": 125,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 406.2,
+        "calibrated": 373,
+        "strictRepair": 409.4,
+        "calibratedRepair": 374.6
+      }
+    },
+    {
+      "id": "scopecheck-fresh/rfq#3",
+      "sample": "scopecheck-fresh",
+      "doc": "rfq",
+      "chunk": 3,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 6,
+      "workerChars": 509,
+      "bodyBytes": 818,
+      "messageBytes": 2270,
+      "repairMessageBytes": 2377,
+      "longestBlockChars": 69,
+      "longestBlockWithCellsChars": 135,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 406.3,
+        "calibrated": 373.1,
+        "strictRepair": 409.5,
+        "calibratedRepair": 374.7
+      }
+    },
+    {
+      "id": "scopecheck-fresh/rfq#4",
+      "sample": "scopecheck-fresh",
+      "doc": "rfq",
+      "chunk": 4,
+      "schemaId": "scopecheck.rfq.v1",
+      "blocks": 13,
+      "workerChars": 806,
+      "bodyBytes": 1223,
+      "messageBytes": 2675,
+      "repairMessageBytes": 2782,
+      "longestBlockChars": 73,
+      "longestBlockWithCellsChars": 123,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 418.2,
+        "calibrated": 379,
+        "strictRepair": 421.3,
+        "calibratedRepair": 380.6
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-a#1",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-a",
+      "chunk": 1,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 6,
+      "workerChars": 481,
+      "bodyBytes": 751,
+      "messageBytes": 2340,
+      "repairMessageBytes": 2447,
+      "longestBlockChars": 89,
+      "longestBlockWithCellsChars": 128,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 408.4,
+        "calibrated": 374.1,
+        "strictRepair": 411.5,
+        "calibratedRepair": 375.7
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-a#2",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-a",
+      "chunk": 2,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 5,
+      "workerChars": 470,
+      "bodyBytes": 741,
+      "messageBytes": 2330,
+      "repairMessageBytes": 2437,
+      "longestBlockChars": 71,
+      "longestBlockWithCellsChars": 138,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 408.1,
+        "calibrated": 374,
+        "strictRepair": 411.2,
+        "calibratedRepair": 375.5
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-a#3",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-a",
+      "chunk": 3,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 406,
+      "bodyBytes": 654,
+      "messageBytes": 2243,
+      "repairMessageBytes": 2350,
+      "longestBlockChars": 59,
+      "longestBlockWithCellsChars": 114,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 405.5,
+        "calibrated": 372.7,
+        "strictRepair": 408.7,
+        "calibratedRepair": 374.3
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-a#4",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-a",
+      "chunk": 4,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 12,
+      "workerChars": 774,
+      "bodyBytes": 1230,
+      "messageBytes": 2819,
+      "repairMessageBytes": 2926,
+      "longestBlockChars": 73,
+      "longestBlockWithCellsChars": 142,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 422.4,
+        "calibrated": 381.1,
+        "strictRepair": 425.6,
+        "calibratedRepair": 382.7
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-b#1",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-b",
+      "chunk": 1,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 6,
+      "workerChars": 371,
+      "bodyBytes": 566,
+      "messageBytes": 1857,
+      "repairMessageBytes": 1964,
+      "longestBlockChars": 85,
+      "longestBlockWithCellsChars": 85,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 394.2,
+        "calibrated": 367,
+        "strictRepair": 397.4,
+        "calibratedRepair": 368.6
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-b#2",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-b",
+      "chunk": 2,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 289,
+      "bodyBytes": 434,
+      "messageBytes": 1725,
+      "repairMessageBytes": 1832,
+      "longestBlockChars": 108,
+      "longestBlockWithCellsChars": 108,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 390.4,
+        "calibrated": 365.1,
+        "strictRepair": 393.5,
+        "calibratedRepair": 366.7
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-b#3",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-b",
+      "chunk": 3,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 4,
+      "workerChars": 285,
+      "bodyBytes": 433,
+      "messageBytes": 1724,
+      "repairMessageBytes": 1831,
+      "longestBlockChars": 118,
+      "longestBlockWithCellsChars": 118,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 390.3,
+        "calibrated": 365.1,
+        "strictRepair": 393.5,
+        "calibratedRepair": 366.7
+      }
+    },
+    {
+      "id": "scopecheck-fresh/quote-b#4",
+      "sample": "scopecheck-fresh",
+      "doc": "quote-b",
+      "chunk": 4,
+      "schemaId": "scopecheck.quote.v1",
+      "blocks": 11,
+      "workerChars": 542,
+      "bodyBytes": 872,
+      "messageBytes": 2163,
+      "repairMessageBytes": 2270,
+      "longestBlockChars": 86,
+      "longestBlockWithCellsChars": 86,
+      "maxOutputTokens": 1500,
+      "reserve": {
+        "strict": 403.2,
+        "calibrated": 371.5,
+        "strictRepair": 406.3,
+        "calibratedRepair": 373.1
+      }
+    },
+    {
+      "id": "packcheck-realistic/requirements#1",
+      "sample": "packcheck-realistic",
+      "doc": "requirements",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 30,
+      "workerChars": 1839,
+      "bodyBytes": 2654,
+      "messageBytes": 4584,
+      "repairMessageBytes": 4691,
+      "longestBlockChars": 100,
+      "longestBlockWithCellsChars": 100,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 406.5,
+        "calibrated": 339.4,
+        "strictRepair": 409.7,
+        "calibratedRepair": 341
+      }
+    },
+    {
+      "id": "packcheck-realistic/application-form#1",
+      "sample": "packcheck-realistic",
+      "doc": "application-form",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 21,
+      "workerChars": 1051,
+      "bodyBytes": 1632,
+      "messageBytes": 3562,
+      "repairMessageBytes": 3669,
+      "longestBlockChars": 95,
+      "longestBlockWithCellsChars": 95,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 376.6,
+        "calibrated": 324.4,
+        "strictRepair": 379.7,
+        "calibratedRepair": 326
+      }
+    },
+    {
+      "id": "packcheck-realistic/application-form#2",
+      "sample": "packcheck-realistic",
+      "doc": "application-form",
+      "chunk": 2,
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 9,
+      "workerChars": 481,
+      "bodyBytes": 759,
+      "messageBytes": 2689,
+      "repairMessageBytes": 2796,
+      "longestBlockChars": 91,
+      "longestBlockWithCellsChars": 91,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 351,
+        "calibrated": 311.6,
+        "strictRepair": 354.2,
+        "calibratedRepair": 313.2
+      }
+    },
+    {
+      "id": "packcheck-realistic/budget#1",
+      "sample": "packcheck-realistic",
+      "doc": "budget",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 9,
+      "workerChars": 354,
+      "bodyBytes": 623,
+      "messageBytes": 2553,
+      "repairMessageBytes": 2660,
+      "longestBlockChars": 71,
+      "longestBlockWithCellsChars": 71,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 347,
+        "calibrated": 309.7,
+        "strictRepair": 350.2,
+        "calibratedRepair": 311.2
+      }
+    },
+    {
+      "id": "packcheck-realistic/budget#2",
+      "sample": "packcheck-realistic",
+      "doc": "budget",
+      "chunk": 2,
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 12,
+      "workerChars": 504,
+      "bodyBytes": 860,
+      "messageBytes": 2790,
+      "repairMessageBytes": 2897,
+      "longestBlockChars": 79,
+      "longestBlockWithCellsChars": 79,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 354,
+        "calibrated": 313.1,
+        "strictRepair": 357.1,
+        "calibratedRepair": 314.7
+      }
+    },
+    {
+      "id": "packcheck-realistic/registration#1",
+      "sample": "packcheck-realistic",
+      "doc": "registration",
+      "chunk": 1,
+      "schemaId": "packcheck.grant.v2",
+      "blocks": 9,
+      "workerChars": 459,
+      "bodyBytes": 728,
+      "messageBytes": 2658,
+      "repairMessageBytes": 2765,
+      "longestBlockChars": 69,
+      "longestBlockWithCellsChars": 69,
+      "maxOutputTokens": 1200,
+      "reserve": {
+        "strict": 350.1,
+        "calibrated": 311.2,
+        "strictRepair": 353.2,
+        "calibratedRepair": 312.8
+      }
+    }
+  ],
+  "gateTest": {
+    "ceiling": 4,
+    "steps": [
+      {
+        "step": "T1",
+        "id": "scopecheck/rfq",
+        "schemaId": "scopecheck.rfq.v1",
+        "blocks": 4,
+        "workerChars": 232,
+        "bodyBytes": 375,
+        "messageBytes": 1529,
+        "longestBlockWithCellsChars": 72,
+        "maxOutputTokens": 1500,
+        "reserve": {
+          "strict": 384.6,
+          "calibrated": 362.2,
+          "strictRepair": 387.8,
+          "calibratedRepair": 363.8
+        }
+      },
+      {
+        "step": "T2",
+        "id": "scopecheck-realistic/rfq#6",
+        "schemaId": "scopecheck.rfq.v1",
+        "blocks": 48,
+        "workerChars": 3471,
+        "bodyBytes": 4753,
+        "messageBytes": 5907,
+        "longestBlockWithCellsChars": 89,
+        "maxOutputTokens": 1500,
+        "reserve": {
+          "strict": 512.9,
+          "calibrated": 426.4,
+          "strictRepair": 516,
+          "calibratedRepair": 427.9
+        }
+      },
+      {
+        "step": "T3",
+        "id": "scopecheck-realistic/quote-a#8",
+        "schemaId": "scopecheck.quote.v1",
+        "blocks": 34,
+        "workerChars": 2575,
+        "bodyBytes": 3495,
+        "messageBytes": 4786,
+        "longestBlockWithCellsChars": 96,
+        "maxOutputTokens": 1500,
+        "reserve": {
+          "strict": 480.1,
+          "calibrated": 409.9,
+          "strictRepair": 483.2,
+          "calibratedRepair": 411.5
+        }
+      },
+      {
+        "step": "T4",
+        "id": "packcheck/registration",
+        "schemaId": "packcheck.grant.v1",
+        "blocks": 2,
+        "workerChars": 91,
+        "bodyBytes": 185,
+        "messageBytes": 1547,
+        "longestBlockWithCellsChars": 46,
+        "maxOutputTokens": 1200,
+        "reserve": {
+          "strict": 317.6,
+          "calibrated": 294.9,
+          "strictRepair": 320.7,
+          "calibratedRepair": 296.5
+        }
+      }
+    ],
+    "paths": 5,
+    "worstStrict": {
+      "total": 1893.6,
+      "attempts": [
+        "T1",
+        "T2",
+        "T2r",
+        "T3"
+      ]
+    },
+    "worstCalibrated": {
+      "total": 1626.4,
+      "attempts": [
+        "T1",
+        "T2",
+        "T2r",
+        "T3"
+      ]
+    },
+    "noRepairPath": 1695.2
+  }
+}
